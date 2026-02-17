@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  quality-gate:
+    name: Repository Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run repository checks
+        run: bash scripts/ci/check_repo.sh
+
+      - name: Run pytest when tests exist
+        run: |
+          if [ -d tests ]; then
+            python3 -m pip install --upgrade pip
+            pip install pytest
+            pytest -q
+          else
+            echo "No tests directory found. Skipping pytest."
+          fi
