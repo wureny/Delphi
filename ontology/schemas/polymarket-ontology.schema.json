@@ -1,0 +1,409 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://delphi.local/schemas/polymarket-ontology.schema.json",
+  "title": "Delphi Polymarket Ontology Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "sources",
+    "events",
+    "markets",
+    "outcomes",
+    "price_points",
+    "liquidity_snapshots",
+    "news_signals",
+    "resolution_states"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v[0-9]+\\.[0-9]+$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Event"
+      }
+    },
+    "markets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Market"
+      }
+    },
+    "outcomes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      }
+    },
+    "price_points": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PricePoint"
+      }
+    },
+    "liquidity_snapshots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LiquiditySnapshot"
+      }
+    },
+    "news_signals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/NewsSignal"
+      }
+    },
+    "resolution_states": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ResolutionState"
+      }
+    }
+  },
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "type",
+        "uri",
+        "ingested_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "api",
+            "stream",
+            "manual"
+          ]
+        },
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ingested_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "category",
+        "start_time",
+        "end_time",
+        "status",
+        "resolution_state_id",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed",
+            "resolved"
+          ]
+        },
+        "resolution_state_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Market": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "event_id",
+        "question",
+        "close_time",
+        "status",
+        "outcome_ids",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "close_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "closed",
+            "resolved"
+          ]
+        },
+        "outcome_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "market_id",
+        "label",
+        "token_id",
+        "current_probability"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "token_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "PricePoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "outcome_id",
+        "timestamp",
+        "probability",
+        "price",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "LiquiditySnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "market_id",
+        "timestamp",
+        "liquidity_usd",
+        "volume_24h_usd"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "liquidity_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "volume_24h_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "NewsSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "event_id",
+        "timestamp",
+        "headline",
+        "url",
+        "sentiment_score",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sentiment_score": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ResolutionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "event_id",
+        "resolved",
+        "resolution_time",
+        "resolution_outcome",
+        "evidence"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved": {
+          "type": "boolean"
+        },
+        "resolution_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "resolution_outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

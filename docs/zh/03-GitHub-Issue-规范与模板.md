@@ -1,4 +1,4 @@
-# GitHub Issue 规范与模板（v0.1）
+# GitHub Issue 规范与模板（v0.2）
 
 ## 1. 创建顺序
 1. 先建 Epic（目标与范围）。
@@ -6,7 +6,7 @@
 3. 最后建 Task（具体实现）。
 
 ## 2. 编号建议
-- Epic: `E-A`, `E-B`, `E-C`
+- Epic: `E-A`, `E-B`, `E-C`, `E-D`, `E-E`, `E-F`, `E-G`
 - Story: `S-A1`, `S-A2`
 - Task: `T-A1-1`, `T-A1-2`
 
@@ -16,6 +16,8 @@
 1. `[Epic][Ontology] 定义 Polymarket 核心本体模型`
 2. `[Story][Mapping] 完成 Market -> Ontology 字段映射表`
 3. `[Task][Validation] 增加 Outcome 完整性校验规则`
+4. `[Story][Evaluation] 建立 Raw vs Ontology 对照评测任务集`
+5. `[Task][Execution/Risk] 增加订单风控闸门与人工审批检查`
 
 ## 4. 必填字段
 1. 背景/目标
@@ -24,6 +26,7 @@
 4. 验收标准（可勾选）
 5. 依赖与阻塞项
 6. 预计工作量（T-shirt size 或天数）
+7. References（Parent Epic、PRD section、Milestone）
 
 ## 5. issue 到文档的映射
 1. PRD 需求编号写入 issue。
@@ -34,3 +37,19 @@
 1. 每周规划 1 次：确认本周要完成的 issue。
 2. 每天更新 1 次：记录状态、风险、下一步。
 3. 每周复盘 1 次：关闭 milestone 或下调范围。
+
+## 7. area 标签（当前）
+1. `area:ontology`
+2. `area:mapping`
+3. `area:validation`
+4. `area:evaluation`
+5. `area:visualization`
+6. `area:execution`
+7. `area:risk`
+
+## 8. 模板列表（当前）
+1. `01-epic-ontology.md`：Epic 模板（通用）
+2. `02-story-ontology.md`：Story 模板（通用）
+3. `03-task-implementation.md`：Task 模板（通用）
+4. `04-evaluation-benchmark.md`：评测专项模板
+5. `05-execution-risk-gate.md`：执行风控专项模板

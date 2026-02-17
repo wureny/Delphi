@@ -1,0 +1,104 @@
+{
+  "schema_version": "v0.1",
+  "generated_at": "2026-02-17T10:00:00Z",
+  "sources": [
+    {
+      "id": "src_polymarket_api",
+      "name": "Polymarket Public API",
+      "type": "api",
+      "uri": "https://api.polymarket.com",
+      "ingested_at": "2026-02-17T09:58:00Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_us_election_2028",
+      "title": "US Presidential Election 2028",
+      "category": "Politics",
+      "start_time": "2026-01-01T00:00:00Z",
+      "end_time": "2028-11-10T00:00:00Z",
+      "status": "open",
+      "resolution_state_id": "rs_evt_us_election_2028",
+      "source_id": "src_polymarket_api"
+    }
+  ],
+  "markets": [
+    {
+      "id": "mkt_candidate_a_win",
+      "event_id": "evt_us_election_2028",
+      "question": "Will Candidate A win the 2028 US Presidential Election?",
+      "description": "Binary market for Candidate A victory.",
+      "close_time": "2028-11-05T00:00:00Z",
+      "status": "open",
+      "outcome_ids": [
+        "out_yes",
+        "out_no"
+      ],
+      "source_id": "src_polymarket_api"
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "out_yes",
+      "market_id": "mkt_candidate_a_win",
+      "label": "Yes",
+      "token_id": "token_yes_001",
+      "current_probability": 0.57
+    },
+    {
+      "id": "out_no",
+      "market_id": "mkt_candidate_a_win",
+      "label": "No",
+      "token_id": "token_no_001",
+      "current_probability": 0.43
+    }
+  ],
+  "price_points": [
+    {
+      "id": "pp_yes_20260217_1000",
+      "outcome_id": "out_yes",
+      "timestamp": "2026-02-17T10:00:00Z",
+      "probability": 0.57,
+      "price": 0.57,
+      "source_id": "src_polymarket_api"
+    },
+    {
+      "id": "pp_no_20260217_1000",
+      "outcome_id": "out_no",
+      "timestamp": "2026-02-17T10:00:00Z",
+      "probability": 0.43,
+      "price": 0.43,
+      "source_id": "src_polymarket_api"
+    }
+  ],
+  "liquidity_snapshots": [
+    {
+      "id": "liq_mkt_candidate_a_win_20260217_1000",
+      "market_id": "mkt_candidate_a_win",
+      "timestamp": "2026-02-17T10:00:00Z",
+      "liquidity_usd": 125000.0,
+      "volume_24h_usd": 54000.0
+    }
+  ],
+  "news_signals": [
+    {
+      "id": "news_evt_001",
+      "event_id": "evt_us_election_2028",
+      "timestamp": "2026-02-17T08:30:00Z",
+      "headline": "Major poll update shifts candidate momentum",
+      "url": "https://example.com/poll-update",
+      "sentiment_score": 0.2,
+      "source_id": "src_polymarket_api"
+    }
+  ],
+  "resolution_states": [
+    {
+      "id": "rs_evt_us_election_2028",
+      "event_id": "evt_us_election_2028",
+      "resolved": false,
+      "resolution_time": "2028-11-10T00:00:00Z",
+      "resolution_outcome": "pending",
+      "evidence": "Election result not finalized yet."
+    }
+  ]
+}

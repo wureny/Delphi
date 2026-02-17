@@ -1,22 +1,25 @@
 ---
-name: "Epic: Ontology"
-about: "Top-level objective for Polymarket ontology delivery"
-title: "[Epic][Ontology] "
-labels: ["type:epic", "area:ontology", "priority:p0"]
+name: "Epic: Delphi Workstream"
+about: "Top-level objective for ontology, evaluation, visualization, or execution"
+title: "[Epic][Area] "
+labels: ["type:epic", "priority:p0"]
 assignees: []
 ---
 
-## Context / Goal
+## Problem / Why Now
 -
 
-## In Scope
+## Goal / Outcome
+- 
+
+## In Scope (must be specific)
 - [ ]
 - [ ]
 
 ## Out of Scope
 - 
 
-## Success Criteria
+## Success Metrics (quantitative)
 - [ ]
 - [ ]
 
@@ -26,6 +29,16 @@ assignees: []
 ## Milestone
 -
 
+## Suggested Child Issues
+1. Story:
+2. Story:
+3. Task:
+
+## Labels To Apply
+- `area:ontology` / `area:mapping` / `area:validation` / `area:evaluation` / `area:visualization` / `area:execution` / `area:risk`
+- `priority:p0` or `priority:p1`
+
 ## References
-- PRD:
+- PRD section:
+- Milestone doc:
 - Related issues:

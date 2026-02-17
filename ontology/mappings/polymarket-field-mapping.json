@@ -1,0 +1,55 @@
+{
+  "version": "v0.1",
+  "source": "polymarket_raw",
+  "target_schema": "polymarket-ontology.schema.json",
+  "mapping_rules": [
+    {
+      "raw_field": "event.id",
+      "target_entity": "Event",
+      "target_field": "id"
+    },
+    {
+      "raw_field": "event.title",
+      "target_entity": "Event",
+      "target_field": "title"
+    },
+    {
+      "raw_field": "market.id",
+      "target_entity": "Market",
+      "target_field": "id"
+    },
+    {
+      "raw_field": "market.question",
+      "target_entity": "Market",
+      "target_field": "question"
+    },
+    {
+      "raw_field": "market.endDate",
+      "target_entity": "Market",
+      "target_field": "close_time",
+      "transform": "to_utc_iso8601"
+    },
+    {
+      "raw_field": "outcome.id",
+      "target_entity": "Outcome",
+      "target_field": "id"
+    },
+    {
+      "raw_field": "outcome.name",
+      "target_entity": "Outcome",
+      "target_field": "label"
+    },
+    {
+      "raw_field": "outcome.price",
+      "target_entity": "Outcome",
+      "target_field": "current_probability",
+      "transform": "to_probability_0_1"
+    },
+    {
+      "raw_field": "market.liquidity",
+      "target_entity": "LiquiditySnapshot",
+      "target_field": "liquidity_usd"
+    }
+  ],
+  "notes": "This mapping is an initial draft and will be refined after real sample ingestion."
+}

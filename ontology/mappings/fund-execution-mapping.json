@@ -1,0 +1,39 @@
+{
+  "version": "v0.1",
+  "source": "agent_decision_and_execution_events",
+  "target_schema": "fund-execution-ontology.schema.json",
+  "mapping_rules": [
+    {
+      "source_field": "decision.id",
+      "target_entity": "DecisionRecord",
+      "target_field": "id"
+    },
+    {
+      "source_field": "decision.market_id",
+      "target_entity": "DecisionRecord",
+      "target_field": "market_id"
+    },
+    {
+      "source_field": "decision.action",
+      "target_entity": "DecisionRecord",
+      "target_field": "proposed_action",
+      "transform": "normalize_action"
+    },
+    {
+      "source_field": "risk.policy.max_position",
+      "target_entity": "RiskPolicy",
+      "target_field": "max_position_usd"
+    },
+    {
+      "source_field": "execution.order_id",
+      "target_entity": "Execution",
+      "target_field": "order_id"
+    },
+    {
+      "source_field": "execution.tx_hash",
+      "target_entity": "Execution",
+      "target_field": "tx_hash"
+    }
+  ],
+  "notes": "Maps agent output and execution logs into standardized fund execution ontology entities."
+}

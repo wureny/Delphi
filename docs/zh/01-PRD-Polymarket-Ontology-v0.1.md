@@ -103,3 +103,8 @@ Delphi 的后续多 Agent 协同能力依赖稳定的语义底座。若不先完
 2. 所有错误可被分类（schema、数据缺失、格式错误）。
 3. 文档与 issue 状态一致，可追踪到每个需求实现。
 4. 完成一次 Raw vs Ontology 的同题对照评测并形成结论文档。
+
+## 11. Phase 2 扩展（交易执行）
+1. 在市场 ontology 之上新增交易域 ontology（Portfolio/Order/Execution/RiskPolicy）。
+2. 先完成 paper trading，再逐步推进小额实盘。
+3. 实盘默认带人工审批与风控闸门。

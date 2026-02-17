@@ -103,3 +103,8 @@ Define key relationships:
 2. All errors are classifiable (schema/data missing/format errors).
 3. Documentation and issue status remain traceable and consistent.
 4. One completed same-task Raw vs Ontology benchmark report with explicit conclusions.
+
+## 11. Phase 2 Extension (Trading Execution)
+1. Add execution-domain ontology on top of market ontology (Portfolio/Order/Execution/RiskPolicy).
+2. Complete paper-trading before moving to small live execution.
+3. Live execution must include human approval and risk gates by default.

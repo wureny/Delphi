@@ -55,11 +55,21 @@ Suggested issues:
 3. F3 Implement basic relation visualization page/script
 4. F4 Define edit constraints to prevent schema breakage
 
+### Epic G: Trading & Execution Ontology
+Goal: allow agent conclusions to enter a risk-gated, auditable execution semantic chain.
+
+Suggested issues:
+1. G1 Define Portfolio/Order/Execution/RiskPolicy entities
+2. G2 Build execution-domain JSON schema
+3. G3 Build decision -> order -> execution sample chain
+4. G4 Define and implement risk gates (including human approval)
+
 ## 2. Suggested Milestones
 1. Milestone 1 (Week 1-2): Finish Epic A + B1/B2
 2. Milestone 2 (Week 3-4): Finish B3/B4 + C1/C2
 3. Milestone 3 (Week 5-6): Finish E-series + F1/F2
 4. Milestone 4 (Week 7): Finish F3/F4 + D-series closure
+5. Milestone 5 (Week 8-9): Finish G-series and close paper-trading loop
 
 ## 3. Label Taxonomy (GitHub)
 1. `type:epic`
@@ -74,6 +84,8 @@ Suggested issues:
 10. `status:blocked`
 11. `area:evaluation`
 12. `area:visualization`
+13. `area:execution`
+14. `area:risk`
 
 ## 4. Definition of Done (DoD)
 1. Code or docs committed and self-checked.
