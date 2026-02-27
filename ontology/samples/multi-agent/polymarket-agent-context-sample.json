@@ -1,0 +1,495 @@
+{
+  "schema_version": "v0.1",
+  "generated_at": "2026-02-27T03:09:13Z",
+  "source_bundle_generated_at": "2026-02-27T02:41:29Z",
+  "research_agent_packets": [
+    {
+      "event_id": "evt_crypto_year_end_2026",
+      "event_title": "Crypto Year-End 2026 Milestones",
+      "market_id": "mkt_btc_above_150k_2026",
+      "market_question": "Will BTC be above $150,000 on December 31, 2026?",
+      "category": "crypto",
+      "close_time": "2026-12-31T23:59:59Z",
+      "trading_state": "active",
+      "liquidity_snapshot": {
+        "id": "liq_mkt_btc_above_150k_2026_20260227_024129",
+        "market_id": "mkt_btc_above_150k_2026",
+        "timestamp": "2026-02-27T02:41:29Z",
+        "liquidity_usd": 210000.0,
+        "volume_24h_usd": 87000.0
+      },
+      "resolution_state": {
+        "id": "rs_mkt_btc_above_150k_2026",
+        "market_id": "mkt_btc_above_150k_2026",
+        "resolved": false,
+        "resolution_time": "2026-12-31T23:59:59Z",
+        "winning_outcome_id": null,
+        "resolution_notes": "Pending resolution.",
+        "evidence": "No resolution evidence available in current source snapshot."
+      },
+      "related_news_signals": [
+        {
+          "id": "news_crypto_001",
+          "event_id": "evt_crypto_year_end_2026",
+          "market_id": "mkt_btc_above_150k_2026",
+          "timestamp": "2026-02-27T18:20:00Z",
+          "headline": "Spot ETF inflows continue to support bullish BTC positioning",
+          "url": "https://example.com/btc-etf-inflows",
+          "sentiment_score": 0.34,
+          "source_id": "src_external_news"
+        }
+      ],
+      "outcomes": [
+        {
+          "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+          "label": "Yes",
+          "binary_side": "yes",
+          "current_probability": 0.39,
+          "displayed_probability": 0.39,
+          "robust_probability": 0.392347,
+          "book_reliability_score": 0.794368,
+          "trade_reliability_score": 0.670605,
+          "manipulation_risk_score": 0.248949,
+          "signal_weights": {
+            "displayed": 0.119155,
+            "book_anchor": 0.397184,
+            "trade_anchor": 0.234712,
+            "fallback_anchor": 0.248949
+          },
+          "explanatory_tags": [
+            "narrow_spread",
+            "deep_book",
+            "trade_confirmed"
+          ]
+        }
+      ]
+    },
+    {
+      "event_id": "evt_crypto_year_end_2026",
+      "event_title": "Crypto Year-End 2026 Milestones",
+      "market_id": "mkt_eth_above_6k_2026",
+      "market_question": "Will ETH be above $6,000 on December 31, 2026?",
+      "category": "crypto",
+      "close_time": "2026-12-31T23:59:59Z",
+      "trading_state": "active",
+      "liquidity_snapshot": {
+        "id": "liq_mkt_eth_above_6k_2026_20260227_024129",
+        "market_id": "mkt_eth_above_6k_2026",
+        "timestamp": "2026-02-27T02:41:29Z",
+        "liquidity_usd": 145000.0,
+        "volume_24h_usd": 62000.0
+      },
+      "resolution_state": {
+        "id": "rs_mkt_eth_above_6k_2026",
+        "market_id": "mkt_eth_above_6k_2026",
+        "resolved": false,
+        "resolution_time": "2026-12-31T23:59:59Z",
+        "winning_outcome_id": null,
+        "resolution_notes": "Pending resolution.",
+        "evidence": "No resolution evidence available in current source snapshot."
+      },
+      "related_news_signals": [],
+      "outcomes": [
+        {
+          "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+          "label": "Yes",
+          "binary_side": "yes",
+          "current_probability": 0.28,
+          "displayed_probability": 0.34,
+          "robust_probability": 0.286854,
+          "book_reliability_score": 0.503057,
+          "trade_reliability_score": 0.242138,
+          "manipulation_risk_score": 0.908265,
+          "signal_weights": {
+            "displayed": 0.024214,
+            "book_anchor": 0.251528,
+            "trade_anchor": 0.084748,
+            "fallback_anchor": 0.63951
+          },
+          "explanatory_tags": [
+            "wide_spread",
+            "shallow_book",
+            "trade_confirmed",
+            "tiny_recent_trade",
+            "fallback_anchored",
+            "small_trade_distortion_risk"
+          ]
+        }
+      ]
+    },
+    {
+      "event_id": "evt_fed_policy_2026",
+      "event_title": "Fed Policy Outlook 2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "market_question": "Will the Fed cut rates by the September 2026 meeting?",
+      "category": "finance",
+      "close_time": "2026-09-18T00:00:00Z",
+      "trading_state": "active",
+      "liquidity_snapshot": {
+        "id": "liq_mkt_fed_cut_by_sep_2026_20260227_024129",
+        "market_id": "mkt_fed_cut_by_sep_2026",
+        "timestamp": "2026-02-27T02:41:29Z",
+        "liquidity_usd": 98000.0,
+        "volume_24h_usd": 41000.0
+      },
+      "resolution_state": {
+        "id": "rs_mkt_fed_cut_by_sep_2026",
+        "market_id": "mkt_fed_cut_by_sep_2026",
+        "resolved": false,
+        "resolution_time": "2026-09-18T00:00:00Z",
+        "winning_outcome_id": null,
+        "resolution_notes": "Pending resolution.",
+        "evidence": "No resolution evidence available in current source snapshot."
+      },
+      "related_news_signals": [
+        {
+          "id": "news_finance_001",
+          "event_id": "evt_fed_policy_2026",
+          "market_id": "mkt_fed_cut_by_sep_2026",
+          "timestamp": "2026-02-27T18:05:00Z",
+          "headline": "Cooling inflation data revives expectations for Fed easing",
+          "url": "https://example.com/inflation-easing",
+          "sentiment_score": 0.18,
+          "source_id": "src_external_news"
+        }
+      ],
+      "outcomes": [
+        {
+          "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+          "label": "Yes",
+          "binary_side": "yes",
+          "current_probability": 0.47,
+          "displayed_probability": 0.47,
+          "robust_probability": 0.47,
+          "book_reliability_score": 0.892455,
+          "trade_reliability_score": 0.968333,
+          "manipulation_risk_score": 0.080988,
+          "signal_weights": {
+            "displayed": 0.133868,
+            "book_anchor": 0.446227,
+            "trade_anchor": 0.338917,
+            "fallback_anchor": 0.080988
+          },
+          "explanatory_tags": [
+            "narrow_spread",
+            "deep_book",
+            "trade_confirmed",
+            "strong_trade_support",
+            "book_anchored",
+            "trade_anchored",
+            "reliable_signal"
+          ]
+        }
+      ]
+    }
+  ],
+  "strategy_agent_packets": [
+    {
+      "agent": "strategy_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "binary_side": "yes",
+      "market_question": "Will BTC be above $150,000 on December 31, 2026?",
+      "displayed_probability": 0.39,
+      "robust_probability": 0.392347,
+      "prior_probability": 0.39,
+      "probability_edge": 0.002347,
+      "book_reliability_score": 0.794368,
+      "trade_reliability_score": 0.670605,
+      "manipulation_risk_score": 0.248949,
+      "strategy_recommendation": "hold",
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed"
+      ]
+    },
+    {
+      "agent": "strategy_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "binary_side": "yes",
+      "market_question": "Will ETH be above $6,000 on December 31, 2026?",
+      "displayed_probability": 0.34,
+      "robust_probability": 0.286854,
+      "prior_probability": 0.28,
+      "probability_edge": 0.006854,
+      "book_reliability_score": 0.503057,
+      "trade_reliability_score": 0.242138,
+      "manipulation_risk_score": 0.908265,
+      "strategy_recommendation": "monitor",
+      "explanatory_tags": [
+        "wide_spread",
+        "shallow_book",
+        "trade_confirmed",
+        "tiny_recent_trade",
+        "fallback_anchored",
+        "small_trade_distortion_risk"
+      ]
+    },
+    {
+      "agent": "strategy_agent",
+      "event_id": "evt_fed_policy_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "binary_side": "yes",
+      "market_question": "Will the Fed cut rates by the September 2026 meeting?",
+      "displayed_probability": 0.47,
+      "robust_probability": 0.47,
+      "prior_probability": 0.47,
+      "probability_edge": 0.0,
+      "book_reliability_score": 0.892455,
+      "trade_reliability_score": 0.968333,
+      "manipulation_risk_score": 0.080988,
+      "strategy_recommendation": "hold",
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed",
+        "strong_trade_support",
+        "book_anchored",
+        "trade_anchored",
+        "reliable_signal"
+      ]
+    }
+  ],
+  "risk_agent_packets": [
+    {
+      "agent": "risk_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "risk_gate": "allow",
+      "risk_reasons": [
+        "signal_quality_ok"
+      ],
+      "book_reliability_score": 0.794368,
+      "trade_reliability_score": 0.670605,
+      "manipulation_risk_score": 0.248949,
+      "signal_weights": {
+        "displayed": 0.119155,
+        "book_anchor": 0.397184,
+        "trade_anchor": 0.234712,
+        "fallback_anchor": 0.248949
+      },
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed"
+      ]
+    },
+    {
+      "agent": "risk_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "risk_gate": "block",
+      "risk_reasons": [
+        "high_manipulation_risk",
+        "insufficient_conviction"
+      ],
+      "book_reliability_score": 0.503057,
+      "trade_reliability_score": 0.242138,
+      "manipulation_risk_score": 0.908265,
+      "signal_weights": {
+        "displayed": 0.024214,
+        "book_anchor": 0.251528,
+        "trade_anchor": 0.084748,
+        "fallback_anchor": 0.63951
+      },
+      "explanatory_tags": [
+        "wide_spread",
+        "shallow_book",
+        "trade_confirmed",
+        "tiny_recent_trade",
+        "fallback_anchored",
+        "small_trade_distortion_risk"
+      ]
+    },
+    {
+      "agent": "risk_agent",
+      "event_id": "evt_fed_policy_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "risk_gate": "allow",
+      "risk_reasons": [
+        "signal_quality_ok"
+      ],
+      "book_reliability_score": 0.892455,
+      "trade_reliability_score": 0.968333,
+      "manipulation_risk_score": 0.080988,
+      "signal_weights": {
+        "displayed": 0.133868,
+        "book_anchor": 0.446227,
+        "trade_anchor": 0.338917,
+        "fallback_anchor": 0.080988
+      },
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed",
+        "strong_trade_support",
+        "book_anchored",
+        "trade_anchored",
+        "reliable_signal"
+      ]
+    }
+  ],
+  "audit_agent_packets": [
+    {
+      "agent": "audit_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_btc_above_150k_2026",
+        "out_mkt_btc_above_150k_2026_yes",
+        "mms_out_mkt_btc_above_150k_2026_yes_20260227_193000"
+      ],
+      "source_ids": [
+        "src_delphi_microstructure_v0",
+        "src_external_news",
+        "src_polymarket_clob_ws",
+        "src_polymarket_gamma_api"
+      ],
+      "display_price_source": "midpoint",
+      "signal_weights": {
+        "displayed": 0.119155,
+        "book_anchor": 0.397184,
+        "trade_anchor": 0.234712,
+        "fallback_anchor": 0.248949
+      },
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed"
+      ]
+    },
+    {
+      "agent": "audit_agent",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_eth_above_6k_2026",
+        "out_mkt_eth_above_6k_2026_yes",
+        "mms_out_mkt_eth_above_6k_2026_yes_20260227_193000"
+      ],
+      "source_ids": [
+        "src_delphi_microstructure_v0",
+        "src_external_news",
+        "src_polymarket_clob_ws",
+        "src_polymarket_gamma_api"
+      ],
+      "display_price_source": "last_trade",
+      "signal_weights": {
+        "displayed": 0.024214,
+        "book_anchor": 0.251528,
+        "trade_anchor": 0.084748,
+        "fallback_anchor": 0.63951
+      },
+      "explanatory_tags": [
+        "wide_spread",
+        "shallow_book",
+        "trade_confirmed",
+        "tiny_recent_trade",
+        "fallback_anchored",
+        "small_trade_distortion_risk"
+      ]
+    },
+    {
+      "agent": "audit_agent",
+      "event_id": "evt_fed_policy_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "evidence_refs": [
+        "evt_fed_policy_2026",
+        "mkt_fed_cut_by_sep_2026",
+        "out_mkt_fed_cut_by_sep_2026_yes",
+        "mms_out_mkt_fed_cut_by_sep_2026_yes_20260227_193000"
+      ],
+      "source_ids": [
+        "src_delphi_microstructure_v0",
+        "src_external_news",
+        "src_polymarket_clob_ws",
+        "src_polymarket_gamma_api"
+      ],
+      "display_price_source": "midpoint",
+      "signal_weights": {
+        "displayed": 0.133868,
+        "book_anchor": 0.446227,
+        "trade_anchor": 0.338917,
+        "fallback_anchor": 0.080988
+      },
+      "explanatory_tags": [
+        "narrow_spread",
+        "deep_book",
+        "trade_confirmed",
+        "strong_trade_support",
+        "book_anchored",
+        "trade_anchored",
+        "reliable_signal"
+      ]
+    }
+  ],
+  "candidate_decisions": [
+    {
+      "decision_id": "draft_out_mkt_btc_above_150k_2026_yes",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "proposed_action": "hold",
+      "confidence": 0.406189,
+      "thesis_summary": "Robust probability=0.392347, prior=0.39, edge=0.002347, risk_gate=allow.",
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_btc_above_150k_2026",
+        "out_mkt_btc_above_150k_2026_yes",
+        "mms_out_mkt_btc_above_150k_2026_yes_20260227_193000"
+      ],
+      "created_by_agent": "strategy_agent",
+      "requires_risk_review": false,
+      "risk_gate": "allow"
+    },
+    {
+      "decision_id": "draft_out_mkt_eth_above_6k_2026_yes",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "proposed_action": "hold",
+      "confidence": 0.0,
+      "thesis_summary": "Robust probability=0.286854, prior=0.28, edge=0.006854, risk_gate=block.",
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_eth_above_6k_2026",
+        "out_mkt_eth_above_6k_2026_yes",
+        "mms_out_mkt_eth_above_6k_2026_yes_20260227_193000"
+      ],
+      "created_by_agent": "strategy_agent",
+      "requires_risk_review": true,
+      "risk_gate": "block"
+    },
+    {
+      "decision_id": "draft_out_mkt_fed_cut_by_sep_2026_yes",
+      "event_id": "evt_fed_policy_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "proposed_action": "hold",
+      "confidence": 0.606988,
+      "thesis_summary": "Robust probability=0.47, prior=0.47, edge=0.0, risk_gate=allow.",
+      "evidence_refs": [
+        "evt_fed_policy_2026",
+        "mkt_fed_cut_by_sep_2026",
+        "out_mkt_fed_cut_by_sep_2026_yes",
+        "mms_out_mkt_fed_cut_by_sep_2026_yes_20260227_193000"
+      ],
+      "created_by_agent": "strategy_agent",
+      "requires_risk_review": false,
+      "risk_gate": "allow"
+    }
+  ]
+}

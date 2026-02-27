@@ -1,0 +1,71 @@
+{
+  "schema_version": "v0.1",
+  "generated_at": "2026-02-27T03:17:03Z",
+  "portfolio_id": "pf_main",
+  "risk_policy_id": "rp_conservative",
+  "gate_results": [
+    {
+      "decision_id": "draft_out_mkt_btc_above_150k_2026_yes",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "portfolio_id": "pf_main",
+      "risk_policy_id": "rp_conservative",
+      "proposed_action": "hold",
+      "price_proxy": 0.392347,
+      "proposed_notional_usd": 500.0,
+      "proposed_quantity": 1274.382116,
+      "projected_market_notional_usd": 500.0,
+      "projected_daily_notional_usd": 780.0,
+      "market_notional_limit_usd": 5000.0,
+      "decision_confidence": 0.406189,
+      "upstream_risk_gate": "allow",
+      "gate": "allow",
+      "requires_human_approval": true,
+      "reasons": [
+        "no_action_required"
+      ]
+    },
+    {
+      "decision_id": "draft_out_mkt_eth_above_6k_2026_yes",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "portfolio_id": "pf_main",
+      "risk_policy_id": "rp_conservative",
+      "proposed_action": "hold",
+      "price_proxy": 0.286854,
+      "proposed_notional_usd": 500.0,
+      "proposed_quantity": 1743.046986,
+      "projected_market_notional_usd": 500.0,
+      "projected_daily_notional_usd": 780.0,
+      "market_notional_limit_usd": 5000.0,
+      "decision_confidence": 0.0,
+      "upstream_risk_gate": "block",
+      "gate": "allow",
+      "requires_human_approval": true,
+      "reasons": [
+        "no_action_required"
+      ]
+    },
+    {
+      "decision_id": "draft_out_mkt_fed_cut_by_sep_2026_yes",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "portfolio_id": "pf_main",
+      "risk_policy_id": "rp_conservative",
+      "proposed_action": "hold",
+      "price_proxy": 0.47,
+      "proposed_notional_usd": 500.0,
+      "proposed_quantity": 1063.829787,
+      "projected_market_notional_usd": 500.0,
+      "projected_daily_notional_usd": 780.0,
+      "market_notional_limit_usd": 5000.0,
+      "decision_confidence": 0.606988,
+      "upstream_risk_gate": "allow",
+      "gate": "allow",
+      "requires_human_approval": true,
+      "reasons": [
+        "no_action_required"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+[
+  {
+    "event_type": "book",
+    "asset_id": "token_btc_150k_yes",
+    "market": "mkt_btc_above_150k_2026",
+    "bids": [
+      {"price": "0.36", "size": "2500"},
+      {"price": "0.35", "size": "1600"},
+      {"price": "0.34", "size": "1000"}
+    ],
+    "asks": [
+      {"price": "0.42", "size": "1800"},
+      {"price": "0.43", "size": "1500"},
+      {"price": "0.44", "size": "1500"}
+    ],
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "best_bid_ask",
+    "asset_id": "token_btc_150k_yes",
+    "market": "mkt_btc_above_150k_2026",
+    "best_bid": "0.36",
+    "best_ask": "0.42",
+    "spread": "0.06",
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "last_trade_price",
+    "asset_id": "token_btc_150k_yes",
+    "market": "mkt_btc_above_150k_2026",
+    "price": "0.40",
+    "side": "BUY",
+    "size": "950",
+    "fee_rate_bps": "0",
+    "timestamp": "1772220430000"
+  },
+  {
+    "event_type": "book",
+    "asset_id": "token_eth_6k_yes",
+    "market": "mkt_eth_above_6k_2026",
+    "bids": [
+      {"price": "0.18", "size": "220"},
+      {"price": "0.17", "size": "200"},
+      {"price": "0.16", "size": "200"}
+    ],
+    "asks": [
+      {"price": "0.38", "size": "110"},
+      {"price": "0.39", "size": "100"},
+      {"price": "0.40", "size": "200"}
+    ],
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "best_bid_ask",
+    "asset_id": "token_eth_6k_yes",
+    "market": "mkt_eth_above_6k_2026",
+    "best_bid": "0.18",
+    "best_ask": "0.38",
+    "spread": "0.20",
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "last_trade_price",
+    "asset_id": "token_eth_6k_yes",
+    "market": "mkt_eth_above_6k_2026",
+    "price": "0.34",
+    "side": "BUY",
+    "size": "45",
+    "fee_rate_bps": "0",
+    "timestamp": "1772220502000"
+  },
+  {
+    "event_type": "book",
+    "asset_id": "token_fed_cut_yes",
+    "market": "mkt_fed_cut_by_sep_2026",
+    "bids": [
+      {"price": "0.45", "size": "3000"},
+      {"price": "0.44", "size": "2800"},
+      {"price": "0.43", "size": "2400"}
+    ],
+    "asks": [
+      {"price": "0.49", "size": "2900"},
+      {"price": "0.50", "size": "2500"},
+      {"price": "0.51", "size": "2500"}
+    ],
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "best_bid_ask",
+    "asset_id": "token_fed_cut_yes",
+    "market": "mkt_fed_cut_by_sep_2026",
+    "best_bid": "0.45",
+    "best_ask": "0.49",
+    "spread": "0.04",
+    "timestamp": "1772220600000"
+  },
+  {
+    "event_type": "last_trade_price",
+    "asset_id": "token_fed_cut_yes",
+    "market": "mkt_fed_cut_by_sep_2026",
+    "price": "0.47",
+    "side": "BUY",
+    "size": "1800",
+    "fee_rate_bps": "0",
+    "timestamp": "1772220581000"
+  }
+]

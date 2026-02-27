@@ -1,0 +1,20 @@
+[
+  {
+    "id": "news_crypto_001",
+    "event_id": "evt_crypto_year_end_2026",
+    "market_id": "mkt_btc_above_150k_2026",
+    "timestamp": "2026-02-27T18:20:00Z",
+    "headline": "Spot ETF inflows continue to support bullish BTC positioning",
+    "url": "https://example.com/btc-etf-inflows",
+    "sentiment_score": 0.34
+  },
+  {
+    "id": "news_finance_001",
+    "event_id": "evt_fed_policy_2026",
+    "market_id": "mkt_fed_cut_by_sep_2026",
+    "timestamp": "2026-02-27T18:05:00Z",
+    "headline": "Cooling inflation data revives expectations for Fed easing",
+    "url": "https://example.com/inflation-easing",
+    "sentiment_score": 0.18
+  }
+]

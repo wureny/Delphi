@@ -89,7 +89,9 @@ So Delphi adds:
 - `displayed_probability`
 - `robust_probability`
 - `book_reliability_score`
+- `trade_reliability_score`
 - `manipulation_risk_score`
+- `signal_weights`
 - `depth_imbalance`
 - `quote_trade_divergence`
 - `explanatory_tags`
@@ -135,24 +137,29 @@ This stays as close as practical to the Polymarket display convention.
 ### 6.4 `robust_probability`
 This is the agent-facing robust market signal, not the UI price.
 
-Suggested rule:
-1. Use `depth_weighted_mid` as the main anchor.
-2. Use `displayed_probability` as an input, not as the only truth.
-3. Reduce trust in `displayed_probability` when:
-   - spread is wide,
-   - top-N depth is shallow,
-   - `quote_trade_divergence` is large,
-   - quote updates are frequent but trade confirmation is weak,
-   - the book is extremely one-sided.
-4. A simple v0 formula is:
+The current implementation explicitly blends four signal sources:
+1. `displayed_probability`
+2. `book_anchor`, based on `depth_weighted_mid`
+3. `trade_anchor`, based on size-weighted recent trades
+4. `fallback_anchor`, based on market metadata / upstream prior probability
+
+The implementation now:
+1. computes `book_reliability_score`,
+2. computes `trade_reliability_score`,
+3. emits `signal_weights` for auditability, and
+4. raises fallback weight when the market looks shallow, unconfirmed, or dominated by tiny prints.
+
+The simplified form is:
 
 ```text
 robust_probability =
-  reliability_score * displayed_probability
-  + (1 - reliability_score) * depth_weighted_mid
+  w_displayed * displayed_probability
+  + w_book * depth_weighted_mid
+  + w_trade * trade_anchor
+  + w_fallback * fallback_probability
 ```
 
-The lower the `reliability_score`, the less the agent should trust surface-level displayed pricing.
+The weights are stored in `signal_weights` so downstream agents and benchmark tooling can inspect why a given robust estimate moved.
 
 ## 7. Suggested risk scores
 ### 7.1 `book_reliability_score`
@@ -165,7 +172,16 @@ It should be influenced by:
 - whether tick size is too coarse,
 - whether quote churn is abnormal.
 
-### 7.2 `manipulation_risk_score`
+### 7.2 `trade_reliability_score`
+Range `[0,1]`, higher means recent trades are suitable as a robust anchor.
+
+It is currently influenced by:
+- recent traded size,
+- whether the latest trade is tiny,
+- whether trades confirm the quoted book, and
+- whether the latest trade is stale versus the current snapshot.
+
+### 7.3 `manipulation_risk_score`
 Range `[0,1]`, higher means higher heuristic risk of shallow-book distortion or adversarial behavior.
 
 Important:
@@ -193,14 +209,12 @@ A better downstream flow is:
 This design is now reflected in the repo by:
 1. upgrading the PRD to v0.4,
 2. extending the core entity dictionary with microstructure and derived-analysis entities,
-3. extending `polymarket-ontology.schema.json` with:
-   - `order_book_snapshots`
-   - `trade_prints`
-   - `market_microstructure_states`
-4. expanding the sample bundle with crypto/finance book, trade, and robust-signal examples,
-5. updating the mapping spec to a multi-source model: Gamma + CLOB + derived analytics.
+3. extending `polymarket-ontology.schema.json` with `trade_reliability_score` and `signal_weights`,
+4. implementing the executable mapper and microstructure analyzer,
+5. adding public snapshot capture, live-case archiving, and rolling stream capture,
+6. expanding the sample bundle and benchmark cases.
 
 ## 10. Recommended next steps
-1. Implement a real CLOB WebSocket / REST ingestion adapter.
-2. Validate whether `robust_probability` is more stable than displayed probability on real shallow-book historical samples.
-3. Build a benchmark set specifically around “agent gets misled by shallow books” and measure robustness directly.
+1. Add a labeling workflow for archived live cases under `ontology/samples/benchmarks/live-cases/`.
+2. Run stream capture as a longer-lived process instead of one-off CLI sessions.
+3. Bring in external reference sources so benchmark labels are less dependent on manual judgment alone.

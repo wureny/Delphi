@@ -50,4 +50,29 @@ else
   python3 scripts/ci/validate_json.py
 fi
 
+echo "[CI] Running ontology pipeline smoke test..."
+python3 scripts/ontology/smoke_test_polymarket_pipeline.py
+
+echo "[CI] Running stream capture replay smoke test..."
+python3 scripts/ontology/smoke_test_polymarket_stream_capture.py
+
+echo "[CI] Running case library smoke test..."
+python3 scripts/ontology/smoke_test_polymarket_case_library.py
+
+echo "[CI] Running live case label smoke test..."
+python3 scripts/ontology/smoke_test_live_case_labels.py
+
+echo "[CI] Running multi-agent context smoke test..."
+python3 scripts/ontology/smoke_test_multi_agent_context.py
+
+echo "[CI] Running decision record mapper smoke test..."
+python3 scripts/ontology/smoke_test_decision_records.py
+
+echo "[CI] Running risk policy gate smoke test..."
+python3 scripts/ontology/smoke_test_risk_policy_gate.py
+
+echo "[CI] Running microstructure benchmark..."
+python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \
+  --cases ontology/samples/benchmarks/microstructure-benchmark-cases.json >/dev/null
+
 echo "[CI] All checks passed."

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "evt_crypto_year_end_2026",
+    "title": "Crypto Year-End 2026 Milestones",
+    "slug": "crypto-year-end-2026-milestones",
+    "category": "crypto",
+    "subCategory": "majors",
+    "startDate": "2026-01-01T00:00:00Z",
+    "endDate": "2026-12-31T23:59:59Z",
+    "markets": [
+      {
+        "id": "mkt_btc_above_150k_2026",
+        "question": "Will BTC be above $150,000 on December 31, 2026?",
+        "slug": "btc-above-150k-by-end-of-2026",
+        "conditionId": "cond_btc_150k_2026",
+        "questionID": "q_btc_150k_2026",
+        "description": "Binary market tracking whether BTC closes above the threshold at year end.",
+        "endDate": "2026-12-31T23:59:59Z",
+        "active": true,
+        "closed": false,
+        "archived": false,
+        "enableOrderBook": true,
+        "liquidity": 210000,
+        "volume24hr": 87000,
+        "outcomes": ["Yes", "No"],
+        "outcomePrices": [0.39, 0.61],
+        "clobTokenIds": ["token_btc_150k_yes", "token_btc_150k_no"]
+      },
+      {
+        "id": "mkt_eth_above_6k_2026",
+        "question": "Will ETH be above $6,000 on December 31, 2026?",
+        "slug": "eth-above-6k-by-end-of-2026",
+        "conditionId": "cond_eth_6k_2026",
+        "questionID": "q_eth_6k_2026",
+        "description": "Binary market tracking whether ETH closes above the threshold at year end.",
+        "endDate": "2026-12-31T23:59:59Z",
+        "active": true,
+        "closed": false,
+        "archived": false,
+        "enableOrderBook": true,
+        "liquidity": 145000,
+        "volume24hr": 62000,
+        "outcomes": ["Yes", "No"],
+        "outcomePrices": [0.28, 0.72],
+        "clobTokenIds": ["token_eth_6k_yes", "token_eth_6k_no"]
+      }
+    ]
+  },
+  {
+    "id": "evt_fed_policy_2026",
+    "title": "Fed Policy Outlook 2026",
+    "slug": "fed-policy-outlook-2026",
+    "category": "finance",
+    "subCategory": "rates",
+    "startDate": "2026-01-15T00:00:00Z",
+    "endDate": "2026-09-18T00:00:00Z",
+    "markets": [
+      {
+        "id": "mkt_fed_cut_by_sep_2026",
+        "question": "Will the Fed cut rates by the September 2026 meeting?",
+        "slug": "fed-cut-by-september-2026",
+        "conditionId": "cond_fed_cut_sep_2026",
+        "questionID": "q_fed_cut_sep_2026",
+        "description": "Binary market on whether a Fed rate cut occurs by the September 2026 meeting.",
+        "endDate": "2026-09-18T00:00:00Z",
+        "active": true,
+        "closed": false,
+        "archived": false,
+        "enableOrderBook": true,
+        "liquidity": 98000,
+        "volume24hr": 41000,
+        "outcomes": ["Yes", "No"],
+        "outcomePrices": [0.47, 0.53],
+        "clobTokenIds": ["token_fed_cut_yes", "token_fed_cut_no"]
+      }
+    ]
+  }
+]

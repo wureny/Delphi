@@ -688,9 +688,11 @@
         "display_price_source",
         "robust_probability",
         "book_reliability_score",
+        "trade_reliability_score",
         "manipulation_risk_score",
         "depth_imbalance",
         "quote_trade_divergence",
+        "signal_weights",
         "explanatory_tags",
         "source_id"
       ],
@@ -759,6 +761,43 @@
         "source_id": {
           "type": "string",
           "minLength": 1
+        },
+        "trade_reliability_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "signal_weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "displayed",
+            "book_anchor",
+            "trade_anchor",
+            "fallback_anchor"
+          ],
+          "properties": {
+            "displayed": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "book_anchor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "trade_anchor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "fallback_anchor": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
         }
       }
     }

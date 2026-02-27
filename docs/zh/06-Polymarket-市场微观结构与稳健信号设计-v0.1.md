@@ -89,7 +89,9 @@ Delphi 之前的 Polymarket ontology 主要解决了 `Event / Market / Outcome` 
 - `displayed_probability`
 - `robust_probability`
 - `book_reliability_score`
+- `trade_reliability_score`
 - `manipulation_risk_score`
+- `signal_weights`
 - `depth_imbalance`
 - `quote_trade_divergence`
 - `explanatory_tags`
@@ -137,24 +139,42 @@ Delphi 之前的 Polymarket ontology 主要解决了 `Event / Market / Outcome` 
 ### 6.4 robust_probability
 这是给 Agent 的“稳健市场信号”，不等于 UI 显示价格。
 
-建议规则：
-1. 以 `depth_weighted_mid` 为主。
-2. 用 `displayed_probability` 作为补充，而不是唯一输入。
-3. 当下列情况出现时，降低对 `displayed_probability` 的信任：
-   - spread 过宽
-   - top-N depth 很浅
-   - `quote_trade_divergence` 很大
-   - 最近报价更新很多，但成交确认很少
-   - 盘口单边极端失衡
-4. 简化公式可以是：
+当前工程实现不再只做单一二元混合，而是显式区分 4 个信号源：
+1. `displayed_probability`
+2. `book_anchor`，即 `depth_weighted_mid`
+3. `trade_anchor`，即最近成交的 size-weighted trade anchor
+4. `fallback_anchor`，即市场元数据里的当前概率或上游先验
+
+当前实现逻辑：
+1. 先计算 `book_reliability_score`。
+2. 再单独计算 `trade_reliability_score`，重点看：
+   - 最近成交总量是否足够
+   - 最近成交是否过小
+   - 成交是否与盘口一致
+   - 成交是否已经过时
+3. 用 `signal_weights` 显式表示 4 个信号源在本次输出中的权重。
+4. 当出现以下情况时，自动提高 `fallback_anchor` 权重：
+   - `trade_only_signal`
+   - `wide_spread`
+   - `shallow_book`
+   - `tiny_recent_trade`
+   - `quote_not_trade_confirmed`
+
+简化表达是：
 
 ```text
 robust_probability =
-  reliability_score * displayed_probability
-  + (1 - reliability_score) * depth_weighted_mid
+  w_displayed * displayed_probability
+  + w_book * depth_weighted_mid
+  + w_trade * trade_anchor
+  + w_fallback * fallback_probability
 ```
 
-其中 `reliability_score` 越低，说明越不应该相信表层显示价格。
+其中：
+1. `w_book` 来自 book 可信度。
+2. `w_trade` 来自 trade 可信度。
+3. `w_fallback` 在薄盘口和小额成交场景下会主动升高。
+4. 所有权重保存在 `signal_weights` 中，方便审计与回归调参。
 
 ## 7. 风险评分建议
 ### 7.1 book_reliability_score
@@ -167,7 +187,16 @@ robust_probability =
 - tick size 是否过粗导致价格颗粒度太大
 - quote churn 是否异常
 
-### 7.2 manipulation_risk_score
+### 7.2 trade_reliability_score
+范围 `[0,1]`，越高说明最近成交更适合作为稳健锚点。
+
+当前主要受以下因素影响：
+- 最近成交总量是否足够
+- 最近成交是否过小
+- 最近成交与当前 quote 是否一致
+- 最近成交与当前盘口时间是否过远
+
+### 7.3 manipulation_risk_score
 范围 `[0,1]`，越高表示越可能存在浅盘口扭曲或对抗性行为。
 
 注意：
@@ -177,7 +206,9 @@ robust_probability =
    - `shallow_book`
    - `quote_not_trade_confirmed`
    - `extreme_depth_imbalance`
-   - `spoof_like_churn`
+   - `trade_only_signal`
+   - `tiny_recent_trade`
+   - `fallback_anchored`
 
 ## 8. 对 Agent 的实际意义
 这个设计的重点不是让 Agent “更会看盘口”，而是让它更少犯下面这类错：
@@ -195,14 +226,23 @@ robust_probability =
 本次设计已经落实为：
 1. PRD 更新到 v0.4。
 2. `core-entity-dictionary` 新增微观结构与派生分析实体。
-3. `polymarket-ontology.schema.json` 新增：
+3. `polymarket-ontology.schema.json` 已覆盖：
    - `order_book_snapshots`
    - `trade_prints`
    - `market_microstructure_states`
-4. sample bundle 增加了 crypto / finance 的盘口、成交与稳健信号示例。
-5. mapping spec 改为多源映射：Gamma + CLOB + Derived analytics。
+   - `trade_reliability_score`
+   - `signal_weights`
+4. `scripts/ontology/polymarket_mapper.py` 已实现 raw -> ontology 映射。
+5. `scripts/ontology/polymarket_microstructure.py` 已实现 v0.1 稳健概率与风险分析。
+6. `scripts/ontology/fetch_polymarket_public_snapshot.py` 已实现公开快照抓取。
+7. `scripts/ontology/capture_polymarket_case_library.py` 已实现多次 snapshot 采样与高风险 case 归档。
+8. `scripts/ontology/polymarket_stream_capture.py` 已实现：
+   - live websocket capture
+   - 本地 replay
+   - rolling ontology bundle 输出
+9. sample bundle 与 benchmark cases 已同步更新。
 
 ## 10. 下一步建议
-1. 实现真实 CLOB WebSocket / REST 的 ingestion adapter。
-2. 用真实历史薄盘口样本验证 `robust_probability` 是否比显示概率更稳定。
-3. 建立一组“被浅盘口误导”的 benchmark 题，专门测 Agent 的鲁棒性。
+1. 给 `ontology/samples/benchmarks/live-cases/` 建立人工标注流程，补齐 `reference_probability`。
+2. 把 stream capture 部署成更长时间的持续作业，而不是单次命令行采样。
+3. 引入外部真实世界参考源，减少 benchmark 标注完全依赖人工判断。

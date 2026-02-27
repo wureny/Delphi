@@ -1,0 +1,55 @@
+{
+  "schema_version": "v0.1",
+  "generated_at": "2026-02-27T03:16:42Z",
+  "source_agent_context_generated_at": "2026-02-27T03:09:13Z",
+  "decision_records": [
+    {
+      "id": "draft_out_mkt_btc_above_150k_2026_yes",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_mkt_btc_above_150k_2026_yes",
+      "thesis": "Robust probability=0.392347, prior=0.39, edge=0.002347, risk_gate=allow.; robust_probability=0.392347; edge=0.002347; strategy=hold; risk_gate=allow; risk_reasons=signal_quality_ok",
+      "confidence": 0.406189,
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_btc_above_150k_2026",
+        "out_mkt_btc_above_150k_2026_yes",
+        "mms_out_mkt_btc_above_150k_2026_yes_20260227_193000"
+      ],
+      "proposed_action": "hold",
+      "created_at": "2026-02-27T03:09:13Z",
+      "created_by_agent": "strategy_agent"
+    },
+    {
+      "id": "draft_out_mkt_eth_above_6k_2026_yes",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_mkt_eth_above_6k_2026_yes",
+      "thesis": "Robust probability=0.286854, prior=0.28, edge=0.006854, risk_gate=block.; robust_probability=0.286854; edge=0.006854; strategy=monitor; risk_gate=block; risk_reasons=high_manipulation_risk,insufficient_conviction",
+      "confidence": 0.0,
+      "evidence_refs": [
+        "evt_crypto_year_end_2026",
+        "mkt_eth_above_6k_2026",
+        "out_mkt_eth_above_6k_2026_yes",
+        "mms_out_mkt_eth_above_6k_2026_yes_20260227_193000"
+      ],
+      "proposed_action": "hold",
+      "created_at": "2026-02-27T03:09:13Z",
+      "created_by_agent": "strategy_agent"
+    },
+    {
+      "id": "draft_out_mkt_fed_cut_by_sep_2026_yes",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_mkt_fed_cut_by_sep_2026_yes",
+      "thesis": "Robust probability=0.47, prior=0.47, edge=0.0, risk_gate=allow.; robust_probability=0.47; edge=0.0; strategy=hold; risk_gate=allow; risk_reasons=signal_quality_ok",
+      "confidence": 0.606988,
+      "evidence_refs": [
+        "evt_fed_policy_2026",
+        "mkt_fed_cut_by_sep_2026",
+        "out_mkt_fed_cut_by_sep_2026_yes",
+        "mms_out_mkt_fed_cut_by_sep_2026_yes_20260227_193000"
+      ],
+      "proposed_action": "hold",
+      "created_at": "2026-02-27T03:09:13Z",
+      "created_by_agent": "strategy_agent"
+    }
+  ]
+}
