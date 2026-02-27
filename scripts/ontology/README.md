@@ -8,6 +8,7 @@ This directory contains the executable Polymarket ontology pipeline for Delphi.
 - `build_decision_records.py`: map `candidate_decisions` into execution-domain `DecisionRecord` objects.
 - `evaluate_risk_policy_gate.py`: run a simple RiskPolicy gate over candidate decisions.
 - `build_order_proposals.py`: turn gated decision records into minimal `Order` proposals.
+- `run_multi_agent_runtime.py`: minimal multi-agent runtime skeleton that orchestrates agent packets and bridges into execution-domain pre-trade chain.
 - `fetch_polymarket_public_snapshot.py`: fetch a public Gamma + CLOB snapshot without API keys.
 - `capture_polymarket_case_library.py`: capture repeated snapshots and archive high-risk benchmark cases.
 - `manage_live_case_labels.py`: export labeling worklists, apply labels, and summarize label coverage.
@@ -24,6 +25,7 @@ This directory contains the executable Polymarket ontology pipeline for Delphi.
 - `smoke_test_decision_records.py`: decision-record mapper smoke test.
 - `smoke_test_risk_policy_gate.py`: risk-policy gate smoke test.
 - `smoke_test_order_proposals.py`: order-proposal mapper smoke test.
+- `smoke_test_multi_agent_runtime.py`: end-to-end multi-agent runtime smoke test.
 - `benchmarks/evaluate_microstructure_cases.py`: benchmark evaluator for labeled cases.
 
 ## Core outputs
@@ -106,6 +108,27 @@ python3 scripts/ontology/build_order_proposals.py \
   --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
   --output /tmp/polymarket-order-proposals.json \
   --pretty
+```
+
+Run the minimal multi-agent runtime skeleton (heuristic engine by default):
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --output /tmp/polymarket-runtime-output.json \
+  --pretty \
+  --include-hold
+```
+
+Run with the optional ADK adapter engine:
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine adk \
+  --output /tmp/polymarket-runtime-output.adk.json \
+  --pretty \
+  --include-hold
 ```
 
 Capture repeated snapshots and archive high-risk benchmark cases:
@@ -211,6 +234,7 @@ Use segment rotation to keep long-running captures bounded and easier to archive
 6. `build_multi_agent_context.py` is the current bridge from market ontology into future Research/Strategy/Risk/Audit agent contracts.
 7. `build_decision_records.py` and `evaluate_risk_policy_gate.py` are intentionally simple pre-orchestration utilities; they define output contracts before a full multi-agent runtime exists.
 8. `build_order_proposals.py` only emits orders for actionable decisions. `hold` decisions are preserved under `skipped_decisions`, not turned into fake buy/sell orders.
+9. `run_multi_agent_runtime.py` is a v0 runtime skeleton. In `adk` mode, it validates ADK availability and keeps the same stable output contract to avoid changing downstream execution semantics.
 
 ## Architecture docs
 For a higher-level overview, read:

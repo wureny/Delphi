@@ -67,12 +67,17 @@ It is the current handoff point between market ontology and the later execution-
 The repo also now includes two minimal pre-orchestration utilities:
 - `scripts/ontology/build_decision_records.py`
 - `scripts/ontology/evaluate_risk_policy_gate.py`
+- `scripts/ontology/build_order_proposals.py`
+
+The repo now also includes a minimal runtime skeleton:
+- `scripts/ontology/run_multi_agent_runtime.py`
 
 They are meant to prove that the current ontology and multi-agent context are already sufficient to:
 1. produce execution-domain `DecisionRecord` objects, and
 2. run a deterministic risk gate,
-3. produce minimal `Order` proposals,
-even before a full multi-agent runtime exists.
+3. produce minimal `Order` proposals.
+
+The runtime skeleton currently orchestrates packet consumption and emits the same downstream contract while keeping the implementation intentionally simple for incremental hardening.
 
 ## Related design docs
 - `docs/zh/06-Polymarket-市场微观结构与稳健信号设计-v0.1.md`

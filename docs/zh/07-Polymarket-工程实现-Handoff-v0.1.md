@@ -61,7 +61,16 @@
 9. 多 Agent 消费层桥接器
    - 文件：`scripts/ontology/build_multi_agent_context.py`
    - 作用：把 ontology bundle 转为 `Research/Strategy/Risk/Audit` agent packets 与 `candidate_decisions`
-10. benchmark 评估器
+10. DecisionRecord mapper
+   - 文件：`scripts/ontology/build_decision_records.py`
+   - 作用：把 `candidate_decisions` 映射为执行域 `DecisionRecord`
+11. RiskPolicy gate
+   - 文件：`scripts/ontology/evaluate_risk_policy_gate.py`
+   - 作用：对 `candidate_decisions / DecisionRecord` 进行最小可运行风控审查
+12. Order proposal builder
+   - 文件：`scripts/ontology/build_order_proposals.py`
+   - 作用：把 gate 结果与 `DecisionRecord` 合成为最小 `Order proposal`
+13. benchmark 评估器
    - 文件：`scripts/ontology/benchmarks/evaluate_microstructure_cases.py`
 
 ### 2.3 样例与测试资产
@@ -78,6 +87,10 @@
    - `scripts/ontology/smoke_test_polymarket_stream_capture.py`
    - `scripts/ontology/smoke_test_polymarket_case_library.py`
    - `scripts/ontology/smoke_test_live_case_labels.py`
+   - `scripts/ontology/smoke_test_multi_agent_context.py`
+   - `scripts/ontology/smoke_test_decision_records.py`
+   - `scripts/ontology/smoke_test_risk_policy_gate.py`
+   - `scripts/ontology/smoke_test_order_proposals.py`
 
 ## 3. 已验证结果
 ### 3.1 本地样例链路
@@ -132,6 +145,17 @@ python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \
 
 结论：当前 `robust_probability` 在已有 case 集中优于直接使用 `displayed_probability`，尤其对薄盘口扭曲 case 更稳健。
 
+### 3.4 执行前链路结果
+当前已经可运行：
+`ontology bundle -> multi-agent context -> candidate_decisions -> DecisionRecord -> RiskPolicy gate -> Order proposal`
+
+说明：
+1. 当前 sample 中 `candidate_decisions` 多数为 `hold`。
+2. 因此 `build_order_proposals.py` 的样例输出主要体现：
+   - `orders=[]`
+   - `skipped_decisions=[...]`
+3. 这是正确行为，不是错误；`hold` 不应被错误转换为 `buy/sell` order。
+
 ## 4. 实现中的关键修正
 ### 4.1 category 推断方式修正
 真实 Polymarket live payload 中，`category` 并不稳定存在于顶层；更可靠的信息来自 `tags`。
@@ -167,9 +191,32 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 4. 当前 benchmark case 数量很少，不足以支持稳定阈值。
 5. category 仍是启发式映射，后续需要更明确的 taxonomy 规则。
 6. 尚未把“真实世界外部参考信号”系统化接入到 benchmark 中。
+7. 当前还没有真正的多 Agent orchestration runtime。
+8. 当前还没有 `Execution -> Position/PnL` 的 paper trading 闭环。
 
 ## 6. 下一步任务优先级
 建议严格按以下顺序做。
+
+### P-Next. 多 Agent runtime skeleton
+当前结论：
+1. 现在最值得做的是多 Agent runtime 和 ontology 层的直接对接。
+2. 当前仓库已经具备足够稳定的输入/输出边界：
+   - `ontology bundle`
+   - `multi-agent context`
+   - `candidate_decisions`
+   - `DecisionRecord`
+   - `RiskPolicy gate`
+   - `Order proposal`
+3. 因此下一阶段不必优先做 paper trading；优先做多 Agent runtime 更合理。
+
+建议做法：
+1. 设计最小 orchestrator skeleton。
+2. 让 `Research/Strategy/Risk/Audit` 4 类 agent 消费 `multi-agent context`。
+3. 把 agent 输出统一写回 `candidate_decisions`。
+4. 复用当前已有的：
+   - `build_decision_records.py`
+   - `evaluate_risk_policy_gate.py`
+   - `build_order_proposals.py`
 
 ### P0. 真实历史 case 库
 当前状态：已实现第一版。
@@ -231,19 +278,27 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - public snapshot fetcher
 - benchmark evaluator
 - live public snapshot 已验证跑通
+- multi-agent context builder
+- decision record mapper
+- risk policy gate
+- order proposal builder
 
 请先阅读：
 - docs/zh/07-Polymarket-工程实现-Handoff-v0.1.md
+- docs/zh/08-Polymarket-Ontology-多Agent消费契约-v0.1.md
+- docs/zh/09-Polymarket到多Agent到执行前链路总览-v0.1.md
 - scripts/ontology/README.md
-- scripts/ontology/polymarket_mapper.py
-- scripts/ontology/polymarket_microstructure.py
+- scripts/ontology/build_multi_agent_context.py
+- scripts/ontology/build_decision_records.py
+- scripts/ontology/evaluate_risk_policy_gate.py
+- scripts/ontology/build_order_proposals.py
 
-然后基于当前实现继续做第二阶段增强：外部参考源接入、长期流采集稳定化、以及稳健概率阈值校准。
+然后优先实现最小可运行的多 Agent runtime skeleton。
 要求：
-1. 设计并实现多次 snapshot 采样与落盘脚本。
-2. 自动筛选高风险 market case。
-3. 生成可用于 benchmark 的 case 文件结构。
-4. 更新 README 和相关文档。
+1. 设计 `Research/Strategy/Risk/Audit` 4 个 agent 的最小 I/O contract。
+2. 让它们直接消费当前 `multi-agent context`。
+3. 输出统一落到 `candidate_decisions`。
+4. 与现有的 `DecisionRecord -> RiskPolicy gate -> Order proposal` 链路接上。
 5. 跑自检并汇报结果。
 ```
 
@@ -258,10 +313,13 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - `docs/zh/08-Polymarket-Ontology-多Agent消费契约-v0.1.md`
 - `docs/zh/09-Polymarket到多Agent到执行前链路总览-v0.1.md`
 - `scripts/ontology/README.md`
-- `scripts/ontology/polymarket_mapper.py`
-- `scripts/ontology/polymarket_microstructure.py`
-- `scripts/ontology/fetch_polymarket_public_snapshot.py`
-- `scripts/ontology/polymarket_public_clients.py`
-- `scripts/ontology/benchmarks/evaluate_microstructure_cases.py`
+- `scripts/ontology/build_multi_agent_context.py`
+- `scripts/ontology/build_decision_records.py`
+- `scripts/ontology/evaluate_risk_policy_gate.py`
+- `scripts/ontology/build_order_proposals.py`
 - `ontology/samples/benchmarks/microstructure-benchmark-cases.json`
+- `ontology/samples/multi-agent/polymarket-agent-context-sample.json`
+- `ontology/samples/execution-derived/decision-records-sample.json`
+- `ontology/samples/execution-derived/risk-gate-report-sample.json`
+- `ontology/samples/execution-derived/order-proposals-sample.json`
 - `scripts/ci/check_repo.sh`

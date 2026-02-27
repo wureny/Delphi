@@ -74,6 +74,9 @@ python3 scripts/ontology/smoke_test_risk_policy_gate.py
 echo "[CI] Running order proposal smoke test..."
 python3 scripts/ontology/smoke_test_order_proposals.py
 
+echo "[CI] Running multi-agent runtime smoke test..."
+python3 scripts/ontology/smoke_test_multi_agent_runtime.py
+
 echo "[CI] Running microstructure benchmark..."
 python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \
   --cases ontology/samples/benchmarks/microstructure-benchmark-cases.json >/dev/null
