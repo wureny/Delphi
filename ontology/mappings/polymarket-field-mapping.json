@@ -1,55 +1,189 @@
 {
-  "version": "v0.1",
-  "source": "polymarket_raw",
+  "version": "v0.4",
+  "sources": [
+    "polymarket_gamma_raw",
+    "polymarket_clob_market_channel",
+    "delphi_microstructure_derived"
+  ],
   "target_schema": "polymarket-ontology.schema.json",
+  "modeling_notes": [
+    "The ontology is a semantic layer for agent reasoning and is not intended to mirror every raw API field.",
+    "Relationship-explicit fields such as event.market_ids, market.outcome_ids, outcome.binary_side, and outcome.complement_outcome_id are deliberate ontology additions.",
+    "The current scope is limited to crypto and finance markets.",
+    "Resolution is modeled at the market level to match the tradable unit described in official Polymarket concepts.",
+    "Order-book and trade data are modeled separately from market metadata so the agent can distinguish world semantics from price-formation mechanics.",
+    "MarketMicrostructureState is a derived layer and should be treated as Delphi analysis rather than a raw source fact."
+  ],
   "mapping_rules": [
     {
       "raw_field": "event.id",
       "target_entity": "Event",
-      "target_field": "id"
+      "target_field": "id",
+      "source": "polymarket_gamma_raw"
     },
     {
       "raw_field": "event.title",
       "target_entity": "Event",
-      "target_field": "title"
+      "target_field": "title",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.slug",
+      "target_entity": "Event",
+      "target_field": "slug",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.category",
+      "target_entity": "Event",
+      "target_field": "category",
+      "transform": "normalize_supported_category",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.subCategory",
+      "target_entity": "Event",
+      "target_field": "sub_category",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.startDate",
+      "target_entity": "Event",
+      "target_field": "start_time",
+      "transform": "to_utc_iso8601",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.endDate",
+      "target_entity": "Event",
+      "target_field": "end_time",
+      "transform": "to_utc_iso8601",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "event.markets[].id",
+      "target_entity": "Event",
+      "target_field": "market_ids",
+      "transform": "collect_market_ids",
+      "source": "polymarket_gamma_raw"
     },
     {
       "raw_field": "market.id",
       "target_entity": "Market",
-      "target_field": "id"
+      "target_field": "id",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.eventId",
+      "target_entity": "Market",
+      "target_field": "event_id",
+      "source": "polymarket_gamma_raw"
     },
     {
       "raw_field": "market.question",
       "target_entity": "Market",
-      "target_field": "question"
+      "target_field": "question",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.slug",
+      "target_entity": "Market",
+      "target_field": "slug",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.conditionId",
+      "target_entity": "Market",
+      "target_field": "condition_id",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.questionID",
+      "target_entity": "Market",
+      "target_field": "question_id",
+      "source": "polymarket_gamma_raw"
     },
     {
       "raw_field": "market.endDate",
       "target_entity": "Market",
       "target_field": "close_time",
-      "transform": "to_utc_iso8601"
+      "transform": "to_utc_iso8601",
+      "source": "polymarket_gamma_raw"
     },
     {
-      "raw_field": "outcome.id",
-      "target_entity": "Outcome",
-      "target_field": "id"
+      "raw_field": "market.active + market.closed + market.archived",
+      "target_entity": "Market",
+      "target_field": "trading_state",
+      "transform": "derive_trading_state",
+      "source": "polymarket_gamma_raw"
     },
     {
-      "raw_field": "outcome.name",
-      "target_entity": "Outcome",
-      "target_field": "label"
+      "raw_field": "market.enableOrderBook",
+      "target_entity": "Market",
+      "target_field": "orderbook_enabled",
+      "source": "polymarket_gamma_raw"
     },
     {
-      "raw_field": "outcome.price",
+      "raw_field": "market.outcomes[] + market.outcomePrices[] + market.clobTokenIds[]",
       "target_entity": "Outcome",
-      "target_field": "current_probability",
-      "transform": "to_probability_0_1"
+      "target_field": "[label, binary_side, token_id, current_probability, complement_outcome_id]",
+      "transform": "zip_binary_outcomes",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.outcomes[]",
+      "target_entity": "Market",
+      "target_field": "outcome_ids",
+      "transform": "derive_outcome_ids",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market_channel.book",
+      "target_entity": "OrderBookSnapshot",
+      "target_field": "[market_id, outcome_id, timestamp, best_bid, best_ask, spread, midpoint, bid_depth_top_n, ask_depth_top_n, tick_size, bid_levels, ask_levels]",
+      "transform": "normalize_order_book_snapshot",
+      "source": "polymarket_clob_market_channel"
+    },
+    {
+      "raw_field": "market_channel.best_bid_ask",
+      "target_entity": "OrderBookSnapshot",
+      "target_field": "[best_bid, best_ask, spread, midpoint]",
+      "transform": "merge_best_bid_ask_into_snapshot",
+      "source": "polymarket_clob_market_channel"
+    },
+    {
+      "raw_field": "market_channel.last_trade_price",
+      "target_entity": "TradePrint",
+      "target_field": "[market_id, outcome_id, timestamp, price, size, side, fee_rate_bps]",
+      "transform": "normalize_trade_print",
+      "source": "polymarket_clob_market_channel"
     },
     {
       "raw_field": "market.liquidity",
       "target_entity": "LiquiditySnapshot",
-      "target_field": "liquidity_usd"
+      "target_field": "liquidity_usd",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.volume24hr",
+      "target_entity": "LiquiditySnapshot",
+      "target_field": "volume_24h_usd",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "market.endDate + resolution source",
+      "target_entity": "ResolutionState",
+      "target_field": "[market_id, resolution_time, winning_outcome_id, resolution_notes, evidence]",
+      "transform": "derive_market_resolution_state",
+      "source": "polymarket_gamma_raw"
+    },
+    {
+      "raw_field": "order_book_snapshots + trade_prints + liquidity_snapshots + price_points",
+      "target_entity": "MarketMicrostructureState",
+      "target_field": "[displayed_probability, display_price_source, robust_probability, book_reliability_score, manipulation_risk_score, depth_imbalance, quote_trade_divergence, explanatory_tags]",
+      "transform": "derive_market_microstructure_state",
+      "source": "delphi_microstructure_derived"
     }
   ],
-  "notes": "This mapping is an initial draft and will be refined after real sample ingestion."
+  "notes": "Mapping rules are aligned with official market/event and CLOB concepts. They intentionally introduce reasoning-friendly semantic fields and a derived analysis layer instead of only copying raw payload structure. External evidence like news signals is modeled through additional sources outside Polymarket raw payloads."
 }

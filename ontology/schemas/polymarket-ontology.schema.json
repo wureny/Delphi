@@ -12,9 +12,12 @@
     "markets",
     "outcomes",
     "price_points",
+    "order_book_snapshots",
+    "trade_prints",
     "liquidity_snapshots",
     "news_signals",
-    "resolution_states"
+    "resolution_states",
+    "market_microstructure_states"
   ],
   "properties": {
     "schema_version": {
@@ -55,6 +58,18 @@
         "$ref": "#/$defs/PricePoint"
       }
     },
+    "order_book_snapshots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OrderBookSnapshot"
+      }
+    },
+    "trade_prints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TradePrint"
+      }
+    },
     "liquidity_snapshots": {
       "type": "array",
       "items": {
@@ -71,6 +86,12 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/ResolutionState"
+      }
+    },
+    "market_microstructure_states": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MarketMicrostructureState"
       }
     }
   },
@@ -99,7 +120,8 @@
           "enum": [
             "api",
             "stream",
-            "manual"
+            "manual",
+            "derived"
           ]
         },
         "uri": {
@@ -118,11 +140,12 @@
       "required": [
         "id",
         "title",
+        "slug",
         "category",
         "start_time",
         "end_time",
         "status",
-        "resolution_state_id",
+        "market_ids",
         "source_id"
       ],
       "properties": {
@@ -134,9 +157,22 @@
           "type": "string",
           "minLength": 1
         },
-        "category": {
+        "slug": {
           "type": "string",
           "minLength": 1
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "crypto",
+            "finance"
+          ]
+        },
+        "sub_category": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "start_time": {
           "type": "string",
@@ -154,9 +190,13 @@
             "resolved"
           ]
         },
-        "resolution_state_id": {
-          "type": "string",
-          "minLength": 1
+        "market_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "source_id": {
           "type": "string",
@@ -171,9 +211,14 @@
         "id",
         "event_id",
         "question",
+        "slug",
+        "market_type",
+        "condition_id",
+        "question_id",
         "close_time",
-        "status",
+        "trading_state",
         "outcome_ids",
+        "orderbook_enabled",
         "source_id"
       ],
       "properties": {
@@ -189,6 +234,24 @@
           "type": "string",
           "minLength": 1
         },
+        "slug": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_type": {
+          "type": "string",
+          "enum": [
+            "binary"
+          ]
+        },
+        "condition_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "question_id": {
+          "type": "string",
+          "minLength": 1
+        },
         "description": {
           "type": "string"
         },
@@ -196,21 +259,27 @@
           "type": "string",
           "format": "date-time"
         },
-        "status": {
+        "trading_state": {
           "type": "string",
           "enum": [
-            "open",
+            "active",
+            "inactive",
             "closed",
-            "resolved"
+            "resolved",
+            "archived"
           ]
         },
         "outcome_ids": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 2,
+          "maxItems": 2,
           "items": {
             "type": "string",
             "minLength": 1
           }
+        },
+        "orderbook_enabled": {
+          "type": "boolean"
         },
         "source_id": {
           "type": "string",
@@ -225,7 +294,9 @@
         "id",
         "market_id",
         "label",
+        "binary_side",
         "token_id",
+        "complement_outcome_id",
         "current_probability"
       ],
       "properties": {
@@ -241,7 +312,18 @@
           "type": "string",
           "minLength": 1
         },
+        "binary_side": {
+          "type": "string",
+          "enum": [
+            "yes",
+            "no"
+          ]
+        },
         "token_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "complement_outcome_id": {
           "type": "string",
           "minLength": 1
         },
@@ -291,6 +373,180 @@
         }
       }
     },
+    "OrderBookLevel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "price",
+        "size"
+      ],
+      "properties": {
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "OrderBookSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "market_id",
+        "outcome_id",
+        "timestamp",
+        "best_bid",
+        "best_ask",
+        "spread",
+        "midpoint",
+        "bid_depth_top_n",
+        "ask_depth_top_n",
+        "tick_size",
+        "bid_levels",
+        "ask_levels",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "best_bid": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "best_ask": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "spread": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "midpoint": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bid_depth_top_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ask_depth_top_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tick_size": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bid_levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OrderBookLevel"
+          }
+        },
+        "ask_levels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/OrderBookLevel"
+          }
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "TradePrint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "market_id",
+        "outcome_id",
+        "timestamp",
+        "price",
+        "size",
+        "side",
+        "fee_rate_bps",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "price": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "size": {
+          "type": "number",
+          "minimum": 0
+        },
+        "side": {
+          "type": "string",
+          "enum": [
+            "buy",
+            "sell"
+          ]
+        },
+        "fee_rate_bps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
     "LiquiditySnapshot": {
       "type": "object",
       "additionalProperties": false,
@@ -330,6 +586,7 @@
       "required": [
         "id",
         "event_id",
+        "market_id",
         "timestamp",
         "headline",
         "url",
@@ -344,6 +601,12 @@
         "event_id": {
           "type": "string",
           "minLength": 1
+        },
+        "market_id": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "timestamp": {
           "type": "string",
@@ -373,10 +636,11 @@
       "additionalProperties": false,
       "required": [
         "id",
-        "event_id",
+        "market_id",
         "resolved",
         "resolution_time",
-        "resolution_outcome",
+        "winning_outcome_id",
+        "resolution_notes",
         "evidence"
       ],
       "properties": {
@@ -384,7 +648,7 @@
           "type": "string",
           "minLength": 1
         },
-        "event_id": {
+        "market_id": {
           "type": "string",
           "minLength": 1
         },
@@ -395,11 +659,104 @@
           "type": "string",
           "format": "date-time"
         },
-        "resolution_outcome": {
+        "winning_outcome_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "resolution_notes": {
           "type": "string",
           "minLength": 1
         },
         "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "MarketMicrostructureState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "market_id",
+        "outcome_id",
+        "timestamp",
+        "displayed_probability",
+        "display_price_source",
+        "robust_probability",
+        "book_reliability_score",
+        "manipulation_risk_score",
+        "depth_imbalance",
+        "quote_trade_divergence",
+        "explanatory_tags",
+        "source_id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "market_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "displayed_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "display_price_source": {
+          "type": "string",
+          "enum": [
+            "midpoint",
+            "last_trade",
+            "derived"
+          ]
+        },
+        "robust_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "book_reliability_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "manipulation_risk_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "depth_imbalance": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "quote_trade_divergence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "explanatory_tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_id": {
           "type": "string",
           "minLength": 1
         }

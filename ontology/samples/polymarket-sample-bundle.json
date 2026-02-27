@@ -1,104 +1,446 @@
 {
-  "schema_version": "v0.1",
-  "generated_at": "2026-02-17T10:00:00Z",
+  "schema_version": "v0.4",
+  "generated_at": "2026-02-27T19:30:00Z",
   "sources": [
     {
-      "id": "src_polymarket_api",
-      "name": "Polymarket Public API",
+      "id": "src_polymarket_gamma_api",
+      "name": "Polymarket Gamma API",
       "type": "api",
-      "uri": "https://api.polymarket.com",
-      "ingested_at": "2026-02-17T09:58:00Z"
+      "uri": "https://gamma-api.polymarket.com",
+      "ingested_at": "2026-02-27T19:28:00Z"
+    },
+    {
+      "id": "src_polymarket_clob_ws",
+      "name": "Polymarket CLOB Market Channel",
+      "type": "stream",
+      "uri": "wss://ws-subscriptions-clob.polymarket.com/ws/market",
+      "ingested_at": "2026-02-27T19:29:00Z"
+    },
+    {
+      "id": "src_external_news",
+      "name": "External News Feed",
+      "type": "manual",
+      "uri": "https://example.com/news-feed",
+      "ingested_at": "2026-02-27T19:20:00Z"
+    },
+    {
+      "id": "src_delphi_microstructure_v0",
+      "name": "Delphi Microstructure Analyzer v0",
+      "type": "derived",
+      "uri": "delphi://analytics/microstructure/v0",
+      "ingested_at": "2026-02-27T19:30:00Z"
     }
   ],
   "events": [
     {
-      "id": "evt_us_election_2028",
-      "title": "US Presidential Election 2028",
-      "category": "Politics",
+      "id": "evt_crypto_year_end_2026",
+      "title": "Crypto Year-End 2026 Milestones",
+      "slug": "crypto-year-end-2026-milestones",
+      "category": "crypto",
+      "sub_category": "majors",
       "start_time": "2026-01-01T00:00:00Z",
-      "end_time": "2028-11-10T00:00:00Z",
+      "end_time": "2026-12-31T23:59:59Z",
       "status": "open",
-      "resolution_state_id": "rs_evt_us_election_2028",
-      "source_id": "src_polymarket_api"
+      "market_ids": [
+        "mkt_btc_above_150k_2026",
+        "mkt_eth_above_6k_2026"
+      ],
+      "source_id": "src_polymarket_gamma_api"
+    },
+    {
+      "id": "evt_fed_policy_2026",
+      "title": "Fed Policy Outlook 2026",
+      "slug": "fed-policy-outlook-2026",
+      "category": "finance",
+      "sub_category": "rates",
+      "start_time": "2026-01-15T00:00:00Z",
+      "end_time": "2026-09-18T00:00:00Z",
+      "status": "open",
+      "market_ids": [
+        "mkt_fed_cut_by_sep_2026"
+      ],
+      "source_id": "src_polymarket_gamma_api"
     }
   ],
   "markets": [
     {
-      "id": "mkt_candidate_a_win",
-      "event_id": "evt_us_election_2028",
-      "question": "Will Candidate A win the 2028 US Presidential Election?",
-      "description": "Binary market for Candidate A victory.",
-      "close_time": "2028-11-05T00:00:00Z",
-      "status": "open",
+      "id": "mkt_btc_above_150k_2026",
+      "event_id": "evt_crypto_year_end_2026",
+      "question": "Will BTC be above $150,000 on December 31, 2026?",
+      "slug": "btc-above-150k-by-end-of-2026",
+      "market_type": "binary",
+      "condition_id": "cond_btc_150k_2026",
+      "question_id": "q_btc_150k_2026",
+      "description": "Binary market tracking whether BTC closes above the threshold at year end.",
+      "close_time": "2026-12-31T23:59:59Z",
+      "trading_state": "active",
       "outcome_ids": [
-        "out_yes",
-        "out_no"
+        "out_btc_150k_yes",
+        "out_btc_150k_no"
       ],
-      "source_id": "src_polymarket_api"
+      "orderbook_enabled": true,
+      "source_id": "src_polymarket_gamma_api"
+    },
+    {
+      "id": "mkt_eth_above_6k_2026",
+      "event_id": "evt_crypto_year_end_2026",
+      "question": "Will ETH be above $6,000 on December 31, 2026?",
+      "slug": "eth-above-6k-by-end-of-2026",
+      "market_type": "binary",
+      "condition_id": "cond_eth_6k_2026",
+      "question_id": "q_eth_6k_2026",
+      "description": "Binary market tracking whether ETH closes above the threshold at year end.",
+      "close_time": "2026-12-31T23:59:59Z",
+      "trading_state": "active",
+      "outcome_ids": [
+        "out_eth_6k_yes",
+        "out_eth_6k_no"
+      ],
+      "orderbook_enabled": true,
+      "source_id": "src_polymarket_gamma_api"
+    },
+    {
+      "id": "mkt_fed_cut_by_sep_2026",
+      "event_id": "evt_fed_policy_2026",
+      "question": "Will the Fed cut rates by the September 2026 meeting?",
+      "slug": "fed-cut-by-september-2026",
+      "market_type": "binary",
+      "condition_id": "cond_fed_cut_sep_2026",
+      "question_id": "q_fed_cut_sep_2026",
+      "description": "Binary market on whether a Fed rate cut occurs by the September 2026 meeting.",
+      "close_time": "2026-09-18T00:00:00Z",
+      "trading_state": "active",
+      "outcome_ids": [
+        "out_fed_cut_yes",
+        "out_fed_cut_no"
+      ],
+      "orderbook_enabled": true,
+      "source_id": "src_polymarket_gamma_api"
     }
   ],
   "outcomes": [
     {
-      "id": "out_yes",
-      "market_id": "mkt_candidate_a_win",
+      "id": "out_btc_150k_yes",
+      "market_id": "mkt_btc_above_150k_2026",
       "label": "Yes",
-      "token_id": "token_yes_001",
-      "current_probability": 0.57
+      "binary_side": "yes",
+      "token_id": "token_btc_150k_yes",
+      "complement_outcome_id": "out_btc_150k_no",
+      "current_probability": 0.39
     },
     {
-      "id": "out_no",
-      "market_id": "mkt_candidate_a_win",
+      "id": "out_btc_150k_no",
+      "market_id": "mkt_btc_above_150k_2026",
       "label": "No",
-      "token_id": "token_no_001",
-      "current_probability": 0.43
+      "binary_side": "no",
+      "token_id": "token_btc_150k_no",
+      "complement_outcome_id": "out_btc_150k_yes",
+      "current_probability": 0.61
+    },
+    {
+      "id": "out_eth_6k_yes",
+      "market_id": "mkt_eth_above_6k_2026",
+      "label": "Yes",
+      "binary_side": "yes",
+      "token_id": "token_eth_6k_yes",
+      "complement_outcome_id": "out_eth_6k_no",
+      "current_probability": 0.28
+    },
+    {
+      "id": "out_eth_6k_no",
+      "market_id": "mkt_eth_above_6k_2026",
+      "label": "No",
+      "binary_side": "no",
+      "token_id": "token_eth_6k_no",
+      "complement_outcome_id": "out_eth_6k_yes",
+      "current_probability": 0.72
+    },
+    {
+      "id": "out_fed_cut_yes",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "label": "Yes",
+      "binary_side": "yes",
+      "token_id": "token_fed_cut_yes",
+      "complement_outcome_id": "out_fed_cut_no",
+      "current_probability": 0.47
+    },
+    {
+      "id": "out_fed_cut_no",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "label": "No",
+      "binary_side": "no",
+      "token_id": "token_fed_cut_no",
+      "complement_outcome_id": "out_fed_cut_yes",
+      "current_probability": 0.53
     }
   ],
   "price_points": [
     {
-      "id": "pp_yes_20260217_1000",
-      "outcome_id": "out_yes",
-      "timestamp": "2026-02-17T10:00:00Z",
-      "probability": 0.57,
-      "price": 0.57,
-      "source_id": "src_polymarket_api"
+      "id": "pp_btc_150k_yes_20260227_1930",
+      "outcome_id": "out_btc_150k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "probability": 0.39,
+      "price": 0.39,
+      "source_id": "src_polymarket_gamma_api"
     },
     {
-      "id": "pp_no_20260217_1000",
-      "outcome_id": "out_no",
-      "timestamp": "2026-02-17T10:00:00Z",
-      "probability": 0.43,
-      "price": 0.43,
-      "source_id": "src_polymarket_api"
+      "id": "pp_eth_6k_yes_20260227_1930",
+      "outcome_id": "out_eth_6k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "probability": 0.28,
+      "price": 0.28,
+      "source_id": "src_polymarket_gamma_api"
+    },
+    {
+      "id": "pp_fed_cut_yes_20260227_1930",
+      "outcome_id": "out_fed_cut_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "probability": 0.47,
+      "price": 0.47,
+      "source_id": "src_polymarket_gamma_api"
+    }
+  ],
+  "order_book_snapshots": [
+    {
+      "id": "obs_btc_150k_yes_20260227_1930",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_btc_150k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "best_bid": 0.36,
+      "best_ask": 0.42,
+      "spread": 0.06,
+      "midpoint": 0.39,
+      "bid_depth_top_n": 5100.0,
+      "ask_depth_top_n": 4800.0,
+      "tick_size": 0.01,
+      "bid_levels": [
+        {"price": 0.36, "size": 2500.0},
+        {"price": 0.35, "size": 1600.0},
+        {"price": 0.34, "size": 1000.0}
+      ],
+      "ask_levels": [
+        {"price": 0.42, "size": 1800.0},
+        {"price": 0.43, "size": 1500.0},
+        {"price": 0.44, "size": 1500.0}
+      ],
+      "source_id": "src_polymarket_clob_ws"
+    },
+    {
+      "id": "obs_eth_6k_yes_20260227_1930",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_eth_6k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "best_bid": 0.18,
+      "best_ask": 0.38,
+      "spread": 0.2,
+      "midpoint": 0.28,
+      "bid_depth_top_n": 620.0,
+      "ask_depth_top_n": 410.0,
+      "tick_size": 0.01,
+      "bid_levels": [
+        {"price": 0.18, "size": 220.0},
+        {"price": 0.17, "size": 200.0},
+        {"price": 0.16, "size": 200.0}
+      ],
+      "ask_levels": [
+        {"price": 0.38, "size": 110.0},
+        {"price": 0.39, "size": 100.0},
+        {"price": 0.4, "size": 200.0}
+      ],
+      "source_id": "src_polymarket_clob_ws"
+    },
+    {
+      "id": "obs_fed_cut_yes_20260227_1930",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_fed_cut_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "best_bid": 0.45,
+      "best_ask": 0.49,
+      "spread": 0.04,
+      "midpoint": 0.47,
+      "bid_depth_top_n": 8200.0,
+      "ask_depth_top_n": 7900.0,
+      "tick_size": 0.01,
+      "bid_levels": [
+        {"price": 0.45, "size": 3000.0},
+        {"price": 0.44, "size": 2800.0},
+        {"price": 0.43, "size": 2400.0}
+      ],
+      "ask_levels": [
+        {"price": 0.49, "size": 2900.0},
+        {"price": 0.5, "size": 2500.0},
+        {"price": 0.51, "size": 2500.0}
+      ],
+      "source_id": "src_polymarket_clob_ws"
+    }
+  ],
+  "trade_prints": [
+    {
+      "id": "tp_btc_150k_yes_20260227_1927",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_btc_150k_yes",
+      "timestamp": "2026-02-27T19:27:10Z",
+      "price": 0.4,
+      "size": 950.0,
+      "side": "buy",
+      "fee_rate_bps": 0.0,
+      "source_id": "src_polymarket_clob_ws"
+    },
+    {
+      "id": "tp_eth_6k_yes_20260227_1928",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_eth_6k_yes",
+      "timestamp": "2026-02-27T19:28:22Z",
+      "price": 0.34,
+      "size": 45.0,
+      "side": "buy",
+      "fee_rate_bps": 0.0,
+      "source_id": "src_polymarket_clob_ws"
+    },
+    {
+      "id": "tp_fed_cut_yes_20260227_1929",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_fed_cut_yes",
+      "timestamp": "2026-02-27T19:29:41Z",
+      "price": 0.47,
+      "size": 1800.0,
+      "side": "buy",
+      "fee_rate_bps": 0.0,
+      "source_id": "src_polymarket_clob_ws"
     }
   ],
   "liquidity_snapshots": [
     {
-      "id": "liq_mkt_candidate_a_win_20260217_1000",
-      "market_id": "mkt_candidate_a_win",
-      "timestamp": "2026-02-17T10:00:00Z",
-      "liquidity_usd": 125000.0,
-      "volume_24h_usd": 54000.0
+      "id": "liq_btc_150k_20260227_1930",
+      "market_id": "mkt_btc_above_150k_2026",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "liquidity_usd": 210000.0,
+      "volume_24h_usd": 87000.0
+    },
+    {
+      "id": "liq_eth_6k_20260227_1930",
+      "market_id": "mkt_eth_above_6k_2026",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "liquidity_usd": 145000.0,
+      "volume_24h_usd": 62000.0
+    },
+    {
+      "id": "liq_fed_cut_20260227_1930",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "liquidity_usd": 98000.0,
+      "volume_24h_usd": 41000.0
     }
   ],
   "news_signals": [
     {
-      "id": "news_evt_001",
-      "event_id": "evt_us_election_2028",
-      "timestamp": "2026-02-17T08:30:00Z",
-      "headline": "Major poll update shifts candidate momentum",
-      "url": "https://example.com/poll-update",
-      "sentiment_score": 0.2,
-      "source_id": "src_polymarket_api"
+      "id": "news_crypto_001",
+      "event_id": "evt_crypto_year_end_2026",
+      "market_id": "mkt_btc_above_150k_2026",
+      "timestamp": "2026-02-27T18:20:00Z",
+      "headline": "Spot ETF inflows continue to support bullish BTC positioning",
+      "url": "https://example.com/btc-etf-inflows",
+      "sentiment_score": 0.34,
+      "source_id": "src_external_news"
+    },
+    {
+      "id": "news_finance_001",
+      "event_id": "evt_fed_policy_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "timestamp": "2026-02-27T18:05:00Z",
+      "headline": "Cooling inflation data revives expectations for Fed easing",
+      "url": "https://example.com/inflation-easing",
+      "sentiment_score": 0.18,
+      "source_id": "src_external_news"
     }
   ],
   "resolution_states": [
     {
-      "id": "rs_evt_us_election_2028",
-      "event_id": "evt_us_election_2028",
+      "id": "rs_btc_150k_2026",
+      "market_id": "mkt_btc_above_150k_2026",
       "resolved": false,
-      "resolution_time": "2028-11-10T00:00:00Z",
-      "resolution_outcome": "pending",
-      "evidence": "Election result not finalized yet."
+      "resolution_time": "2026-12-31T23:59:59Z",
+      "winning_outcome_id": null,
+      "resolution_notes": "Pending final year-end price observation.",
+      "evidence": "Market remains open; no settlement evidence yet."
+    },
+    {
+      "id": "rs_eth_6k_2026",
+      "market_id": "mkt_eth_above_6k_2026",
+      "resolved": false,
+      "resolution_time": "2026-12-31T23:59:59Z",
+      "winning_outcome_id": null,
+      "resolution_notes": "Pending final year-end price observation.",
+      "evidence": "Market remains open; no settlement evidence yet."
+    },
+    {
+      "id": "rs_fed_cut_sep_2026",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "resolved": false,
+      "resolution_time": "2026-09-18T00:00:00Z",
+      "winning_outcome_id": null,
+      "resolution_notes": "Pending FOMC outcome by the target meeting window.",
+      "evidence": "Market remains open; no settlement evidence yet."
+    }
+  ],
+  "market_microstructure_states": [
+    {
+      "id": "mms_btc_150k_yes_20260227_1930",
+      "market_id": "mkt_btc_above_150k_2026",
+      "outcome_id": "out_btc_150k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "displayed_probability": 0.39,
+      "display_price_source": "midpoint",
+      "robust_probability": 0.392,
+      "book_reliability_score": 0.82,
+      "manipulation_risk_score": 0.18,
+      "depth_imbalance": 0.03,
+      "quote_trade_divergence": 0.01,
+      "explanatory_tags": [
+        "trade_confirmed",
+        "narrow_spread",
+        "healthy_depth"
+      ],
+      "source_id": "src_delphi_microstructure_v0"
+    },
+    {
+      "id": "mms_eth_6k_yes_20260227_1930",
+      "market_id": "mkt_eth_above_6k_2026",
+      "outcome_id": "out_eth_6k_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "displayed_probability": 0.34,
+      "display_price_source": "last_trade",
+      "robust_probability": 0.286,
+      "book_reliability_score": 0.29,
+      "manipulation_risk_score": 0.71,
+      "depth_imbalance": 0.2,
+      "quote_trade_divergence": 0.06,
+      "explanatory_tags": [
+        "wide_spread",
+        "shallow_book",
+        "quote_not_trade_confirmed",
+        "small_trade_distortion_risk"
+      ],
+      "source_id": "src_delphi_microstructure_v0"
+    },
+    {
+      "id": "mms_fed_cut_yes_20260227_1930",
+      "market_id": "mkt_fed_cut_by_sep_2026",
+      "outcome_id": "out_fed_cut_yes",
+      "timestamp": "2026-02-27T19:30:00Z",
+      "displayed_probability": 0.47,
+      "display_price_source": "midpoint",
+      "robust_probability": 0.471,
+      "book_reliability_score": 0.88,
+      "manipulation_risk_score": 0.12,
+      "depth_imbalance": 0.02,
+      "quote_trade_divergence": 0.0,
+      "explanatory_tags": [
+        "trade_confirmed",
+        "narrow_spread",
+        "deep_book"
+      ],
+      "source_id": "src_delphi_microstructure_v0"
     }
   ]
 }

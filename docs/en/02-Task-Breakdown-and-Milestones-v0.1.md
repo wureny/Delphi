@@ -9,6 +9,7 @@ Suggested issues:
 2. A2 Define relationship graph and cardinality
 3. A3 Define field standards (naming/type/time/currency)
 4. A4 Define validation rules and error codes
+5. A5 Define market microstructure entities (OrderBookSnapshot/TradePrint/MarketMicrostructureState)
 
 ### Epic B: Data Mapping Pipeline
 Goal: map raw Polymarket structures into ontology schema.
@@ -18,6 +19,8 @@ Suggested issues:
 2. B2 Write mapping spec (field mapping table)
 3. B3 Implement mapper v0
 4. B4 Add malformed/edge-case handling paths
+5. B5 Ingest CLOB / WebSocket order-book and trade data
+6. B6 Merge market metadata and microstructure into one ontology bundle
 
 ### Epic C: Validation & QA
 Goal: ensure trust, traceability, and regression safety.
@@ -27,6 +30,7 @@ Suggested issues:
 2. C2 Build test case library (normal + abnormal)
 3. C3 Generate validation reports and metrics
 4. C4 Establish regression process
+5. C5 Add dedicated shallow-book / wide-spread / weak-trade-confirmation validation cases
 
 ### Epic D: Documentation & Governance
 Goal: keep execution sustainable as a professional team workflow.
@@ -45,6 +49,7 @@ Suggested issues:
 2. E2 Build Raw Dataset Agent baseline flow
 3. E3 Build Ontology Agent comparison flow
 4. E4 Produce benchmark report and conclusions
+5. E5 Add a shallow-book robustness benchmark to test whether agents get misled by anomalous price moves
 
 ### Epic F: Visualization & Editable Ontology
 Goal: deliver relation visualization and controlled ontology editing.
@@ -65,9 +70,9 @@ Suggested issues:
 4. G4 Define and implement risk gates (including human approval)
 
 ## 2. Suggested Milestones
-1. Milestone 1 (Week 1-2): Finish Epic A + B1/B2
-2. Milestone 2 (Week 3-4): Finish B3/B4 + C1/C2
-3. Milestone 3 (Week 5-6): Finish E-series + F1/F2
+1. Milestone 1 (Week 1-2): Finish Epic A + B1/B2 + A5
+2. Milestone 2 (Week 3-4): Finish B3/B4/B5/B6 + C1/C2
+3. Milestone 3 (Week 5-6): Finish C5 + E-series + F1/F2
 4. Milestone 4 (Week 7): Finish F3/F4 + D-series closure
 5. Milestone 5 (Week 8-9): Finish G-series and close paper-trading loop
 
