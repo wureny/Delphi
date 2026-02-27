@@ -255,6 +255,8 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 
 ## 9. 本次 handoff 对应的重要文件
 - `docs/zh/07-Polymarket-工程实现-Handoff-v0.1.md`
+- `docs/zh/08-Polymarket-Ontology-多Agent消费契约-v0.1.md`
+- `docs/zh/09-Polymarket到多Agent到执行前链路总览-v0.1.md`
 - `scripts/ontology/README.md`
 - `scripts/ontology/polymarket_mapper.py`
 - `scripts/ontology/polymarket_microstructure.py`

@@ -7,6 +7,7 @@ This directory contains the executable Polymarket ontology pipeline for Delphi.
 - `build_multi_agent_context.py`: derive per-agent context packets and candidate decisions from an ontology bundle.
 - `build_decision_records.py`: map `candidate_decisions` into execution-domain `DecisionRecord` objects.
 - `evaluate_risk_policy_gate.py`: run a simple RiskPolicy gate over candidate decisions.
+- `build_order_proposals.py`: turn gated decision records into minimal `Order` proposals.
 - `fetch_polymarket_public_snapshot.py`: fetch a public Gamma + CLOB snapshot without API keys.
 - `capture_polymarket_case_library.py`: capture repeated snapshots and archive high-risk benchmark cases.
 - `manage_live_case_labels.py`: export labeling worklists, apply labels, and summarize label coverage.
@@ -22,6 +23,7 @@ This directory contains the executable Polymarket ontology pipeline for Delphi.
 - `smoke_test_multi_agent_context.py`: multi-agent context smoke test.
 - `smoke_test_decision_records.py`: decision-record mapper smoke test.
 - `smoke_test_risk_policy_gate.py`: risk-policy gate smoke test.
+- `smoke_test_order_proposals.py`: order-proposal mapper smoke test.
 - `benchmarks/evaluate_microstructure_cases.py`: benchmark evaluator for labeled cases.
 
 ## Core outputs
@@ -94,6 +96,16 @@ python3 scripts/ontology/evaluate_risk_policy_gate.py \
   --output /tmp/polymarket-risk-gate-report.json \
   --pretty \
   --include-hold
+```
+
+Build minimal order proposals:
+```bash
+python3 scripts/ontology/build_order_proposals.py \
+  --decision-records ontology/samples/execution-derived/decision-records-sample.json \
+  --risk-gate-report ontology/samples/execution-derived/risk-gate-report-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --output /tmp/polymarket-order-proposals.json \
+  --pretty
 ```
 
 Capture repeated snapshots and archive high-risk benchmark cases:
@@ -198,3 +210,11 @@ Use segment rotation to keep long-running captures bounded and easier to archive
 5. Archived live cases are only benchmark-ready after `reference_probability` is labeled and reviewed.
 6. `build_multi_agent_context.py` is the current bridge from market ontology into future Research/Strategy/Risk/Audit agent contracts.
 7. `build_decision_records.py` and `evaluate_risk_policy_gate.py` are intentionally simple pre-orchestration utilities; they define output contracts before a full multi-agent runtime exists.
+8. `build_order_proposals.py` only emits orders for actionable decisions. `hold` decisions are preserved under `skipped_decisions`, not turned into fake buy/sell orders.
+
+## Architecture docs
+For a higher-level overview, read:
+1. `docs/zh/08-Polymarket-Ontology-多Agent消费契约-v0.1.md`
+2. `docs/en/08-Polymarket-Ontology-Multi-Agent-Consumption-Contract-v0.1.md`
+3. `docs/zh/09-Polymarket到多Agent到执行前链路总览-v0.1.md`
+4. `docs/en/09-Polymarket-to-Multi-Agent-to-Pre-Trade-Flow-Overview-v0.1.md`

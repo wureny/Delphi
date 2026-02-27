@@ -150,10 +150,11 @@ Audit Agent 不负责判断是否买卖，但必须负责保存：
 
 ## 8. 当前实现边界
 1. 当前 `candidate_decisions` 仍是 heuristic draft，不是最终策略引擎输出。
-2. 目前还没有把 `candidate_decisions` 自动映射到 `fund-execution-ontology.schema.json` 的 `DecisionRecord`。
-3. 目前也还没有真正的 agent orchestration runtime；现在提供的是 stable contract 和 sample packet。
+2. 当前已经有 `candidate_decisions -> DecisionRecord` mapper，但还没有完整的 `Execution -> Position/PnL` 闭环。
+3. 当前已经有最小 `RiskPolicy gate` 与 `Order proposal`，但还不是完整 execution runtime。
+4. 目前也还没有真正的 agent orchestration runtime；现在提供的是 stable contract 和 sample packet。
 
 ## 9. 下一步建议
-1. 新增 `candidate_decisions -> DecisionRecord` mapper。
-2. 给 `Risk Agent` 接入 `RiskPolicy`，形成真正的 execution gate。
-3. 为 `Research/Strategy/Risk/Audit` 增加 benchmark，衡量 ontology 对多 Agent 的提升是否真实存在。
+1. 补 `Execution -> Position/PnL` 的 paper trading stub。
+2. 为 `Research/Strategy/Risk/Audit` 增加 benchmark，衡量 ontology 对多 Agent 的提升是否真实存在。
+3. 让未来多 Agent runtime 直接把这层作为固定输入/输出边界。

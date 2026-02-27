@@ -71,12 +71,17 @@ The repo also now includes two minimal pre-orchestration utilities:
 They are meant to prove that the current ontology and multi-agent context are already sufficient to:
 1. produce execution-domain `DecisionRecord` objects, and
 2. run a deterministic risk gate,
+3. produce minimal `Order` proposals,
 even before a full multi-agent runtime exists.
 
 ## Related design docs
 - `docs/zh/06-Polymarket-市场微观结构与稳健信号设计-v0.1.md`
 - `docs/en/06-Polymarket-Microstructure-and-Robust-Signal-Design-v0.1.md`
 - `docs/zh/07-Polymarket-工程实现-Handoff-v0.1.md`
+- `docs/zh/08-Polymarket-Ontology-多Agent消费契约-v0.1.md`
+- `docs/en/08-Polymarket-Ontology-Multi-Agent-Consumption-Contract-v0.1.md`
+- `docs/zh/09-Polymarket到多Agent到执行前链路总览-v0.1.md`
+- `docs/en/09-Polymarket-to-Multi-Agent-to-Pre-Trade-Flow-Overview-v0.1.md`
 
 ## Local pipeline
 Build a bundle from local sample inputs:
@@ -171,6 +176,17 @@ python3 scripts/ontology/evaluate_risk_policy_gate.py \
   --output /tmp/polymarket-risk-gate-report.json \
   --pretty \
   --include-hold
+```
+
+Build minimal order proposals:
+
+```bash
+python3 scripts/ontology/build_order_proposals.py \
+  --decision-records ontology/samples/execution-derived/decision-records-sample.json \
+  --risk-gate-report ontology/samples/execution-derived/risk-gate-report-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --output /tmp/polymarket-order-proposals.json \
+  --pretty
 ```
 
 ## Next expected issues
