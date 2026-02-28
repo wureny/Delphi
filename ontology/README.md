@@ -51,6 +51,8 @@ The current derived state includes:
 The design intent is to give agents a robust market-implied signal that can fall back toward prior market probability when the visible book is shallow, unconfirmed, or dominated by tiny trades.
 
 ## Multi-agent bridge
+Primary agent implementations now live in `agents/`, while `scripts/ontology/*` keeps backward-compatible CLI wrappers.
+
 The repo now includes a minimal bridge from ontology bundles into agent-specific packets:
 - `scripts/ontology/build_multi_agent_context.py`
 - `ontology/samples/multi-agent/polymarket-agent-context-sample.json`
@@ -78,6 +80,7 @@ They are meant to prove that the current ontology and multi-agent context are al
 3. produce minimal `Order` proposals.
 
 The runtime skeleton currently orchestrates packet consumption and emits the same downstream contract while keeping the implementation intentionally simple for incremental hardening.
+It now supports a concrete `llm` runtime mode with OpenAI-compatible API integration, plus offline mock responses for local testing without network credentials.
 
 ## Related design docs
 - `docs/zh/06-Polymarket-市场微观结构与稳健信号设计-v0.1.md`
@@ -192,6 +195,19 @@ python3 scripts/ontology/build_order_proposals.py \
   --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
   --output /tmp/polymarket-order-proposals.json \
   --pretty
+```
+
+Run multi-agent runtime with LLM mock responses:
+
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.llm-mock.json \
+  --pretty \
+  --include-hold
 ```
 
 ## Next expected issues

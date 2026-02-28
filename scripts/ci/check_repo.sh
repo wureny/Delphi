@@ -63,19 +63,22 @@ echo "[CI] Running live case label smoke test..."
 python3 scripts/ontology/smoke_test_live_case_labels.py
 
 echo "[CI] Running multi-agent context smoke test..."
-python3 scripts/ontology/smoke_test_multi_agent_context.py
+python3 agents/tests/smoke_test_multi_agent_context.py
 
 echo "[CI] Running decision record mapper smoke test..."
-python3 scripts/ontology/smoke_test_decision_records.py
+python3 agents/tests/smoke_test_decision_records.py
 
 echo "[CI] Running risk policy gate smoke test..."
-python3 scripts/ontology/smoke_test_risk_policy_gate.py
+python3 agents/tests/smoke_test_risk_policy_gate.py
 
 echo "[CI] Running order proposal smoke test..."
-python3 scripts/ontology/smoke_test_order_proposals.py
+python3 agents/tests/smoke_test_order_proposals.py
 
 echo "[CI] Running multi-agent runtime smoke test..."
-python3 scripts/ontology/smoke_test_multi_agent_runtime.py
+python3 agents/tests/smoke_test_multi_agent_runtime.py
+
+echo "[CI] Running multi-agent LLM runtime smoke test..."
+python3 agents/tests/smoke_test_multi_agent_runtime_llm.py
 
 echo "[CI] Running microstructure benchmark..."
 python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \

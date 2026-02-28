@@ -1,0 +1,62 @@
+{
+  "research_agent": [
+    {
+      "summary": "BTC market snapshot: watch liquidity and confirmation before action."
+    },
+    {
+      "summary": "ETH market snapshot: weak signal quality and elevated distortion risk."
+    },
+    {
+      "summary": "Fed-cut market snapshot: stable signal and low immediate risk."
+    }
+  ],
+  "strategy_agent": [
+    {
+      "strategy_recommendation": "consider_buy",
+      "thesis_summary": "Robust probability indicates mild upside with acceptable reliability.",
+      "confidence": 0.62
+    },
+    {
+      "strategy_recommendation": "monitor",
+      "thesis_summary": "Signal remains noisy; wait for stronger trade confirmation.",
+      "confidence": 0.22
+    },
+    {
+      "strategy_recommendation": "hold",
+      "thesis_summary": "No clear edge against prior probability in the current window.",
+      "confidence": 0.55
+    }
+  ],
+  "risk_agent": [
+    {
+      "risk_gate": "allow",
+      "risk_reasons": [
+        "signal_quality_ok"
+      ]
+    },
+    {
+      "risk_gate": "block",
+      "risk_reasons": [
+        "high_manipulation_risk",
+        "low_book_reliability"
+      ]
+    },
+    {
+      "risk_gate": "caution",
+      "risk_reasons": [
+        "insufficient_conviction"
+      ]
+    }
+  ],
+  "audit_agent": [
+    {
+      "trace_summary": "Used robust probability with balanced book/trade anchors and full evidence refs."
+    },
+    {
+      "trace_summary": "Signal is fallback-anchored; keep caution due to weak confirmation."
+    },
+    {
+      "trace_summary": "Edge is small; audit trail preserved for later review."
+    }
+  ]
+}

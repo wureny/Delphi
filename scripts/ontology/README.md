@@ -2,6 +2,9 @@
 
 This directory contains the executable Polymarket ontology pipeline for Delphi.
 
+Agent-oriented implementations now live under `agents/`. The agent-related files in this folder are compatibility wrappers so existing commands keep working.
+Primary agent smoke tests now live under `agents/tests/`; this folder keeps wrapper smoke tests for backward compatibility.
+
 ## Files
 - `build_polymarket_ontology.py`: build a bundle from local raw JSON inputs.
 - `build_multi_agent_context.py`: derive per-agent context packets and candidate decisions from an ontology bundle.
@@ -21,11 +24,12 @@ This directory contains the executable Polymarket ontology pipeline for Delphi.
 - `smoke_test_polymarket_stream_capture.py`: replay-mode stream capture smoke test.
 - `smoke_test_polymarket_case_library.py`: case-library smoke test.
 - `smoke_test_live_case_labels.py`: live-case labeling smoke test.
-- `smoke_test_multi_agent_context.py`: multi-agent context smoke test.
-- `smoke_test_decision_records.py`: decision-record mapper smoke test.
-- `smoke_test_risk_policy_gate.py`: risk-policy gate smoke test.
-- `smoke_test_order_proposals.py`: order-proposal mapper smoke test.
-- `smoke_test_multi_agent_runtime.py`: end-to-end multi-agent runtime smoke test.
+- `smoke_test_multi_agent_context.py`: wrapper for `agents/tests/smoke_test_multi_agent_context.py`.
+- `smoke_test_decision_records.py`: wrapper for `agents/tests/smoke_test_decision_records.py`.
+- `smoke_test_risk_policy_gate.py`: wrapper for `agents/tests/smoke_test_risk_policy_gate.py`.
+- `smoke_test_order_proposals.py`: wrapper for `agents/tests/smoke_test_order_proposals.py`.
+- `smoke_test_multi_agent_runtime.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime.py`.
+- `smoke_test_multi_agent_runtime_llm.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_llm.py`.
 - `benchmarks/evaluate_microstructure_cases.py`: benchmark evaluator for labeled cases.
 
 ## Core outputs
@@ -127,6 +131,33 @@ python3 scripts/ontology/run_multi_agent_runtime.py \
   --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
   --runtime-engine adk \
   --output /tmp/polymarket-runtime-output.adk.json \
+  --pretty \
+  --include-hold
+```
+
+Run with LLM engine (OpenAI-compatible API):
+```bash
+export OPENAI_API_KEY="your_api_key"
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-base-url https://api.openai.com/v1 \
+  --llm-model gpt-4o-mini \
+  --llm-api-key-env OPENAI_API_KEY \
+  --output /tmp/polymarket-runtime-output.llm.json \
+  --pretty \
+  --include-hold
+```
+
+Run LLM engine offline with mock responses:
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.llm-mock.json \
   --pretty \
   --include-hold
 ```
@@ -235,6 +266,7 @@ Use segment rotation to keep long-running captures bounded and easier to archive
 7. `build_decision_records.py` and `evaluate_risk_policy_gate.py` are intentionally simple pre-orchestration utilities; they define output contracts before a full multi-agent runtime exists.
 8. `build_order_proposals.py` only emits orders for actionable decisions. `hold` decisions are preserved under `skipped_decisions`, not turned into fake buy/sell orders.
 9. `run_multi_agent_runtime.py` is a v0 runtime skeleton. In `adk` mode, it validates ADK availability and keeps the same stable output contract to avoid changing downstream execution semantics.
+10. In `llm` mode, runtime expects an OpenAI-compatible `/chat/completions` endpoint and can be validated offline with `--llm-mock-responses`.
 
 ## Architecture docs
 For a higher-level overview, read:
