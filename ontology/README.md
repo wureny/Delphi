@@ -70,6 +70,7 @@ The repo also now includes two minimal pre-orchestration utilities:
 - `scripts/ontology/build_decision_records.py`
 - `scripts/ontology/evaluate_risk_policy_gate.py`
 - `scripts/ontology/build_order_proposals.py`
+- `scripts/ontology/simulate_paper_execution.py`
 
 The repo now also includes a minimal runtime skeleton:
 - `scripts/ontology/run_multi_agent_runtime.py`
@@ -77,10 +78,12 @@ The repo now also includes a minimal runtime skeleton:
 They are meant to prove that the current ontology and multi-agent context are already sufficient to:
 1. produce execution-domain `DecisionRecord` objects, and
 2. run a deterministic risk gate,
-3. produce minimal `Order` proposals.
+3. produce minimal `Order` proposals,
+4. run paper-trading simulation updates for `Execution -> Position/PnL`.
 
 The runtime skeleton currently orchestrates packet consumption and emits the same downstream contract while keeping the implementation intentionally simple for incremental hardening.
 It now supports a concrete `llm` runtime mode with OpenAI-compatible API integration, plus offline mock responses for local testing without network credentials.
+It supports two source modes: prebuilt `--agent-context` and direct `--ontology-bundle` (which auto-builds multi-agent context before orchestration).
 
 ## Related design docs
 - `docs/zh/06-Polymarket-市场微观结构与稳健信号设计-v0.1.md`
@@ -92,6 +95,14 @@ It now supports a concrete `llm` runtime mode with OpenAI-compatible API integra
 - `docs/en/09-Polymarket-to-Multi-Agent-to-Pre-Trade-Flow-Overview-v0.1.md`
 
 ## Local pipeline
+Install ADK runtime dependencies when needed:
+
+```bash
+bash scripts/ontology/setup_adk_venv.sh
+# optional
+source .venv-adk/bin/activate
+```
+
 Build a bundle from local sample inputs:
 
 ```bash
@@ -156,6 +167,15 @@ python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \
   --cases ontology/samples/benchmarks/microstructure-benchmark-cases.json
 ```
 
+Evaluate execution safety from paper-trading output:
+
+```bash
+python3 scripts/ontology/benchmarks/evaluate_execution_safety.py \
+  --input /tmp/polymarket-runtime-output.paper.json \
+  --output /tmp/polymarket-execution-safety-metrics.json \
+  --pretty
+```
+
 Build multi-agent context:
 
 ```bash
@@ -197,6 +217,17 @@ python3 scripts/ontology/build_order_proposals.py \
   --pretty
 ```
 
+Run paper-trading simulation:
+
+```bash
+python3 scripts/ontology/simulate_paper_execution.py \
+  --order-proposals ontology/samples/execution-derived/order-proposals-sample.json \
+  --decision-records ontology/samples/execution-derived/decision-records-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --output /tmp/polymarket-paper-trading.json \
+  --pretty
+```
+
 Run multi-agent runtime with LLM mock responses:
 
 ```bash
@@ -206,6 +237,53 @@ python3 scripts/ontology/run_multi_agent_runtime.py \
   --runtime-engine llm \
   --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
   --output /tmp/polymarket-runtime-output.llm-mock.json \
+  --pretty \
+  --include-hold
+```
+
+Run multi-agent runtime directly from ontology bundle:
+
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --ontology-bundle ontology/samples/polymarket-sample-bundle.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.from-ontology.json \
+  --pretty \
+  --include-hold
+```
+
+Run multi-agent runtime with ADK engine and mock responses:
+
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine adk \
+  --adk-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.adk-mock.json \
+  --pretty \
+  --include-hold
+```
+
+Run ADK runtime with one command (expects `OPENAI_API_KEY` or `LLM_API_KEY`):
+
+```bash
+bash scripts/ontology/run_adk_runtime.sh
+```
+
+Run multi-agent runtime with paper-trading simulation:
+
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --enable-paper-trading \
+  --execute-proposed-orders \
+  --output /tmp/polymarket-runtime-output.paper.json \
   --pretty \
   --include-hold
 ```

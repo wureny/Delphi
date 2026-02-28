@@ -4,8 +4,8 @@
 Delphi is an ontology-driven multi-agent collaboration system for Agentic Fund research, decision-making, and execution workflows.
 
 Current priority order (as of 2026-02-28):
-1. Close the execution loop (paper trading) on top of the existing ontology + multi-agent runtime skeleton.
-2. Complete execution auditability and safety benchmarking to move from "runnable" to "operationally managed".
+1. Build on top of ontology + multi-agent runtime skeleton + paper-trading v0 to harden execution auditability and safety benchmarking.
+2. Move from "runnable" to "operationally managed and measurable".
 
 ## 2. Current Phase Goal (Phase 2)
 Focus on execution-loop closure and governance hardening:
@@ -42,7 +42,7 @@ Delphi/
 3. End of week: update phase retrospective in `plans/milestones`.
 
 ## 6. Next Actions (Priority Order)
-1. Advance G6: implement paper-trading simulation flow and close `Execution -> Position/PnL` (`plans/milestones/issue-backlog-g-trading-execution-v0.1.md`).
-2. Advance G7: add execution audit trail and enforce `decision_record_id` and `tx_hash/simulation_id`.
-3. Advance G8: add recommendation-quality and execution-safety benchmarks and make them regression-ready.
+1. Advance G7: add audit replay/consistency checks and harden `decision_record_id` and `tx_hash/simulation_id` guarantees.
+2. Advance G8: add recommendation-quality and execution-safety benchmarks and make them regression-ready.
+3. Backfill G6 hardening: improve simulation stability and reporting depth on top of the v0 loop.
 4. Publish a weekly status snapshot under `plans/milestones/`.

@@ -11,7 +11,10 @@ Primary agent smoke tests now live under `agents/tests/`; this folder keeps wrap
 - `build_decision_records.py`: map `candidate_decisions` into execution-domain `DecisionRecord` objects.
 - `evaluate_risk_policy_gate.py`: run a simple RiskPolicy gate over candidate decisions.
 - `build_order_proposals.py`: turn gated decision records into minimal `Order` proposals.
-- `run_multi_agent_runtime.py`: minimal multi-agent runtime skeleton that orchestrates agent packets and bridges into execution-domain pre-trade chain.
+- `simulate_paper_execution.py`: simulate `Order` execution and update `Execution -> Position/PnL` state.
+- `run_multi_agent_runtime.py`: minimal multi-agent runtime skeleton that orchestrates agent packets and bridges into execution-domain pre-trade chain. Supports `--agent-context` and direct `--ontology-bundle` input modes.
+- `setup_adk_venv.sh`: create `.venv-adk` and install ADK runtime dependencies.
+- `run_adk_runtime.sh`: one-command ADK runtime launcher (supports `LLM_API_KEY` bootstrap).
 - `fetch_polymarket_public_snapshot.py`: fetch a public Gamma + CLOB snapshot without API keys.
 - `capture_polymarket_case_library.py`: capture repeated snapshots and archive high-risk benchmark cases.
 - `manage_live_case_labels.py`: export labeling worklists, apply labels, and summarize label coverage.
@@ -29,8 +32,13 @@ Primary agent smoke tests now live under `agents/tests/`; this folder keeps wrap
 - `smoke_test_risk_policy_gate.py`: wrapper for `agents/tests/smoke_test_risk_policy_gate.py`.
 - `smoke_test_order_proposals.py`: wrapper for `agents/tests/smoke_test_order_proposals.py`.
 - `smoke_test_multi_agent_runtime.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime.py`.
+- `smoke_test_multi_agent_runtime_from_ontology.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_from_ontology.py`.
 - `smoke_test_multi_agent_runtime_llm.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_llm.py`.
+- `smoke_test_multi_agent_runtime_adk.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_adk.py`.
+- `smoke_test_paper_trading_simulation.py`: wrapper for `agents/tests/smoke_test_paper_trading_simulation.py`.
 - `benchmarks/evaluate_microstructure_cases.py`: benchmark evaluator for labeled cases.
+- `benchmarks/evaluate_execution_safety.py`: execution-safety metrics evaluator for paper-trading payloads.
+- `benchmarks/smoke_test_execution_safety_benchmark.py`: smoke test for execution-safety benchmark flow.
 
 ## Core outputs
 The pipeline emits ontology bundles with three layers:
@@ -50,6 +58,13 @@ The pipeline emits ontology bundles with three layers:
 - `explanatory_tags`
 
 ## Usage
+Install ADK runtime dependencies:
+```bash
+bash scripts/ontology/setup_adk_venv.sh
+# optional
+source .venv-adk/bin/activate
+```
+
 Build a bundle from local sample inputs:
 ```bash
 python3 scripts/ontology/build_polymarket_ontology.py \
@@ -114,6 +129,16 @@ python3 scripts/ontology/build_order_proposals.py \
   --pretty
 ```
 
+Simulate paper trading from order proposals:
+```bash
+python3 scripts/ontology/simulate_paper_execution.py \
+  --order-proposals ontology/samples/execution-derived/order-proposals-sample.json \
+  --decision-records ontology/samples/execution-derived/decision-records-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --output /tmp/polymarket-paper-trading.json \
+  --pretty
+```
+
 Run the minimal multi-agent runtime skeleton (heuristic engine by default):
 ```bash
 python3 scripts/ontology/run_multi_agent_runtime.py \
@@ -124,15 +149,79 @@ python3 scripts/ontology/run_multi_agent_runtime.py \
   --include-hold
 ```
 
-Run with the optional ADK adapter engine:
+Run runtime directly from ontology bundle (runtime auto-builds multi-agent context):
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --ontology-bundle ontology/samples/polymarket-sample-bundle.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.from-ontology.json \
+  --pretty \
+  --include-hold
+```
+
+Run runtime with paper-trading simulation enabled:
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine llm \
+  --llm-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --enable-paper-trading \
+  --execute-proposed-orders \
+  --output /tmp/polymarket-runtime-output.paper.json \
+  --pretty \
+  --include-hold
+```
+
+Run with ADK engine (session/context managed by ADK SessionService):
 ```bash
 python3 scripts/ontology/run_multi_agent_runtime.py \
   --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
   --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
   --runtime-engine adk \
+  --adk-provider openai \
+  --adk-openai-model gpt-4o-mini \
+  --adk-openai-api-key-env OPENAI_API_KEY \
+  --adk-openai-base-url-env OPENAI_API_BASE \
+  --adk-model gemini-2.5-flash \
+  --adk-app-name delphi_adk_runtime \
+  --adk-user-id delphi_runtime_user \
+  --adk-session-prefix delphi_adk_session \
+  --adk-session-db-url sqlite+aiosqlite:///tmp/delphi_adk_sessions.db \
   --output /tmp/polymarket-runtime-output.adk.json \
   --pretty \
   --include-hold
+```
+
+Run ADK engine offline with mock responses:
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --agent-context ontology/samples/multi-agent/polymarket-agent-context-sample.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine adk \
+  --adk-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
+  --output /tmp/polymarket-runtime-output.adk-mock.json \
+  --pretty \
+  --include-hold
+```
+
+Run ADK runtime with one command after exporting a key:
+```bash
+cp env.adk.example /tmp/env.adk.local
+# edit /tmp/env.adk.local then:
+# source /tmp/env.adk.local
+export LLM_API_KEY="your_api_key"
+# Optional for OpenAI-compatible gateway
+# export LLM_API_BASE="https://api.openai.com/v1"
+
+bash scripts/ontology/run_adk_runtime.sh
+```
+
+If you do not use the default `.venv-adk`, set `PYTHON_BIN` explicitly:
+```bash
+PYTHON_BIN=/path/to/python bash scripts/ontology/run_adk_runtime.sh
 ```
 
 Run with LLM engine (OpenAI-compatible API):
@@ -234,6 +323,14 @@ python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \
   --require-labeled
 ```
 
+Evaluate execution safety metrics from runtime paper-trading output:
+```bash
+python3 scripts/ontology/benchmarks/evaluate_execution_safety.py \
+  --input /tmp/polymarket-runtime-output.paper.json \
+  --output /tmp/polymarket-execution-safety-metrics.json \
+  --pretty
+```
+
 ## Case library layout
 `capture_polymarket_case_library.py` writes:
 - `snapshots/<timestamp>/`: raw snapshot plus full ontology bundle
@@ -263,10 +360,12 @@ Use segment rotation to keep long-running captures bounded and easier to archive
 4. The websocket client is implemented with the Python standard library so live streaming does not require extra dependencies.
 5. Archived live cases are only benchmark-ready after `reference_probability` is labeled and reviewed.
 6. `build_multi_agent_context.py` is the current bridge from market ontology into future Research/Strategy/Risk/Audit agent contracts.
-7. `build_decision_records.py` and `evaluate_risk_policy_gate.py` are intentionally simple pre-orchestration utilities; they define output contracts before a full multi-agent runtime exists.
+7. `build_decision_records.py` and `evaluate_risk_policy_gate.py` remain intentionally simple pre-orchestration utilities and keep stable contracts used by the runtime skeleton.
 8. `build_order_proposals.py` only emits orders for actionable decisions. `hold` decisions are preserved under `skipped_decisions`, not turned into fake buy/sell orders.
-9. `run_multi_agent_runtime.py` is a v0 runtime skeleton. In `adk` mode, it validates ADK availability and keeps the same stable output contract to avoid changing downstream execution semantics.
-10. In `llm` mode, runtime expects an OpenAI-compatible `/chat/completions` endpoint and can be validated offline with `--llm-mock-responses`.
+9. `simulate_paper_execution.py` adds a paper-trading loop and emits execution records, audit linkage, and updated position/PnL state.
+10. `run_multi_agent_runtime.py` is a v0 runtime skeleton. In `adk` mode, it uses ADK Runner + SessionService for per-agent context continuity while preserving the same downstream contract.
+11. In `llm` mode, runtime expects an OpenAI-compatible `/chat/completions` endpoint and can be validated offline with `--llm-mock-responses`.
+12. `env.adk.example` provides a minimal environment template for ADK runtime startup.
 
 ## Architecture docs
 For a higher-level overview, read:

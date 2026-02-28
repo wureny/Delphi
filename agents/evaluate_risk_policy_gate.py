@@ -7,6 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+if __package__:
+    from .contracts import validate_agent_context, validate_execution_bundle
+else:
+    from contracts import validate_agent_context, validate_execution_bundle
+
 
 DEFAULT_PORTFOLIO_ID = "pf_main"
 DEFAULT_POLICY_ID = "rp_conservative"
@@ -20,6 +25,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--policy-id", default=None, help="Risk policy id override. Defaults to the portfolio's policy.")
     parser.add_argument("--default-order-size-usd", type=float, default=500.0, help="Default notional per proposed action.")
     parser.add_argument("--include-hold", action="store_true", help="Include hold decisions in the gate report.")
+    parser.add_argument(
+        "--skip-contract-validation",
+        action="store_true",
+        help="Skip agent-context and execution-bundle contract validation.",
+    )
     parser.add_argument("--output", required=True, help="Path to write the gate report JSON.")
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     return parser.parse_args()
@@ -29,6 +39,9 @@ def main() -> int:
     args = parse_args()
     agent_context = json.loads(Path(args.agent_context).read_text(encoding="utf-8"))
     execution_bundle = json.loads(Path(args.execution_bundle).read_text(encoding="utf-8"))
+    if not args.skip_contract_validation:
+        validate_agent_context(agent_context)
+        validate_execution_bundle(execution_bundle)
     report = evaluate_gate(
         agent_context=agent_context,
         execution_bundle=execution_bundle,

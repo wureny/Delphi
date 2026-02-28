@@ -4,9 +4,9 @@
 Enable Delphi to move from market understanding to safe, traceable action proposals and execution records.
 
 ## Progress Snapshot (2026-02-28)
-- Completed (v0): G1, G2, G3, G4, G5
-- In Progress: G6
-- Pending: G7, G8
+- Completed (v0): G1, G2, G3, G4, G5, G6
+- In Progress: G7, G8
+- Pending: none
 
 ## G1 - Define trading domain ontology entities
 - Type: Story
@@ -51,23 +51,25 @@ Enable Delphi to move from market understanding to safe, traceable action propos
 ## G6 - Implement paper-trading simulation flow
 - Type: Story
 - Area: execution
-- Status: in progress
+- Status: done (v0)
 - Acceptance:
-  - [ ] Simulation wallet mode defined.
-  - [ ] Position and PnL updates are captured.
+  - [x] Simulation wallet mode defined.
+  - [x] Position and PnL updates are captured.
 
 ## G7 - Add execution audit trail
 - Type: Task
 - Area: docs
-- Status: pending
+- Status: in progress
 - Acceptance:
-  - [ ] Every execution links to decision record and evidence refs.
-  - [ ] Chain tx hash or simulation tx id is required.
+  - [x] Every execution links to decision record and evidence refs.
+  - [x] Chain tx hash or simulation tx id is required.
+  - [ ] Add audit replay and consistency checks to CI-level validation.
 
 ## G8 - Add benchmark for recommendation quality and execution safety
 - Type: Story
 - Area: evaluation
-- Status: pending
+- Status: in progress
 - Acceptance:
-  - [ ] Recommendation quality metrics defined.
-  - [ ] Execution safety violation rate tracked.
+  - [x] Recommendation quality/execution safety metric dictionary drafted.
+  - [x] Execution safety violation rate tracked via benchmark script.
+  - [ ] Add recommendation-quality benchmark runner and CI trend report.

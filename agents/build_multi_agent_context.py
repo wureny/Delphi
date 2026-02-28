@@ -8,6 +8,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+if __package__:
+    from .contracts import validate_ontology_bundle
+else:
+    from contracts import validate_ontology_bundle
+
 
 @dataclass(frozen=True)
 class AgentPolicy:
@@ -262,6 +267,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build per-agent context packets from a Polymarket ontology bundle.")
     parser.add_argument("--bundle", required=True, help="Path to polymarket ontology bundle JSON.")
     parser.add_argument("--output", required=True, help="Path to write the multi-agent context JSON.")
+    parser.add_argument(
+        "--skip-contract-validation",
+        action="store_true",
+        help="Skip ontology bundle contract validation.",
+    )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     return parser.parse_args()
 
@@ -269,6 +279,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     bundle = json.loads(Path(args.bundle).read_text(encoding="utf-8"))
+    if not args.skip_contract_validation:
+        validate_ontology_bundle(bundle)
     context = MultiAgentContextBuilder().build(bundle)
     indent = 2 if args.pretty else None
     Path(args.output).write_text(json.dumps(context, indent=indent) + "\n", encoding="utf-8")

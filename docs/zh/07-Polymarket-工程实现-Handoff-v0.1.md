@@ -72,6 +72,9 @@
    - 作用：把 gate 结果与 `DecisionRecord` 合成为最小 `Order proposal`
 13. benchmark 评估器
    - 文件：`scripts/ontology/benchmarks/evaluate_microstructure_cases.py`
+14. paper trading simulation
+   - 文件：`scripts/ontology/simulate_paper_execution.py`
+   - 作用：把 `Order proposal` 推进到 `Execution -> Position/PnL` 并输出审计链路载荷
 
 ### 2.3 样例与测试资产
 已提供：
@@ -192,22 +195,21 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 5. category 仍是启发式映射，后续需要更明确的 taxonomy 规则。
 6. 尚未把“真实世界外部参考信号”系统化接入到 benchmark 中。
 7. 当前已实现最小多 Agent runtime skeleton，但还缺生产级编排、容错与可观测性。
-8. 当前还没有 `Execution -> Position/PnL` 的 paper trading 闭环。
+8. 当前已实现 `Execution -> Position/PnL` 的 paper trading v0 闭环，但还需要审计与评测加固。
 
 ## 6. 下一步任务优先级
 建议严格按以下顺序做。
 
-### P-Next. G6 - paper trading 闭环
+### P-Next. G7 - execution audit trail 加固
 当前结论：
-1. 多 Agent runtime skeleton 已落地，可直接进入执行域闭环阶段。
-2. 当前最关键缺口是 `Order -> Execution -> Position/PnL`。
-3. 该闭环补齐后，才能真实评估策略质量与风险门禁有效性。
+1. G6 已完成 v0 闭环，当前主要风险转到执行审计可验证性。
+2. 现有审计字段已串联，但缺 replay 和一致性检查门禁。
+3. 在进入更复杂执行器前，应先把审计可靠性做扎实。
 
 建议做法：
-1. 增加 simulation execution 模块，消费 `approved/proposed` orders。
-2. 输出 execution records（强制 `simulation_id`）并更新 positions。
-3. 产出最小 PnL 快照（已实现盈亏与未实现盈亏）。
-4. 增加 smoke test 覆盖 `decision -> gate -> order -> execution -> position/pnl` 全链路。
+1. 增加 execution audit replay 校验脚本与 smoke tests。
+2. 对 `decision_record_id / evidence_refs / simulation_id(tx_hash)` 做一致性检查。
+3. 将审计校验加入 CI，避免回归破坏可追溯性。
 
 ### P0. G7 - execution audit trail
 当前状态：执行前链路已具备，但审计链路仍需硬约束。
@@ -300,14 +302,15 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - scripts/ontology/build_decision_records.py
 - scripts/ontology/evaluate_risk_policy_gate.py
 - scripts/ontology/build_order_proposals.py
+- scripts/ontology/simulate_paper_execution.py
 - agents/run_multi_agent_runtime.py
 
-然后优先实现 paper trading 闭环（G6）并补 execution audit trail（G7）。
+然后优先实现 execution audit trail 加固（G7）并推进安全 benchmark（G8）。
 要求：
-1. 在现有 `Order proposal` 基础上增加 simulation execution。
-2. 输出 `Execution -> Position/PnL` 更新结果与最小报表。
-3. 强制执行审计字段：`decision_record_id`、`evidence_refs`、`simulation_id/tx_hash`。
-4. 增加 smoke test 覆盖闭环。
+1. 基于现有 paper trading v0 输出，新增审计 replay 与一致性校验。
+2. 校验 `decision_record_id`、`evidence_refs`、`simulation_id/tx_hash` 的链路完整性。
+3. 定义执行安全 benchmark 指标并实现最小 runner。
+4. 增加 smoke test 覆盖审计与 benchmark 入口。
 5. 跑自检并汇报结果。
 ```
 
@@ -326,6 +329,7 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - `scripts/ontology/build_decision_records.py`
 - `scripts/ontology/evaluate_risk_policy_gate.py`
 - `scripts/ontology/build_order_proposals.py`
+- `scripts/ontology/simulate_paper_execution.py`
 - `ontology/samples/benchmarks/microstructure-benchmark-cases.json`
 - `ontology/samples/multi-agent/polymarket-agent-context-sample.json`
 - `ontology/samples/execution-derived/decision-records-sample.json`

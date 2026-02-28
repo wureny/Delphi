@@ -148,11 +148,11 @@ With this layer:
 
 ## 8. Current boundary
 1. `candidate_decisions` are still heuristic drafts, not the final strategy engine output.
-2. The repo now includes a `candidate_decisions -> DecisionRecord` mapper, but there is still no full `Execution -> Position/PnL` closed loop.
-3. A minimal `RiskPolicy gate` and `Order proposal` layer now exist, but this is still not a full execution runtime.
+2. The repo now has a v0 paper-trading loop for `candidate_decisions -> DecisionRecord -> RiskPolicy -> Order -> Execution -> Position/PnL`.
+3. Execution is still simulation-oriented and not a production execution runtime.
 4. A minimal multi-agent runtime skeleton now exists (`heuristic/adk/llm`), but it still lacks production-grade state management, long-running reliability, and full orchestration controls.
 
 ## 9. Recommended next steps
-1. Add a paper-trading stub for `Execution -> Position/PnL`.
-2. Add execution audit-trail requirements (decision/evidence/gate/execution linkage).
-3. Add benchmarks for Research/Strategy/Risk/Audit and execution safety to measure whether ontology genuinely improves system quality.
+1. Harden execution audit-trail checks (replay and consistency validation).
+2. Add benchmarks for Research/Strategy/Risk/Audit and execution safety to measure whether ontology genuinely improves system quality.
+3. Improve simulation-loop reporting depth and long-running stability.

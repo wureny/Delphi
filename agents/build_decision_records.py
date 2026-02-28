@@ -7,12 +7,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+if __package__:
+    from .contracts import validate_agent_context
+else:
+    from contracts import validate_agent_context
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Map multi-agent candidate decisions into execution-domain DecisionRecord objects.")
     parser.add_argument("--agent-context", required=True, help="Path to the multi-agent context JSON.")
     parser.add_argument("--output", required=True, help="Path to write the decision records JSON.")
     parser.add_argument("--include-hold", action="store_true", help="Keep hold decisions. By default only actionable decisions are emitted.")
+    parser.add_argument(
+        "--skip-contract-validation",
+        action="store_true",
+        help="Skip agent context contract validation.",
+    )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
     return parser.parse_args()
 
@@ -20,6 +30,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     agent_context = json.loads(Path(args.agent_context).read_text(encoding="utf-8"))
+    if not args.skip_contract_validation:
+        validate_agent_context(agent_context)
     payload = build_decision_records(agent_context, include_hold=args.include_hold)
     indent = 2 if args.pretty else None
     Path(args.output).write_text(json.dumps(payload, indent=indent) + "\n", encoding="utf-8")

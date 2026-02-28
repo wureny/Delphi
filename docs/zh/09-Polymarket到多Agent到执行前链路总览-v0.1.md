@@ -112,8 +112,8 @@ flowchart TD
 
 注意：
 1. 这还不是正式 execution runtime。
-2. 这也还不是 paper trading。
-3. 但它已经定义好了多 Agent 输出如何进入执行域的最小 contract。
+2. 当前已具备 paper trading simulation v0 闭环。
+3. 它定义了多 Agent 输出进入执行域的最小 contract，并支持执行后状态回写。
 
 ## 4. 现在这层对未来多 Agent 的价值
 如果以后你开始做多 Agent，最合理的接法不是：
@@ -157,13 +157,13 @@ flowchart TD
 1. 当前已具备最小多 Agent runtime skeleton，但仍不是生产级 orchestration runtime。
 2. 当前 `candidate_decisions` 仍是 heuristic draft。
 3. 当前 `RiskPolicy gate` 仍是最小规则集。
-4. 当前 `Order proposal` 还没有进入真正的 execution / paper trading。
-5. 当前还没有 `Execution -> Position/PnL` 闭环。
+4. 当前 execution 仍以 simulation 为主，未进入真实交易执行。
+5. 当前已具备 `Execution -> Position/PnL` 闭环，但还需要审计与评测层面加固。
 
 ## 7. 现阶段最适合的开发顺序
 1. 保持当前 ontology / microstructure / benchmark 层稳定。
 2. 基于现有 runtime skeleton 做稳定性与可观测性加固。
-3. 推进执行域时优先补 paper trading stub 与审计链路，再考虑实盘 runtime。
+3. 推进执行域时优先补审计回放校验与安全 benchmark，再考虑实盘 runtime。
 
 ## 8. 一句话总结
 当前 Delphi 在 Polymarket 这条链路上，已经不是“原始市场抓取脚本”，而是：

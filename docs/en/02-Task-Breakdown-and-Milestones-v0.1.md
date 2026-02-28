@@ -80,8 +80,8 @@ Suggested issues:
 1. Epic A/B/C/D foundations are in place at v0 (ontology, mapping, smoke tests, CI, bilingual docs/templates).
 2. Epic E has a microstructure benchmark and live-case labeling workflow, but execution-safety benchmarking is still pending.
 3. Epic F (visualization/Neo4j) has not started yet and remains a later-phase track.
-4. Epic G has runnable foundations through G1-G5 (entities, schema, sample chain, risk gate, order proposal).
-5. Current execution focus is G6/G7/G8 (paper-trading loop, audit trail, safety benchmark).
+4. Epic G has runnable v0 foundations through G1-G6 (including paper-trading simulation).
+5. Current execution focus is G7/G8 (audit hardening and safety benchmarking).
 
 ## 4. Label Taxonomy (GitHub)
 1. `type:epic`

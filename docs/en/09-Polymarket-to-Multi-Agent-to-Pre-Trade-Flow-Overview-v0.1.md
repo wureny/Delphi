@@ -112,8 +112,8 @@ Current runnable chain:
 
 Important:
 1. this is not yet a full execution runtime,
-2. this is not yet paper trading,
-3. but it already defines the minimum output contract from future agents into the execution domain.
+2. a v0 paper-trading simulation loop is now available,
+3. and the same contract now supports execution-state updates after pre-trade outputs.
 
 ## 4. Why this matters for a future multi-agent system
 A future multi-agent system should not be wired as:
@@ -157,13 +157,13 @@ Why:
 1. a minimal multi-agent runtime skeleton exists, but it is still not a production-grade orchestration runtime,
 2. `candidate_decisions` are still heuristic drafts,
 3. `RiskPolicy gate` is still a minimum rule set,
-4. `Order proposal` is not yet actual execution or paper trading,
-5. there is no `Execution -> Position/PnL` closed loop yet.
+4. execution remains simulation-oriented rather than production trading,
+5. `Execution -> Position/PnL` now has a v0 loop, but audit and benchmark hardening is still pending.
 
 ## 7. Recommended development order
 1. keep the ontology / microstructure / benchmark layer stable,
 2. harden the existing runtime skeleton with better reliability and observability,
-3. for execution work, prioritize a paper-trading stub and audit trail before a live runtime.
+3. for execution work, prioritize audit consistency checks and safety benchmarks before a live runtime.
 
 ## 8. One-line summary
 At this stage, Delphi is no longer just “raw market ingestion”. It already has:

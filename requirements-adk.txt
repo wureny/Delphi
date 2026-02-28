@@ -1,0 +1,5 @@
+google-adk>=1.25.0
+google-genai>=1.0.0
+# Optional but recommended for persistent ADK sessions with sqlite+aiosqlite URLs.
+sqlalchemy>=2.0.0
+aiosqlite>=0.20.0
