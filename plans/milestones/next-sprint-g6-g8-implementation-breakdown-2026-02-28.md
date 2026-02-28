@@ -31,7 +31,7 @@ Move Delphi from pre-trade semantics to a verifiable execution-loop baseline wit
 1. G6.1-G6.4: completed (v0 baseline).
 2. G7.1-G7.3: partially completed via `execution_audit_trail` payload; G7.4 pending expansion.
 3. G8.1-G8.3: completed (v0 baseline).
-4. G8.4: pending.
+4. G8.4: completed (recommendation-quality benchmark + CI trend report smoke flow).
 
 ## Acceptance Checklist
 - [x] Runtime can emit `paper_trading_payload`.
@@ -39,7 +39,7 @@ Move Delphi from pre-trade semantics to a verifiable execution-loop baseline wit
 - [x] PnL summary is emitted.
 - [x] Smoke test covers paper-trading path.
 - [x] Execution-safety benchmark is defined with smoke-test coverage.
-- [ ] Recommendation-quality benchmark runner and CI trend report are automated.
+- [x] Recommendation-quality benchmark runner and CI trend report are automated.
 
 ## References
 1. `plans/milestones/issue-backlog-g-trading-execution-v0.1.md`

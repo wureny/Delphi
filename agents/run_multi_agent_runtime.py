@@ -21,6 +21,13 @@ if __package__:
     from .contracts import validate_agent_context, validate_execution_bundle, validate_ontology_bundle
     from .evaluate_risk_policy_gate import evaluate_gate
     from .simulate_paper_execution import simulate_paper_execution
+    from .runtime_memory import (
+        build_memory_context,
+        get_session_memory,
+        load_runtime_memory_store,
+        save_runtime_memory_store,
+        update_session_memory,
+    )
 else:
     from build_multi_agent_context import MultiAgentContextBuilder
     from build_decision_records import build_decision_records
@@ -28,6 +35,13 @@ else:
     from contracts import validate_agent_context, validate_execution_bundle, validate_ontology_bundle
     from evaluate_risk_policy_gate import evaluate_gate
     from simulate_paper_execution import simulate_paper_execution
+    from runtime_memory import (
+        build_memory_context,
+        get_session_memory,
+        load_runtime_memory_store,
+        save_runtime_memory_store,
+        update_session_memory,
+    )
 
 
 DEFAULT_PORTFOLIO_ID = "pf_main"
@@ -69,6 +83,22 @@ def parse_args() -> argparse.Namespace:
         "--skip-contract-validation",
         action="store_true",
         help="Skip source/agent-context and execution-bundle contract validation.",
+    )
+    parser.add_argument(
+        "--runtime-memory-path",
+        help="Optional JSON file path used to persist and reuse per-session runtime memory.",
+    )
+    parser.add_argument(
+        "--runtime-memory-max-decisions",
+        type=int,
+        default=20,
+        help="Max candidate decisions retained per session in runtime memory.",
+    )
+    parser.add_argument(
+        "--runtime-memory-max-summaries",
+        type=int,
+        default=20,
+        help="Max research summaries retained per session in runtime memory.",
     )
     parser.add_argument(
         "--runtime-engine",
@@ -200,6 +230,13 @@ class ADKRuntimeConfig:
     session_db_url: str | None
     runtime_session_id: str
     mock_responses_path: str | None
+
+
+@dataclass(frozen=True)
+class RuntimeMemoryConfig:
+    path: str
+    max_decisions: int
+    max_summaries: int
 
 
 class OpenAICompatClient:
@@ -745,6 +782,13 @@ def main() -> int:
         runtime_session_id=args.session_id,
         mock_responses_path=args.adk_mock_responses,
     )
+    runtime_memory_config = None
+    if args.runtime_memory_path:
+        runtime_memory_config = RuntimeMemoryConfig(
+            path=args.runtime_memory_path,
+            max_decisions=max(1, int(args.runtime_memory_max_decisions)),
+            max_summaries=max(1, int(args.runtime_memory_max_summaries)),
+        )
     result = run_runtime(
         agent_context=source_context,
         source_context_kind=source_context_kind,
@@ -765,6 +809,7 @@ def main() -> int:
         simulation_slippage_bps=args.simulation_slippage_bps,
         simulation_prefix=args.simulation_prefix,
         validate_contracts=not args.skip_contract_validation,
+        runtime_memory_config=runtime_memory_config,
     )
     indent = 2 if args.pretty else None
     Path(args.output).write_text(json.dumps(result, indent=indent) + "\n", encoding="utf-8")
@@ -797,10 +842,34 @@ def run_runtime(
     simulation_slippage_bps: float = DEFAULT_SIMULATION_SLIPPAGE_BPS,
     simulation_prefix: str = DEFAULT_SIMULATION_PREFIX,
     validate_contracts: bool = True,
+    runtime_memory_config: RuntimeMemoryConfig | None = None,
 ) -> dict[str, Any]:
     if validate_contracts:
         validate_agent_context(agent_context)
         validate_execution_bundle(execution_bundle)
+    session_memory: dict[str, Any] = {}
+    memory_store: dict[str, Any] | None = None
+    session_memory_info = {
+        "enabled": False,
+        "path": None,
+        "source_run_count": 0,
+        "updated_run_count": 0,
+        "decision_memory_size": 0,
+        "summary_memory_size": 0,
+        "risk_reason_memory_size": 0,
+    }
+    if runtime_memory_config is not None:
+        memory_store = load_runtime_memory_store(runtime_memory_config.path)
+        session_memory = get_session_memory(memory_store, session_id)
+        session_memory_info.update(
+            {
+                "enabled": True,
+                "path": runtime_memory_config.path,
+                "source_run_count": int(session_memory.get("run_count", 0))
+                if isinstance(session_memory, dict)
+                else 0,
+            }
+        )
     runtime_client = ensure_runtime_engine(
         runtime_engine,
         llm_config=llm_config,
@@ -811,6 +880,7 @@ def run_runtime(
         runtime_engine=runtime_engine,
         session_id=session_id,
         runtime_client=runtime_client,
+        session_memory=session_memory,
     )
     decision_records_payload = build_decision_records(runtime_context, include_hold=include_hold)
     risk_gate_payload = evaluate_gate(
@@ -841,6 +911,20 @@ def run_runtime(
             slippage_bps=simulation_slippage_bps,
             simulation_prefix=simulation_prefix,
         )
+    if runtime_memory_config is not None and memory_store is not None:
+        updated_info = update_session_memory(
+            store=memory_store,
+            session_id=session_id,
+            runtime_engine=runtime_engine,
+            runtime_context=runtime_context,
+            max_decisions=runtime_memory_config.max_decisions,
+            max_summaries=runtime_memory_config.max_summaries,
+        )
+        updated_info["path"] = runtime_memory_config.path
+        session_memory_info.update(updated_info)
+        save_runtime_memory_store(runtime_memory_config.path, memory_store)
+    runtime_context.setdefault("runtime_metadata", {})
+    runtime_context["runtime_metadata"]["session_memory"] = session_memory_info
     return {
         "schema_version": "v0.1",
         "generated_at": utc_iso8601(),
@@ -849,6 +933,7 @@ def run_runtime(
         "source_context_kind": source_context_kind,
         "source_agent_context_generated_at": agent_context.get("generated_at"),
         "source_bundle_generated_at": agent_context.get("source_bundle_generated_at"),
+        "session_memory": session_memory_info,
         "orchestration_trace": trace,
         "runtime_agent_context": runtime_context,
         "decision_records_payload": decision_records_payload,
@@ -908,6 +993,7 @@ def build_runtime_agent_context(
     runtime_engine: str,
     session_id: str,
     runtime_client: LLMRuntime | ADKRuntime | None,
+    session_memory: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     strategy_by_key = {
         (item["market_id"], item["outcome_id"]): item
@@ -928,13 +1014,19 @@ def build_runtime_agent_context(
 
     research_outputs = []
     for packet in source_context.get("research_agent_packets", []):
+        runtime_packet = attach_runtime_memory_context(
+            packet=packet,
+            session_memory=session_memory,
+            market_id=str(packet.get("market_id") or ""),
+            outcome_id=None,
+        )
         summary = (
             f"category={packet.get('category')}, trading_state={packet.get('trading_state')}, "
             f"news_count={len(packet.get('related_news_signals', []))}, outcomes={len(packet.get('outcomes', []))}"
         )
         response_mode = "heuristic"
         if runtime_client is not None:
-            runtime_output = runtime_client.research_summary(packet)
+            runtime_output = runtime_client.research_summary(runtime_packet)
             summary = str(runtime_output.get("summary") or summary)
             response_mode = str(runtime_output.get("_response_mode", runtime_engine))
         research_outputs.append(
@@ -962,15 +1054,33 @@ def build_runtime_agent_context(
         risk_response_mode = "heuristic"
         audit_response_mode = "heuristic"
         strategy_runtime_output: dict[str, Any] | None = None
+        strategy_runtime_packet = attach_runtime_memory_context(
+            packet=strategy_packet,
+            session_memory=session_memory,
+            market_id=str(strategy_packet.get("market_id") or ""),
+            outcome_id=str(strategy_packet.get("outcome_id") or ""),
+        )
+        risk_runtime_packet = attach_runtime_memory_context(
+            packet=risk_packet,
+            session_memory=session_memory,
+            market_id=str(strategy_packet.get("market_id") or ""),
+            outcome_id=str(strategy_packet.get("outcome_id") or ""),
+        )
+        audit_runtime_packet = attach_runtime_memory_context(
+            packet=audit_packet,
+            session_memory=session_memory,
+            market_id=str(strategy_packet.get("market_id") or ""),
+            outcome_id=str(strategy_packet.get("outcome_id") or ""),
+        )
         if runtime_client is not None:
-            strategy_runtime_output = runtime_client.strategy_decision(strategy_packet, default_thesis=runtime_thesis)
+            strategy_runtime_output = runtime_client.strategy_decision(strategy_runtime_packet, default_thesis=runtime_thesis)
             strategy_recommendation = normalize_strategy_recommendation(strategy_runtime_output.get("strategy_recommendation", strategy_recommendation))
             runtime_thesis = str(strategy_runtime_output.get("thesis_summary") or runtime_thesis)
             strategy_response_mode = str(strategy_runtime_output.get("_response_mode", runtime_engine))
         runtime_risk_gate = normalize_risk_gate(risk_packet.get("risk_gate", "caution"))
         runtime_risk_reasons = list(risk_packet.get("risk_reasons") or ["runtime_risk_packet_missing"])
         if runtime_client is not None:
-            risk_runtime_output = runtime_client.risk_decision(strategy_packet, risk_packet)
+            risk_runtime_output = runtime_client.risk_decision(strategy_runtime_packet, risk_runtime_packet)
             runtime_risk_gate = normalize_risk_gate(risk_runtime_output.get("risk_gate", runtime_risk_gate))
             runtime_risk_reasons = normalize_risk_reasons(risk_runtime_output.get("risk_reasons"), fallback=runtime_risk_reasons)
             risk_response_mode = str(risk_runtime_output.get("_response_mode", runtime_engine))
@@ -988,7 +1098,7 @@ def build_runtime_agent_context(
             f"signal_tags={','.join(audit_packet.get('explanatory_tags', []))}"
         )
         if runtime_client is not None:
-            audit_runtime_output = runtime_client.audit_summary(audit_packet, fallback_summary=audit_summary_text)
+            audit_runtime_output = runtime_client.audit_summary(audit_runtime_packet, fallback_summary=audit_summary_text)
             audit_summary_text = str(audit_runtime_output.get("trace_summary") or audit_summary_text)
             audit_response_mode = str(audit_runtime_output.get("_response_mode", runtime_engine))
 
@@ -1063,6 +1173,23 @@ def build_runtime_agent_context(
         {"step": "audit_agent", "engine": runtime_engine, "inputs": len(source_context.get("audit_agent_packets", [])), "outputs": len(audit_outputs), "status": "ok"},
     ]
     return runtime_context, trace
+
+
+def attach_runtime_memory_context(
+    packet: dict[str, Any],
+    session_memory: dict[str, Any] | None,
+    market_id: str | None,
+    outcome_id: str | None,
+) -> dict[str, Any]:
+    if not session_memory:
+        return dict(packet)
+    payload = dict(packet)
+    payload["_runtime_memory_context"] = build_memory_context(
+        session_memory=session_memory,
+        market_id=market_id,
+        outcome_id=outcome_id,
+    )
+    return payload
 
 
 def recommendation_to_action(strategy_recommendation: str, risk_gate: str | None) -> str:

@@ -12,6 +12,7 @@ Primary agent smoke tests now live under `agents/tests/`; this folder keeps wrap
 - `evaluate_risk_policy_gate.py`: run a simple RiskPolicy gate over candidate decisions.
 - `build_order_proposals.py`: turn gated decision records into minimal `Order` proposals.
 - `simulate_paper_execution.py`: simulate `Order` execution and update `Execution -> Position/PnL` state.
+- `runtime_memory.py`: (in `agents/`) session memory persistence for runtime context continuity.
 - `run_multi_agent_runtime.py`: minimal multi-agent runtime skeleton that orchestrates agent packets and bridges into execution-domain pre-trade chain. Supports `--agent-context` and direct `--ontology-bundle` input modes.
 - `setup_adk_venv.sh`: create `.venv-adk` and install ADK runtime dependencies.
 - `run_adk_runtime.sh`: one-command ADK runtime launcher (supports `LLM_API_KEY` bootstrap).
@@ -36,9 +37,14 @@ Primary agent smoke tests now live under `agents/tests/`; this folder keeps wrap
 - `smoke_test_multi_agent_runtime_llm.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_llm.py`.
 - `smoke_test_multi_agent_runtime_adk.py`: wrapper for `agents/tests/smoke_test_multi_agent_runtime_adk.py`.
 - `smoke_test_paper_trading_simulation.py`: wrapper for `agents/tests/smoke_test_paper_trading_simulation.py`.
+- `smoke_test_runtime_session_memory.py`: wrapper for `agents/tests/smoke_test_runtime_session_memory.py`.
 - `benchmarks/evaluate_microstructure_cases.py`: benchmark evaluator for labeled cases.
 - `benchmarks/evaluate_execution_safety.py`: execution-safety metrics evaluator for paper-trading payloads.
+- `benchmarks/evaluate_recommendation_quality.py`: recommendation-quality metrics evaluator for runtime outputs.
+- `benchmarks/generate_benchmark_trend_report.py`: merges benchmark metrics and produces trend report snapshots.
 - `benchmarks/smoke_test_execution_safety_benchmark.py`: smoke test for execution-safety benchmark flow.
+- `benchmarks/smoke_test_recommendation_quality_benchmark.py`: smoke test for recommendation-quality benchmark flow.
+- `benchmarks/smoke_test_benchmark_trend_report.py`: smoke test for benchmark trend reporting flow.
 
 ## Core outputs
 The pipeline emits ontology bundles with three layers:
@@ -171,6 +177,19 @@ python3 scripts/ontology/run_multi_agent_runtime.py \
   --enable-paper-trading \
   --execute-proposed-orders \
   --output /tmp/polymarket-runtime-output.paper.json \
+  --pretty \
+  --include-hold
+```
+
+Run runtime with persistent session memory:
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --ontology-bundle ontology/samples/polymarket-sample-bundle.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine adk \
+  --runtime-memory-path /tmp/delphi-runtime-memory.json \
+  --session-id session_alpha \
+  --output /tmp/polymarket-runtime-output.with-memory.json \
   --pretty \
   --include-hold
 ```
@@ -328,6 +347,24 @@ Evaluate execution safety metrics from runtime paper-trading output:
 python3 scripts/ontology/benchmarks/evaluate_execution_safety.py \
   --input /tmp/polymarket-runtime-output.paper.json \
   --output /tmp/polymarket-execution-safety-metrics.json \
+  --pretty
+```
+
+Evaluate recommendation quality metrics from runtime output:
+```bash
+python3 scripts/ontology/benchmarks/evaluate_recommendation_quality.py \
+  --input /tmp/polymarket-runtime-output.paper.json \
+  --output /tmp/polymarket-recommendation-quality-metrics.json \
+  --pretty
+```
+
+Generate benchmark trend report from recommendation + execution metrics:
+```bash
+python3 scripts/ontology/benchmarks/generate_benchmark_trend_report.py \
+  --recommendation-quality /tmp/polymarket-recommendation-quality-metrics.json \
+  --execution-safety /tmp/polymarket-execution-safety-metrics.json \
+  --history /tmp/delphi-benchmark-history.json \
+  --output /tmp/delphi-benchmark-trend-report.json \
   --pretty
 ```
 

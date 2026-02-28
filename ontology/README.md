@@ -84,6 +84,7 @@ They are meant to prove that the current ontology and multi-agent context are al
 The runtime skeleton currently orchestrates packet consumption and emits the same downstream contract while keeping the implementation intentionally simple for incremental hardening.
 It now supports a concrete `llm` runtime mode with OpenAI-compatible API integration, plus offline mock responses for local testing without network credentials.
 It supports two source modes: prebuilt `--agent-context` and direct `--ontology-bundle` (which auto-builds multi-agent context before orchestration).
+It also supports optional per-session runtime memory persistence via `--runtime-memory-path` for context continuity across repeated runs.
 
 ## Related design docs
 - `docs/zh/06-Polymarket-市场微观结构与稳健信号设计-v0.1.md`
@@ -176,6 +177,26 @@ python3 scripts/ontology/benchmarks/evaluate_execution_safety.py \
   --pretty
 ```
 
+Evaluate recommendation quality from runtime output:
+
+```bash
+python3 scripts/ontology/benchmarks/evaluate_recommendation_quality.py \
+  --input /tmp/polymarket-runtime-output.paper.json \
+  --output /tmp/polymarket-recommendation-quality-metrics.json \
+  --pretty
+```
+
+Generate benchmark trend report:
+
+```bash
+python3 scripts/ontology/benchmarks/generate_benchmark_trend_report.py \
+  --recommendation-quality /tmp/polymarket-recommendation-quality-metrics.json \
+  --execution-safety /tmp/polymarket-execution-safety-metrics.json \
+  --history /tmp/delphi-benchmark-history.json \
+  --output /tmp/delphi-benchmark-trend-report.json \
+  --pretty
+```
+
 Build multi-agent context:
 
 ```bash
@@ -263,6 +284,20 @@ python3 scripts/ontology/run_multi_agent_runtime.py \
   --runtime-engine adk \
   --adk-mock-responses ontology/samples/multi-agent/llm-mock-responses-sample.json \
   --output /tmp/polymarket-runtime-output.adk-mock.json \
+  --pretty \
+  --include-hold
+```
+
+Run runtime with persistent session memory:
+
+```bash
+python3 scripts/ontology/run_multi_agent_runtime.py \
+  --ontology-bundle ontology/samples/polymarket-sample-bundle.json \
+  --execution-bundle ontology/samples/fund-execution-sample-bundle.json \
+  --runtime-engine adk \
+  --runtime-memory-path /tmp/delphi-runtime-memory.json \
+  --session-id session_alpha \
+  --output /tmp/polymarket-runtime-output.with-memory.json \
   --pretty \
   --include-hold
 ```

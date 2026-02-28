@@ -68,8 +68,8 @@ Enable Delphi to move from market understanding to safe, traceable action propos
 ## G8 - Add benchmark for recommendation quality and execution safety
 - Type: Story
 - Area: evaluation
-- Status: in progress
+- Status: done (v0)
 - Acceptance:
   - [x] Recommendation quality/execution safety metric dictionary drafted.
   - [x] Execution safety violation rate tracked via benchmark script.
-  - [ ] Add recommendation-quality benchmark runner and CI trend report.
+  - [x] Add recommendation-quality benchmark runner and CI trend report.

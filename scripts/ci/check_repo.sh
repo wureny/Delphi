@@ -89,8 +89,17 @@ python3 agents/tests/smoke_test_multi_agent_runtime_adk.py
 echo "[CI] Running paper trading simulation smoke test..."
 python3 agents/tests/smoke_test_paper_trading_simulation.py
 
+echo "[CI] Running runtime session memory smoke test..."
+python3 agents/tests/smoke_test_runtime_session_memory.py
+
 echo "[CI] Running execution safety benchmark smoke test..."
 python3 scripts/ontology/benchmarks/smoke_test_execution_safety_benchmark.py
+
+echo "[CI] Running recommendation quality benchmark smoke test..."
+python3 scripts/ontology/benchmarks/smoke_test_recommendation_quality_benchmark.py
+
+echo "[CI] Running benchmark trend report smoke test..."
+python3 scripts/ontology/benchmarks/smoke_test_benchmark_trend_report.py
 
 echo "[CI] Running microstructure benchmark..."
 python3 scripts/ontology/benchmarks/evaluate_microstructure_cases.py \

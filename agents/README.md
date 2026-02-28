@@ -8,6 +8,7 @@ This directory contains the primary multi-agent implementation modules for Delph
 - `evaluate_risk_policy_gate.py`: evaluates decisions under RiskPolicy constraints.
 - `build_order_proposals.py`: generates minimal order proposals from gated decisions.
 - `simulate_paper_execution.py`: simulates order execution and updates execution/position/PnL state.
+- `runtime_memory.py`: persists and restores per-session runtime memory (decisions/summaries/risk reasons).
 - `run_multi_agent_runtime.py`: orchestrates multi-agent runtime (`heuristic`, `adk`, `llm`) and bridges into pre-trade chain. It accepts either prebuilt `--agent-context` or raw `--ontology-bundle` as source input.
 
 ## Compatibility
@@ -29,3 +30,4 @@ Smoke tests for agent modules are located in `agents/tests/`:
 - `smoke_test_multi_agent_runtime_llm.py`
 - `smoke_test_multi_agent_runtime_adk.py` (auto-skip when ADK is not installed)
 - `smoke_test_paper_trading_simulation.py`
+- `smoke_test_runtime_session_memory.py`
