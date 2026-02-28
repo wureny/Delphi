@@ -152,9 +152,9 @@ Audit Agent 不负责判断是否买卖，但必须负责保存：
 1. 当前 `candidate_decisions` 仍是 heuristic draft，不是最终策略引擎输出。
 2. 当前已经有 `candidate_decisions -> DecisionRecord` mapper，但还没有完整的 `Execution -> Position/PnL` 闭环。
 3. 当前已经有最小 `RiskPolicy gate` 与 `Order proposal`，但还不是完整 execution runtime。
-4. 目前也还没有真正的 agent orchestration runtime；现在提供的是 stable contract 和 sample packet。
+4. 当前已实现最小 multi-agent runtime skeleton（`heuristic/adk/llm`），但仍缺执行器状态管理、长运行稳定性与生产级编排能力。
 
 ## 9. 下一步建议
 1. 补 `Execution -> Position/PnL` 的 paper trading stub。
-2. 为 `Research/Strategy/Risk/Audit` 增加 benchmark，衡量 ontology 对多 Agent 的提升是否真实存在。
-3. 让未来多 Agent runtime 直接把这层作为固定输入/输出边界。
+2. 增加 execution audit trail 约束（decision/evidence/gate/execution 全链路可追溯）。
+3. 为 `Research/Strategy/Risk/Audit` 增加 benchmark，衡量 ontology 对多 Agent 与执行安全的提升是否真实存在。

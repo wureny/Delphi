@@ -191,34 +191,41 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 4. 当前 benchmark case 数量很少，不足以支持稳定阈值。
 5. category 仍是启发式映射，后续需要更明确的 taxonomy 规则。
 6. 尚未把“真实世界外部参考信号”系统化接入到 benchmark 中。
-7. 当前还没有真正的多 Agent orchestration runtime。
+7. 当前已实现最小多 Agent runtime skeleton，但还缺生产级编排、容错与可观测性。
 8. 当前还没有 `Execution -> Position/PnL` 的 paper trading 闭环。
 
 ## 6. 下一步任务优先级
 建议严格按以下顺序做。
 
-### P-Next. 多 Agent runtime skeleton
+### P-Next. G6 - paper trading 闭环
 当前结论：
-1. 现在最值得做的是多 Agent runtime 和 ontology 层的直接对接。
-2. 当前仓库已经具备足够稳定的输入/输出边界：
-   - `ontology bundle`
-   - `multi-agent context`
-   - `candidate_decisions`
-   - `DecisionRecord`
-   - `RiskPolicy gate`
-   - `Order proposal`
-3. 因此下一阶段不必优先做 paper trading；优先做多 Agent runtime 更合理。
+1. 多 Agent runtime skeleton 已落地，可直接进入执行域闭环阶段。
+2. 当前最关键缺口是 `Order -> Execution -> Position/PnL`。
+3. 该闭环补齐后，才能真实评估策略质量与风险门禁有效性。
 
 建议做法：
-1. 设计最小 orchestrator skeleton。
-2. 让 `Research/Strategy/Risk/Audit` 4 类 agent 消费 `multi-agent context`。
-3. 把 agent 输出统一写回 `candidate_decisions`。
-4. 复用当前已有的：
-   - `build_decision_records.py`
-   - `evaluate_risk_policy_gate.py`
-   - `build_order_proposals.py`
+1. 增加 simulation execution 模块，消费 `approved/proposed` orders。
+2. 输出 execution records（强制 `simulation_id`）并更新 positions。
+3. 产出最小 PnL 快照（已实现盈亏与未实现盈亏）。
+4. 增加 smoke test 覆盖 `decision -> gate -> order -> execution -> position/pnl` 全链路。
 
-### P0. 真实历史 case 库
+### P0. G7 - execution audit trail
+当前状态：执行前链路已具备，但审计链路仍需硬约束。
+
+下一步增强：
+1. 强制 order/execution 关联 `decision_record_id` 与 `evidence_refs`。
+2. 统一 `tx_hash/simulation_id` 字段约束与空值处理策略。
+3. 增加审计回放样例与校验脚本，确保链路可追溯。
+
+### P1. G8 - recommendation quality + execution safety benchmark
+当前状态：已有 microstructure benchmark，尚未覆盖执行安全质量。
+
+下一步增强：
+1. 定义执行安全指标（block 准确率、违规漏拦率、人工审批占比）。
+2. 定义推荐质量指标（行动命中率、收益质量、风险调整收益）。
+3. 将 benchmark 纳入回归流程，并输出阶段趋势报告。
+
+### P2. 真实历史 case 库
 当前状态：已实现第一版。
 
 已完成：
@@ -235,7 +242,7 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 1. 把标注结果和外部参考源进一步联动
 2. 将 live case 自动汇总进回归评测
 
-### P1. WebSocket 持续流
+### P3. WebSocket 持续流
 当前状态：已实现第一版。
 
 已完成：
@@ -250,7 +257,7 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 1. 更长时间运行的稳定性
 2. 更细粒度的 rolling window 聚合
 
-### P2. robust_probability 调整
+### P4. robust_probability 调整
 当前状态：已实现 v0.1。
 
 已完成：
@@ -282,6 +289,7 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - decision record mapper
 - risk policy gate
 - order proposal builder
+- multi-agent runtime skeleton
 
 请先阅读：
 - docs/zh/07-Polymarket-工程实现-Handoff-v0.1.md
@@ -292,13 +300,14 @@ CLOB 的独立 `last-trade-prices` 路径在 live 验证中并不稳定，因此
 - scripts/ontology/build_decision_records.py
 - scripts/ontology/evaluate_risk_policy_gate.py
 - scripts/ontology/build_order_proposals.py
+- agents/run_multi_agent_runtime.py
 
-然后优先实现最小可运行的多 Agent runtime skeleton。
+然后优先实现 paper trading 闭环（G6）并补 execution audit trail（G7）。
 要求：
-1. 设计 `Research/Strategy/Risk/Audit` 4 个 agent 的最小 I/O contract。
-2. 让它们直接消费当前 `multi-agent context`。
-3. 输出统一落到 `candidate_decisions`。
-4. 与现有的 `DecisionRecord -> RiskPolicy gate -> Order proposal` 链路接上。
+1. 在现有 `Order proposal` 基础上增加 simulation execution。
+2. 输出 `Execution -> Position/PnL` 更新结果与最小报表。
+3. 强制执行审计字段：`decision_record_id`、`evidence_refs`、`simulation_id/tx_hash`。
+4. 增加 smoke test 覆盖闭环。
 5. 跑自检并汇报结果。
 ```
 

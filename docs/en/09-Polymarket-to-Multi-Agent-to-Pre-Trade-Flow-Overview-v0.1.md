@@ -154,7 +154,7 @@ Why:
 - `ontology/samples/execution-derived/order-proposals-sample.json`
 
 ## 6. Current boundary
-1. there is still no full multi-agent orchestration runtime,
+1. a minimal multi-agent runtime skeleton exists, but it is still not a production-grade orchestration runtime,
 2. `candidate_decisions` are still heuristic drafts,
 3. `RiskPolicy gate` is still a minimum rule set,
 4. `Order proposal` is not yet actual execution or paper trading,
@@ -162,8 +162,8 @@ Why:
 
 ## 7. Recommended development order
 1. keep the ontology / microstructure / benchmark layer stable,
-2. when multi-agent work starts, consume `multi-agent context` directly,
-3. if execution work continues, prioritize a paper-trading stub before a live runtime.
+2. harden the existing runtime skeleton with better reliability and observability,
+3. for execution work, prioritize a paper-trading stub and audit trail before a live runtime.
 
 ## 8. One-line summary
 At this stage, Delphi is no longer just “raw market ingestion”. It already has:

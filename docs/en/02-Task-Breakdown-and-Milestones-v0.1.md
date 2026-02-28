@@ -76,7 +76,14 @@ Suggested issues:
 4. Milestone 4 (Week 7): Finish F3/F4 + D-series closure
 5. Milestone 5 (Week 8-9): Finish G-series and close paper-trading loop
 
-## 3. Label Taxonomy (GitHub)
+## 3. Current Status Snapshot (2026-02-28)
+1. Epic A/B/C/D foundations are in place at v0 (ontology, mapping, smoke tests, CI, bilingual docs/templates).
+2. Epic E has a microstructure benchmark and live-case labeling workflow, but execution-safety benchmarking is still pending.
+3. Epic F (visualization/Neo4j) has not started yet and remains a later-phase track.
+4. Epic G has runnable foundations through G1-G5 (entities, schema, sample chain, risk gate, order proposal).
+5. Current execution focus is G6/G7/G8 (paper-trading loop, audit trail, safety benchmark).
+
+## 4. Label Taxonomy (GitHub)
 1. `type:epic`
 2. `type:story`
 3. `type:task`
@@ -92,7 +99,7 @@ Suggested issues:
 13. `area:execution`
 14. `area:risk`
 
-## 4. Definition of Done (DoD)
+## 5. Definition of Done (DoD)
 1. Code or docs committed and self-checked.
 2. Acceptance checklist completed in issue.
 3. Related docs (PRD/mapping spec/progress) updated.

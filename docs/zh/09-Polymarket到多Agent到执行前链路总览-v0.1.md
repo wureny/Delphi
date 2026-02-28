@@ -154,7 +154,7 @@ flowchart TD
 - `ontology/samples/execution-derived/order-proposals-sample.json`
 
 ## 6. 当前边界
-1. 当前还没有真正的多 Agent orchestration runtime。
+1. 当前已具备最小多 Agent runtime skeleton，但仍不是生产级 orchestration runtime。
 2. 当前 `candidate_decisions` 仍是 heuristic draft。
 3. 当前 `RiskPolicy gate` 仍是最小规则集。
 4. 当前 `Order proposal` 还没有进入真正的 execution / paper trading。
@@ -162,8 +162,8 @@ flowchart TD
 
 ## 7. 现阶段最适合的开发顺序
 1. 保持当前 ontology / microstructure / benchmark 层稳定。
-2. 若开始做多 Agent，直接消费 `multi-agent context`。
-3. 若继续推进执行域，优先做 paper trading stub，而不是直接上实盘 runtime。
+2. 基于现有 runtime skeleton 做稳定性与可观测性加固。
+3. 推进执行域时优先补 paper trading stub 与审计链路，再考虑实盘 runtime。
 
 ## 8. 一句话总结
 当前 Delphi 在 Polymarket 这条链路上，已经不是“原始市场抓取脚本”，而是：
