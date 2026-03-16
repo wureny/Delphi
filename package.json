@@ -4,11 +4,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "check:research-graph": "node --experimental-strip-types ./src/research-graph/index.ts",
+    "neo4j:bootstrap": "tsx ./scripts/bootstrap-research-graph.ts",
+    "check:research-graph": "tsx ./src/research-graph/index.ts",
+    "neo4j:smoke-write": "tsx ./scripts/run-neo4j-smoke-write.ts",
+    "neo4j:verify": "tsx ./scripts/check-neo4j-connectivity.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "neo4j-driver": "^6.0.1"
   }
 }

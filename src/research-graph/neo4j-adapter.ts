@@ -199,7 +199,7 @@ function buildMergeNodeStatement(
       identity: operation.matchKeys,
       createProperties,
       metadata,
-      mutableProperties,
+      properties: mutableProperties,
     },
     description: `merge_node#${index}`,
   };

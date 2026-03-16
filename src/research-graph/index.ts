@@ -5,3 +5,5 @@ export * from "./graph-patch.ts";
 export * from "./validator.ts";
 export * from "./graph-writer.ts";
 export * from "./neo4j-adapter.ts";
+export * from "./neo4j-driver.ts";
+export * from "./bootstrap.ts";

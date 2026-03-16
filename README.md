@@ -29,5 +29,7 @@ Implementation skeleton:
   - writer interface and patch submission boundary for runtime integration
 - `src/research-graph/neo4j-adapter.ts`
   - Neo4j statement planner and graph writer skeleton built on the same patch contract
+- `src/research-graph/neo4j-driver.ts`
+  - real Neo4j driver executor and env-based connection config
 - `src/research-graph/index.ts`
   - single entrypoint for thread2 graph contracts

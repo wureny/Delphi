@@ -4,3 +4,5 @@ docs/delphi-architecture-diagram.md
 node_modules/
 dist/
 *.tsbuildinfo
+.env
+.env.local

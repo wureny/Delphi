@@ -6,6 +6,7 @@
 - 可选补充文档:
   - [architecture.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/architecture.md)
   - [roadmap.md](/Users/wurenyu/workspace/Delphi/docs/execution/threads/thread-02-ontology-context-graph/roadmap.md)
+  - [aura-queries.md](/Users/wurenyu/workspace/Delphi/docs/execution/threads/thread-02-ontology-context-graph/aura-queries.md)
 - 完成标准:
   - ontology object registry、稳定关系和 runtime meta graph 已固定到可实现粒度
   - `GraphPatch` 已有明确 metadata、operation shape 和 scope 规则

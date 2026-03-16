@@ -41,6 +41,9 @@
 - 定义 graph writer interface 和 `submitGraphPatch()` 提交流程，打通 validator 到 writer 的调用边界
 - 定义 stable object merge policy，并接入 validator 的 `merge_node` / immutable field 校验
 - 定义 Neo4j adapter skeleton，可把 `GraphPatch` 规划成 Cypher statements 并通过可替换 executor 执行
+- 接入真实 `neo4j-driver`，并补了 Aura 连接验证脚本
+- 补了 `neo4j:smoke-write`，可对真实 Neo4j 做最小写入、读回验证和清理
+- 补了 `neo4j:bootstrap`，可在 Aura 中初始化 ontology/runtime registry、merge policy 和 schema constraints
 
 ### In Progress
 
@@ -50,7 +53,6 @@
 ### Not Started
 
 - snapshot-to-evidence 映射 contract 的代码层接口
-- 真实 Neo4j driver 集成
 - thread2 相关测试样例
 
 ## Recommended Build Order
@@ -62,7 +64,7 @@
 5. 定义 snapshot-to-evidence mapping interface，和 thread3 对齐
 6. 定义 runtime patch submission flow，和 thread4 对齐
 7. 增加 validator test cases
-8. 视进度接入真实 Neo4j driver / session 管理
+8. 补真实 Aura 写入回归与后续测试样例
 
 ## Solution Outline
 
@@ -101,7 +103,7 @@
 - 补一组合法 / 非法 patch 样例
 - 和 thread3 对齐 `Evidence.source_type / source_ref / observed_at` 的来源
 - 和 thread4 对齐 patch 提交流程与 `patch_accepted / patch_rejected` 事件
-- 评估是否需要安装 `neo4j-driver` 并接入真实 executor
+- 在真实 Aura 中执行 `neo4j:bootstrap` 并确认结构可见
 
 ## Dependencies
 
