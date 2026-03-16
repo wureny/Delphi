@@ -8,6 +8,7 @@
 - 新建 `src/research-graph/` 代码骨架，集中放 ontology registry、runtime meta graph、GraphPatch types 和 validator。
 - 新增 `graph-writer.ts`，定义 writer interface、receipt 和 `submitGraphPatch()` 提交流程。
 - 新增 `merge-policy.ts`，锁定 stable object 的 identity keys、conflict strategy 和 immutable field 规则。
+- 新增 `neo4j-adapter.ts`，把 patch 映射为 Cypher statements，并通过可替换 executor 执行。
 
 ## Decisions Made
 
@@ -17,12 +18,14 @@
 - Judge 只能基于 findings 和合法 patch 形成 judgment / report，不能绕过 trace。
 - runtime 和 graph writer 的第一层边界收敛为：`patch -> validate -> write -> patch_accepted / patch_rejected`
 - stable object 的 upsert 语义必须复用 merge policy，不能在 Neo4j writer 里另起一套规则。
+- Neo4j 适配层先做 statement planner + executor interface，不急着绑定具体 driver 包。
 
 ## Risks / Open Questions
 
 - `Judgment -SUPPORTED_BY-> Evidence` 足够支撑 v0，但后续若要做更细的 reasoning lineage，可能还需要独立 lineage object。
 - v0 先不做跨 run memory compression，后续如果需要复用 pattern，需另开 ADR。
 - `Finding -UPDATES-> stable object` 的细化 merge 策略还需要 runtime 实现时进一步落地。
+- 当前只有 Neo4j adapter skeleton，还没有真实 `neo4j-driver` 集成、事务管理和数据库连接配置。
 
 ## Next Recommended Consumer
 

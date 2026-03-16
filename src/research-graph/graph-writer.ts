@@ -112,13 +112,13 @@ export class NoopGraphWriter implements GraphWriter {
       targetScope: patch.targetScope,
       appliedAt: new Date().toISOString(),
       acceptedOperations: patch.operations.length,
-      touchedRefs: collectTouchedRefs(patch),
+      touchedRefs: collectTouchedRefsFromPatch(patch),
       warnings: [],
     };
   }
 }
 
-function collectTouchedRefs(patch: GraphPatch): string[] {
+export function collectTouchedRefsFromPatch(patch: GraphPatch): string[] {
   const refs = new Set<string>();
 
   for (const operation of patch.operations) {

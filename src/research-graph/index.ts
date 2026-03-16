@@ -4,3 +4,4 @@ export * from "./runtime.ts";
 export * from "./graph-patch.ts";
 export * from "./validator.ts";
 export * from "./graph-writer.ts";
+export * from "./neo4j-adapter.ts";

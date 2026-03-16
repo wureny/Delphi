@@ -27,5 +27,7 @@ Implementation skeleton:
   - patch validation rules for scope, schema, edge pairs, and evidence discipline
 - `src/research-graph/graph-writer.ts`
   - writer interface and patch submission boundary for runtime integration
+- `src/research-graph/neo4j-adapter.ts`
+  - Neo4j statement planner and graph writer skeleton built on the same patch contract
 - `src/research-graph/index.ts`
   - single entrypoint for thread2 graph contracts

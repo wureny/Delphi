@@ -31,13 +31,16 @@
 - 建立 `src/research-graph/` 代码骨架：
   - [ontology.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/ontology.ts)
   - [runtime.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/runtime.ts)
+  - [merge-policy.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/merge-policy.ts)
   - [graph-patch.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/graph-patch.ts)
   - [validator.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/validator.ts)
   - [graph-writer.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/graph-writer.ts)
+  - [neo4j-adapter.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/neo4j-adapter.ts)
   - [index.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/index.ts)
 - 安装本地 TypeScript 最小环境，并验证 `npm run typecheck` 可通过
 - 定义 graph writer interface 和 `submitGraphPatch()` 提交流程，打通 validator 到 writer 的调用边界
 - 定义 stable object merge policy，并接入 validator 的 `merge_node` / immutable field 校验
+- 定义 Neo4j adapter skeleton，可把 `GraphPatch` 规划成 Cypher statements 并通过可替换 executor 执行
 
 ### In Progress
 
@@ -47,7 +50,7 @@
 ### Not Started
 
 - snapshot-to-evidence 映射 contract 的代码层接口
-- Neo4j persistence adapter skeleton
+- 真实 Neo4j driver 集成
 - thread2 相关测试样例
 
 ## Recommended Build Order
@@ -59,7 +62,7 @@
 5. 定义 snapshot-to-evidence mapping interface，和 thread3 对齐
 6. 定义 runtime patch submission flow，和 thread4 对齐
 7. 增加 validator test cases
-8. 视进度补 Neo4j adapter skeleton
+8. 视进度接入真实 Neo4j driver / session 管理
 
 ## Solution Outline
 
@@ -98,6 +101,7 @@
 - 补一组合法 / 非法 patch 样例
 - 和 thread3 对齐 `Evidence.source_type / source_ref / observed_at` 的来源
 - 和 thread4 对齐 patch 提交流程与 `patch_accepted / patch_rejected` 事件
+- 评估是否需要安装 `neo4j-driver` 并接入真实 executor
 
 ## Dependencies
 
