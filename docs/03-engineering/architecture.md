@@ -124,7 +124,7 @@ v0 默认技术标准包：
 
 ## 9. Companion Specs
 
-- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-core-interface-contract.md)
-- [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-ontology-context-graph-contract.md)
-- [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-data-layer-contract.md)
-- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
+- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-core-interface-contract.md)
+- [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-ontology-context-graph-contract.md)
+- [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-data-layer-contract.md)
+- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)

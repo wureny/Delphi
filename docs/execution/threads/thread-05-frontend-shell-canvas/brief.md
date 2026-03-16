@@ -10,10 +10,10 @@
 
 ## Primary Source Docs
 
-- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
-- [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-product/ux-contract.md)
-- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-core-interface-contract.md)
-- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
+- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
+- [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/01-product/ux-contract.md)
+- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-core-interface-contract.md)
+- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)
 
 ## Scope
 

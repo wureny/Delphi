@@ -12,8 +12,8 @@
 
 - [project-brief.md](/Users/wurenyu/workspace/Delphi/docs/00-project/project-brief.md)
 - [pr-faq.md](/Users/wurenyu/workspace/Delphi/docs/00-project/pr-faq.md)
-- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
-- [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-product/ux-contract.md)
+- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
+- [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/01-product/ux-contract.md)
 
 ## Scope
 

@@ -12,3 +12,18 @@ Core principle:
 2. Turn product requirements into agent behavior, evals, and safety rules.
 3. Turn stable decisions into technical specs and ADRs.
 4. Keep docs live and iterative instead of treating them as one-off deliverables.
+
+Implementation skeleton:
+
+- `src/research-graph/ontology.ts`
+  - v0 ontology node types and stable relationship registry
+- `src/research-graph/runtime.ts`
+  - runtime meta graph node types, edge registry, and agent roster
+- `src/research-graph/graph-patch.ts`
+  - `GraphPatch` scope and operation contracts
+- `src/research-graph/validator.ts`
+  - patch validation rules for scope, schema, edge pairs, and evidence discipline
+- `src/research-graph/graph-writer.ts`
+  - writer interface and patch submission boundary for runtime integration
+- `src/research-graph/index.ts`
+  - single entrypoint for thread2 graph contracts

@@ -10,9 +10,9 @@
 
 ## Primary Source Docs
 
-- [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/technical-notes.md)
-- [architecture.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/architecture.md)
-- [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-data-layer-contract.md)
+- [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/technical-notes.md)
+- [architecture.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/architecture.md)
+- [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-data-layer-contract.md)
 
 ## Scope
 

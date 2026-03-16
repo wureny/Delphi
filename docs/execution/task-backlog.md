@@ -24,10 +24,10 @@
 ### T2. Tighten technical framing
 
 - Goal:
-  - 把 [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/technical-notes.md) 中的核心技术方案收敛成稳定叙事
+  - 把 [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/technical-notes.md) 中的核心技术方案收敛成稳定叙事
 - Input docs:
-  - [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/technical-notes.md)
-  - [architecture.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/architecture.md)
+  - [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/technical-notes.md)
+  - [architecture.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/architecture.md)
 - Done when:
   - ontology、context graph、graph patch、runtime flow 的关系被清晰定义
 
@@ -38,8 +38,8 @@
 - Goal:
   - 把 v0 产品要求写到可直接支持实现和评估
 - Input docs:
-  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
-  - [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-product/ux-contract.md)
+  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
+  - [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/01-product/ux-contract.md)
 - Done when:
   - 用户路径、报告结构、非目标范围稳定
 
@@ -48,8 +48,8 @@
 - Goal:
   - 锁定 4 个 agent 的职责、handoff 和 failure behavior
 - Input docs:
-  - [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/agent-contract.md)
-  - [safety-guardrails.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/safety-guardrails.md)
+  - [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/agent-contract.md)
+  - [safety-guardrails.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/safety-guardrails.md)
 - Done when:
   - 后续实现 agent 不需要再猜角色边界
 
@@ -58,8 +58,8 @@
 - Goal:
   - 把 v0 eval 设计收敛到足够轻但真实有用
 - Input docs:
-  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/eval-plan.md)
-  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
+  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/eval-plan.md)
+  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
 - Done when:
   - output structure、tool usage、trace quality 三类 eval 有明确验收口径
 
@@ -70,7 +70,7 @@
 - Goal:
   - 固定 ResearchQuery、AgentTask、Finding、GraphPatch、RunEvent、FinalReport
 - Input docs:
-  - [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-core-interface-contract.md)
+  - [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-core-interface-contract.md)
 - Done when:
   - 未来实现无需再临时发明核心字段
 
@@ -79,7 +79,7 @@
 - Goal:
   - 明确 ontology / KG / runtime context graph 的边界和写入约束
 - Input docs:
-  - [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-ontology-context-graph-contract.md)
+  - [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-ontology-context-graph-contract.md)
 - Done when:
   - graph validator 的职责和 scope 清楚
 
@@ -88,7 +88,7 @@
 - Goal:
   - 明确 OpenBB、Supabase、Neo4j 的职责分工
 - Input docs:
-  - [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-data-layer-contract.md)
+  - [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-data-layer-contract.md)
 - Done when:
   - 后续实现 agent 知道数据从哪里来、写到哪里去
 
@@ -97,7 +97,7 @@
 - Goal:
   - 明确 planner、event stream、degraded mode、Judge synthesis 的运行逻辑
 - Input docs:
-  - [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
+  - [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)
 - Done when:
   - 后续 runtime 实现可直接照合同搭骨架
 
@@ -117,7 +117,7 @@
 - Goal:
   - 准备答辩与联调所需的 gold demo queries
 - Input docs:
-  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/eval-plan.md)
+  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/eval-plan.md)
 - Done when:
   - 至少有 3 条强展示 query 和 5 条基础测试 query
 

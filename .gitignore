@@ -1,2 +1,6 @@
 docs/dev_plan.md
 docs/README.md
+docs/delphi-architecture-diagram.md
+node_modules/
+dist/
+*.tsbuildinfo

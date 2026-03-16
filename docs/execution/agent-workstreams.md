@@ -10,8 +10,8 @@
 - Owns:
   - [project-brief.md](/Users/wurenyu/workspace/Delphi/docs/00-project/project-brief.md)
   - [pr-faq.md](/Users/wurenyu/workspace/Delphi/docs/00-project/pr-faq.md)
-  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
-  - [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-product/ux-contract.md)
+  - [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
+  - [ux-contract.md](/Users/wurenyu/workspace/Delphi/docs/01-product/ux-contract.md)
 - Main responsibility:
   - 防止产品边界漂移
 
@@ -20,9 +20,9 @@
 - Mission:
   - 持续维护 agent roles、guardrails、eval 逻辑
 - Owns:
-  - [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/agent-contract.md)
-  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/eval-plan.md)
-  - [safety-guardrails.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/safety-guardrails.md)
+  - [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/agent-contract.md)
+  - [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/eval-plan.md)
+  - [safety-guardrails.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/safety-guardrails.md)
 - Main responsibility:
   - 防止“多 agent”沦为没有边界的 prompt 拼接
 
@@ -31,11 +31,11 @@
 - Mission:
   - 维护 ontology、context graph、runtime orchestration 的系统合同
 - Owns:
-  - [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/technical-notes.md)
-  - [architecture.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/architecture.md)
-  - [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-core-interface-contract.md)
-  - [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-ontology-context-graph-contract.md)
-  - [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
+  - [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/technical-notes.md)
+  - [architecture.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/architecture.md)
+  - [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-core-interface-contract.md)
+  - [2026-03-ontology-context-graph-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-ontology-context-graph-contract.md)
+  - [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)
 - Main responsibility:
   - 防止 runtime 设计失控或图层语义漂移
 
@@ -44,7 +44,7 @@
 - Mission:
   - 维护外部数据接入与内部数据合同
 - Owns:
-  - [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-data-layer-contract.md)
+  - [2026-03-data-layer-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-data-layer-contract.md)
 - Main responsibility:
   - 防止 provider 接入过多、过早、过重
 

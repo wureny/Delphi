@@ -10,9 +10,9 @@
 
 ## Primary Source Docs
 
-- [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/eval-plan.md)
-- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/02-product/requirements/2026-03-delphi-v0-prd.md)
-- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
+- [eval-plan.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/eval-plan.md)
+- [2026-03-delphi-v0-prd.md](/Users/wurenyu/workspace/Delphi/docs/01-product/requirements/2026-03-delphi-v0-prd.md)
+- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)
 
 ## Scope
 

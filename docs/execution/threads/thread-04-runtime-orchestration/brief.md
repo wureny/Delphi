@@ -10,10 +10,10 @@
 
 ## Primary Source Docs
 
-- [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/technical-notes.md)
-- [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-agent/agent-contract.md)
-- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-runtime-orchestration-contract.md)
-- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/04-engineering/specs/2026-03-core-interface-contract.md)
+- [technical-notes.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/technical-notes.md)
+- [agent-contract.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/agent-contract.md)
+- [2026-03-runtime-orchestration-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-runtime-orchestration-contract.md)
+- [2026-03-core-interface-contract.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/specs/2026-03-core-interface-contract.md)
 
 ## Scope
 
