@@ -11,6 +11,7 @@ import type {
 import { getStableNodeMergePolicy } from "./merge-policy.ts";
 import { isOntologyNodeType, type OntologyNodeType } from "./ontology.ts";
 import type { GraphNodeType } from "./runtime.ts";
+import { validateGraphPatch } from "./validator.ts";
 
 export interface Neo4jStatement {
   cypher: string;
@@ -36,6 +37,16 @@ export class Neo4jGraphWriter implements GraphWriter {
   }
 
   async write(patch: GraphPatch, context: GraphWriteContext): Promise<GraphWriteReceipt> {
+    const validation = validateGraphPatch(patch, context);
+
+    if (!validation.ok) {
+      throw new Error(
+        `Refusing to write invalid GraphPatch: ${validation.errors
+          .map((error) => `${error.code}:${error.message}`)
+          .join("; ")}`,
+      );
+    }
+
     const statements = planNeo4jStatements(patch, context);
 
     await this.executor.execute(statements);

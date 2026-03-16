@@ -257,6 +257,7 @@ v0 runtime graph 允许的节点类型：
   - `ticker`
   - `time_horizon`
   - `case_type`
+  - `created_at`
 
 ### `Task`
 
@@ -265,7 +266,9 @@ v0 runtime graph 允许的节点类型：
   - `run_id`
   - `agent_type`
   - `goal`
+  - `input_refs`
   - `status`
+  - `priority`
 
 ### `Agent`
 
@@ -304,10 +307,14 @@ v0 runtime graph 允许的节点类型：
 - 最小字段：
   - `finding_id`
   - `run_id`
+  - `task_id`
   - `agent_type`
   - `claim`
+  - `evidence_refs`
+  - `object_refs`
   - `confidence`
   - `impact`
+  - `timestamp`
 
 ### `Decision`
 

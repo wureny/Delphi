@@ -45,6 +45,7 @@ export interface QueryNode {
   ticker: string;
   timeHorizon: string;
   caseType: string;
+  createdAt: string;
 }
 
 export interface TaskNode {
@@ -53,7 +54,9 @@ export interface TaskNode {
   runId: string;
   agentType: AgentType;
   goal: string;
+  inputRefs: string[];
   status: string;
+  priority: string;
 }
 
 export interface AgentNode {
@@ -92,10 +95,14 @@ export interface FindingNode {
   nodeType: "Finding";
   findingId: string;
   runId: string;
+  taskId: string;
   agentType: AgentType;
   claim: string;
+  evidenceRefs: string[];
+  objectRefs: string[];
   confidence: number;
   impact: "positive" | "neutral" | "negative" | "mixed";
+  timestamp: string;
 }
 
 export interface DecisionNode {

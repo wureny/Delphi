@@ -11,6 +11,8 @@
 - 新增 `neo4j-adapter.ts`，把 patch 映射为 Cypher statements，并通过可替换 executor 执行。
 - 新增 `neo4j-driver.ts` 和连接检查/真实写入脚本，开始接真实 Aura 而不是本地 mock。
 - 新增 bootstrap planner 和脚本，用来把 ontology/runtime registry 与约束真正初始化到 Aura。
+- 收紧 validator，补上 `attach_evidence` 的 scope / pair 校验、runtime `runId` 一致性校验，以及 stable object 的 create-vs-merge identity 校验。
+- 对齐 runtime graph 类型与 core contract，补齐 `Query.createdAt`、`Task.inputRefs/priority`、`Finding.taskId/evidenceRefs/objectRefs/timestamp`。
 
 ## Decisions Made
 
@@ -21,17 +23,17 @@
 - runtime 和 graph writer 的第一层边界收敛为：`patch -> validate -> write -> patch_accepted / patch_rejected`
 - stable object 的 upsert 语义必须复用 merge policy，不能在 Neo4j writer 里另起一套规则。
 - Neo4j 适配层先做 statement planner + executor interface，不急着绑定具体 driver 包。
-- 现在已经绑定真实 `neo4j-driver`，但真实落库回归还需要在用户本地环境里执行一次。
+- 现在已经绑定真实 `neo4j-driver`，真实落库 smoke write 与 Aura bootstrap 已执行通过。
 - ontology 和 context graph 现在有了“可持续存在的初始化入口”，不再只是 smoke data。
+- 真实 Neo4j writer 在写入前会再次执行 validator，不接受绕过 `submitGraphPatch()` 的非法 patch。
 
 ## Risks / Open Questions
 
 - `Judgment -SUPPORTED_BY-> Evidence` 足够支撑 v0，但后续若要做更细的 reasoning lineage，可能还需要独立 lineage object。
 - v0 先不做跨 run memory compression，后续如果需要复用 pattern，需另开 ADR。
 - `Finding -UPDATES-> stable object` 的细化 merge 策略还需要 runtime 实现时进一步落地。
-- 当前只有 Neo4j adapter skeleton，还没有真实 `neo4j-driver` 集成、事务管理和数据库连接配置。
-- 真实 Neo4j driver 已接入，但还没有把 smoke write 结果回填到 thread2 文档。
-- bootstrap 脚本尚未在用户 Aura 上执行，当前结构还没有正式种进去。
+- validator 目前只能基于当前 patch 和调用方提供的 `existingStableIdentities` 拦截“该 merge 却 create”的情况；等 thread4 接入时需要把这份 context 真正喂进来。
+- runtime 现阶段还没有持续产出实例级 context graph；真实运行图还要等 thread4 接入。
 
 ## Next Recommended Consumer
 

@@ -6,7 +6,9 @@ import {
   isCaseScopedOntologyNodeType,
   isOntologyNodeType,
   isStableEdgeType,
+  ontologyNodeTypes,
   stableRelationshipRegistry,
+  type OntologyNodeType,
 } from "./ontology.ts";
 import type {
   CreateEdgeOperation,
@@ -31,6 +33,7 @@ export interface GraphPatchValidationContext {
   existingRuntimeRefs?: Iterable<string>;
   existingCaseRefs?: Iterable<string>;
   existingEvidenceRefs?: Iterable<string>;
+  existingStableIdentities?: Partial<Record<OntologyNodeType, Iterable<string>>>;
   maxOperations?: number;
 }
 
@@ -45,6 +48,7 @@ export interface GraphPatchValidationError {
     | "invalid_scope_target"
     | "unknown_ref"
     | "existing_ref_requires_merge"
+    | "existing_identity_requires_merge"
     | "missing_required_property"
     | "invalid_relationship_pair"
     | "judge_requires_basis"
@@ -52,7 +56,8 @@ export interface GraphPatchValidationError {
     | "invalid_relation_type"
     | "writer_failure"
     | "missing_identity_key"
-    | "immutable_field_update";
+    | "immutable_field_update"
+    | "runtime_run_id_mismatch";
   message: string;
   opId?: string;
 }
@@ -86,6 +91,9 @@ export function validateGraphPatch(
   const existingRuntimeRefs = new Set(context.existingRuntimeRefs ?? []);
   const existingCaseRefs = new Set(context.existingCaseRefs ?? []);
   const existingEvidenceRefs = new Set(context.existingEvidenceRefs ?? []);
+  const knownStableIdentities = buildStableIdentityRegistry(
+    context.existingStableIdentities,
+  );
 
   if (patch.runId !== context.runId) {
     errors.push({
@@ -125,10 +133,28 @@ export function validateGraphPatch(
   for (const operation of patch.operations) {
     switch (operation.type) {
       case "create_node":
-        validateCreateNode(operation, patch, context, refTypes, existingRuntimeRefs, existingCaseRefs, errors);
+        validateCreateNode(
+          operation,
+          patch,
+          context,
+          refTypes,
+          existingRuntimeRefs,
+          existingCaseRefs,
+          knownStableIdentities,
+          errors,
+        );
         break;
       case "merge_node":
-        validateMergeNode(operation, patch, context, refTypes, existingRuntimeRefs, existingCaseRefs, errors);
+        validateMergeNode(
+          operation,
+          patch,
+          context,
+          refTypes,
+          existingRuntimeRefs,
+          existingCaseRefs,
+          knownStableIdentities,
+          errors,
+        );
         break;
       case "create_edge":
         validateCreateEdge(operation, patch, refTypes, errors, warnings);
@@ -136,29 +162,83 @@ export function validateGraphPatch(
       case "update_property":
         validateUpdateProperty(operation, patch, refTypes, errors, warnings);
         break;
-      case "attach_evidence":
-        if (!isKnownRef(operation.targetRef, refTypes, existingRuntimeRefs, existingCaseRefs)) {
+      case "attach_evidence": {
+        const targetKnown = isKnownRef(
+          operation.targetRef,
+          refTypes,
+          existingRuntimeRefs,
+          existingCaseRefs,
+        );
+        const evidenceKnown = isKnownEvidenceRef(
+          operation.evidenceRef,
+          refTypes,
+          existingEvidenceRefs,
+        );
+
+        if (!targetKnown) {
           errors.push({
             code: "unknown_ref",
             message: `attach_evidence target_ref ${operation.targetRef} is not known in this patch context.`,
             opId: operation.opId,
           });
         }
-        if (!isKnownEvidenceRef(operation.evidenceRef, refTypes, existingEvidenceRefs)) {
+
+        if (!evidenceKnown) {
           errors.push({
             code: "unknown_ref",
             message: `attach_evidence evidence_ref ${operation.evidenceRef} is not a known Evidence node.`,
             opId: operation.opId,
           });
         }
-        if (!["SUPPORTED_BY", "CHALLENGED_BY", "CITES"].includes(operation.relationType)) {
+
+        const relationAllowedInScope =
+          patch.targetScope === "runtime"
+            ? isRuntimeEdgeType(operation.relationType)
+            : isStableEdgeType(operation.relationType);
+
+        if (!relationAllowedInScope) {
           errors.push({
             code: "invalid_relation_type",
-            message: `Unsupported relation_type ${operation.relationType}.`,
+            message: `Relation type ${operation.relationType} is not allowed in ${patch.targetScope} scope.`,
             opId: operation.opId,
           });
         }
+
+        const targetType = refTypes.get(operation.targetRef);
+        const evidenceType = resolveEvidenceRefType(
+          operation.evidenceRef,
+          refTypes,
+          existingEvidenceRefs,
+        );
+
+        if (targetKnown && evidenceKnown && (!targetType || !evidenceType)) {
+          warnings.push({
+            code: "unresolved_ref_type",
+            message: `Could not fully resolve attach_evidence refs ${operation.targetRef} -> ${operation.evidenceRef}. Pair validation was skipped.`,
+            opId: operation.opId,
+          });
+        }
+
+        if (
+          relationAllowedInScope &&
+          targetType &&
+          evidenceType &&
+          !isAllowedRelationshipPair(
+            patch.targetScope,
+            operation.relationType,
+            targetType,
+            evidenceType,
+          )
+        ) {
+          errors.push({
+            code: "invalid_relationship_pair",
+            message: `Relationship ${operation.relationType} is not allowed between ${targetType} and ${evidenceType} in ${patch.targetScope} scope.`,
+            opId: operation.opId,
+          });
+        }
+
         break;
+      }
       case "summarize_subgraph":
         if (operation.sourceRefs.length === 0) {
           warnings.push({
@@ -212,6 +292,7 @@ function validateCreateNode(
   refTypes: Map<string, GraphNodeType>,
   existingRuntimeRefs: Set<string>,
   existingCaseRefs: Set<string>,
+  knownStableIdentities: Map<OntologyNodeType, Set<string>>,
   errors: GraphPatchValidationError[],
 ): void {
   if (!isAllowedNodeTypeForScope(operation.nodeType, patch.targetScope)) {
@@ -241,6 +322,14 @@ function validateCreateNode(
 
   validateRequiredProperties(operation.nodeType, operation.properties, operation.opId, errors);
   validateCaseBinding(operation.nodeType, operation.properties, context.caseId, operation.opId, errors);
+  validateRunBinding(operation.nodeType, operation.properties, context.runId, operation.opId, errors);
+  validateStableCreateIdentity(
+    operation.nodeType,
+    operation.properties,
+    operation.opId,
+    knownStableIdentities,
+    errors,
+  );
 
   refTypes.set(operation.nodeRef, operation.nodeType);
 }
@@ -252,6 +341,7 @@ function validateMergeNode(
   refTypes: Map<string, GraphNodeType>,
   _existingRuntimeRefs: Set<string>,
   _existingCaseRefs: Set<string>,
+  knownStableIdentities: Map<OntologyNodeType, Set<string>>,
   errors: GraphPatchValidationError[],
 ): void {
   if (!isAllowedNodeTypeForScope(operation.nodeType, patch.targetScope)) {
@@ -274,6 +364,8 @@ function validateMergeNode(
   validateMergeKeys(operation.nodeType, operation.matchKeys, operation.opId, errors);
   validateRequiredProperties(operation.nodeType, operation.properties, operation.opId, errors);
   validateCaseBinding(operation.nodeType, operation.properties, context.caseId, operation.opId, errors);
+  validateRunBinding(operation.nodeType, operation.properties, context.runId, operation.opId, errors);
+  registerStableMergeIdentity(operation.nodeType, operation.matchKeys, knownStableIdentities);
 
   refTypes.set(operation.resolvedRef, operation.nodeType);
 }
@@ -315,22 +407,7 @@ function validateCreateEdge(
     return;
   }
 
-  const isAllowedPair =
-    patch.targetScope === "runtime"
-      ? runtimeRelationshipRegistry.some(
-          (rule) =>
-            rule.type === operation.edgeType &&
-            rule.from === fromType &&
-            rule.to === toType,
-        )
-      : stableRelationshipRegistry.some(
-          (rule) =>
-            rule.type === operation.edgeType &&
-            rule.from === fromType &&
-            rule.to === toType,
-        );
-
-  if (!isAllowedPair) {
+  if (!isAllowedRelationshipPair(patch.targetScope, operation.edgeType, fromType, toType)) {
     errors.push({
       code: "invalid_relationship_pair",
       message: `Relationship ${operation.edgeType} is not allowed between ${fromType} and ${toType}.`,
@@ -384,13 +461,24 @@ function validateRequiredProperties(
     MacroActorAction: ["actionId", "caseId", "actor", "actionType", "summary", "effectiveDate"],
     MarketSignal: ["signalId", "caseId", "signalType", "timeframe", "direction", "observedAt"],
     Judgment: ["judgmentId", "caseId", "stance", "confidenceBand", "summary", "asOf"],
-    Query: ["queryId", "runId", "ticker", "timeHorizon", "caseType"],
-    Task: ["taskId", "runId", "agentType", "goal", "status"],
+    Query: ["queryId", "runId", "ticker", "timeHorizon", "caseType", "createdAt"],
+    Task: ["taskId", "runId", "agentType", "goal", "inputRefs", "status", "priority"],
     Agent: ["agentId", "runId", "agentType"],
     Skill: ["skillId", "runId", "capabilityName"],
     ToolCall: ["toolCallId", "runId", "toolName", "status", "startedAt"],
     ContextItem: ["contextItemId", "runId", "refType", "refId", "sourceLayer"],
-    Finding: ["findingId", "runId", "agentType", "claim", "confidence", "impact"],
+    Finding: [
+      "findingId",
+      "runId",
+      "taskId",
+      "agentType",
+      "claim",
+      "evidenceRefs",
+      "objectRefs",
+      "confidence",
+      "impact",
+      "timestamp",
+    ],
     Decision: ["decisionId", "runId", "decisionType", "summary", "confidenceBand"],
     ReportSection: ["sectionId", "runId", "sectionKey", "title"],
   };
@@ -409,6 +497,35 @@ function validateRequiredProperties(
         opId,
       });
     }
+  }
+}
+
+function validateRunBinding(
+  nodeType: GraphNodeType,
+  properties: Record<string, unknown>,
+  runId: string,
+  opId: string,
+  errors: GraphPatchValidationError[],
+): void {
+  if (!isRuntimeNodeType(nodeType)) {
+    return;
+  }
+
+  if (!("runId" in properties)) {
+    errors.push({
+      code: "missing_required_property",
+      message: `Runtime node type ${nodeType} must carry runId.`,
+      opId,
+    });
+    return;
+  }
+
+  if (properties.runId !== runId) {
+    errors.push({
+      code: "runtime_run_id_mismatch",
+      message: `Runtime node type ${nodeType} must stay within run ${runId}.`,
+      opId,
+    });
   }
 }
 
@@ -464,6 +581,55 @@ function validateMergeKeys(
   }
 }
 
+function validateStableCreateIdentity(
+  nodeType: GraphNodeType,
+  properties: Record<string, unknown>,
+  opId: string,
+  knownStableIdentities: Map<OntologyNodeType, Set<string>>,
+  errors: GraphPatchValidationError[],
+): void {
+  if (!isOntologyNodeType(nodeType) || !hasStableNodeMergePolicy(nodeType)) {
+    return;
+  }
+
+  const signature = buildStableIdentitySignature(nodeType, properties);
+
+  if (!signature) {
+    return;
+  }
+
+  const knownIdentities = ensureStableIdentitySet(nodeType, knownStableIdentities);
+
+  if (knownIdentities.has(signature)) {
+    errors.push({
+      code: "existing_identity_requires_merge",
+      message: `${nodeType} identity already exists in the current validator context. Use merge_node instead of create_node.`,
+      opId,
+    });
+    return;
+  }
+
+  knownIdentities.add(signature);
+}
+
+function registerStableMergeIdentity(
+  nodeType: GraphNodeType,
+  matchKeys: Record<string, string | number | boolean>,
+  knownStableIdentities: Map<OntologyNodeType, Set<string>>,
+): void {
+  if (!isOntologyNodeType(nodeType) || !hasStableNodeMergePolicy(nodeType)) {
+    return;
+  }
+
+  const signature = buildStableIdentitySignature(nodeType, matchKeys);
+
+  if (!signature) {
+    return;
+  }
+
+  ensureStableIdentitySet(nodeType, knownStableIdentities).add(signature);
+}
+
 function validateImmutablePropertyUpdates(
   nodeType: GraphNodeType,
   properties: Record<string, unknown>,
@@ -496,6 +662,21 @@ function isAllowedNodeTypeForScope(
     : isOntologyNodeType(nodeType);
 }
 
+function isAllowedRelationshipPair(
+  scope: GraphPatch["targetScope"],
+  edgeType: string,
+  fromType: GraphNodeType,
+  toType: GraphNodeType,
+): boolean {
+  return scope === "runtime"
+    ? runtimeRelationshipRegistry.some(
+        (rule) => rule.type === edgeType && rule.from === fromType && rule.to === toType,
+      )
+    : stableRelationshipRegistry.some(
+        (rule) => rule.type === edgeType && rule.from === fromType && rule.to === toType,
+      );
+}
+
 function isKnownRef(
   ref: string,
   refTypes: Map<string, GraphNodeType>,
@@ -511,6 +692,73 @@ function isKnownEvidenceRef(
   existingEvidenceRefs: Set<string>,
 ): boolean {
   return refTypes.get(ref) === "Evidence" || existingEvidenceRefs.has(ref);
+}
+
+function resolveEvidenceRefType(
+  ref: string,
+  refTypes: Map<string, GraphNodeType>,
+  existingEvidenceRefs: Set<string>,
+): GraphNodeType | undefined {
+  if (refTypes.get(ref) === "Evidence" || existingEvidenceRefs.has(ref)) {
+    return "Evidence";
+  }
+
+  return refTypes.get(ref);
+}
+
+function buildStableIdentityRegistry(
+  existingStableIdentities: GraphPatchValidationContext["existingStableIdentities"],
+): Map<OntologyNodeType, Set<string>> {
+  const registry = new Map<OntologyNodeType, Set<string>>();
+
+  if (!existingStableIdentities) {
+    return registry;
+  }
+
+  for (const nodeType of ontologyNodeTypes) {
+    const identities = existingStableIdentities[nodeType];
+
+    if (!identities) {
+      continue;
+    }
+
+    registry.set(nodeType, new Set(identities));
+  }
+
+  return registry;
+}
+
+function ensureStableIdentitySet(
+  nodeType: OntologyNodeType,
+  knownStableIdentities: Map<OntologyNodeType, Set<string>>,
+): Set<string> {
+  const existingSet = knownStableIdentities.get(nodeType);
+
+  if (existingSet) {
+    return existingSet;
+  }
+
+  const nextSet = new Set<string>();
+  knownStableIdentities.set(nodeType, nextSet);
+  return nextSet;
+}
+
+function buildStableIdentitySignature(
+  nodeType: OntologyNodeType,
+  source: Record<string, unknown>,
+): string | undefined {
+  const policy = getStableNodeMergePolicy(nodeType);
+  const values: string[] = [];
+
+  for (const identityKey of policy.identityKeys) {
+    if (!(identityKey in source)) {
+      return undefined;
+    }
+
+    values.push(`${identityKey}=${JSON.stringify(source[identityKey])}`);
+  }
+
+  return `${nodeType}:${values.join("|")}`;
 }
 
 function targetsNodeType(

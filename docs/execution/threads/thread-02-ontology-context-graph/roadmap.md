@@ -44,16 +44,21 @@
 - 接入真实 `neo4j-driver`，并补了 Aura 连接验证脚本
 - 补了 `neo4j:smoke-write`，可对真实 Neo4j 做最小写入、读回验证和清理
 - 补了 `neo4j:bootstrap`，可在 Aura 中初始化 ontology/runtime registry、merge policy 和 schema constraints
+- 收紧 validator：
+  - 非法 `attach_evidence` pair / scope 会被拒绝
+  - runtime node 的 `runId` 必须匹配当前 run
+  - stable object 若命中已知 identity，必须走 `merge_node`
+  - runtime `Query` / `Task` / `Finding` 最小字段与 core contract 对齐
 
 ### In Progress
 
-- 把 thread2 的实现骨架和 thread3 / thread4 的接口边界进一步接实
+- 等待 thread3 / thread4 开工后再把 thread2 边界接入真实消费方
 - 收敛 snapshot-to-evidence mapping interface
 
 ### Not Started
 
 - snapshot-to-evidence 映射 contract 的代码层接口
-- thread2 相关测试样例
+- thread2 相关测试样例 / fixture
 
 ## Recommended Build Order
 
@@ -103,7 +108,6 @@
 - 补一组合法 / 非法 patch 样例
 - 和 thread3 对齐 `Evidence.source_type / source_ref / observed_at` 的来源
 - 和 thread4 对齐 patch 提交流程与 `patch_accepted / patch_rejected` 事件
-- 在真实 Aura 中执行 `neo4j:bootstrap` 并确认结构可见
 
 ## Dependencies
 
