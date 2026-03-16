@@ -7,6 +7,7 @@
 - 修正了 `architecture.md` 中错误的 companion spec 路径。
 - 新建 `src/research-graph/` 代码骨架，集中放 ontology registry、runtime meta graph、GraphPatch types 和 validator。
 - 新增 `graph-writer.ts`，定义 writer interface、receipt 和 `submitGraphPatch()` 提交流程。
+- 新增 `merge-policy.ts`，锁定 stable object 的 identity keys、conflict strategy 和 immutable field 规则。
 
 ## Decisions Made
 
@@ -15,6 +16,7 @@
 - 外部 provider 原始 payload 不进入图层，图层只吃 normalization 后对象。
 - Judge 只能基于 findings 和合法 patch 形成 judgment / report，不能绕过 trace。
 - runtime 和 graph writer 的第一层边界收敛为：`patch -> validate -> write -> patch_accepted / patch_rejected`
+- stable object 的 upsert 语义必须复用 merge policy，不能在 Neo4j writer 里另起一套规则。
 
 ## Risks / Open Questions
 

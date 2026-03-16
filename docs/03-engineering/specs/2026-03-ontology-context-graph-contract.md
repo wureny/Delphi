@@ -189,7 +189,63 @@ v0 只允许以下核心对象：
 - 稳定层关系以 case 聚合为主，不追求世界知识图的完备表达
 - `Judgment` 不直接依赖 runtime 节点；runtime 通过 `Decision` 去更新或引用 `Judgment`
 
-## 6. Runtime Meta Graph Registry
+## 6. Stable Object Merge Policy
+
+稳定对象在 v0 中不能“随便 merge”，必须按对象类型走固定策略。
+
+### Identity Rule
+
+- `Asset`
+  - global identity key: `ticker`
+- `InvestmentCase`
+  - case identity key: `case_id`
+- `Thesis`
+  - case identity key: `case_id + thesis_id`
+- `Evidence`
+  - case identity key: `case_id + provider + source_type + source_ref + observed_at`
+- `Risk`
+  - case identity key: `case_id + risk_id`
+- `LiquidityFactor`
+  - case identity key: `case_id + factor_id`
+- `LiquidityRegime`
+  - case identity key: `case_id + regime_id`
+- `MacroActorAction`
+  - case identity key: `case_id + action_id`
+- `MarketSignal`
+  - case identity key: `case_id + signal_id`
+- `Judgment`
+  - case identity key: `case_id + judgment_id`
+
+### Conflict Rule
+
+- `Asset`
+  - allow replace on descriptive fields
+- `InvestmentCase`
+  - reject identity rewrite; only `status` may advance
+- `Thesis`
+  - replace mutable fields in place
+- `Evidence`
+  - prefer dedupe by source identity; only allow normalized summary refresh
+- `Risk`
+  - replace mutable fields in place
+- `LiquidityFactor`
+  - replace only if newer `observed_at`
+- `LiquidityRegime`
+  - replace only if newer `observed_at`
+- `MacroActorAction`
+  - reject after creation
+- `MarketSignal`
+  - replace only if newer `observed_at`
+- `Judgment`
+  - replace only if newer `as_of`
+
+### Validator Implication
+
+- `merge_node` 必须包含该对象类型的 identity keys
+- 对 stable object 的 `update_property` 不允许修改 immutable fields
+- Neo4j writer 后续必须复用同一套 merge policy，而不是自行发明 upsert 规则
+
+## 7. Runtime Meta Graph Registry
 
 v0 runtime graph 允许的节点类型：
 
@@ -308,7 +364,7 @@ v0 runtime graph 允许的边类型：
 - 不允许稳定层对象主动连回 runtime 节点
 - `Reflection`、`MemoryPattern` 等更高阶节点不在 v0 范围内
 
-## 7. GraphPatch Write Policy
+## 8. GraphPatch Write Policy
 
 agent 不允许直接写图数据库。
 
@@ -330,7 +386,7 @@ agent 不允许直接写图数据库。
 - `case` patch 只能触达当前 `InvestmentCase` 及其锚定的稳定对象
 - 不允许 patch 修改 ontology schema、本体注册表或全局关系集
 
-## 8. Validator Rules
+## 9. Validator Rules
 
 validator 至少校验以下项目：
 
@@ -343,6 +399,8 @@ validator 至少校验以下项目：
 - 是否会造成明显图膨胀
 - `Finding`、`Decision`、`Judgment` 是否缺关键引用
 - `Evidence` 是否缺 `source_type`、`source_ref` 或 `observed_at`
+- `merge_node` 是否缺 identity keys
+- stable object 的更新是否触碰 immutable fields
 
 建议的拒绝条件：
 
@@ -351,7 +409,7 @@ validator 至少校验以下项目：
 - 试图让 Judge 在缺少 findings 的情况下直接写强结论
 - 试图把原始 provider payload 整块塞入图层
 
-## 9. Scope And Growth Control
+## 10. Scope And Growth Control
 
 v0 的 bounded runtime 是硬约束，不是抽象原则：
 
@@ -365,7 +423,7 @@ v0 的 bounded runtime 是硬约束，不是抽象原则：
 
 如果某次 run 需要大量额外节点才能表达结论，优先怀疑任务拆分过度或 schema 设计失真，而不是继续扩图。
 
-## 10. Evidence And Data Mapping Discipline
+## 11. Evidence And Data Mapping Discipline
 
 重要判断必须能回到可追踪 evidence，但 graph 中只存 normalization 后的摘要对象，不存原始 provider payload。
 
@@ -390,7 +448,7 @@ OpenBB 等数据源接入建议：
 - `Judgment` 必须能通过 `Decision -> Finding -> Evidence` 或 `ReportSection -> Finding -> Evidence` 路径回溯
 - 若 `Finding.evidence_refs` 为空，必须在 runtime 和报告中显式降低置信度
 
-## 11. What v0 Explicitly Does Not Do
+## 12. What v0 Explicitly Does Not Do
 
 - 不做完整金融世界本体
 - 不做任意 graph learning
@@ -399,7 +457,7 @@ OpenBB 等数据源接入建议：
 - 不把全部原始文本或 provider 原始 JSON 塞进 Neo4j
 - 不做多资产、多组合级图建模
 
-## 12. Acceptance Criteria
+## 13. Acceptance Criteria
 
 - 一个 run 可以在图中被完整回放为：
   `Query -> Task -> Skill / ToolCall -> Finding -> Decision -> ReportSection`

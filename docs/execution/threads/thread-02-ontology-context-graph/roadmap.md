@@ -37,11 +37,12 @@
   - [index.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/index.ts)
 - 安装本地 TypeScript 最小环境，并验证 `npm run typecheck` 可通过
 - 定义 graph writer interface 和 `submitGraphPatch()` 提交流程，打通 validator 到 writer 的调用边界
+- 定义 stable object merge policy，并接入 validator 的 `merge_node` / immutable field 校验
 
 ### In Progress
 
 - 把 thread2 的实现骨架和 thread3 / thread4 的接口边界进一步接实
-- 收敛 stable object merge policy 和 snapshot-to-evidence mapping interface
+- 收敛 snapshot-to-evidence mapping interface
 
 ### Not Started
 
@@ -93,7 +94,6 @@
 
 ## Next Concrete Tasks
 
-- 定义 stable object merge policy
 - 定义 snapshot-to-evidence mapping interface
 - 补一组合法 / 非法 patch 样例
 - 和 thread3 对齐 `Evidence.source_type / source_ref / observed_at` 的来源

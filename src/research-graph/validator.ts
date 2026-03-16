@@ -1,4 +1,8 @@
 import {
+  getStableNodeMergePolicy,
+  hasStableNodeMergePolicy,
+} from "./merge-policy.ts";
+import {
   isCaseScopedOntologyNodeType,
   isOntologyNodeType,
   isStableEdgeType,
@@ -46,7 +50,9 @@ export interface GraphPatchValidationError {
     | "judge_requires_basis"
     | "judgment_requires_judge"
     | "invalid_relation_type"
-    | "writer_failure";
+    | "writer_failure"
+    | "missing_identity_key"
+    | "immutable_field_update";
   message: string;
   opId?: string;
 }
@@ -265,6 +271,7 @@ function validateMergeNode(
     });
   }
 
+  validateMergeKeys(operation.nodeType, operation.matchKeys, operation.opId, errors);
   validateRequiredProperties(operation.nodeType, operation.properties, operation.opId, errors);
   validateCaseBinding(operation.nodeType, operation.properties, context.caseId, operation.opId, errors);
 
@@ -357,6 +364,8 @@ function validateUpdateProperty(
       opId: operation.opId,
     });
   }
+
+  validateImmutablePropertyUpdates(targetType, operation.properties, operation.opId, errors);
 }
 
 function validateRequiredProperties(
@@ -429,6 +438,52 @@ function validateCaseBinding(
       message: `Case-scoped node type ${nodeType} must stay within case ${caseId}.`,
       opId,
     });
+  }
+}
+
+function validateMergeKeys(
+  nodeType: GraphNodeType,
+  matchKeys: Record<string, string | number | boolean>,
+  opId: string,
+  errors: GraphPatchValidationError[],
+): void {
+  if (!isOntologyNodeType(nodeType) || !hasStableNodeMergePolicy(nodeType)) {
+    return;
+  }
+
+  const policy = getStableNodeMergePolicy(nodeType);
+
+  for (const identityKey of policy.identityKeys) {
+    if (!(identityKey in matchKeys)) {
+      errors.push({
+        code: "missing_identity_key",
+        message: `merge_node for ${nodeType} must include identity key ${identityKey}.`,
+        opId,
+      });
+    }
+  }
+}
+
+function validateImmutablePropertyUpdates(
+  nodeType: GraphNodeType,
+  properties: Record<string, unknown>,
+  opId: string,
+  errors: GraphPatchValidationError[],
+): void {
+  if (!isOntologyNodeType(nodeType) || !hasStableNodeMergePolicy(nodeType)) {
+    return;
+  }
+
+  const policy = getStableNodeMergePolicy(nodeType);
+
+  for (const fieldName of Object.keys(properties)) {
+    if (policy.immutableFields.includes(fieldName)) {
+      errors.push({
+        code: "immutable_field_update",
+        message: `Field ${fieldName} is immutable for stable node type ${nodeType}.`,
+        opId,
+      });
+    }
   }
 }
 

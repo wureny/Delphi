@@ -19,6 +19,8 @@ Implementation skeleton:
   - v0 ontology node types and stable relationship registry
 - `src/research-graph/runtime.ts`
   - runtime meta graph node types, edge registry, and agent roster
+- `src/research-graph/merge-policy.ts`
+  - stable object identity keys, conflict strategy, and mutable field policy
 - `src/research-graph/graph-patch.ts`
   - `GraphPatch` scope and operation contracts
 - `src/research-graph/validator.ts`
