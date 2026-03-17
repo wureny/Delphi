@@ -1,3 +1,36 @@
 # Thread 04 Notes
 
-- 
+## Locked Decisions
+
+- v0 runtime 主概念只保留 `run`，不把 `session` 引入 orchestration contract
+- Judge 第一阶段默认只写 runtime `Decision + ReportSection + FinalReport`
+- stable `Judgment` 是二阶段、条件化持久化能力
+- `ReportSection` 在 graph 中固定为 6 个 runtime 节点
+- tool / skill registry 先做静态 TypeScript 注册表
+- thread3 第一阶段不是只给 contract，占位后必须尽快接一个最小真实 OpenBB adapter
+- graph access 只能通过 thread4 的受控 tool -> thread2 graph adapter 链路
+
+## Implementation Notes
+
+- thread4 负责把一次 research run 真正串起来：
+  - RunManager
+  - PlannerRouter
+  - AgentExecutor
+  - ToolRegistry
+  - SkillRegistry
+  - GraphContextReader
+  - GraphPatchGateway
+  - JudgeSynthesizer
+  - EventBus / SSEPublisher
+  - DegradedModeHandler
+- thread4 不负责：
+  - 发明 ontology / graph schema
+  - 重做 thread3 provider normalization
+  - 给 agent 真实 shell 权限
+  - 动态 agent marketplace
+  - 配置化 workflow 系统
+
+## Open Follow-Ups
+
+- thread2 未来可能还需要补更适合 runtime 消费的 graph CLI / SDK / API
+- 如果后续考虑接 OpenAI Agents SDK，只应放在 execution / session-continuity 层，不拥有 Delphi 的 run / case / graph / report 语义

@@ -2,6 +2,11 @@
 
 这份文档锁定 v0 的 6 个内部核心接口。后续实现 agent、graph writer、UI 和 eval 应优先遵循这里，而不是临时发明字段。
 
+补充说明：
+
+- v0 orchestration contract 统一以 `run_id` 为唯一 runtime 作用域
+- `session_id` 若存在，只属于应用层或数据层元数据，不进入这里的核心 runtime interface
+
 ## 1. ResearchQuery
 
 代表用户发起的一次研究请求。
@@ -182,6 +187,11 @@
 - `degraded_mode_entered`
 - `report_ready`
 
+### Notes
+
+- 所有 `RunEvent` 都必须是 run-scoped
+- UI 只消费 `RunEvent`，不依赖 runtime 内存中的隐式状态
+
 ## 6. FinalReport
 
 代表用户最终看到的结构化研究结论。
@@ -216,6 +226,7 @@
 - `section_citations` 至少要让每个 section 回指到若干 `Finding`
 - 最终报告中的核心判断应能回指至少一部分 findings
 - 结构顺序固定，便于评估和 UI 渲染
+- 对应的 runtime `ReportSection` 固定为 6 个 section 节点，即使内容为空也保留
 
 ## 7. Compatibility Policy
 

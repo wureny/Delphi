@@ -37,11 +37,17 @@
 
 - 目标：
   - 整合前 3 个 agent 的 findings
-  - 补充必要 task
-  - 产出最终 judgment 和 final report
+  - 仅在必要时补充轻量 task
+  - 产出 runtime `Decision`、固定 6 个 `ReportSection` 和 `FinalReport`
 - 主要输出：
-  - `Judgment`
+  - `Decision`
+  - `ReportSection`
   - `FinalReport`
+
+补充说明：
+
+- v0 第一阶段不强制每次 run 都写 stable `Judgment`
+- stable `Judgment` 视为后续的条件化持久化产物，不是 Judge 的默认必选动作
 
 ## 2. Shared Rules
 
@@ -52,6 +58,7 @@
 - 只输出 graph patch，不直接写图数据库
 - 不发明未注册 ontology label
 - 只在本次 run scope 内创建 runtime 节点
+- 只能通过 thread4 暴露的受控 tools 访问 graph、data 和 report helpers
 
 所有 agent 都禁止：
 
@@ -59,6 +66,7 @@
 - 在数据缺失时假装信息完整
 - 直接给出与职责不匹配的大而全结论
 - 输出无法被追踪的 reasoning
+- 直接拿 shell 权限执行任意 CLI / 任意 Cypher
 
 ## 3. Handoff Contract
 
@@ -78,10 +86,16 @@
 
 Judge 至少输出：
 
-- `judgment`
+- `decision`
 - `confidence_band`
+- `report_sections`
 - `report`
 - `citations_to_findings[]`
+
+补充要求：
+
+- `report_sections` 固定为 6 个 section
+- 即使某 section 内容为空，也保留对应 section 输出，并显式标记不确定性或 degraded
 
 ## 5. Event Emission Rules
 
@@ -97,7 +111,7 @@ Judge 至少输出：
 ## 6. Failure Handling
 
 - 缺数据：输出 partial finding，并标记 uncertainty
-- tool 失败：允许重试一次；失败后进入 degraded mode
+- tool 失败：记录失败并进入 degraded mode，不要求自动重试
 - patch 非法：禁止静默忽略，必须记录 rejected event
 - Judge 证据不足：必须降低 confidence，不能硬合成强结论
 
