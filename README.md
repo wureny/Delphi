@@ -33,3 +33,9 @@ Implementation skeleton:
   - real Neo4j driver executor and env-based connection config
 - `src/research-graph/index.ts`
   - single entrypoint for thread2 graph contracts
+- `src/data-layer/`
+  - thread3 runtime adapter, normalization, evidence-ready mapping, and OpenBB integration
+
+OpenBB local setup:
+
+- [openbb-local-setup.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/openbb-local-setup.md)

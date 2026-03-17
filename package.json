@@ -8,7 +8,9 @@
     "check:research-graph": "tsx ./src/research-graph/index.ts",
     "neo4j:smoke-write": "tsx ./scripts/run-neo4j-smoke-write.ts",
     "neo4j:verify": "tsx ./scripts/check-neo4j-connectivity.ts",
-    "runtime:demo": "node --import tsx ./scripts/run-runtime-demo.ts",
+    "openbb:smoke": "tsx ./scripts/run-openbb-adapter-smoke.ts",
+    "runtime:demo": "tsx ./scripts/run-runtime-demo.ts",
+    "runtime:demo:openbb": "RUNTIME_DATA_MODE=openbb tsx ./scripts/run-runtime-demo.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
