@@ -51,6 +51,7 @@
   - planner completed
   - fixed 4 tasks assigned
   - non-Judge findings created
+  - `Finding -UPDATES-> stable object` runtime edges 已补上
   - runtime scaffold patch accepted
   - Judge decision / report / citation patches accepted
   - final report ready

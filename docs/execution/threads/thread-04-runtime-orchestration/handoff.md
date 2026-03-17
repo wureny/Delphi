@@ -6,6 +6,7 @@
 - 更新了 runtime/core/agent 三份相关合同，使其和 thread4 当前实现一致。
 - 新建 `src/orchestration/` 最小 runtime 骨架，包含 run manager、planner、event sink、static registry、graph patch gateway、report builder、orchestrator。
 - 新增 fixture data adapter、fixture graph context reader、4 个 fixture executors 和 demo runner。
+- 已在 runtime finding patch 中补上 `Finding -UPDATES-> stable object` edges，覆盖 `Thesis`、`Risk`、`LiquidityFactor`、`LiquidityRegime`、`MarketSignal`。
 - 现在可以通过 `npm run runtime:demo` 跑通一条不依赖 UI 的最小 orchestration 闭环。
 
 ## Decisions Made

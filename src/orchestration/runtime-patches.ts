@@ -137,6 +137,27 @@ export function buildFindingPatch(
         timestamp: finding.timestamp,
       },
     });
+
+    const uniqueObjectRefs = [...new Set(finding.objectRefs)];
+
+    for (const objectRef of uniqueObjectRefs) {
+      const targetNodeType = inferUpdatableStableNodeType(objectRef);
+
+      if (!targetNodeType) {
+        continue;
+      }
+
+      operations.push({
+        opId: `op:${finding.findingId}:${objectRef}:updates`,
+        type: "create_edge",
+        edgeType: "UPDATES",
+        fromRef: finding.findingId,
+        toRef: objectRef,
+        properties: {
+          targetNodeType,
+        },
+      });
+    }
   }
 
   return {
@@ -350,6 +371,32 @@ export function buildJudgeCitationPatches(
 
 function buildAgentRef(runId: string, agentType: AgentType): string {
   return `agent:${runId}:${agentType}`;
+}
+
+function inferUpdatableStableNodeType(
+  ref: string,
+): "Thesis" | "Risk" | "LiquidityFactor" | "LiquidityRegime" | "MarketSignal" | null {
+  if (ref.startsWith("thesis:")) {
+    return "Thesis";
+  }
+
+  if (ref.startsWith("risk:")) {
+    return "Risk";
+  }
+
+  if (ref.startsWith("liquidityfactor:")) {
+    return "LiquidityFactor";
+  }
+
+  if (ref.startsWith("liquidityregime:")) {
+    return "LiquidityRegime";
+  }
+
+  if (ref.startsWith("marketsignal:")) {
+    return "MarketSignal";
+  }
+
+  return null;
 }
 
 function chunkOperations(
