@@ -1,4 +1,5 @@
 import type { AgentType } from "../research-graph/runtime.ts";
+import type { StableObjectType } from "./stable-objects.ts";
 
 export const caseTypes = [
   "buy_decision",
@@ -95,6 +96,7 @@ export interface DecisionRecord {
   summary: string;
   confidenceBand: string;
   basisFindingRefs: string[];
+  updatedObjectRefs: string[];
 }
 
 export const finalReportSectionKeys = [
@@ -120,6 +122,7 @@ export interface ReportSectionRecord {
   content: string;
   citationFindingRefs: string[];
   citationEvidenceRefs: string[];
+  citationObjectRefs: string[];
   status: ReportSectionStatus;
 }
 
@@ -140,6 +143,11 @@ export interface FinalReport {
   liquidityContext: string;
   whatChangesTheView: string;
   sectionCitations: SectionCitationMap;
+  updatedObjectRefs: string[];
+  sectionObjectRefs: {
+    [K in FinalReportSectionKey]: string[];
+  };
+  updatedObjectTypes: StableObjectType[];
 }
 
 const caseTypeSet = new Set<string>(caseTypes);

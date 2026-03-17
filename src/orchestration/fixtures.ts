@@ -11,6 +11,11 @@ import {
   defaultRefreshPolicies,
   isInspectableRuntimeDataAdapter,
 } from "../data-layer/contracts.ts";
+import type { RuntimeArtifactsStore } from "../data-layer/store.ts";
+import {
+  FileSystemRuntimeArtifactsStore as FileArtifactsStore,
+  NoopRuntimeArtifactsStore as NoopArtifactsStore,
+} from "../data-layer/store.ts";
 import type {
   AgentExecutionContext,
   AgentExecutionResult,
@@ -43,11 +48,30 @@ import {
   buildJudgeReportPatch,
 } from "./runtime-patches.ts";
 import { createRunEvent } from "./events.ts";
+import {
+  collectStableObjectRefs,
+  collectStableObjectRefsForSection,
+  inferStableObjectType,
+} from "./stable-objects.ts";
 
 export class FixtureRuntimeDataAdapter
   implements RuntimeDataAdapter, InspectableRuntimeDataAdapter
 {
   private readonly artifactsByRun = new Map<string, RuntimeDataArtifacts>();
+  private readonly artifactsStore: RuntimeArtifactsStore;
+
+  constructor(options: { artifactsStore?: RuntimeArtifactsStore } = {}) {
+    this.artifactsStore = options.artifactsStore ?? new NoopArtifactsStore();
+  }
+
+  static fromEnv(env: NodeJS.ProcessEnv = process.env): FixtureRuntimeDataAdapter {
+    return new FixtureRuntimeDataAdapter({
+      artifactsStore:
+        env.DELPHI_PERSIST_DATA_ARTIFACTS === "true"
+          ? FileArtifactsStore.fromEnv(env)
+          : new NoopArtifactsStore(),
+    });
+  }
 
   getArtifacts(runId: string): RuntimeDataArtifacts | null {
     return this.artifactsByRun.get(runId) ?? null;
@@ -65,7 +89,7 @@ export class FixtureRuntimeDataAdapter
       ],
     };
 
-    this.storeArtifacts(runId, "company", {
+    await this.storeArtifacts(runId, "company", {
       snapshot,
       rawSnapshots: [
         createFixtureRawSnapshot(runId, ticker, "company_profile", {
@@ -103,7 +127,7 @@ export class FixtureRuntimeDataAdapter
       ],
     };
 
-    this.storeArtifacts(runId, "news", {
+    await this.storeArtifacts(runId, "news", {
       snapshot,
       rawSnapshots: [
         createFixtureRawSnapshot(runId, ticker, "company_news", snapshot.items),
@@ -138,7 +162,7 @@ export class FixtureRuntimeDataAdapter
       ],
     };
 
-    this.storeArtifacts(runId, "market", {
+    await this.storeArtifacts(runId, "market", {
       snapshot,
       rawSnapshots: [
         createFixtureRawSnapshot(runId, ticker, "market_quote", {
@@ -175,7 +199,7 @@ export class FixtureRuntimeDataAdapter
       ],
     };
 
-    this.storeArtifacts(runId, "macro", {
+    await this.storeArtifacts(runId, "macro", {
       snapshot,
       rawSnapshots: [
         createFixtureRawSnapshot(runId, undefined, "macro_effr", {
@@ -195,16 +219,18 @@ export class FixtureRuntimeDataAdapter
     return snapshot;
   }
 
-  private storeArtifacts<TSnapshot>(
+  private async storeArtifacts<TSnapshot>(
     runId: string,
     kind: keyof Omit<RuntimeDataArtifacts, "runId">,
     bundle: SnapshotArtifacts<TSnapshot>,
-  ): void {
+  ): Promise<void> {
     const current = this.artifactsByRun.get(runId) ?? { runId };
     this.artifactsByRun.set(runId, {
       ...current,
       [kind]: bundle,
     });
+
+    await this.artifactsStore.persistBundle(runId, kind, bundle);
   }
 }
 
@@ -429,6 +455,7 @@ class FixtureJudgeExecutor implements AgentExecutor {
           : `${context.query.ticker} has a workable case, but the evidence base is not strong enough for a high-conviction call.`,
       confidenceBand: mixedCount > 0 ? "medium" : "medium_high",
       basisFindingRefs,
+      updatedObjectRefs: collectStableObjectRefs(context.upstreamFindings),
     };
 
     const sectionContents = buildSectionContents(context.upstreamFindings, decision.summary);
@@ -437,6 +464,7 @@ class FixtureJudgeExecutor implements AgentExecutor {
       content: sectionContents[section.sectionKey],
       citationFindingRefs: pickCitationFindingRefs(context.upstreamFindings, section.sectionKey),
       citationEvidenceRefs: pickCitationEvidenceRefs(context.upstreamFindings, section.sectionKey),
+      citationObjectRefs: pickCitationObjectRefs(context.upstreamFindings, section.sectionKey),
       status: (sectionContents[section.sectionKey] ? "ready" : "empty") as ReportSectionStatus,
     }));
 
@@ -934,12 +962,31 @@ function buildSectionContents(
   findings: readonly FindingRecord[],
   decisionSummary: string,
 ): Record<FinalReportSectionKey, string> {
+  const thesisObjects = formatStableObjects(
+    collectStableObjectRefsForSection(findings, "core_thesis"),
+  );
+  const riskObjects = formatStableObjects(
+    collectStableObjectRefsForSection(findings, "key_risks"),
+  );
+  const liquidityObjects = formatStableObjects(
+    collectStableObjectRefsForSection(findings, "liquidity_context"),
+  );
+
   return {
-    final_judgment: decisionSummary,
-    core_thesis: summarizeByAgent(findings, "thesis"),
+    final_judgment: `${decisionSummary} Updated objects: ${formatStableObjects(collectStableObjectRefs(findings)) || "none"}.`,
+    core_thesis: appendStableObjectSummary(
+      summarizeByAgent(findings, "thesis"),
+      thesisObjects,
+    ),
     supporting_evidence: summarizeByImpact(findings, "positive"),
-    key_risks: summarizeByImpact(findings, "mixed"),
-    liquidity_context: summarizeByAgent(findings, "liquidity"),
+    key_risks: appendStableObjectSummary(
+      summarizeByImpact(findings, "mixed"),
+      riskObjects,
+    ),
+    liquidity_context: appendStableObjectSummary(
+      summarizeByAgent(findings, "liquidity"),
+      liquidityObjects,
+    ),
     what_changes_the_view:
       "The view would weaken if execution deteriorates, liquidity turns restrictive, or market positioning becomes obviously crowded.",
   };
@@ -993,6 +1040,34 @@ function pickCitationEvidenceRefs(
     default:
       return [];
   }
+}
+
+function pickCitationObjectRefs(
+  findings: readonly FindingRecord[],
+  sectionKey: FinalReportSectionKey,
+): string[] {
+  return collectStableObjectRefsForSection(findings, sectionKey);
+}
+
+function appendStableObjectSummary(content: string, stableObjectSummary: string): string {
+  if (!stableObjectSummary) {
+    return content;
+  }
+
+  return `${content} Updated objects: ${stableObjectSummary}.`.trim();
+}
+
+function formatStableObjects(refs: readonly string[]): string {
+  if (refs.length === 0) {
+    return "";
+  }
+
+  const labels = refs.map((ref) => {
+    const nodeType = inferStableObjectType(ref) ?? "Unknown";
+    return `${nodeType}(${ref})`;
+  });
+
+  return labels.join(", ");
 }
 
 function pickCitationFindingRefs(

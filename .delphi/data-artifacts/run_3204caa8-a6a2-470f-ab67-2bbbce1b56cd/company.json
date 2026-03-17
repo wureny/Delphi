@@ -1,0 +1,60 @@
+{
+  "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+  "bundleKind": "company",
+  "persistedAt": "2026-03-17T08:20:17.519Z",
+  "bundle": {
+    "snapshot": {
+      "ticker": "AAPL",
+      "observedAt": "2026-03-17T08:20:17.516Z",
+      "companyName": "AAPL Holdings",
+      "businessSummary": "AAPL is treated as a high-quality large-cap equity in the fixture runtime.",
+      "keyPoints": [
+        "Revenue mix remains diversified.",
+        "Recent execution has stayed within expected range."
+      ]
+    },
+    "rawSnapshots": [
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_profile",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "company_profile",
+        "fetchedAt": "2026-03-17T08:20:17.516Z",
+        "requestKey": "fixture:company_profile",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "company_profile",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "short_cache",
+          "ttlMs": 21600000,
+          "staleIfErrorTtlMs": 86400000,
+          "allowStaleOnError": true
+        },
+        "payload": {
+          "companyName": "AAPL Holdings",
+          "businessSummary": "AAPL is treated as a high-quality large-cap equity in the fixture runtime."
+        },
+        "ticker": "AAPL"
+      }
+    ],
+    "evidenceCandidates": [
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_profile:AAPL is treated as a hig",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "company_profile",
+        "sourceRef": "company_profile:2026-03-17T08:20:17.516Z",
+        "observedAt": "2026-03-17T08:20:17.516Z",
+        "summary": "AAPL is treated as a high-quality large-cap equity in the fixture runtime.",
+        "supportedObjects": [
+          "Thesis",
+          "Risk"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_profile",
+        "ticker": "AAPL"
+      }
+    ],
+    "degradedReasons": [],
+    "cacheStatus": "miss"
+  }
+}

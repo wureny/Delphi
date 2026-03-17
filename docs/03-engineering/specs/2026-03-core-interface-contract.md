@@ -76,6 +76,11 @@
 - `evidence_refs` 可以为空，但若为空必须标注低置信度
 - `impact` 建议用 `positive / neutral / negative / mixed`
 
+### Optional lineage metadata
+
+- `object_refs` 在 v0 中可进一步作为 Judge / report 的 stable-object lineage 输入
+- 当 `object_refs` 指向稳定对象时，runtime 可据此补 `Finding -UPDATES-> stable object`
+
 ## 4. GraphPatch
 
 代表 agent 对图层提出的结构化写入请求。
@@ -227,6 +232,17 @@
 - 最终报告中的核心判断应能回指至少一部分 findings
 - 结构顺序固定，便于评估和 UI 渲染
 - 对应的 runtime `ReportSection` 固定为 6 个 section 节点，即使内容为空也保留
+
+### Optional lineage metadata
+
+- `Decision` 可额外携带 `updated_object_refs`
+- `ReportSection` 可额外携带 `citation_object_refs`
+- `FinalReport` 可额外携带：
+  - `updated_object_refs`
+  - `section_object_refs`
+  - `updated_object_types`
+
+这些字段不是 v0 的必填接口，但允许 Judge / UI / eval 更明确知道本轮 run 更新了哪些稳定对象
 
 ## 7. Compatibility Policy
 

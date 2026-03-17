@@ -1,0 +1,108 @@
+{
+  "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+  "bundleKind": "macro",
+  "persistedAt": "2026-03-17T08:20:17.520Z",
+  "bundle": {
+    "snapshot": {
+      "observedAt": "2026-03-17T08:20:17.520Z",
+      "regimeLabel": "neutral_to_supportive",
+      "ratesSummary": "Rates pressure is manageable and liquidity conditions are not actively tightening.",
+      "liquiditySignals": [
+        "Liquidity backdrop is stable.",
+        "Macro conditions do not obviously block multiple expansion."
+      ]
+    },
+    "rawSnapshots": [
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_effr",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "macro_effr",
+        "fetchedAt": "2026-03-17T08:20:17.520Z",
+        "requestKey": "fixture:macro_effr",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "macro_effr",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "daily_refresh",
+          "ttlMs": 86400000,
+          "staleIfErrorTtlMs": 259200000,
+          "allowStaleOnError": true
+        },
+        "payload": {
+          "ratesSummary": "Rates pressure is manageable and liquidity conditions are not actively tightening."
+        }
+      },
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_treasury_rates",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "macro_treasury_rates",
+        "fetchedAt": "2026-03-17T08:20:17.520Z",
+        "requestKey": "fixture:macro_treasury_rates",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "macro_treasury_rates",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "daily_refresh",
+          "ttlMs": 86400000,
+          "staleIfErrorTtlMs": 259200000,
+          "allowStaleOnError": true
+        },
+        "payload": [
+          "Liquidity backdrop is stable.",
+          "Macro conditions do not obviously block multiple expansion."
+        ]
+      }
+    ],
+    "evidenceCandidates": [
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_effr:Rates pressure is manage",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "macro_effr",
+        "sourceRef": "macro_effr:2026-03-17T08:20:17.520Z",
+        "observedAt": "2026-03-17T08:20:17.520Z",
+        "summary": "Rates pressure is manageable and liquidity conditions are not actively tightening.",
+        "supportedObjects": [
+          "MacroActorAction",
+          "LiquidityFactor",
+          "LiquidityRegime"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_effr"
+      },
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_treasury_rates:Liquidity backdrop is st",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "macro_treasury_rates",
+        "sourceRef": "macro_treasury_rates:2026-03-17T08:20:17.520Z",
+        "observedAt": "2026-03-17T08:20:17.520Z",
+        "summary": "Liquidity backdrop is stable.",
+        "supportedObjects": [
+          "MacroActorAction",
+          "LiquidityFactor",
+          "LiquidityRegime"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_treasury_rates"
+      },
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_treasury_rates:Macro conditions do not ",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "macro_treasury_rates",
+        "sourceRef": "macro_treasury_rates:2026-03-17T08:20:17.520Z",
+        "observedAt": "2026-03-17T08:20:17.520Z",
+        "summary": "Macro conditions do not obviously block multiple expansion.",
+        "supportedObjects": [
+          "MacroActorAction",
+          "LiquidityFactor",
+          "LiquidityRegime"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:macro_treasury_rates"
+      }
+    ],
+    "degradedReasons": [],
+    "cacheStatus": "miss"
+  }
+}

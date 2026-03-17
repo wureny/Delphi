@@ -8,6 +8,7 @@ import type {
   ReportSectionRecord,
   RunRecord,
 } from "./contracts.ts";
+import { inferRuntimeUpdatableStableNodeType } from "./stable-objects.ts";
 
 export function buildRuntimeScaffoldPatch(
   run: RunRecord,
@@ -141,7 +142,7 @@ export function buildFindingPatch(
     const uniqueObjectRefs = [...new Set(finding.objectRefs)];
 
     for (const objectRef of uniqueObjectRefs) {
-      const targetNodeType = inferUpdatableStableNodeType(objectRef);
+      const targetNodeType = inferRuntimeUpdatableStableNodeType(objectRef);
 
       if (!targetNodeType) {
         continue;
@@ -251,15 +252,16 @@ export function buildJudgeDecisionPatch(
       type: "create_node",
       nodeRef: decision.decisionId,
       nodeType: "Decision",
-      properties: {
-        decisionId: decision.decisionId,
-        runId: decision.runId,
-        decisionType: decision.decisionType,
-        summary: decision.summary,
-        confidenceBand: decision.confidenceBand,
+        properties: {
+          decisionId: decision.decisionId,
+          runId: decision.runId,
+          decisionType: decision.decisionType,
+          summary: decision.summary,
+          confidenceBand: decision.confidenceBand,
+          updatedObjectRefs: decision.updatedObjectRefs,
+        },
       },
-    },
-  ];
+    ];
 
   for (const findingRef of decision.basisFindingRefs) {
     operations.push({
@@ -303,6 +305,7 @@ export function buildJudgeReportPatch(
           sectionKey: section.sectionKey,
           title: section.title,
           content: section.content,
+          citationObjectRefs: section.citationObjectRefs,
           status: section.status,
         },
       },
@@ -371,32 +374,6 @@ export function buildJudgeCitationPatches(
 
 function buildAgentRef(runId: string, agentType: AgentType): string {
   return `agent:${runId}:${agentType}`;
-}
-
-function inferUpdatableStableNodeType(
-  ref: string,
-): "Thesis" | "Risk" | "LiquidityFactor" | "LiquidityRegime" | "MarketSignal" | null {
-  if (ref.startsWith("thesis:")) {
-    return "Thesis";
-  }
-
-  if (ref.startsWith("risk:")) {
-    return "Risk";
-  }
-
-  if (ref.startsWith("liquidityfactor:")) {
-    return "LiquidityFactor";
-  }
-
-  if (ref.startsWith("liquidityregime:")) {
-    return "LiquidityRegime";
-  }
-
-  if (ref.startsWith("marketsignal:")) {
-    return "MarketSignal";
-  }
-
-  return null;
 }
 
 function chunkOperations(

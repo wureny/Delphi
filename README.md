@@ -35,6 +35,7 @@ Implementation skeleton:
   - single entrypoint for thread2 graph contracts
 - `src/data-layer/`
   - thread3 runtime adapter, normalization, evidence-ready mapping, and OpenBB integration
+  - includes local file-backed artifact persistence for raw snapshots and evidence-ready bundles
 
 OpenBB local setup:
 

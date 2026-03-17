@@ -67,6 +67,7 @@ Judge 额外步骤：
 - v0 第一阶段，Judge 默认先写 runtime `Decision + ReportSection`
 - stable `Judgment` 不是每次 run 的强制产物
 - 只有当结果不是 degraded、evidence 足够、且相关 patch 校验通过时，后续阶段才考虑额外持久化 stable `Judgment`
+- Judge 可消费 `Finding.object_refs` 形成 stable-object lineage 元数据，用于报告与后续 UI trace
 
 ## 4. Tool / Skill Registry Contract
 

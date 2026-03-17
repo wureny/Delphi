@@ -52,6 +52,7 @@
   - fixed 4 tasks assigned
   - non-Judge findings created
   - `Finding -UPDATES-> stable object` runtime edges 已补上
+  - Judge / report 已携带 stable-object lineage metadata
   - runtime scaffold patch accepted
   - Judge decision / report / citation patches accepted
   - final report ready

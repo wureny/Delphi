@@ -29,6 +29,12 @@ thread3 第一阶段不是交付“大数据系统”，而是交付：
 - raw snapshots
 - cache 和中间结构化结果
 
+当前实现状态：
+
+- v0 当前仓库里已经有真实的 raw snapshot / normalized snapshot / evidence-ready artifacts 持久化能力
+- 现阶段先落到本地文件 store，作为 thread3 的最小真实 persistence
+- 真正切到 Supabase 仍需要连接信息、表结构和凭证，不在当前仓库内假装已经完成
+
 ### Neo4j
 
 负责：
@@ -141,6 +147,14 @@ thread3 必须明确哪些数据最终支持哪些 ontology objects：
 - `report_sections`
 - `run_failures`
 
+补充说明：
+
+- 当前代码还没有直接写 Supabase
+- 在未提供 Supabase 凭证前，thread3 使用本地文件 store 保留：
+  - raw snapshots
+  - normalized snapshot bundles
+  - evidence-ready candidates
+
 ## 8. Refresh Policy
 
 ### Query-triggered + short cache
@@ -202,6 +216,7 @@ thread3 必须明确哪些数据最终支持哪些 ontology objects：
 - 某个数据源失败不应阻止整次 run 完成
 - 所有降级都应通过 `RunEvent` 和报告提示出来
 - stale cache fallback 是允许的降级手段，但必须显式记录
+- 持久化失败不应污染 runtime contract，但必须作为 thread3 的 store 层错误显式暴露
 
 ## 12. What v0 Explicitly Avoids
 

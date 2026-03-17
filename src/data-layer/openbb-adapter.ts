@@ -15,6 +15,11 @@ import type {
 import { defaultRefreshPolicies, type InspectableRuntimeDataAdapter } from "./contracts.ts";
 import { OpenBBRestClient } from "./openbb-client.ts";
 import {
+  FileSystemRuntimeArtifactsStore,
+  NoopRuntimeArtifactsStore,
+  type RuntimeArtifactsStore,
+} from "./store.ts";
+import {
   makeSourceRecord,
   normalizeCompanyBundle,
   normalizeMacroBundle,
@@ -25,6 +30,7 @@ import {
 
 interface OpenBBRuntimeDataAdapterOptions {
   client?: OpenBBRestClient;
+  artifactsStore?: RuntimeArtifactsStore;
 }
 
 type BundleKind = keyof Omit<RuntimeDataArtifacts, "runId">;
@@ -35,14 +41,20 @@ export class OpenBBRuntimeDataAdapter
   private readonly client: OpenBBRestClient;
   private readonly cache = new MemoryTtlCache<SnapshotArtifacts<unknown>>();
   private readonly artifactsByRun = new Map<string, RuntimeDataArtifacts>();
+  private readonly artifactsStore: RuntimeArtifactsStore;
 
   constructor(options: OpenBBRuntimeDataAdapterOptions = {}) {
     this.client = options.client ?? OpenBBRestClient.fromEnv();
+    this.artifactsStore = options.artifactsStore ?? new NoopRuntimeArtifactsStore();
   }
 
   static fromEnv(env: NodeJS.ProcessEnv = process.env): OpenBBRuntimeDataAdapter {
     return new OpenBBRuntimeDataAdapter({
       client: OpenBBRestClient.fromEnv(env),
+      artifactsStore:
+        env.DELPHI_PERSIST_DATA_ARTIFACTS === "true"
+          ? FileSystemRuntimeArtifactsStore.fromEnv(env)
+          : new NoopRuntimeArtifactsStore(),
     });
   }
 
@@ -262,7 +274,7 @@ export class OpenBBRuntimeDataAdapter
         effectivePolicy.ttlMs,
         effectivePolicy.staleIfErrorTtlMs,
       );
-      this.storeArtifacts(runId, kind, bundle);
+      await this.storeArtifacts(runId, kind, bundle);
       return bundle;
     } catch (error) {
       if (cacheLookup.status === "stale" && cacheLookup.value && effectivePolicy.allowStaleOnError) {
@@ -270,7 +282,7 @@ export class OpenBBRuntimeDataAdapter
           cacheLookup.value as SnapshotArtifacts<TSnapshot>,
           `Using stale cached ${kind} snapshot because fresh provider fetch failed: ${toErrorMessage(error)}`,
         );
-        this.storeArtifacts(runId, kind, staleBundle);
+        await this.storeArtifacts(runId, kind, staleBundle);
         return staleBundle;
       }
 
@@ -278,16 +290,18 @@ export class OpenBBRuntimeDataAdapter
     }
   }
 
-  private storeArtifacts<TSnapshot>(
+  private async storeArtifacts<TSnapshot>(
     runId: string,
     kind: BundleKind,
     bundle: SnapshotArtifacts<TSnapshot>,
-  ): void {
+  ): Promise<void> {
     const current = this.artifactsByRun.get(runId) ?? { runId };
     this.artifactsByRun.set(runId, {
       ...current,
       [kind]: bundle,
     });
+
+    await this.artifactsStore.persistBundle(runId, kind, bundle);
   }
 }
 

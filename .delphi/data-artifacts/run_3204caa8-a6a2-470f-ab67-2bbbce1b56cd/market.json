@@ -1,0 +1,97 @@
+{
+  "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+  "bundleKind": "market",
+  "persistedAt": "2026-03-17T08:20:17.521Z",
+  "bundle": {
+    "snapshot": {
+      "ticker": "AAPL",
+      "observedAt": "2026-03-17T08:20:17.521Z",
+      "latestPrice": 187.42,
+      "priceChangePct": 1.8,
+      "volume": 1280000,
+      "signalSummaries": [
+        "Price trend is constructive but not euphoric.",
+        "Positioning looks supportive rather than crowded."
+      ]
+    },
+    "rawSnapshots": [
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_quote",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "market_quote",
+        "fetchedAt": "2026-03-17T08:20:17.521Z",
+        "requestKey": "fixture:market_quote",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "market_quote",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "short_cache",
+          "ttlMs": 300000,
+          "staleIfErrorTtlMs": 1800000,
+          "allowStaleOnError": true
+        },
+        "payload": {
+          "latestPrice": 187.42,
+          "priceChangePct": 1.8,
+          "volume": 1280000
+        },
+        "ticker": "AAPL"
+      },
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_historical",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "market_historical",
+        "fetchedAt": "2026-03-17T08:20:17.521Z",
+        "requestKey": "fixture:market_historical",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "market_historical",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "short_cache",
+          "ttlMs": 1800000,
+          "staleIfErrorTtlMs": 21600000,
+          "allowStaleOnError": true
+        },
+        "payload": [
+          "Price trend is constructive but not euphoric.",
+          "Positioning looks supportive rather than crowded."
+        ],
+        "ticker": "AAPL"
+      }
+    ],
+    "evidenceCandidates": [
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_quote:Price trend is construct",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "market_quote",
+        "sourceRef": "market_quote:2026-03-17T08:20:17.521Z",
+        "observedAt": "2026-03-17T08:20:17.521Z",
+        "summary": "Price trend is constructive but not euphoric.",
+        "supportedObjects": [
+          "MarketSignal"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_quote",
+        "ticker": "AAPL"
+      },
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_historical:Positioning looks suppor",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "market_historical",
+        "sourceRef": "market_historical:2026-03-17T08:20:17.521Z",
+        "observedAt": "2026-03-17T08:20:17.521Z",
+        "summary": "Positioning looks supportive rather than crowded.",
+        "supportedObjects": [
+          "MarketSignal"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:market_historical",
+        "ticker": "AAPL"
+      }
+    ],
+    "degradedReasons": [],
+    "cacheStatus": "miss"
+  }
+}

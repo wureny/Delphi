@@ -1,0 +1,93 @@
+{
+  "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+  "bundleKind": "news",
+  "persistedAt": "2026-03-17T08:20:17.518Z",
+  "bundle": {
+    "snapshot": {
+      "ticker": "AAPL",
+      "observedAt": "2026-03-17T08:20:17.516Z",
+      "items": [
+        {
+          "id": "news:AAPL:1",
+          "headline": "AAPL management reiterates operating priorities",
+          "summary": "Management commentary remains constructive but measured.",
+          "publishedAt": "2026-03-17T08:20:17.516Z"
+        },
+        {
+          "id": "news:AAPL:2",
+          "headline": "AAPL faces mixed near-term sentiment",
+          "summary": "Market participants appear constructive on fundamentals but selective on timing.",
+          "publishedAt": "2026-03-17T08:20:17.516Z"
+        }
+      ]
+    },
+    "rawSnapshots": [
+      {
+        "snapshotId": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_news",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "company_news",
+        "fetchedAt": "2026-03-17T08:20:17.516Z",
+        "requestKey": "fixture:company_news",
+        "requestParams": {},
+        "cachePolicy": {
+          "sourceType": "company_news",
+          "refreshTrigger": "query_triggered",
+          "cacheClass": "short_cache",
+          "ttlMs": 900000,
+          "staleIfErrorTtlMs": 7200000,
+          "allowStaleOnError": true
+        },
+        "payload": [
+          {
+            "id": "news:AAPL:1",
+            "headline": "AAPL management reiterates operating priorities",
+            "summary": "Management commentary remains constructive but measured.",
+            "publishedAt": "2026-03-17T08:20:17.516Z"
+          },
+          {
+            "id": "news:AAPL:2",
+            "headline": "AAPL faces mixed near-term sentiment",
+            "summary": "Market participants appear constructive on fundamentals but selective on timing.",
+            "publishedAt": "2026-03-17T08:20:17.516Z"
+          }
+        ],
+        "ticker": "AAPL"
+      }
+    ],
+    "evidenceCandidates": [
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_news:Management commentary re",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "company_news",
+        "sourceRef": "news:AAPL:1",
+        "observedAt": "2026-03-17T08:20:17.516Z",
+        "summary": "Management commentary remains constructive but measured.",
+        "supportedObjects": [
+          "Thesis",
+          "Risk"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_news",
+        "ticker": "AAPL"
+      },
+      {
+        "candidateId": "candidate:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_news:Market participants appe",
+        "runId": "run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd",
+        "provider": "fixture",
+        "sourceType": "company_news",
+        "sourceRef": "news:AAPL:2",
+        "observedAt": "2026-03-17T08:20:17.516Z",
+        "summary": "Market participants appear constructive on fundamentals but selective on timing.",
+        "supportedObjects": [
+          "Thesis",
+          "Risk"
+        ],
+        "rawSnapshotRef": "raw:run_3204caa8-a6a2-470f-ab67-2bbbce1b56cd:company_news",
+        "ticker": "AAPL"
+      }
+    ],
+    "degradedReasons": [],
+    "cacheStatus": "miss"
+  }
+}

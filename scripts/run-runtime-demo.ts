@@ -54,6 +54,8 @@ async function main(): Promise<void> {
       decisionId: result.decision?.decisionId ?? null,
       reportId: result.finalReport?.reportId ?? null,
       sectionKeys: result.reportSections.map((section) => section.sectionKey),
+      updatedObjectCount: result.finalReport?.updatedObjectRefs.length ?? 0,
+      updatedObjectTypes: result.finalReport?.updatedObjectTypes ?? [],
       eventCount: memorySink.events.length,
       evidenceCandidateCount: countEvidenceCandidates(artifacts),
       adapterDegradedReasons: artifacts
@@ -77,7 +79,7 @@ function resolveDataAdapter(): FixtureRuntimeDataAdapter | OpenBBRuntimeDataAdap
     return OpenBBRuntimeDataAdapter.fromEnv();
   }
 
-  return new FixtureRuntimeDataAdapter();
+  return FixtureRuntimeDataAdapter.fromEnv();
 }
 
 function countEvidenceCandidates(

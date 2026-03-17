@@ -7,6 +7,7 @@ import type {
   SectionCitationMap,
 } from "./contracts.ts";
 import { finalReportSectionKeys } from "./contracts.ts";
+import { inferStableObjectType } from "./stable-objects.ts";
 
 export const reportSectionTitles: Record<FinalReportSectionKey, string> = {
   final_judgment: "Final Judgment",
@@ -30,6 +31,7 @@ export function createEmptyReportSections(runId: string): ReportSectionRecord[] 
     content: "",
     citationFindingRefs: [],
     citationEvidenceRefs: [],
+    citationObjectRefs: [],
     status: "empty",
   }));
 }
@@ -59,6 +61,7 @@ export function normalizeReportSections(
       content: "",
       citationFindingRefs: [],
       citationEvidenceRefs: [],
+      citationObjectRefs: [],
       status: "empty",
     };
   });
@@ -88,6 +91,9 @@ export function buildFinalReport(options: BuildFinalReportOptions): FinalReport 
     liquidityContext: getSectionContent(normalizedSections, "liquidity_context"),
     whatChangesTheView: getSectionContent(normalizedSections, "what_changes_the_view"),
     sectionCitations: buildSectionCitationMap(normalizedSections),
+    updatedObjectRefs: collectUpdatedObjectRefs(normalizedSections),
+    sectionObjectRefs: buildSectionObjectRefMap(normalizedSections),
+    updatedObjectTypes: collectUpdatedObjectTypes(normalizedSections),
   };
 }
 
@@ -123,4 +129,57 @@ function collectCitations(
   }
 
   return [...section.citationFindingRefs, ...section.citationEvidenceRefs];
+}
+
+function buildSectionObjectRefMap(
+  sections: readonly ReportSectionRecord[],
+): FinalReport["sectionObjectRefs"] {
+  return {
+    final_judgment: collectObjectRefs(sections, "final_judgment"),
+    core_thesis: collectObjectRefs(sections, "core_thesis"),
+    supporting_evidence: collectObjectRefs(sections, "supporting_evidence"),
+    key_risks: collectObjectRefs(sections, "key_risks"),
+    liquidity_context: collectObjectRefs(sections, "liquidity_context"),
+    what_changes_the_view: collectObjectRefs(sections, "what_changes_the_view"),
+  };
+}
+
+function collectObjectRefs(
+  sections: readonly ReportSectionRecord[],
+  sectionKey: FinalReportSectionKey,
+): string[] {
+  const section = sections.find((candidate) => candidate.sectionKey === sectionKey);
+  return section?.citationObjectRefs ?? [];
+}
+
+function collectUpdatedObjectRefs(
+  sections: readonly ReportSectionRecord[],
+): string[] {
+  const refs = new Set<string>();
+
+  for (const section of sections) {
+    for (const objectRef of section.citationObjectRefs) {
+      refs.add(objectRef);
+    }
+  }
+
+  return [...refs];
+}
+
+function collectUpdatedObjectTypes(
+  sections: readonly ReportSectionRecord[],
+): FinalReport["updatedObjectTypes"] {
+  const types = new Set<FinalReport["updatedObjectTypes"][number]>();
+
+  for (const section of sections) {
+    for (const objectRef of section.citationObjectRefs) {
+      const nodeType = inferStableObjectType(objectRef);
+
+      if (nodeType) {
+        types.add(nodeType);
+      }
+    }
+  }
+
+  return [...types];
 }

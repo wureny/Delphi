@@ -101,6 +101,18 @@ Delphi 这边最小只需要：
 export OPENBB_BASE_URL=http://127.0.0.1:8000
 ```
 
+如果你想把 raw snapshots / normalized bundles / evidence-ready candidates 一起落盘：
+
+```bash
+export DELPHI_PERSIST_DATA_ARTIFACTS=true
+```
+
+可选自定义目录：
+
+```bash
+export DELPHI_DATA_ARTIFACTS_DIR=/absolute/path/to/data-artifacts
+```
+
 如果你的 OpenBB API 真的开启了 Basic Auth，再额外设置：
 
 ```bash
@@ -132,6 +144,12 @@ OPENBB_BASE_URL=http://127.0.0.1:8000 OPENBB_SMOKE_TICKER=MSFT npm run openbb:sm
 
 ```bash
 OPENBB_BASE_URL=http://127.0.0.1:8000 npm run runtime:demo:openbb
+```
+
+如果同时开启了本地 artifacts 持久化，跑完后可以读取某次 run 的落盘结果：
+
+```bash
+npm run data:artifacts:read -- <runId>
 ```
 
 ## What Delphi Expects
@@ -168,6 +186,6 @@ provider 默认值：
 
 ## Current Limitations
 
-- raw snapshot 还没有落 Supabase
+- raw snapshot 当前先落本地文件 store，还没有切到 Supabase
 - endpoint 成功与否依赖你本地 OpenBB 环境里对应 extension 是否已安装
 - live OpenBB 路径仍需要你本地服务稳定可访问；仓库内 fixture demo 现在已经能演练 `Evidence` bridge
