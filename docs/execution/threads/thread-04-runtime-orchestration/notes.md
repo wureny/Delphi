@@ -30,6 +30,37 @@
   - 动态 agent marketplace
   - 配置化 workflow 系统
 
+## Current Implementation Snapshot
+
+- 已新增 `src/orchestration/` 最小骨架：
+  - contracts
+  - run manager
+  - planner
+  - event sinks
+  - static tool / skill registry
+  - graph patch gateway
+  - report builder
+  - orchestrator
+- 已补 fixture runtime：
+  - fixture data adapter
+  - fixture graph context reader
+  - 4 个 fixture executors
+  - demo runner
+- 当前 demo 能跑通：
+  - run created
+  - planner completed
+  - fixed 4 tasks assigned
+  - non-Judge findings created
+  - runtime scaffold patch accepted
+  - Judge decision / report / citation patches accepted
+  - final report ready
+- 当前仍未开始：
+  - 真实 OpenBB-backed adapter
+  - 非 fixture agent execution
+  - SSE publisher
+  - stable `Judgment` 条件化持久化
+  - Aura 上的真实 runtime graph demo
+
 ## Open Follow-Ups
 
 - thread2 未来可能还需要补更适合 runtime 消费的 graph CLI / SDK / API

@@ -24,6 +24,7 @@ import {
   type ToolRegistry,
 } from "./registry.ts";
 import { createDefaultPlanner, type Planner } from "./planner.ts";
+import { buildRuntimeScaffoldPatch } from "./runtime-patches.ts";
 import { RunManager } from "./run-manager.ts";
 
 const runtimeAgentId = "runtime";
@@ -101,6 +102,22 @@ export class RuntimeOrchestrator {
         goal: task.goal,
       }, buildAgentId(run.runId, task.agentType));
     }
+
+    const scaffoldPatch = buildRuntimeScaffoldPatch(run, plannerOutput.tasks);
+    const scaffoldSubmission = await graphGateway.submit(scaffoldPatch);
+    await this.publishRuntimeEvent(
+      run.runId,
+      scaffoldSubmission.runEventType,
+      "Submitted runtime scaffold patch.",
+      {
+        patchId: scaffoldSubmission.patchId,
+        status: scaffoldSubmission.status,
+        reason:
+          scaffoldSubmission.status === "rejected"
+            ? scaffoldSubmission.reason
+            : "accepted",
+      },
+    );
 
     run = this.runManager.transitionRun(run.runId, "agent_running");
 
@@ -232,6 +249,8 @@ export class RuntimeOrchestrator {
 
     try {
       const result = await executor.execute(runtimeContext);
+      let effectiveTaskStatus = result.taskStatus;
+      const degradedReasons = [...result.degradedReasons];
 
       for (const finding of result.findings) {
         await this.publishRuntimeEvent(run.runId, "finding_created", `Finding created by ${task.agentType}.`, {
@@ -251,12 +270,19 @@ export class RuntimeOrchestrator {
             patchId: submission.patchId,
             status: submission.status,
             reason: submission.status === "rejected" ? submission.reason : "accepted",
+            errors: submission.status === "rejected" ? submission.errors : [],
+            warnings: submission.status === "rejected" ? submission.warnings : submission.validation.warnings,
           },
           agentId,
         );
+
+        if (submission.status === "rejected" && effectiveTaskStatus !== "failed") {
+          effectiveTaskStatus = "degraded";
+          degradedReasons.push(`Graph patch rejected: ${submission.patchId}`);
+        }
       }
 
-      if (result.taskStatus === "failed") {
+      if (effectiveTaskStatus === "failed") {
         await this.publishRuntimeEvent(run.runId, "agent_failed", `Agent ${task.agentType} failed.`, {
           taskId: task.taskId,
           summary: result.summary,
@@ -264,19 +290,23 @@ export class RuntimeOrchestrator {
       } else {
         await this.publishRuntimeEvent(run.runId, "agent_completed", `Agent ${task.agentType} completed.`, {
           taskId: task.taskId,
-          taskStatus: result.taskStatus,
+          taskStatus: effectiveTaskStatus,
           summary: result.summary,
         }, agentId);
       }
 
-      if (result.taskStatus === "degraded") {
+      if (effectiveTaskStatus === "degraded") {
         await this.publishRuntimeEvent(run.runId, "degraded_mode_entered", `Agent ${task.agentType} entered degraded mode.`, {
           taskId: task.taskId,
-          reasons: result.degradedReasons,
+          reasons: degradedReasons,
         }, agentId);
       }
 
-      return result;
+      return {
+        ...result,
+        taskStatus: effectiveTaskStatus,
+        degradedReasons,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown executor failure.";
 
