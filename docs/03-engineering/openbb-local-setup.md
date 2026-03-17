@@ -169,5 +169,5 @@ provider 默认值：
 ## Current Limitations
 
 - raw snapshot 还没有落 Supabase
-- evidence-ready candidate 还没有接入 thread4 -> thread2 的真实 `GraphPatch`
 - endpoint 成功与否依赖你本地 OpenBB 环境里对应 extension 是否已安装
+- live OpenBB 路径仍需要你本地服务稳定可访问；仓库内 fixture demo 现在已经能演练 `Evidence` bridge

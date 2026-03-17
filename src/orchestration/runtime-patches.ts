@@ -1,4 +1,5 @@
 import type { GraphPatch } from "../research-graph/graph-patch.ts";
+import type { EvidenceCandidate } from "../data-layer/contracts.ts";
 import type { AgentType } from "../research-graph/runtime.ts";
 import type {
   AgentTask,
@@ -148,6 +149,56 @@ export function buildFindingPatch(
   };
 }
 
+export function buildEvidenceRef(
+  caseId: string,
+  candidate: Pick<EvidenceCandidate, "candidateId">,
+): string {
+  return `evidence:${caseId}:${candidate.candidateId}`;
+}
+
+export function buildEvidenceCandidatePatch(
+  run: RunRecord,
+  agentType: AgentType,
+  taskId: string,
+  candidates: readonly EvidenceCandidate[],
+): GraphPatch {
+  const operations: GraphPatch["operations"] = candidates.map((candidate, index) => {
+    const evidenceRef = buildEvidenceRef(run.caseId, candidate);
+
+    return {
+      opId: `op:${taskId}:evidence:${index + 1}`,
+      type: "merge_node",
+      resolvedRef: evidenceRef,
+      nodeType: "Evidence",
+      matchKeys: {
+        caseId: run.caseId,
+        provider: candidate.provider,
+        sourceType: candidate.sourceType,
+        sourceRef: candidate.sourceRef,
+        observedAt: candidate.observedAt,
+      },
+      properties: {
+        evidenceId: evidenceRef,
+        caseId: run.caseId,
+        provider: candidate.provider,
+        sourceType: candidate.sourceType,
+        sourceRef: candidate.sourceRef,
+        observedAt: candidate.observedAt,
+        summary: candidate.summary,
+      },
+    };
+  });
+
+  return {
+    patchId: `patch:${run.runId}:${taskId}:evidence`,
+    runId: run.runId,
+    agentType,
+    targetScope: "case",
+    basisRefs: [taskId],
+    operations,
+  };
+}
+
 export function buildJudgeDecisionPatch(
   run: RunRecord,
   taskId: string,
@@ -255,12 +306,12 @@ export function buildJudgeReportPatch(
   };
 }
 
-export function buildJudgeCitationPatch(
+export function buildJudgeCitationPatches(
   run: RunRecord,
   taskId: string,
   decision: DecisionRecord,
   sections: readonly ReportSectionRecord[],
-): GraphPatch {
+): GraphPatch[] {
   const operations: GraphPatch["operations"] = [];
 
   for (const section of sections) {
@@ -274,18 +325,42 @@ export function buildJudgeCitationPatch(
         properties: {},
       });
     }
+
+    for (const evidenceRef of section.citationEvidenceRefs) {
+      operations.push({
+        opId: `op:${section.sectionId}:${evidenceRef}:cites-evidence`,
+        type: "create_edge",
+        edgeType: "CITES",
+        fromRef: section.sectionId,
+        toRef: evidenceRef,
+        properties: {},
+      });
+    }
   }
 
-  return {
-    patchId: `patch:${run.runId}:${taskId}:judge-citations`,
+  return chunkOperations(operations, 18).map((chunk, index) => ({
+    patchId: `patch:${run.runId}:${taskId}:judge-citations:${index + 1}`,
     runId: run.runId,
     agentType: "judge",
     targetScope: "runtime",
     basisRefs: decision.basisFindingRefs,
-    operations,
-  };
+    operations: chunk,
+  }));
 }
 
 function buildAgentRef(runId: string, agentType: AgentType): string {
   return `agent:${runId}:${agentType}`;
+}
+
+function chunkOperations(
+  operations: GraphPatch["operations"],
+  chunkSize: number,
+): GraphPatch["operations"][] {
+  const chunks: GraphPatch["operations"][] = [];
+
+  for (let index = 0; index < operations.length; index += chunkSize) {
+    chunks.push(operations.slice(index, index + chunkSize));
+  }
+
+  return chunks;
 }
