@@ -30,6 +30,7 @@ async function main(): Promise<void> {
 
   server.listen(port, host, () => {
     console.log(`Runtime API listening at http://${host}:${port}`);
+    console.log(`Run creation endpoint: http://${host}:${port}/runs`);
     console.log(`SSE endpoint: http://${host}:${port}/runs/demo/events`);
     console.log(`Snapshot endpoint: http://${host}:${port}/runs/demo/report`);
     console.log(`Data mode: ${process.env.RUNTIME_DATA_MODE ?? "fixture"}`);

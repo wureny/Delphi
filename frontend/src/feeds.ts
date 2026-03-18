@@ -32,6 +32,15 @@ export interface RunFeedSource {
   connect(handlers: FeedHandlers): FeedConnection;
 }
 
+export interface RuntimeRunSubmission {
+  runKey: string;
+  run: RunRecord;
+  endpoints: {
+    events: string;
+    report: string;
+  };
+}
+
 export function createRecordedFeedSource(options: {
   fixtureUrl: string;
   baseDelayMs?: number;
@@ -102,58 +111,119 @@ export function createSseFeedSource(options: {
 }): RunFeedSource {
   return {
     connect(handlers) {
-      const eventSource = new EventSource(options.eventsUrl);
       let closed = false;
+      let eventSource: EventSource | null = null;
 
-      handlers.onMessage({
-        kind: "connected",
-        label: "Live SSE Feed",
-      });
-
-      if (options.snapshotUrl) {
-        void loadSnapshot(options.snapshotUrl, handlers);
-      }
-
-      eventSource.onmessage = async (message) => {
-        if (closed) {
-          return;
-        }
+      const connect = async (): Promise<void> => {
+        handlers.onMessage({
+          kind: "connected",
+          label: "Live SSE Feed",
+        });
 
         try {
-          const event = JSON.parse(message.data) as RunEvent;
-          handlers.onMessage({ kind: "event", event });
-
-          if (event.eventType === "report_ready" && options.snapshotUrl) {
+          if (options.snapshotUrl) {
             await loadSnapshot(options.snapshotUrl, handlers);
           }
-        } catch {
+
+          if (closed) {
+            return;
+          }
+
+          eventSource = new EventSource(options.eventsUrl);
+          eventSource.onmessage = async (message) => {
+            if (closed) {
+              return;
+            }
+
+            try {
+              const event = JSON.parse(message.data) as RunEvent;
+              handlers.onMessage({ kind: "event", event });
+
+              if (event.eventType === "report_ready" && options.snapshotUrl) {
+                await loadSnapshot(options.snapshotUrl, handlers);
+              }
+            } catch {
+              handlers.onMessage({
+                kind: "error",
+                message: "Received an invalid SSE event payload.",
+              });
+            }
+          };
+
+          eventSource.onerror = () => {
+            if (closed) {
+              return;
+            }
+
+            handlers.onMessage({
+              kind: "error",
+              message:
+                "SSE connection failed. Provide a valid events endpoint or switch back to recorded mode.",
+            });
+          };
+        } catch (error) {
           handlers.onMessage({
             kind: "error",
-            message: "Received an invalid SSE event payload.",
+            message:
+              error instanceof Error
+                ? error.message
+                : "Failed to load the live run snapshot.",
           });
         }
       };
 
-      eventSource.onerror = () => {
-        if (closed) {
-          return;
-        }
-
-        handlers.onMessage({
-          kind: "error",
-          message:
-            "SSE connection failed. Provide a valid events endpoint or switch back to recorded mode.",
-        });
-      };
+      void connect();
 
       return {
         close() {
           closed = true;
-          eventSource.close();
+          eventSource?.close();
         },
       };
     },
   };
+}
+
+export async function createRuntimeRun(options: {
+  runtimeApiBaseUrl: string;
+  payload: {
+    runKey?: string;
+    query: {
+      userQuestion: string;
+      ticker?: string;
+      timeHorizon?: string;
+      caseType?: string;
+    };
+  };
+}): Promise<RuntimeRunSubmission> {
+  const response = await fetch(new URL("/runs", options.runtimeApiBaseUrl), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(options.payload),
+  });
+
+  const body = (await response.json()) as
+    | RuntimeRunSubmission
+    | { error?: string };
+
+  if (!response.ok) {
+    const errorMessage =
+      "error" in body
+        ? body.error
+        : undefined;
+    throw new Error(errorMessage ?? `Run creation failed with status ${response.status}.`);
+  }
+
+  return body as RuntimeRunSubmission;
+}
+
+export function resolveRuntimeEndpoint(
+  runtimeApiBaseUrl: string,
+  endpoint: string,
+): string {
+  return new URL(endpoint, runtimeApiBaseUrl).toString();
 }
 
 async function loadFixture(fixtureUrl: string): Promise<RecordedRunFixture> {

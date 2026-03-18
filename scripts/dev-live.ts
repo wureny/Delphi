@@ -25,13 +25,18 @@ const frontendHost = process.env.FRONTEND_HOST ?? "127.0.0.1";
 const frontendPort = process.env.FRONTEND_PORT ?? "4173";
 const runtimeHost = process.env.RUNTIME_API_HOST ?? "127.0.0.1";
 const runtimePort = process.env.RUNTIME_API_PORT ?? "8787";
-const runKey = process.env.RUNTIME_RUN_KEY ?? "demo";
+const runKey = process.env.RUNTIME_RUN_KEY;
+const liveUrl = new URL(
+  `http://${frontendHost}:${frontendPort}/?source=sse&runtime=http://${runtimeHost}:${runtimePort}`,
+);
+
+if (runKey) {
+  liveUrl.searchParams.set("run", runKey);
+}
 
 console.log("");
 console.log("Live frontend URL");
-console.log(
-  `http://${frontendHost}:${frontendPort}/?source=sse&runtime=http://${runtimeHost}:${runtimePort}&run=${encodeURIComponent(runKey)}`,
-);
+console.log(liveUrl.toString());
 console.log("");
 
 let exiting = false;

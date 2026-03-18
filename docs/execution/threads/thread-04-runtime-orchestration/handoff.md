@@ -9,6 +9,7 @@
 - 已在 runtime finding patch 中补上 `Finding -UPDATES-> stable object` edges，覆盖 `Thesis`、`Risk`、`LiquidityFactor`、`LiquidityRegime`、`MarketSignal`。
 - 现在可以通过 `npm run runtime:demo` 跑通一条不依赖 UI 的最小 orchestration 闭环。
 - 已新增最小 runtime HTTP bridge，可通过 `npm run runtime:serve` 暴露：
+  - `POST /runs`
   - `GET /runs/:runKey/events`
   - `GET /runs/:runKey/report`
 
@@ -24,6 +25,7 @@
 
 - fixture runtime 已能证明主链能跑，但还没有接真实 OpenBB adapter
 - 当前 runtime API 仍显式使用 `NoopGraphWriter`；要验证 Aura 上的真实实例图，还需要切到 thread2 的真实 writer
+- `POST /runs` 当前对 `ticker/timeHorizon/caseType` 支持显式传入；若只传 `userQuestion`，runtime 会用轻量启发式推断，v0 可用但不是最终 planner-grade parsing
 - runtime contract 目前仍未覆盖 session continuity；这是后续阶段问题，不应倒灌回第一阶段
 - thread2 未来可能还需要补更适合 runtime 消费的 graph CLI / SDK / API
 

@@ -61,8 +61,10 @@
   - stable `Judgment` 条件化持久化
   - Aura 上的真实 runtime graph demo
 - 当前已补最小 frontend-facing runtime API：
+  - `POST /runs` 可创建并启动真实 run，返回 `runKey` 与 `events/report` endpoint
   - `GET /runs/:runKey/events` 提供 SSE `RunEvent` 流
   - `GET /runs/:runKey/report` 提供当前 snapshot / final report hydration
+  - `GET /runs/:runKey/events` 现在会连接并回放已有 run 的事件，而不是每次都隐式新建 run
   - 默认脚本 `npm run runtime:serve` 明确使用 `NoopGraphWriter`
   - `npm run runtime:serve:openbb` 可切到真实 OpenBB data adapter，但 graph 仍是显式 noop demo mode
 

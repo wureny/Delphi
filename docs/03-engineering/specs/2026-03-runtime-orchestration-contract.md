@@ -120,10 +120,12 @@ v0 至少应存在：
 
 补充要求：
 
+- runtime 至少应支持一个 query submission / run creation endpoint，例如 `POST /runs`
 - 事件必须是 run-scoped
 - UI 只消费事件，不依赖 runtime 内存状态
 - `ReportSection` 在 runtime 中固定映射为 6 个 section 节点，即使某 section 内容为空也保留节点
 - 对 frontend shell 的最小 transport contract 可以是：
+  - `POST /runs` 接收 query submission，并返回 `runKey` 与后续消费 endpoint
   - `GET /runs/:runKey/events` 返回 SSE `RunEvent`
   - `GET /runs/:runKey/report` 返回 `{ run, reportSections, finalReport }`
 - snapshot endpoint 在 run 尚未完成时也必须可访问，至少返回当前 `run` 与固定 6 个 `ReportSection` 占位

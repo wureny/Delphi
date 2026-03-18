@@ -54,14 +54,13 @@ export function renderApp(options: {
                 class="query-input"
                 name="question"
                 placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
-                ${config.feedMode === "sse" ? "readonly" : ""}
               >${escapeHtml(state.composerText)}</textarea>
               <div class="composer-actions">
                 <p class="composer-note">${escapeHtml(
                   state.errorMessage ?? state.infoMessage ?? "",
                 )}</p>
                 <button class="primary-button" type="submit">
-                  ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Reconnect Live Run"}
+                  ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Submit Live Query"}
                 </button>
               </div>
             </form>

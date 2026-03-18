@@ -7,15 +7,16 @@
   - 后续若迁到 React，只需要替换渲染层，不需要重写 feed / selector 逻辑
 - feed 设计：
   - `recorded`：读取 `frontend/public/fixtures/runtime-demo.json`
-  - `sse`：EventSource 消费 thread4 runtime bridge `/runs/:runKey/events`，并在 `report_ready` 后单独请求 `/runs/:runKey/report`
+  - `sse`：先 `POST /runs` 创建 run，再消费 `/runs/:runKey/events`，并在首帧与 `report_ready` 后请求 `/runs/:runKey/report`
 - live bridge 接入状态：
-  - thread5 已能从 `runtime` base URL + `run` key 自动推导 events/report endpoints
+  - thread5 live mode 已支持真实 `composer -> POST /runs -> 切换 runKey -> snapshot + events`
+  - 若 URL 显式带 `run`，前端仍可重连既有 run；若不带 `run`，页面保持空闲态等待提交
   - 新增 `npm run dev:live`，一键同时启动 runtime bridge 和 frontend shell
-  - 当前 live 模式下 composer 明确只用于“重连同一个 run key”，不会把输入文本提交给后端
 - 重要边界：
   - 前端不假设 `report_ready` 自带完整 report
   - 前端不假设 4 个非 judge agent 会真并发
   - 右侧卡片只展示 runtime 已显式暴露的高信号状态
+  - 当前前端提交只传 `query.userQuestion`；`ticker / timeHorizon / caseType` 仍交给 thread4 v0 轻量推断
 - UI 方向：
   - 左侧像一份机构化研究 memo
   - 右侧像被产品化后的 agent workbench
@@ -25,7 +26,7 @@
   - recorded fixture 已由真实 runtime fixture demo 导出
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge
   - 前端 typecheck / build 已通过
-  - `GET /runs/demo/events` 与 `GET /runs/demo/report` 已实际联调验证
+  - `POST /runs`、`GET /runs/:runKey/events`、`GET /runs/:runKey/report` 已实际联调验证
 - 当前明确不做的伪装：
   - 不把 agent 事件伪装成“真实 shell/PTy 已接入”
   - 若要做真正可交互 web terminal，需要 thread4 / backend 额外提供终端流协议或 PTY bridge

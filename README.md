@@ -41,7 +41,7 @@ Frontend shell:
 
 - `frontend/`
   - thread5 no-dependency TypeScript shell
-  - recorded runtime fixture playback + future SSE adapter placeholder
+  - recorded runtime fixture playback + live runtime submission bridge
   - left report / right agent canvas layout
 - `npm run frontend:demo:record`
   - regenerate the recorded runtime fixture from the real thread4 fixture runtime
@@ -51,7 +51,8 @@ Frontend shell:
   - serve the frontend shell locally from `frontend/`
 - `npm run dev:live`
   - start the thread4 runtime bridge and thread5 frontend shell together
-  - opens the live path via `/?source=sse&runtime=http://127.0.0.1:8787&run=demo`
+  - opens the live path via `/?source=sse&runtime=http://127.0.0.1:8787`
+  - submit a question in the composer to create a live run, or append `&run=<runKey>` to reconnect one
 
 OpenBB local setup:
 

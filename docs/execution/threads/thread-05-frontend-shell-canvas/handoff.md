@@ -19,15 +19,16 @@
   - `frontend:typecheck`
   - `dev:live`
 - 已把 thread5 前端接到 thread4 live runtime bridge：
-  - `?source=sse&runtime=http://127.0.0.1:8787&run=demo`
-  - 若未显式传 `events` / `snapshot`，前端会根据 `runtime + run` 自动推导
+  - live mode 现在走 `POST /runs -> GET /runs/:runKey/report -> GET /runs/:runKey/events`
+  - 若 URL 显式传 `run`，前端会根据 `runtime + run` 自动推导既有 run 的 events/report endpoints
 
 ## Decisions Made
 
 - 第一版不用 React / Vite，先确保事件驱动壳层真实可跑
 - recorded mode 明确标注为 replay，不伪装成 live backend
 - SSE mode 若缺少 `events` endpoint，直接报错，不回退到 recorded
-- live mode 当前明确是“桥接同一个 run key 的实时研究流”，不是“前端提交任意新 query”
+- live mode composer 已恢复可编辑，并真实提交 `POST /runs`
+- live mode 默认不再隐式重连 `demo`；没有 `run` 参数时保持空闲态，等待用户提交问题
 - 右侧 terminal 使用真实 `RunEvent` transcript 渲染；当前不伪装成已接入 PTY 的真实交互 shell
 - 固定 agent 顺序：
   - thesis
@@ -46,7 +47,7 @@
 
 - 当前 `RunEvent.payload` 仍是弱类型 `Record<string, unknown>`；前端已经做 narrowing，但未来最好补 stronger typing
 - `report_ready` 只带 `reportId`，所以 live 模式必须配合 snapshot/report endpoint
-- thread4 目前仍是 `GET` bridge，没有 query submission endpoint；因此 live 模式下 composer 只能重连，不能真正发新问题
+- 当前前端 live submit 只提交 `query.userQuestion`；如果后续想减少后端推断不确定性，可以再显式补 `ticker / timeHorizon / caseType`
 - 当前 demo runtime 实际上是顺序执行 non-judge agents；UI 没有假设强并发，但答辩展示时要注意解释
 - 当前沙箱无法监听本地端口，浏览器级验证还没在这个环境完成
 - 若用户坚持“真实 Mac 终端 + agent 在终端里执行”，则需要新增后端能力：
@@ -56,7 +57,6 @@
 
 ## Next Recommended Consumer
 
-- thread4 runtime / integration owner：
-  - 提供 SSE events endpoint
-  - 提供 report snapshot endpoint
-  - 确认 recorded fixture 导出路径和 shape 可以持续稳定
+- thread5 frontend owner：
+  - 若后续想收更稳的 query 质量，可在 composer 旁补显式 ticker / horizon / caseType controls
+  - 若要做真实终端，不要在前端伪装，需要 thread4 / backend 先给 terminal stream 能力

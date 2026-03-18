@@ -1,8 +1,10 @@
 import {
   createRecordedFeedSource,
+  createRuntimeRun,
   createSseFeedSource,
   type FeedConnection,
   type FeedMode,
+  resolveRuntimeEndpoint,
   type RunFeedSource,
 } from "./feeds.js";
 import { renderApp } from "./render.js";
@@ -52,7 +54,10 @@ export class DelphiFrontendApp {
     this.root.addEventListener("click", this.handleClick);
     this.root.addEventListener("input", this.handleInput);
     this.render();
-    this.startFeed();
+
+    if (this.shouldAutoStartFeed()) {
+      this.startFeed();
+    }
   }
 
   private startFeed(): void {
@@ -84,7 +89,7 @@ export class DelphiFrontendApp {
             handlers.onMessage({
               kind: "error",
               message:
-                "SSE mode is selected, but no `events` endpoint was provided. Pass `?source=sse&events=/runs/<id>/events` and optionally `&snapshot=/runs/<id>/report`.",
+                "Live mode needs a run events endpoint. Submit a query first, or pass `?source=sse&run=<id>` / `?events=/runs/<id>/events`.",
             });
 
             return {
@@ -115,6 +120,12 @@ export class DelphiFrontendApp {
     }
 
     event.preventDefault();
+
+    if (this.config.feedMode === "sse") {
+      void this.submitLiveRun();
+      return;
+    }
+
     this.startFeed();
   }
 
@@ -140,15 +151,79 @@ export class DelphiFrontendApp {
   private handleInput(event: Event): void {
     const target = event.target;
 
-    if (
-      this.config.feedMode === "sse" ||
-      !(target instanceof HTMLTextAreaElement) ||
-      target.name !== "question"
-    ) {
+    if (!(target instanceof HTMLTextAreaElement) || target.name !== "question") {
       return;
     }
 
     this.state = updateComposerText(this.state, target.value);
+  }
+
+  private shouldAutoStartFeed(): boolean {
+    return this.config.feedMode === "recorded" || Boolean(this.config.sseEventsUrl);
+  }
+
+  private async submitLiveRun(): Promise<void> {
+    const userQuestion = this.state.composerText.trim();
+
+    if (!userQuestion) {
+      this.state = {
+        ...this.state,
+        errorMessage: "Question is required before creating a live run.",
+      };
+      this.render();
+      return;
+    }
+
+    if (!this.config.runtimeApiBaseUrl) {
+      this.state = {
+        ...this.state,
+        errorMessage: "Missing runtime API base URL for live submission.",
+      };
+      this.render();
+      return;
+    }
+
+    this.connection?.close();
+    this.connection = null;
+    this.state = createRestartState(
+      this.state,
+      `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
+    );
+    this.render();
+
+    try {
+      const submission = await createRuntimeRun({
+        runtimeApiBaseUrl: this.config.runtimeApiBaseUrl,
+        payload: {
+          query: {
+            userQuestion,
+          },
+        },
+      });
+
+      this.config.runtimeRunKey = submission.runKey;
+      this.config.sseEventsUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.events,
+      );
+      this.config.sseSnapshotUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.report,
+      );
+
+      syncLiveLocation(this.config.runtimeApiBaseUrl, submission.runKey);
+      this.startFeed();
+    } catch (error) {
+      this.state = {
+        ...this.state,
+        connectionStatus: "error",
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : "Live run submission failed.",
+      };
+      this.render();
+    }
   }
 
   private render(): void {
@@ -165,10 +240,17 @@ export class DelphiFrontendApp {
 
 function buildFeedInfoMessage(config: DelphiAppConfig): string {
   if (config.feedMode === "sse") {
-    const runKey = config.runtimeRunKey ?? inferRunKeyFromUrl(config.sseEventsUrl) ?? "demo";
-    const runtimeBase = config.runtimeApiBaseUrl ?? inferRuntimeBase(config.sseEventsUrl) ?? "http://127.0.0.1:8787";
+    const runKey = config.runtimeRunKey ?? inferRunKeyFromUrl(config.sseEventsUrl);
+    const runtimeBase =
+      config.runtimeApiBaseUrl ??
+      inferRuntimeBase(config.sseEventsUrl) ??
+      "http://127.0.0.1:8787";
 
-    return `Live bridge mode uses runtime run key "${runKey}" via ${runtimeBase}. The composer is read-only here because thread4 currently exposes GET /runs/:runKey/events + GET /runs/:runKey/report, not a query submission endpoint.`;
+    if (runKey) {
+      return `Live mode submits new research via POST /runs and is currently connected to run "${runKey}" on ${runtimeBase}.`;
+    }
+
+    return `Live mode submits your question to ${runtimeBase} via POST /runs, then hydrates /report and streams /events for the returned run.`;
   }
 
   return "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run.";
@@ -194,4 +276,14 @@ function inferRuntimeBase(url: string | undefined): string | null {
   } catch {
     return null;
   }
+}
+
+function syncLiveLocation(runtimeApiBaseUrl: string, runKey: string): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("source", "sse");
+  url.searchParams.set("runtime", runtimeApiBaseUrl);
+  url.searchParams.set("run", runKey);
+  url.searchParams.delete("events");
+  url.searchParams.delete("snapshot");
+  window.history.replaceState(null, "", url);
 }
