@@ -57,11 +57,14 @@
   - Judge decision / report / citation patches accepted
   - final report ready
 - 当前仍未开始：
-  - 真实 OpenBB-backed adapter
   - 非 fixture agent execution
-  - SSE publisher
   - stable `Judgment` 条件化持久化
   - Aura 上的真实 runtime graph demo
+- 当前已补最小 frontend-facing runtime API：
+  - `GET /runs/:runKey/events` 提供 SSE `RunEvent` 流
+  - `GET /runs/:runKey/report` 提供当前 snapshot / final report hydration
+  - 默认脚本 `npm run runtime:serve` 明确使用 `NoopGraphWriter`
+  - `npm run runtime:serve:openbb` 可切到真实 OpenBB data adapter，但 graph 仍是显式 noop demo mode
 
 ## Open Follow-Ups
 

@@ -7,6 +7,7 @@ export * from "./report.ts";
 export * from "./planner.ts";
 export * from "./agent-runtime.ts";
 export * from "./orchestrator.ts";
+export * from "./runtime-api.ts";
 export * from "./runtime-patches.ts";
 export * from "./stable-objects.ts";
 export * from "./fixtures.ts";

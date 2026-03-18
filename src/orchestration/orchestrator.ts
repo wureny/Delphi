@@ -25,7 +25,10 @@ import {
 } from "./registry.ts";
 import { createDefaultPlanner, type Planner } from "./planner.ts";
 import { buildRuntimeScaffoldPatch } from "./runtime-patches.ts";
-import { RunManager } from "./run-manager.ts";
+import {
+  type CreateRunOptions,
+  RunManager,
+} from "./run-manager.ts";
 
 const runtimeAgentId = "runtime";
 
@@ -48,6 +51,17 @@ export interface OrchestrationResult {
   decision: DecisionRecord | null;
   reportSections: ReportSectionRecord[];
   finalReport: FinalReport | null;
+}
+
+export interface RuntimeRunOptions {
+  createRunOptions?: CreateRunOptions;
+  eventSink?: RuntimeEventSink;
+  onReportReady?: (input: {
+    run: RunRecord;
+    decision: DecisionRecord | null;
+    reportSections: ReportSectionRecord[];
+    finalReport: FinalReport;
+  }) => Promise<void> | void;
 }
 
 export class RuntimeOrchestrator {
@@ -73,15 +87,19 @@ export class RuntimeOrchestrator {
     this.executors = options.executors;
   }
 
-  async run(query: RunRecord["query"]): Promise<OrchestrationResult> {
-    let run = this.runManager.createRun(query);
+  async run(
+    query: RunRecord["query"],
+    options: RuntimeRunOptions = {},
+  ): Promise<OrchestrationResult> {
+    const eventSink = options.eventSink ?? this.eventSink;
+    let run = this.runManager.createRun(query, options.createRunOptions);
     const graphGateway = new GraphPatchGateway({
       runId: run.runId,
       caseId: run.caseId,
       writer: this.graphWriter,
     });
 
-    await this.publishRuntimeEvent(run.runId, "run_created", "Run created.", {
+    await this.publishRuntimeEvent(eventSink, run.runId, "run_created", "Run created.", {
       queryId: query.queryId,
       caseId: run.caseId,
       ticker: query.ticker,
@@ -90,22 +108,30 @@ export class RuntimeOrchestrator {
     const plannerOutput = await this.planner.plan(run);
     run = this.runManager.transitionRun(run.runId, "planned");
 
-    await this.publishRuntimeEvent(run.runId, "planner_completed", "Planner completed.", {
+    await this.publishRuntimeEvent(eventSink, run.runId, "planner_completed", "Planner completed.", {
       summary: plannerOutput.summary,
       taskCount: plannerOutput.tasks.length,
     });
 
     for (const task of plannerOutput.tasks) {
-      await this.publishRuntimeEvent(run.runId, "task_assigned", `Assigned ${task.agentType} task.`, {
-        taskId: task.taskId,
-        agentType: task.agentType,
-        goal: task.goal,
-      }, buildAgentId(run.runId, task.agentType));
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "task_assigned",
+        `Assigned ${task.agentType} task.`,
+        {
+          taskId: task.taskId,
+          agentType: task.agentType,
+          goal: task.goal,
+        },
+        buildAgentId(run.runId, task.agentType),
+      );
     }
 
     const scaffoldPatch = buildRuntimeScaffoldPatch(run, plannerOutput.tasks);
     const scaffoldSubmission = await graphGateway.submit(scaffoldPatch);
     await this.publishRuntimeEvent(
+      eventSink,
       run.runId,
       scaffoldSubmission.runEventType,
       "Submitted runtime scaffold patch.",
@@ -130,7 +156,14 @@ export class RuntimeOrchestrator {
     let fatalFailure = false;
 
     for (const task of nonJudgeTasks) {
-      const result = await this.executeTask(run, task, plannerOutput.tasks, findings, graphGateway);
+      const result = await this.executeTask(
+        run,
+        task,
+        plannerOutput.tasks,
+        findings,
+        graphGateway,
+        eventSink,
+      );
       findings.push(...result.findings);
 
       if (result.taskStatus === "failed") {
@@ -150,11 +183,25 @@ export class RuntimeOrchestrator {
 
     if (!fatalFailure && judgeTask) {
       run = this.runManager.transitionRun(run.runId, "synthesizing");
-      await this.publishRuntimeEvent(run.runId, "judge_synthesis_started", "Judge synthesis started.", {
-        findingCount: findings.length,
-      }, buildAgentId(run.runId, "judge"));
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "judge_synthesis_started",
+        "Judge synthesis started.",
+        {
+          findingCount: findings.length,
+        },
+        buildAgentId(run.runId, "judge"),
+      );
 
-      const judgeResult = await this.executeTask(run, judgeTask, plannerOutput.tasks, findings, graphGateway);
+      const judgeResult = await this.executeTask(
+        run,
+        judgeTask,
+        plannerOutput.tasks,
+        findings,
+        graphGateway,
+        eventSink,
+      );
       findings.push(...judgeResult.findings);
 
       if (judgeResult.decision) {
@@ -179,9 +226,22 @@ export class RuntimeOrchestrator {
     }
 
     if (finalReport) {
-      await this.publishRuntimeEvent(run.runId, "report_ready", "Final report ready.", {
-        reportId: finalReport.reportId,
-      }, buildAgentId(run.runId, "judge"));
+      await options.onReportReady?.({
+        run,
+        decision,
+        reportSections,
+        finalReport,
+      });
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "report_ready",
+        "Final report ready.",
+        {
+          reportId: finalReport.reportId,
+        },
+        buildAgentId(run.runId, "judge"),
+      );
     }
 
     if (fatalFailure) {
@@ -208,6 +268,7 @@ export class RuntimeOrchestrator {
     tasks: AgentTask[],
     findings: FindingRecord[],
     graphGateway: GraphPatchGateway,
+    eventSink: RuntimeEventSink,
   ): Promise<AgentExecutionResult> {
     const agentId = buildAgentId(run.runId, task.agentType);
     const executor = this.executors[task.agentType];
@@ -224,9 +285,16 @@ export class RuntimeOrchestrator {
         reportSections: [],
         finalReport: null,
       };
-      await this.publishRuntimeEvent(run.runId, "agent_failed", `Agent ${task.agentType} has no executor.`, {
-        taskId: task.taskId,
-      }, agentId);
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "agent_failed",
+        `Agent ${task.agentType} has no executor.`,
+        {
+          taskId: task.taskId,
+        },
+        agentId,
+      );
       return failedResult;
     }
 
@@ -242,7 +310,7 @@ export class RuntimeOrchestrator {
       graphGateway,
       graphContextReader: this.graphContextReader,
       dataAdapter: this.dataAdapter,
-      eventSink: this.eventSink,
+      eventSink,
       upstreamFindings: findings,
       knownTasks: tasks,
     };
@@ -253,16 +321,24 @@ export class RuntimeOrchestrator {
       const degradedReasons = [...result.degradedReasons];
 
       for (const finding of result.findings) {
-        await this.publishRuntimeEvent(run.runId, "finding_created", `Finding created by ${task.agentType}.`, {
-          taskId: task.taskId,
-          findingId: finding.findingId,
-          claim: finding.claim,
-        }, agentId);
+        await this.publishRuntimeEvent(
+          eventSink,
+          run.runId,
+          "finding_created",
+          `Finding created by ${task.agentType}.`,
+          {
+            taskId: task.taskId,
+            findingId: finding.findingId,
+            claim: finding.claim,
+          },
+          agentId,
+        );
       }
 
       for (const patch of result.graphPatches) {
         const submission = await graphGateway.submit(patch);
         await this.publishRuntimeEvent(
+          eventSink,
           run.runId,
           submission.runEventType,
           `Graph patch ${submission.status}.`,
@@ -283,23 +359,44 @@ export class RuntimeOrchestrator {
       }
 
       if (effectiveTaskStatus === "failed") {
-        await this.publishRuntimeEvent(run.runId, "agent_failed", `Agent ${task.agentType} failed.`, {
-          taskId: task.taskId,
-          summary: result.summary,
-        }, agentId);
+        await this.publishRuntimeEvent(
+          eventSink,
+          run.runId,
+          "agent_failed",
+          `Agent ${task.agentType} failed.`,
+          {
+            taskId: task.taskId,
+            summary: result.summary,
+          },
+          agentId,
+        );
       } else {
-        await this.publishRuntimeEvent(run.runId, "agent_completed", `Agent ${task.agentType} completed.`, {
-          taskId: task.taskId,
-          taskStatus: effectiveTaskStatus,
-          summary: result.summary,
-        }, agentId);
+        await this.publishRuntimeEvent(
+          eventSink,
+          run.runId,
+          "agent_completed",
+          `Agent ${task.agentType} completed.`,
+          {
+            taskId: task.taskId,
+            taskStatus: effectiveTaskStatus,
+            summary: result.summary,
+          },
+          agentId,
+        );
       }
 
       if (effectiveTaskStatus === "degraded") {
-        await this.publishRuntimeEvent(run.runId, "degraded_mode_entered", `Agent ${task.agentType} entered degraded mode.`, {
-          taskId: task.taskId,
-          reasons: degradedReasons,
-        }, agentId);
+        await this.publishRuntimeEvent(
+          eventSink,
+          run.runId,
+          "degraded_mode_entered",
+          `Agent ${task.agentType} entered degraded mode.`,
+          {
+            taskId: task.taskId,
+            reasons: degradedReasons,
+          },
+          agentId,
+        );
       }
 
       return {
@@ -310,15 +407,29 @@ export class RuntimeOrchestrator {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown executor failure.";
 
-      await this.publishRuntimeEvent(run.runId, "agent_failed", `Agent ${task.agentType} failed.`, {
-        taskId: task.taskId,
-        error: message,
-      }, agentId);
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "agent_failed",
+        `Agent ${task.agentType} failed.`,
+        {
+          taskId: task.taskId,
+          error: message,
+        },
+        agentId,
+      );
 
-      await this.publishRuntimeEvent(run.runId, "degraded_mode_entered", `Run degraded after ${task.agentType} failure.`, {
-        taskId: task.taskId,
-        error: message,
-      }, agentId);
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "degraded_mode_entered",
+        `Run degraded after ${task.agentType} failure.`,
+        {
+          taskId: task.taskId,
+          error: message,
+        },
+        agentId,
+      );
 
       return {
         taskStatus: task.agentType === "judge" ? "failed" : "degraded",
@@ -335,13 +446,14 @@ export class RuntimeOrchestrator {
   }
 
   private async publishRuntimeEvent(
+    eventSink: RuntimeEventSink,
     runId: string,
     eventType: Parameters<typeof createRunEvent>[0]["eventType"],
     title: string,
     payload: Record<string, unknown>,
     agentId: string = runtimeAgentId,
   ): Promise<void> {
-    await this.eventSink.publish(
+    await eventSink.publish(
       createRunEvent({
         runId,
         agentId,
