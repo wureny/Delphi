@@ -23,6 +23,8 @@ export interface DelphiAppConfig {
   root: HTMLElement;
   feedMode: FeedMode;
   recordedFixtureUrl: string;
+  runtimeApiBaseUrl?: string;
+  runtimeRunKey?: string;
   sseEventsUrl?: string;
   sseSnapshotUrl?: string;
 }
@@ -36,7 +38,10 @@ export class DelphiFrontendApp {
   constructor(config: DelphiAppConfig) {
     this.config = config;
     this.root = config.root;
-    this.state = createInitialState(config.feedMode);
+    this.state = createInitialState(
+      config.feedMode,
+      buildFeedInfoMessage(config),
+    );
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleInput = this.handleInput.bind(this);
@@ -52,7 +57,10 @@ export class DelphiFrontendApp {
 
   private startFeed(): void {
     this.connection?.close();
-    this.state = createRestartState(this.state);
+    this.state = createRestartState(
+      this.state,
+      buildFeedInfoMessage(this.config),
+    );
     this.render();
 
     const source = this.createFeedSource();
@@ -132,7 +140,11 @@ export class DelphiFrontendApp {
   private handleInput(event: Event): void {
     const target = event.target;
 
-    if (!(target instanceof HTMLTextAreaElement) || target.name !== "question") {
+    if (
+      this.config.feedMode === "sse" ||
+      !(target instanceof HTMLTextAreaElement) ||
+      target.name !== "question"
+    ) {
       return;
     }
 
@@ -142,10 +154,44 @@ export class DelphiFrontendApp {
   private render(): void {
     this.root.innerHTML = renderApp({
       state: this.state,
+      config: this.config,
       run: selectRunViewState(this.state),
       report: selectReportViewState(this.state),
       agentCards: selectAgentCardStates(this.state),
       timeline: selectTimelineState(this.state),
     });
+  }
+}
+
+function buildFeedInfoMessage(config: DelphiAppConfig): string {
+  if (config.feedMode === "sse") {
+    const runKey = config.runtimeRunKey ?? inferRunKeyFromUrl(config.sseEventsUrl) ?? "demo";
+    const runtimeBase = config.runtimeApiBaseUrl ?? inferRuntimeBase(config.sseEventsUrl) ?? "http://127.0.0.1:8787";
+
+    return `Live bridge mode uses runtime run key "${runKey}" via ${runtimeBase}. The composer is read-only here because thread4 currently exposes GET /runs/:runKey/events + GET /runs/:runKey/report, not a query submission endpoint.`;
+  }
+
+  return "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run.";
+}
+
+function inferRunKeyFromUrl(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  const match = url.match(/\/runs\/([^/]+)\/events$/);
+  return match?.[1] ?? null;
+}
+
+function inferRuntimeBase(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return null;
   }
 }

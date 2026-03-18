@@ -17,6 +17,7 @@
     "frontend:demo:record": "node --import tsx ./scripts/export-runtime-demo-fixture.ts",
     "frontend:build": "tsc -p ./tsconfig.frontend.json",
     "frontend:serve": "node --import tsx ./scripts/serve-frontend.ts",
+    "dev:live": "node --import tsx ./scripts/dev-live.ts",
     "frontend:typecheck": "tsc -p ./tsconfig.frontend.json --noEmit",
     "typecheck": "tsc --noEmit && npm run frontend:typecheck"
   },

@@ -102,7 +102,10 @@ export interface TimelineItemViewState {
   summary: string;
 }
 
-export function createInitialState(feedMode: FeedMode): AppState {
+export function createInitialState(
+  feedMode: FeedMode,
+  infoMessage?: string,
+): AppState {
   return {
     feedMode,
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
@@ -111,9 +114,10 @@ export function createInitialState(feedMode: FeedMode): AppState {
     connectionStatus: "idle",
     errorMessage: null,
     infoMessage:
-      feedMode === "recorded"
+      infoMessage ??
+      (feedMode === "recorded"
         ? "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run."
-        : "SSE mode expects a runtime event endpoint plus an optional snapshot endpoint for final report hydration.",
+        : "SSE mode expects a runtime event endpoint plus an optional snapshot endpoint for final report hydration."),
     run: null,
     reportSections: createEmptySections(),
     finalReportReady: false,
@@ -121,9 +125,12 @@ export function createInitialState(feedMode: FeedMode): AppState {
   };
 }
 
-export function createRestartState(previous: AppState): AppState {
+export function createRestartState(
+  previous: AppState,
+  infoMessage?: string,
+): AppState {
   return {
-    ...createInitialState(previous.feedMode),
+    ...createInitialState(previous.feedMode, infoMessage),
     composerText: previous.composerText,
     canvasCollapsed: previous.canvasCollapsed,
   };

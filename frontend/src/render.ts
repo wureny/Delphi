@@ -8,12 +8,16 @@ import type { AppState } from "./state.js";
 
 export function renderApp(options: {
   state: AppState;
+  config: {
+    feedMode: AppState["feedMode"];
+    runtimeRunKey?: string;
+  };
   run: RunViewState;
   report: ReportViewState;
   agentCards: AgentCardState[];
   timeline: TimelineItemViewState[];
 }): string {
-  const { state, run, report, agentCards, timeline } = options;
+  const { state, config, run, report, agentCards, timeline } = options;
 
   return `
     <div class="app-shell ${state.canvasCollapsed ? "canvas-collapsed" : ""}">
@@ -29,6 +33,11 @@ export function renderApp(options: {
           ${renderStatusBadge(run.statusTone, `${run.stageLabel}`)}
           <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
           <span class="tag">${escapeHtml(run.feedLabel)}</span>
+          ${
+            config.feedMode === "sse" && config.runtimeRunKey
+              ? `<span class="tag">run ${escapeHtml(config.runtimeRunKey)}</span>`
+              : ""
+          }
         </div>
         <button class="toggle-button" data-action="toggle-canvas" type="button">
           ${state.canvasCollapsed ? "Expand Canvas" : "Collapse Canvas"}
@@ -45,13 +54,14 @@ export function renderApp(options: {
                 class="query-input"
                 name="question"
                 placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
+                ${config.feedMode === "sse" ? "readonly" : ""}
               >${escapeHtml(state.composerText)}</textarea>
               <div class="composer-actions">
                 <p class="composer-note">${escapeHtml(
                   state.errorMessage ?? state.infoMessage ?? "",
                 )}</p>
                 <button class="primary-button" type="submit">
-                  ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Connect SSE Feed"}
+                  ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Reconnect Live Run"}
                 </button>
               </div>
             </form>

@@ -49,6 +49,9 @@ Frontend shell:
   - compile browser TypeScript into `frontend/dist`
 - `npm run frontend:serve`
   - serve the frontend shell locally from `frontend/`
+- `npm run dev:live`
+  - start the thread4 runtime bridge and thread5 frontend shell together
+  - opens the live path via `/?source=sse&runtime=http://127.0.0.1:8787&run=demo`
 
 OpenBB local setup:
 

@@ -7,7 +7,11 @@
   - 后续若迁到 React，只需要替换渲染层，不需要重写 feed / selector 逻辑
 - feed 设计：
   - `recorded`：读取 `frontend/public/fixtures/runtime-demo.json`
-  - `sse`：EventSource 消费 `/runs/:id/events`，并在 `report_ready` 后单独请求 snapshot
+  - `sse`：EventSource 消费 thread4 runtime bridge `/runs/:runKey/events`，并在 `report_ready` 后单独请求 `/runs/:runKey/report`
+- live bridge 接入状态：
+  - thread5 已能从 `runtime` base URL + `run` key 自动推导 events/report endpoints
+  - 新增 `npm run dev:live`，一键同时启动 runtime bridge 和 frontend shell
+  - 当前 live 模式下 composer 明确只用于“重连同一个 run key”，不会把输入文本提交给后端
 - 重要边界：
   - 前端不假设 `report_ready` 自带完整 report
   - 前端不假设 4 个非 judge agent 会真并发
@@ -19,8 +23,9 @@
   - 结果优先，过程可见但不喧宾夺主
 - 当前验证：
   - recorded fixture 已由真实 runtime fixture demo 导出
+  - `npm run dev:live` 可同时拉起 frontend + runtime bridge
   - 前端 typecheck / build 已通过
-  - 本地监听端口在当前沙箱下被禁止，无法在本环境内打开页面做浏览器级验证
+  - `GET /runs/demo/events` 与 `GET /runs/demo/report` 已实际联调验证
 - 当前明确不做的伪装：
   - 不把 agent 事件伪装成“真实 shell/PTy 已接入”
   - 若要做真正可交互 web terminal，需要 thread4 / backend 额外提供终端流协议或 PTY bridge
