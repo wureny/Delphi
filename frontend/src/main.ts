@@ -19,8 +19,17 @@ const derivedEventsUrl = runtimeRunKey
 const derivedSnapshotUrl = runtimeRunKey
   ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/report`
   : undefined;
+const derivedTerminalsUrl = runtimeRunKey
+  ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/terminals`
+  : undefined;
+const derivedTerminalStreamUrl = runtimeRunKey
+  ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/terminal-stream`
+  : undefined;
 const sseEventsUrl = searchParams.get("events") ?? derivedEventsUrl;
 const sseSnapshotUrl = searchParams.get("snapshot") ?? derivedSnapshotUrl;
+const sseTerminalsUrl = searchParams.get("terminals") ?? derivedTerminalsUrl;
+const sseTerminalStreamUrl =
+  searchParams.get("terminalStream") ?? derivedTerminalStreamUrl;
 
 const app = new DelphiFrontendApp({
   root,
@@ -30,6 +39,8 @@ const app = new DelphiFrontendApp({
   ...(feedMode === "sse" && runtimeRunKey ? { runtimeRunKey } : {}),
   ...(sseEventsUrl ? { sseEventsUrl } : {}),
   ...(sseSnapshotUrl ? { sseSnapshotUrl } : {}),
+  ...(sseTerminalsUrl ? { sseTerminalsUrl } : {}),
+  ...(sseTerminalStreamUrl ? { sseTerminalStreamUrl } : {}),
 });
 
 app.mount();

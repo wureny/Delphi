@@ -7,6 +7,10 @@ import {
   RuntimeOrchestrator,
 } from "../src/orchestration/index.ts";
 import {
+  createEmptyTerminalSnapshot,
+  createTerminalChunkFromRunEvent,
+} from "../src/orchestration/terminal-stream.ts";
+import {
   FixtureGraphContextReader,
   FixtureRuntimeDataAdapter,
   createFixtureExecutors,
@@ -34,6 +38,15 @@ async function main(): Promise<void> {
     createdAt: "2026-03-18T00:00:00.000Z",
   });
 
+  const terminalSnapshot = createEmptyTerminalSnapshot(result.run.runId);
+  const terminalChunks = eventSink.events
+    .map((event) => createTerminalChunkFromRunEvent(event))
+    .filter((chunk) => chunk !== null);
+
+  for (const chunk of terminalChunks) {
+    terminalSnapshot.terminals[chunk.agentType].push(chunk.line);
+  }
+
   const outputPath = resolve(
     process.cwd(),
     "frontend/public/fixtures/runtime-demo.json",
@@ -56,6 +69,8 @@ async function main(): Promise<void> {
         reportSections: result.reportSections,
         finalReport: result.finalReport,
         events: eventSink.events,
+        terminalSnapshot,
+        terminalChunks,
       },
       null,
       2,

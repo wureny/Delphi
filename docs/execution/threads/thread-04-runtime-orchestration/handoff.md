@@ -12,6 +12,12 @@
   - `POST /runs`
   - `GET /runs/:runKey/events`
   - `GET /runs/:runKey/report`
+  - `GET /runs/:runKey/terminals`
+  - `GET /runs/:runKey/terminal-stream`
+- 已新增受控 terminal stream：
+  - backend 会把真实 `RunEvent` 转成 per-agent terminal line
+  - 可同时提供 terminal snapshot 和 terminal SSE replay
+  - 明确不暴露 OS shell / PTY 给 agent 或浏览器
 
 ## Decisions Made
 
@@ -26,6 +32,7 @@
 - fixture runtime 已能证明主链能跑，但还没有接真实 OpenBB adapter
 - 当前 runtime API 仍显式使用 `NoopGraphWriter`；要验证 Aura 上的真实实例图，还需要切到 thread2 的真实 writer
 - `POST /runs` 当前对 `ticker/timeHorizon/caseType` 支持显式传入；若只传 `userQuestion`，runtime 会用轻量启发式推断，v0 可用但不是最终 planner-grade parsing
+- terminal stream 当前基于受控 runtime event 映射，而不是 token-level model stream 或真实 shell 字节流；这符合 v0 产品边界
 - runtime contract 目前仍未覆盖 session continuity；这是后续阶段问题，不应倒灌回第一阶段
 - thread2 未来可能还需要补更适合 runtime 消费的 graph CLI / SDK / API
 

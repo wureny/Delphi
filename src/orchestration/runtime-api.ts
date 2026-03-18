@@ -17,6 +17,12 @@ import { createRunEvent, type RunEvent, type RuntimeEventSink } from "./events.t
 import type { RuntimeOrchestrator } from "./orchestrator.ts";
 import { createEmptyReportSections } from "./report.ts";
 import { createDefaultCaseId } from "./run-manager.ts";
+import {
+  createEmptyTerminalSnapshot,
+  createTerminalChunkFromRunEvent,
+  type TerminalSnapshot,
+  type TerminalStreamChunk,
+} from "./terminal-stream.ts";
 
 type RunSnapshot = {
   run: RunRecord;
@@ -28,11 +34,14 @@ interface RuntimeSession {
   key: string;
   query: ResearchQuery;
   snapshot: RunSnapshot;
+  terminalSnapshot: TerminalSnapshot;
   runId: string;
   caseId: string;
   createdAt: string;
   events: RunEvent[];
-  listeners: Set<ServerResponse<IncomingMessage>>;
+  terminalChunks: TerminalStreamChunk[];
+  eventListeners: Set<ServerResponse<IncomingMessage>>;
+  terminalListeners: Set<ServerResponse<IncomingMessage>>;
   execution: Promise<void> | null;
 }
 
@@ -127,6 +136,8 @@ export function createRuntimeApiServer(
         endpoints: {
           events: `/runs/${encodeURIComponent(session.key)}/events`,
           report: `/runs/${encodeURIComponent(session.key)}/report`,
+          terminals: `/runs/${encodeURIComponent(session.key)}/terminals`,
+          terminalStream: `/runs/${encodeURIComponent(session.key)}/terminal-stream`,
         },
       });
       return;
@@ -164,6 +175,31 @@ export function createRuntimeApiServer(
       return;
     }
 
+    const terminalsMatch = requestUrl.pathname.match(/^\/runs\/([^/]+)\/terminals$/);
+
+    if (terminalsMatch) {
+      const runKey = terminalsMatch[1];
+
+      if (!runKey) {
+        writeJson(response, 400, {
+          error: "Missing run key.",
+        });
+        return;
+      }
+
+      if (!normalizeRunKey(runKey)) {
+        writeJson(response, 400, {
+          error:
+            "Invalid runKey. Use only letters, numbers, underscores, or hyphens.",
+        });
+        return;
+      }
+
+      const session = ensureSession(runKey, sessions, options);
+      writeJson(response, 200, session.terminalSnapshot);
+      return;
+    }
+
     const eventsMatch = requestUrl.pathname.match(/^\/runs\/([^/]+)\/events$/);
 
     if (eventsMatch) {
@@ -186,6 +222,32 @@ export function createRuntimeApiServer(
 
       const session = ensureSession(runKey, sessions, options);
       attachEventStream(request, response, session);
+      startSession(session, options);
+      return;
+    }
+
+    const terminalStreamMatch = requestUrl.pathname.match(/^\/runs\/([^/]+)\/terminal-stream$/);
+
+    if (terminalStreamMatch) {
+      const runKey = terminalStreamMatch[1];
+
+      if (!runKey) {
+        writeJson(response, 400, {
+          error: "Missing run key.",
+        });
+        return;
+      }
+
+      if (!normalizeRunKey(runKey)) {
+        writeJson(response, 400, {
+          error:
+            "Invalid runKey. Use only letters, numbers, underscores, or hyphens.",
+        });
+        return;
+      }
+
+      const session = ensureSession(runKey, sessions, options);
+      attachTerminalStream(request, response, session);
       startSession(session, options);
       return;
     }
@@ -266,11 +328,14 @@ function createSession(runKey: string, query: ResearchQuery): RuntimeSession {
       reportSections: createEmptyReportSections(runId),
       finalReport: null,
     },
+    terminalSnapshot: createEmptyTerminalSnapshot(runId),
     runId,
     caseId,
     createdAt,
     events: [],
-    listeners: new Set(),
+    terminalChunks: [],
+    eventListeners: new Set(),
+    terminalListeners: new Set(),
     execution: null,
   };
 }
@@ -287,23 +352,51 @@ function attachEventStream(
     "X-Accel-Buffering": "no",
   });
   response.write("retry: 1000\n\n");
-  session.listeners.add(response);
+  session.eventListeners.add(response);
 
   for (const event of session.events) {
     response.write(`data: ${JSON.stringify(event)}\n\n`);
   }
 
   request.on("close", () => {
-    session.listeners.delete(response);
+    session.eventListeners.delete(response);
+  });
+}
+
+function attachTerminalStream(
+  request: IncomingMessage,
+  response: ServerResponse<IncomingMessage>,
+  session: RuntimeSession,
+): void {
+  response.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache, no-transform",
+    Connection: "keep-alive",
+    "X-Accel-Buffering": "no",
+  });
+  response.write("retry: 1000\n\n");
+  session.terminalListeners.add(response);
+
+  for (const chunk of session.terminalChunks) {
+    response.write(`data: ${JSON.stringify(chunk)}\n\n`);
+  }
+
+  request.on("close", () => {
+    session.terminalListeners.delete(response);
   });
 }
 
 function closeSession(session: RuntimeSession): void {
-  for (const listener of session.listeners) {
+  for (const listener of session.eventListeners) {
     listener.end();
   }
 
-  session.listeners.clear();
+  for (const listener of session.terminalListeners) {
+    listener.end();
+  }
+
+  session.eventListeners.clear();
+  session.terminalListeners.clear();
 }
 
 function startSession(
@@ -319,6 +412,7 @@ function startSession(
       session.events.push(event);
       session.snapshot.run = applyRuntimeEvent(session.snapshot.run, event);
       broadcastEvent(session, event);
+      broadcastTerminalChunk(session, event);
     },
   };
 
@@ -361,6 +455,7 @@ function startSession(
       });
       session.events.push(failureEvent);
       broadcastEvent(session, failureEvent);
+      broadcastTerminalChunk(session, failureEvent);
     }
   })();
 }
@@ -610,8 +705,23 @@ function writeJson(
 }
 
 function broadcastEvent(session: RuntimeSession, event: RunEvent): void {
-  for (const listener of session.listeners) {
+  for (const listener of session.eventListeners) {
     listener.write(`data: ${JSON.stringify(event)}\n\n`);
+  }
+}
+
+function broadcastTerminalChunk(session: RuntimeSession, event: RunEvent): void {
+  const chunk = createTerminalChunkFromRunEvent(event);
+
+  if (!chunk) {
+    return;
+  }
+
+  session.terminalChunks.push(chunk);
+  session.terminalSnapshot.terminals[chunk.agentType].push(chunk.line);
+
+  for (const listener of session.terminalListeners) {
+    listener.write(`data: ${JSON.stringify(chunk)}\n\n`);
   }
 }
 

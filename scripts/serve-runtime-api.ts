@@ -33,6 +33,8 @@ async function main(): Promise<void> {
     console.log(`Run creation endpoint: http://${host}:${port}/runs`);
     console.log(`SSE endpoint: http://${host}:${port}/runs/demo/events`);
     console.log(`Snapshot endpoint: http://${host}:${port}/runs/demo/report`);
+    console.log(`Terminal snapshot endpoint: http://${host}:${port}/runs/demo/terminals`);
+    console.log(`Terminal stream endpoint: http://${host}:${port}/runs/demo/terminal-stream`);
     console.log(`Data mode: ${process.env.RUNTIME_DATA_MODE ?? "fixture"}`);
     console.log("Graph writer: noop (explicit local demo mode)");
   });

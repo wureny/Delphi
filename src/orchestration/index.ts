@@ -10,4 +10,5 @@ export * from "./orchestrator.ts";
 export * from "./runtime-api.ts";
 export * from "./runtime-patches.ts";
 export * from "./stable-objects.ts";
+export * from "./terminal-stream.ts";
 export * from "./fixtures.ts";

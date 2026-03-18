@@ -7,26 +7,30 @@
   - 后续若迁到 React，只需要替换渲染层，不需要重写 feed / selector 逻辑
 - feed 设计：
   - `recorded`：读取 `frontend/public/fixtures/runtime-demo.json`
-  - `sse`：先 `POST /runs` 创建 run，再消费 `/runs/:runKey/events`，并在首帧与 `report_ready` 后请求 `/runs/:runKey/report`
+  - `recorded`：fixture 现在同时包含 terminal snapshot / terminal chunks，右侧 demo transcript 不再由前端临时拼装
+  - `sse`：先 `POST /runs` 创建 run，再消费 `/runs/:runKey/report`、`/runs/:runKey/events`、`/runs/:runKey/terminals`、`/runs/:runKey/terminal-stream`
 - live bridge 接入状态：
   - thread5 live mode 已支持真实 `composer -> POST /runs -> 切换 runKey -> snapshot + events`
+  - thread5 右侧 terminal body 已切到 thread4 的 controlled terminal transport：
+    - `terminals` 做首屏 hydration / reload recovery
+    - `terminal-stream` 做增量 append
   - 若 URL 显式带 `run`，前端仍可重连既有 run；若不带 `run`，页面保持空闲态等待提交
   - 新增 `npm run dev:live`，一键同时启动 runtime bridge 和 frontend shell
 - 重要边界：
   - 前端不假设 `report_ready` 自带完整 report
   - 前端不假设 4 个非 judge agent 会真并发
-  - 右侧卡片只展示 runtime 已显式暴露的高信号状态
+  - RunEvent 负责 run 状态 / timeline / summary；Terminal transport 负责右侧 transcript body
   - 当前前端提交只传 `query.userQuestion`；`ticker / timeHorizon / caseType` 仍交给 thread4 v0 轻量推断
 - UI 方向：
   - 左侧像一份机构化研究 memo
   - 右侧像被产品化后的 agent workbench
-  - terminal card 已升级为 event-driven transcript surface，直接消费真实 runtime events，而不是假打字动画
+  - terminal card 现在像克制的 Mac terminal window，但正文来自受控 runtime terminal stream，不是假打字动画，也不是裸 shell
   - 结果优先，过程可见但不喧宾夺主
 - 当前验证：
   - recorded fixture 已由真实 runtime fixture demo 导出
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge
   - 前端 typecheck / build 已通过
-  - `POST /runs`、`GET /runs/:runKey/events`、`GET /runs/:runKey/report` 已实际联调验证
+  - `POST /runs`、`GET /runs/:runKey/events`、`GET /runs/:runKey/report`、`GET /runs/:runKey/terminals`、`GET /runs/:runKey/terminal-stream` 已实际联调验证
 - 当前明确不做的伪装：
-  - 不把 agent 事件伪装成“真实 shell/PTy 已接入”
-  - 若要做真正可交互 web terminal，需要 thread4 / backend 额外提供终端流协议或 PTY bridge
+  - 不把 controlled runtime terminal stream 伪装成真实 shell / PTY
+  - 若要做真正可交互 web terminal，仍需要 thread4 / backend 额外提供终端流协议或 PTY bridge

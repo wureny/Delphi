@@ -7,6 +7,7 @@ import {
   type ReportSectionRecord,
   type ReportSectionStatus,
   type ReportSectionKey,
+  type TerminalLine,
   type RunEvent,
   type RunRecord,
 } from "./run-contract.js";
@@ -38,6 +39,7 @@ export interface AppState {
   reportSections: ReportSectionRecord[];
   finalReportReady: boolean;
   receivedEvents: RunEvent[];
+  terminalLines: Record<AgentKey, TerminalLine[]>;
 }
 
 export interface RunViewState {
@@ -90,8 +92,10 @@ export interface AgentCardState {
 export interface TerminalLineState {
   id: string;
   prefix: string;
-  content: string;
-  tone: "neutral" | "running" | "success" | "warning" | "danger";
+  text: string;
+  kind: TerminalLine["kind"];
+  tone: TerminalLine["tone"];
+  ts: string;
 }
 
 export interface TimelineItemViewState {
@@ -122,6 +126,7 @@ export function createInitialState(
     reportSections: createEmptySections(),
     finalReportReady: false,
     receivedEvents: [],
+    terminalLines: createEmptyTerminalLines(),
   };
 }
 
@@ -164,6 +169,16 @@ export function reduceFeedMessage(
         receivedEvents: [...state.receivedEvents, message.event],
         finalReportReady:
           state.finalReportReady || message.event.eventType === "report_ready",
+      };
+    case "terminal_snapshot":
+      return {
+        ...state,
+        terminalLines: sanitizeTerminalLines(message.snapshot.terminals),
+      };
+    case "terminal_chunk":
+      return {
+        ...state,
+        terminalLines: appendTerminalChunk(state.terminalLines, message.chunk),
       };
     case "complete":
       return {
@@ -419,8 +434,19 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
     const agentEvents = state.receivedEvents.filter(
       (event) => inferAgentKey(event) === agent,
     );
+    const terminalLines = state.terminalLines[agent];
 
-    card.transcriptLines = buildTranscriptLines(agentEvents);
+    card.transcriptLines =
+      terminalLines.length > 0
+        ? terminalLines.slice(-28).map((line) => ({
+            id: line.lineId,
+            prefix: line.prefix,
+            text: line.text,
+            kind: line.kind,
+            tone: line.tone,
+            ts: line.ts,
+          }))
+        : buildTranscriptLines(agentEvents);
     card.eventCount = agentEvents.length;
     card.isLive = card.status === "running";
 
@@ -492,6 +518,15 @@ function createEmptySections(runId = "run:pending"): ReportSectionRecord[] {
     citationObjectRefs: [],
     status: "empty",
   }));
+}
+
+function createEmptyTerminalLines(): Record<AgentKey, TerminalLine[]> {
+  return {
+    thesis: [],
+    liquidity: [],
+    market_signal: [],
+    judge: [],
+  };
 }
 
 function formatAgentLabel(agent: AgentKey): string {
@@ -602,8 +637,10 @@ function buildTranscriptLines(
   return events.slice(-7).map((event) => ({
     id: event.eventId,
     prefix: terminalPrefix(event),
-    content: summarizeTranscriptEvent(event),
+    text: summarizeTranscriptEvent(event),
+    kind: inferTerminalKindFromEvent(event),
     tone: terminalTone(event),
+    ts: event.ts,
   }));
 }
 
@@ -687,6 +724,76 @@ function terminalTone(
     default:
       return "neutral";
   }
+}
+
+function inferTerminalKindFromEvent(
+  event: RunEvent,
+): TerminalLineState["kind"] {
+  switch (event.eventType) {
+    case "task_assigned":
+      return "plan";
+    case "tool_started":
+    case "tool_finished":
+      return "tool";
+    case "finding_created":
+      return "finding";
+    case "patch_accepted":
+    case "patch_rejected":
+      return "graph";
+    case "judge_synthesis_started":
+    case "report_ready":
+      return "synthesis";
+    case "degraded_mode_entered":
+      return "warning";
+    case "agent_failed":
+      return "error";
+    default:
+      return "status";
+  }
+}
+
+function sanitizeTerminalLines(
+  terminals: Record<AgentKey, TerminalLine[]>,
+): Record<AgentKey, TerminalLine[]> {
+  const next = createEmptyTerminalLines();
+
+  for (const agent of agentKeys) {
+    next[agent] = dedupeTerminalLines(terminals[agent] ?? []);
+  }
+
+  return next;
+}
+
+function appendTerminalChunk(
+  terminalLines: Record<AgentKey, TerminalLine[]>,
+  chunk: { agentType: AgentKey; line: TerminalLine },
+): Record<AgentKey, TerminalLine[]> {
+  const existing = terminalLines[chunk.agentType];
+
+  if (existing.some((line) => line.lineId === chunk.line.lineId)) {
+    return terminalLines;
+  }
+
+  return {
+    ...terminalLines,
+    [chunk.agentType]: [...existing, chunk.line],
+  };
+}
+
+function dedupeTerminalLines(lines: TerminalLine[]): TerminalLine[] {
+  const seen = new Set<string>();
+  const next: TerminalLine[] = [];
+
+  for (const line of lines) {
+    if (seen.has(line.lineId)) {
+      continue;
+    }
+
+    seen.add(line.lineId);
+    next.push(line);
+  }
+
+  return next;
 }
 
 function truncateLong(value: string, limit: number): string {

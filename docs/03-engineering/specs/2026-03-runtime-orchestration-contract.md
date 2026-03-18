@@ -128,7 +128,11 @@ v0 至少应存在：
   - `POST /runs` 接收 query submission，并返回 `runKey` 与后续消费 endpoint
   - `GET /runs/:runKey/events` 返回 SSE `RunEvent`
   - `GET /runs/:runKey/report` 返回 `{ run, reportSections, finalReport }`
+  - `GET /runs/:runKey/terminals` 返回按 agent 分组的 terminal transcript snapshot
+  - `GET /runs/:runKey/terminal-stream` 返回 SSE terminal chunks
 - snapshot endpoint 在 run 尚未完成时也必须可访问，至少返回当前 `run` 与固定 6 个 `ReportSection` 占位
+- terminal stream 必须来自真实 runtime action / event，而不是前端伪造动画
+- v0 默认 terminal stream 是受控 command/event stream，不等于把真实 shell / PTY 暴露给 agent 或浏览器
 
 ## 6. Parallelism Policy
 

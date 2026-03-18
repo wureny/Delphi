@@ -42,9 +42,9 @@ Frontend shell:
 - `frontend/`
   - thread5 no-dependency TypeScript shell
   - recorded runtime fixture playback + live runtime submission bridge
-  - left report / right agent canvas layout
+  - left report / right controlled terminal canvas layout
 - `npm run frontend:demo:record`
-  - regenerate the recorded runtime fixture from the real thread4 fixture runtime
+  - regenerate the recorded runtime fixture from the real thread4 fixture runtime, including terminal chunks
 - `npm run frontend:build`
   - compile browser TypeScript into `frontend/dist`
 - `npm run frontend:serve`

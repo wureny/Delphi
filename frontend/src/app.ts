@@ -3,11 +3,26 @@ import {
   createRuntimeRun,
   createSseFeedSource,
   type FeedConnection,
+  type FeedMessage,
   type FeedMode,
   resolveRuntimeEndpoint,
   type RunFeedSource,
 } from "./feeds.js";
-import { renderApp } from "./render.js";
+import {
+  renderApp,
+  renderDegradedBanner,
+  renderRailMeta,
+  renderReportGrid,
+  renderStatusStrip,
+  renderTerminalLine,
+  renderTerminalLines,
+  renderTimelineList,
+} from "./render.js";
+import {
+  agentKeys,
+  type AgentKey,
+  type TerminalStreamChunk,
+} from "./run-contract.js";
 import {
   createInitialState,
   createRestartState,
@@ -19,6 +34,7 @@ import {
   toggleCanvas,
   updateComposerText,
   type AppState,
+  type TerminalLineState,
 } from "./state.js";
 
 export interface DelphiAppConfig {
@@ -29,6 +45,8 @@ export interface DelphiAppConfig {
   runtimeRunKey?: string;
   sseEventsUrl?: string;
   sseSnapshotUrl?: string;
+  sseTerminalsUrl?: string;
+  sseTerminalStreamUrl?: string;
 }
 
 export class DelphiFrontendApp {
@@ -36,6 +54,8 @@ export class DelphiFrontendApp {
   private readonly root: HTMLElement;
   private readonly config: DelphiAppConfig;
   private connection: FeedConnection | null = null;
+  private readonly pausedTerminalAgents = new Set<AgentKey>();
+  private readonly renderedTerminalLineIds = new Map<AgentKey, Set<string>>();
 
   constructor(config: DelphiAppConfig) {
     this.config = config;
@@ -47,13 +67,15 @@ export class DelphiFrontendApp {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
   }
 
   mount(): void {
     this.root.addEventListener("submit", this.handleSubmit);
     this.root.addEventListener("click", this.handleClick);
     this.root.addEventListener("input", this.handleInput);
-    this.render();
+    this.root.addEventListener("scroll", this.handleScroll, true);
+    this.renderShell();
 
     if (this.shouldAutoStartFeed()) {
       this.startFeed();
@@ -62,18 +84,34 @@ export class DelphiFrontendApp {
 
   private startFeed(): void {
     this.connection?.close();
+    this.connection = null;
+    this.resetTerminalUiState();
     this.state = createRestartState(
       this.state,
       buildFeedInfoMessage(this.config),
     );
-    this.render();
+    this.renderShell();
 
     const source = this.createFeedSource();
     this.connection = source.connect({
       onMessage: (message) => {
-        this.state = reduceFeedMessage(this.state, message);
-        this.render();
+        this.applyFeedMessage(message);
       },
+    });
+  }
+
+  private applyFeedMessage(message: FeedMessage): void {
+    this.state = reduceFeedMessage(this.state, message);
+
+    if (message.kind === "terminal_chunk") {
+      this.syncView({
+        appendTerminalChunk: message.chunk,
+      });
+      return;
+    }
+
+    this.syncView({
+      forceTerminalRefresh: message.kind === "terminal_snapshot",
     });
   }
 
@@ -103,6 +141,12 @@ export class DelphiFrontendApp {
         eventsUrl: this.config.sseEventsUrl,
         ...(this.config.sseSnapshotUrl
           ? { snapshotUrl: this.config.sseSnapshotUrl }
+          : {}),
+        ...(this.config.sseTerminalsUrl
+          ? { terminalsUrl: this.config.sseTerminalsUrl }
+          : {}),
+        ...(this.config.sseTerminalStreamUrl
+          ? { terminalStreamUrl: this.config.sseTerminalStreamUrl }
           : {}),
       });
     }
@@ -144,7 +188,20 @@ export class DelphiFrontendApp {
 
     if (actionNode.dataset.action === "toggle-canvas") {
       this.state = toggleCanvas(this.state);
-      this.render();
+      this.renderShell();
+      return;
+    }
+
+    if (actionNode.dataset.action === "jump-terminal") {
+      const agent = actionNode.dataset.agent;
+
+      if (!isAgentKey(agent)) {
+        return;
+      }
+
+      this.pausedTerminalAgents.delete(agent);
+      this.scrollTerminalToBottom(agent);
+      this.syncJumpButton(agent);
     }
   }
 
@@ -156,6 +213,32 @@ export class DelphiFrontendApp {
     }
 
     this.state = updateComposerText(this.state, target.value);
+  }
+
+  private handleScroll(event: Event): void {
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement) || target.dataset.role !== "terminal-scroll") {
+      return;
+    }
+
+    const agent = target.dataset.agent;
+
+    if (!isAgentKey(agent)) {
+      return;
+    }
+
+    const followThreshold = 18;
+    const isNearBottom =
+      target.scrollHeight - target.scrollTop - target.clientHeight <= followThreshold;
+
+    if (isNearBottom) {
+      this.pausedTerminalAgents.delete(agent);
+    } else {
+      this.pausedTerminalAgents.add(agent);
+    }
+
+    this.syncJumpButton(agent);
   }
 
   private shouldAutoStartFeed(): boolean {
@@ -170,7 +253,7 @@ export class DelphiFrontendApp {
         ...this.state,
         errorMessage: "Question is required before creating a live run.",
       };
-      this.render();
+      this.syncView();
       return;
     }
 
@@ -179,17 +262,18 @@ export class DelphiFrontendApp {
         ...this.state,
         errorMessage: "Missing runtime API base URL for live submission.",
       };
-      this.render();
+      this.syncView();
       return;
     }
 
     this.connection?.close();
     this.connection = null;
+    this.resetTerminalUiState();
     this.state = createRestartState(
       this.state,
       `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
     );
-    this.render();
+    this.renderShell();
 
     try {
       const submission = await createRuntimeRun({
@@ -210,6 +294,14 @@ export class DelphiFrontendApp {
         this.config.runtimeApiBaseUrl,
         submission.endpoints.report,
       );
+      this.config.sseTerminalsUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.terminals,
+      );
+      this.config.sseTerminalStreamUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.terminalStream,
+      );
 
       syncLiveLocation(this.config.runtimeApiBaseUrl, submission.runKey);
       this.startFeed();
@@ -222,11 +314,11 @@ export class DelphiFrontendApp {
             ? error.message
             : "Live run submission failed.",
       };
-      this.render();
+      this.syncView();
     }
   }
 
-  private render(): void {
+  private renderShell(): void {
     this.root.innerHTML = renderApp({
       state: this.state,
       config: this.config,
@@ -235,6 +327,242 @@ export class DelphiFrontendApp {
       agentCards: selectAgentCardStates(this.state),
       timeline: selectTimelineState(this.state),
     });
+    this.syncView({
+      forceTerminalRefresh: true,
+    });
+  }
+
+  private syncView(options?: {
+    forceTerminalRefresh?: boolean;
+    appendTerminalChunk?: TerminalStreamChunk;
+  }): void {
+    const run = selectRunViewState(this.state);
+    const report = selectReportViewState(this.state);
+    const agentCards = selectAgentCardStates(this.state);
+    const timeline = selectTimelineState(this.state);
+
+    const railMeta = this.root.querySelector<HTMLElement>('[data-role="rail-meta"]');
+    if (railMeta) {
+      railMeta.innerHTML = renderRailMeta(run, this.config);
+    }
+
+    const composerNote = this.root.querySelector<HTMLElement>('[data-role="composer-note"]');
+    if (composerNote) {
+      composerNote.textContent = this.state.errorMessage ?? this.state.infoMessage ?? "";
+    }
+
+    const statusStrip = this.root.querySelector<HTMLElement>('[data-role="status-strip"]');
+    if (statusStrip) {
+      statusStrip.innerHTML = renderStatusStrip(run);
+    }
+
+    const degradedSlot = this.root.querySelector<HTMLElement>('[data-role="degraded-banner-slot"]');
+    if (degradedSlot) {
+      degradedSlot.innerHTML = renderDegradedBanner(report);
+    }
+
+    const reportGrid = this.root.querySelector<HTMLElement>('[data-role="report-grid"]');
+    if (reportGrid) {
+      reportGrid.innerHTML = renderReportGrid(report);
+    }
+
+    const timelineList = this.root.querySelector<HTMLElement>('[data-role="timeline-list"]');
+    if (timelineList) {
+      timelineList.innerHTML = renderTimelineList(timeline);
+    }
+
+    this.syncAgentCards(agentCards, options);
+  }
+
+  private syncAgentCards(
+    agentCards: ReturnType<typeof selectAgentCardStates>,
+    options?: {
+      forceTerminalRefresh?: boolean;
+      appendTerminalChunk?: TerminalStreamChunk;
+    },
+  ): void {
+    for (const card of agentCards) {
+      const cardElement = this.root.querySelector<HTMLElement>(
+        `[data-agent-card="${card.agent}"]`,
+      );
+
+      if (!cardElement) {
+        continue;
+      }
+
+      cardElement.classList.toggle("running", card.status === "running");
+      cardElement.classList.toggle("degraded", card.status === "degraded");
+      cardElement.classList.toggle("failed", card.status === "failed");
+
+      const liveIndicator = cardElement.querySelector<HTMLElement>('[data-field="live-indicator"]');
+      if (liveIndicator) {
+        liveIndicator.classList.toggle("is-live", card.isLive);
+        liveIndicator.innerHTML = `<span class="terminal-live-dot"></span>${card.isLive ? "Live" : "Idle"}`;
+      }
+
+      const phaseLabel = cardElement.querySelector<HTMLElement>('[data-field="phase-label"]');
+      if (phaseLabel) {
+        phaseLabel.textContent = card.phaseLabel;
+      }
+
+      const statusInline = cardElement.querySelector<HTMLElement>('[data-field="status-inline"] .dot');
+      if (statusInline) {
+        statusInline.setAttribute("style", `color:${agentStatusColor(card.status)}`);
+      }
+
+      const statusLabel = cardElement.querySelector<HTMLElement>('[data-field="status-label"]');
+      if (statusLabel) {
+        statusLabel.textContent = card.status;
+      }
+
+      const eventCount = cardElement.querySelector<HTMLElement>('[data-field="event-count"]');
+      if (eventCount) {
+        eventCount.textContent = `${card.eventCount} events`;
+      }
+
+      const currentTask = cardElement.querySelector<HTMLElement>('[data-field="current-task"]');
+      if (currentTask) {
+        currentTask.textContent = card.currentTask;
+      }
+
+      const recentAction = cardElement.querySelector<HTMLElement>('[data-field="recent-action"]');
+      if (recentAction) {
+        recentAction.textContent = card.recentAction;
+      }
+
+      const latestFinding = cardElement.querySelector<HTMLElement>('[data-field="latest-finding"]');
+      if (latestFinding) {
+        latestFinding.textContent = card.latestFinding;
+      }
+
+      const latestTool = cardElement.querySelector<HTMLElement>('[data-field="latest-tool"]');
+      if (latestTool) {
+        latestTool.textContent = card.latestTool;
+      }
+
+      const latestPatch = cardElement.querySelector<HTMLElement>('[data-field="latest-patch"]');
+      if (latestPatch) {
+        latestPatch.textContent = card.latestPatch;
+        latestPatch.classList.remove("tag-clean", "tag-warning", "tag-error");
+        latestPatch.classList.add(patchClass(card.patchTone));
+      }
+
+      const terminalScreen = cardElement.querySelector<HTMLElement>('[data-field="terminal-screen"]');
+      if (terminalScreen) {
+        terminalScreen.classList.toggle("live", card.isLive);
+      }
+
+      const screenMeta = cardElement.querySelector<HTMLElement>('[data-field="screen-meta"]');
+      if (screenMeta) {
+        screenMeta.textContent = card.phaseLabel;
+      }
+
+      const cursorRow = cardElement.querySelector<HTMLElement>(`[data-role="terminal-cursor"][data-agent="${card.agent}"]`);
+      if (cursorRow) {
+        cursorRow.classList.toggle("is-hidden", !card.isLive);
+      }
+
+      if (options?.forceTerminalRefresh) {
+        this.replaceTerminalLines(card.agent, card.transcriptLines);
+      }
+
+      this.syncJumpButton(card.agent);
+    }
+
+    if (options?.appendTerminalChunk) {
+      this.appendTerminalChunk(options.appendTerminalChunk);
+    }
+  }
+
+  private replaceTerminalLines(agent: AgentKey, lines: TerminalLineState[]): void {
+    const linesContainer = this.root.querySelector<HTMLElement>(
+      `[data-role="terminal-lines"][data-agent="${agent}"]`,
+    );
+
+    if (!linesContainer) {
+      return;
+    }
+
+    linesContainer.innerHTML = renderTerminalLines(lines);
+    this.renderedTerminalLineIds.set(
+      agent,
+      new Set(lines.map((line) => line.id)),
+    );
+
+    if (!this.pausedTerminalAgents.has(agent)) {
+      this.scrollTerminalToBottom(agent);
+    }
+  }
+
+  private appendTerminalChunk(chunk: TerminalStreamChunk): void {
+    const agent = chunk.agentType;
+    const renderedIds = this.renderedTerminalLineIds.get(agent) ?? new Set<string>();
+
+    if (renderedIds.has(chunk.line.lineId)) {
+      return;
+    }
+
+    const linesContainer = this.root.querySelector<HTMLElement>(
+      `[data-role="terminal-lines"][data-agent="${agent}"]`,
+    );
+
+    if (!linesContainer) {
+      return;
+    }
+
+    linesContainer.querySelector('[data-role="terminal-placeholder"]')?.remove();
+    linesContainer.insertAdjacentHTML(
+      "beforeend",
+      renderTerminalLine({
+        id: chunk.line.lineId,
+        prefix: chunk.line.prefix,
+        text: chunk.line.text,
+        kind: chunk.line.kind,
+        tone: chunk.line.tone,
+        ts: chunk.line.ts,
+      }),
+    );
+
+    const appendedLine = linesContainer.lastElementChild as HTMLElement | null;
+    appendedLine?.classList.add("is-streamed");
+
+    renderedIds.add(chunk.line.lineId);
+    this.renderedTerminalLineIds.set(agent, renderedIds);
+
+    if (!this.pausedTerminalAgents.has(agent)) {
+      this.scrollTerminalToBottom(agent);
+    }
+
+    this.syncJumpButton(agent);
+  }
+
+  private scrollTerminalToBottom(agent: AgentKey): void {
+    const terminalScroll = this.root.querySelector<HTMLElement>(
+      `[data-role="terminal-scroll"][data-agent="${agent}"]`,
+    );
+
+    if (!terminalScroll) {
+      return;
+    }
+
+    terminalScroll.scrollTop = terminalScroll.scrollHeight;
+  }
+
+  private syncJumpButton(agent: AgentKey): void {
+    const jumpButton = this.root.querySelector<HTMLElement>(
+      `[data-action="jump-terminal"][data-agent="${agent}"]`,
+    );
+
+    if (!jumpButton) {
+      return;
+    }
+
+    jumpButton.classList.toggle("is-hidden", !this.pausedTerminalAgents.has(agent));
+  }
+
+  private resetTerminalUiState(): void {
+    this.pausedTerminalAgents.clear();
+    this.renderedTerminalLineIds.clear();
   }
 }
 
@@ -247,10 +575,10 @@ function buildFeedInfoMessage(config: DelphiAppConfig): string {
       "http://127.0.0.1:8787";
 
     if (runKey) {
-      return `Live mode submits new research via POST /runs and is currently connected to run "${runKey}" on ${runtimeBase}.`;
+      return `Live mode uses POST /runs for new submissions and is currently replaying run "${runKey}" from ${runtimeBase}, including report, events, and controlled terminal transport.`;
     }
 
-    return `Live mode submits your question to ${runtimeBase} via POST /runs, then hydrates /report and streams /events for the returned run.`;
+    return `Live mode submits your question to ${runtimeBase} via POST /runs, then hydrates report + terminal snapshots and streams both events and terminal lines.`;
   }
 
   return "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run.";
@@ -285,5 +613,39 @@ function syncLiveLocation(runtimeApiBaseUrl: string, runKey: string): void {
   url.searchParams.set("run", runKey);
   url.searchParams.delete("events");
   url.searchParams.delete("snapshot");
+  url.searchParams.delete("terminals");
+  url.searchParams.delete("terminalStream");
   window.history.replaceState(null, "", url);
+}
+
+function patchClass(tone: "clean" | "warning" | "error"): string {
+  switch (tone) {
+    case "error":
+      return "tag-error";
+    case "warning":
+      return "tag-warning";
+    default:
+      return "tag-clean";
+  }
+}
+
+function agentStatusColor(status: "idle" | "running" | "blocked" | "done" | "degraded" | "failed"): string {
+  switch (status) {
+    case "running":
+      return "var(--running)";
+    case "done":
+      return "var(--done)";
+    case "degraded":
+      return "var(--degraded)";
+    case "failed":
+      return "var(--failed)";
+    case "blocked":
+      return "var(--degraded)";
+    default:
+      return "var(--idle)";
+  }
+}
+
+function isAgentKey(value: string | undefined): value is AgentKey {
+  return typeof value === "string" && agentKeys.includes(value as AgentKey);
 }

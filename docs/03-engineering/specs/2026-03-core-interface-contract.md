@@ -218,6 +218,39 @@
 
 ### Required sections
 
+## 7. TerminalStream
+
+代表右侧 agent canvas 使用的受控终端输出流。
+
+### Required fields for each terminal line
+
+- `line_id`
+- `run_id`
+- `agent_type`
+- `event_id`
+- `prefix`
+- `text`
+- `kind`
+- `tone`
+- `ts`
+
+### Allowed `kind`
+
+- `plan`
+- `tool`
+- `finding`
+- `graph`
+- `synthesis`
+- `status`
+- `warning`
+- `error`
+
+### Notes
+
+- TerminalStream 必须由真实 runtime event / tool action 映射而来
+- v0 默认是受控 command/event stream，不是原始 shell 字节流
+- 每条 terminal line 都必须可追溯回一个 `RunEvent`
+
 - `final_judgment`
 - `core_thesis`
 - `supporting_evidence`

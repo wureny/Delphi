@@ -65,6 +65,9 @@
   - `GET /runs/:runKey/events` 提供 SSE `RunEvent` 流
   - `GET /runs/:runKey/report` 提供当前 snapshot / final report hydration
   - `GET /runs/:runKey/events` 现在会连接并回放已有 run 的事件，而不是每次都隐式新建 run
+  - `GET /runs/:runKey/terminals` 提供按 agent 分组的 terminal transcript snapshot
+  - `GET /runs/:runKey/terminal-stream` 提供按 terminal chunk 推送的 SSE stream
+  - terminal stream 是受控 runtime action stream，不是 OS shell / PTY 暴露
   - 默认脚本 `npm run runtime:serve` 明确使用 `NoopGraphWriter`
   - `npm run runtime:serve:openbb` 可切到真实 OpenBB data adapter，但 graph 仍是显式 noop demo mode
 

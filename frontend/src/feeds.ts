@@ -2,6 +2,8 @@ import type {
   FinalReport,
   RecordedRunFixture,
   ReportSectionRecord,
+  TerminalSnapshot,
+  TerminalStreamChunk,
   RunEvent,
   RunRecord,
 } from "./run-contract.js";
@@ -15,6 +17,14 @@ export type FeedMessage =
       run: RunRecord;
       reportSections: ReportSectionRecord[];
       finalReport: FinalReport | null;
+    }
+  | {
+      kind: "terminal_snapshot";
+      snapshot: TerminalSnapshot;
+    }
+  | {
+      kind: "terminal_chunk";
+      chunk: TerminalStreamChunk;
     }
   | { kind: "event"; event: RunEvent }
   | { kind: "complete" }
@@ -38,6 +48,8 @@ export interface RuntimeRunSubmission {
   endpoints: {
     events: string;
     report: string;
+    terminals: string;
+    terminalStream: string;
   };
 }
 
@@ -69,6 +81,21 @@ export function createRecordedFeedSource(options: {
             finalReport: fixture.finalReport,
           });
 
+          handlers.onMessage({
+            kind: "terminal_snapshot",
+            snapshot: createInitialTerminalSnapshot(
+              fixture.terminalSnapshot?.runId ?? fixture.run.runId,
+            ),
+          });
+
+          const terminalChunksByEventId = new Map<string, TerminalStreamChunk[]>();
+
+          for (const chunk of fixture.terminalChunks ?? []) {
+            const chunks = terminalChunksByEventId.get(chunk.line.eventId) ?? [];
+            chunks.push(chunk);
+            terminalChunksByEventId.set(chunk.line.eventId, chunks);
+          }
+
           for (const event of fixture.events) {
             await sleep(resolveEventDelay(event.eventType, options.baseDelayMs));
 
@@ -80,6 +107,13 @@ export function createRecordedFeedSource(options: {
               kind: "event",
               event,
             });
+
+            for (const chunk of terminalChunksByEventId.get(event.eventId) ?? []) {
+              handlers.onMessage({
+                kind: "terminal_chunk",
+                chunk,
+              });
+            }
           }
 
           handlers.onMessage({ kind: "complete" });
@@ -108,11 +142,14 @@ export function createRecordedFeedSource(options: {
 export function createSseFeedSource(options: {
   eventsUrl: string;
   snapshotUrl?: string;
+  terminalsUrl?: string;
+  terminalStreamUrl?: string;
 }): RunFeedSource {
   return {
     connect(handlers) {
       let closed = false;
       let eventSource: EventSource | null = null;
+      let terminalSource: EventSource | null = null;
 
       const connect = async (): Promise<void> => {
         handlers.onMessage({
@@ -121,6 +158,10 @@ export function createSseFeedSource(options: {
         });
 
         try {
+          if (options.terminalsUrl) {
+            await loadTerminalSnapshot(options.terminalsUrl, handlers);
+          }
+
           if (options.snapshotUrl) {
             await loadSnapshot(options.snapshotUrl, handlers);
           }
@@ -161,6 +202,40 @@ export function createSseFeedSource(options: {
                 "SSE connection failed. Provide a valid events endpoint or switch back to recorded mode.",
             });
           };
+
+          if (options.terminalStreamUrl) {
+            terminalSource = new EventSource(options.terminalStreamUrl);
+            terminalSource.onmessage = (message) => {
+              if (closed) {
+                return;
+              }
+
+              try {
+                const chunk = JSON.parse(message.data) as TerminalStreamChunk;
+                handlers.onMessage({
+                  kind: "terminal_chunk",
+                  chunk,
+                });
+              } catch {
+                handlers.onMessage({
+                  kind: "error",
+                  message: "Received an invalid terminal stream payload.",
+                });
+              }
+            };
+
+            terminalSource.onerror = () => {
+              if (closed) {
+                return;
+              }
+
+              handlers.onMessage({
+                kind: "error",
+                message:
+                  "Terminal stream connection failed. The run can continue, but the agent canvas may stop updating.",
+              });
+            };
+          }
         } catch (error) {
           handlers.onMessage({
             kind: "error",
@@ -178,6 +253,7 @@ export function createSseFeedSource(options: {
         close() {
           closed = true;
           eventSource?.close();
+          terminalSource?.close();
         },
       };
     },
@@ -258,6 +334,35 @@ async function loadSnapshot(
     reportSections: snapshot.reportSections,
     finalReport: snapshot.finalReport,
   });
+}
+
+async function loadTerminalSnapshot(
+  terminalsUrl: string,
+  handlers: FeedHandlers,
+): Promise<void> {
+  const response = await fetch(terminalsUrl);
+
+  if (!response.ok) {
+    throw new Error(`Terminal snapshot request failed with status ${response.status}.`);
+  }
+
+  const snapshot = (await response.json()) as TerminalSnapshot;
+  handlers.onMessage({
+    kind: "terminal_snapshot",
+    snapshot,
+  });
+}
+
+function createInitialTerminalSnapshot(runId: string): TerminalSnapshot {
+  return {
+    runId,
+    terminals: {
+      thesis: [],
+      liquidity: [],
+      market_signal: [],
+      judge: [],
+    },
+  };
 }
 
 function resolveEventDelay(

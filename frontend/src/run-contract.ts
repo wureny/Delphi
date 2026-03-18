@@ -101,6 +101,47 @@ export interface RunEvent {
   ts: string;
 }
 
+export type TerminalLineKind =
+  | "plan"
+  | "tool"
+  | "finding"
+  | "graph"
+  | "synthesis"
+  | "status"
+  | "warning"
+  | "error";
+
+export type TerminalLineTone =
+  | "neutral"
+  | "running"
+  | "success"
+  | "warning"
+  | "danger";
+
+export interface TerminalLine {
+  lineId: string;
+  runId: string;
+  agentType: AgentKey;
+  eventId: string;
+  prefix: string;
+  text: string;
+  kind: TerminalLineKind;
+  tone: TerminalLineTone;
+  ts: string;
+}
+
+export interface TerminalStreamChunk {
+  chunkId: string;
+  runId: string;
+  agentType: AgentKey;
+  line: TerminalLine;
+}
+
+export interface TerminalSnapshot {
+  runId: string;
+  terminals: Record<AgentKey, TerminalLine[]>;
+}
+
 export interface RecordedRunFixture {
   meta: {
     source: string;
@@ -111,6 +152,8 @@ export interface RecordedRunFixture {
   reportSections: ReportSectionRecord[];
   finalReport: FinalReport | null;
   events: RunEvent[];
+  terminalSnapshot?: TerminalSnapshot;
+  terminalChunks?: TerminalStreamChunk[];
 }
 
 export const reportSectionTitles: Record<ReportSectionKey, string> = {
