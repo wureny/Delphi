@@ -18,7 +18,16 @@
 ## Scope
 
 - 明确做什么:
+  - 搭一版可运行的前端壳层，固定左 report / 右 agent canvas 双栏结构
+  - 以前端状态层消费 `RunEvent[]`，而不是直接读 runtime 内存
+  - 支持 recorded demo feed 和未来 SSE feed 两种输入方式
+  - 固定渲染 4 个 agent cards 与 6 个 report sections
+  - 支持 canvas expand / collapse，并在收起时保留弱状态提示
 - 明确不做什么:
+  - 不修改 thread4 runtime 合同
+  - 不发明新的 runtime event types
+  - 不直接连接 Neo4j、Supabase 或 runtime 内存
+  - 不做图谱视图、多 run 对比、拖拽布局、复杂图表系统
 
 ## Stop Condition
 

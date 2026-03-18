@@ -1,0 +1,782 @@
+{
+  "meta": {
+    "source": "recorded_fixture",
+    "generatedAt": "2026-03-18T05:44:01.600Z",
+    "notes": "Generated from the real thread4 fixture runtime. Safe for frontend recorded-feed playback only."
+  },
+  "run": {
+    "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+    "caseId": "case:AAPL:buy_decision:3m",
+    "query": {
+      "queryId": "query:demo:aapl",
+      "userQuestion": "AAPL 未来三个月值不值得买？",
+      "ticker": "AAPL",
+      "timeHorizon": "3m",
+      "caseType": "buy_decision",
+      "createdAt": "2026-03-18T00:00:00.000Z"
+    },
+    "status": "completed",
+    "createdAt": "2026-03-18T05:44:01.595Z",
+    "updatedAt": "2026-03-18T05:44:01.599Z",
+    "degradedReasons": []
+  },
+  "reportSections": [
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:final_judgment",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "final_judgment",
+      "title": "Final Judgment",
+      "content": "AAPL looks investable on the fixture path, but entry timing still depends on execution and sentiment staying stable. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution), MacroActorAction(macroactoraction:case:AAPL:buy_decision:3m:policy_rates), LiquidityFactor(liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure), LiquidityRegime(liquidityregime:case:AAPL:buy_decision:3m:primary), MarketSignal(marketsignal:case:AAPL:buy_decision:3m:price_positioning).",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:35da2d58-fb08-47c7-a387-53789218662e"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_effr:Rates pressure is manage"
+      ],
+      "citationObjectRefs": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution",
+        "macroactoraction:case:AAPL:buy_decision:3m:policy_rates",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary",
+        "marketsignal:case:AAPL:buy_decision:3m:price_positioning"
+      ],
+      "status": "ready"
+    },
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:core_thesis",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "core_thesis",
+      "title": "Core Thesis",
+      "content": "AAPL Holdings still supports a credible medium-term fundamental thesis. Recent news flow on AAPL is constructive but not strong enough to remove execution risk. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution).",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe"
+      ],
+      "citationObjectRefs": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ],
+      "status": "ready"
+    },
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:supporting_evidence",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "supporting_evidence",
+      "title": "Supporting Evidence",
+      "content": "AAPL Holdings still supports a credible medium-term fundamental thesis. Liquidity backdrop is stable. This does not contradict the long case for AAPL. AAPL price action is constructive without looking fully crowded.",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:a7ed5972-eb0d-4f6c-823d-32a3a1f1fc30",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:e2cc5567-b28c-45b5-9bae-f73b343f5eec"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Liquidity backdrop is st",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Macro conditions do not ",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_quote:Price trend is construct"
+      ],
+      "citationObjectRefs": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary",
+        "marketsignal:case:AAPL:buy_decision:3m:price_positioning"
+      ],
+      "status": "ready"
+    },
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:key_risks",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "key_risks",
+      "title": "Key Risks",
+      "content": "Recent news flow on AAPL is constructive but not strong enough to remove execution risk. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution).",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe"
+      ],
+      "citationObjectRefs": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ],
+      "status": "ready"
+    },
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity_context",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "liquidity_context",
+      "title": "Liquidity Context",
+      "content": "Rates pressure is manageable and liquidity conditions are not actively tightening. Liquidity backdrop is stable. This does not contradict the long case for AAPL. Updated objects: MacroActorAction(macroactoraction:case:AAPL:buy_decision:3m:policy_rates), LiquidityFactor(liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure), LiquidityRegime(liquidityregime:case:AAPL:buy_decision:3m:primary).",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:35da2d58-fb08-47c7-a387-53789218662e",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:a7ed5972-eb0d-4f6c-823d-32a3a1f1fc30"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_effr:Rates pressure is manage",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Liquidity backdrop is st",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Macro conditions do not "
+      ],
+      "citationObjectRefs": [
+        "macroactoraction:case:AAPL:buy_decision:3m:policy_rates",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary"
+      ],
+      "status": "ready"
+    },
+    {
+      "sectionId": "section:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:what_changes_the_view",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "sectionKey": "what_changes_the_view",
+      "title": "What Changes The View",
+      "content": "The view would weaken if execution deteriorates, liquidity turns restrictive, or market positioning becomes obviously crowded.",
+      "citationFindingRefs": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:e2cc5567-b28c-45b5-9bae-f73b343f5eec",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a5e2275-aeed-4f0a-ae34-2a79fc1845f9"
+      ],
+      "citationEvidenceRefs": [
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_quote:Price trend is construct",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_historical:Positioning looks suppor"
+      ],
+      "citationObjectRefs": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ],
+      "status": "ready"
+    }
+  ],
+  "finalReport": {
+    "reportId": "report_87df2476-f207-4a06-8bb5-0d0110b35b60",
+    "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+    "caseId": "case:AAPL:buy_decision:3m",
+    "generatedBy": "judge",
+    "generatedAt": "2026-03-18T05:44:01.599Z",
+    "finalJudgment": "AAPL looks investable on the fixture path, but entry timing still depends on execution and sentiment staying stable. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution), MacroActorAction(macroactoraction:case:AAPL:buy_decision:3m:policy_rates), LiquidityFactor(liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure), LiquidityRegime(liquidityregime:case:AAPL:buy_decision:3m:primary), MarketSignal(marketsignal:case:AAPL:buy_decision:3m:price_positioning).",
+    "coreThesis": "AAPL Holdings still supports a credible medium-term fundamental thesis. Recent news flow on AAPL is constructive but not strong enough to remove execution risk. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution).",
+    "supportingEvidence": "AAPL Holdings still supports a credible medium-term fundamental thesis. Liquidity backdrop is stable. This does not contradict the long case for AAPL. AAPL price action is constructive without looking fully crowded.",
+    "keyRisks": "Recent news flow on AAPL is constructive but not strong enough to remove execution risk. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution).",
+    "liquidityContext": "Rates pressure is manageable and liquidity conditions are not actively tightening. Liquidity backdrop is stable. This does not contradict the long case for AAPL. Updated objects: MacroActorAction(macroactoraction:case:AAPL:buy_decision:3m:policy_rates), LiquidityFactor(liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure), LiquidityRegime(liquidityregime:case:AAPL:buy_decision:3m:primary).",
+    "whatChangesTheView": "The view would weaken if execution deteriorates, liquidity turns restrictive, or market positioning becomes obviously crowded.",
+    "sectionCitations": {
+      "final_judgment": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:35da2d58-fb08-47c7-a387-53789218662e",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_effr:Rates pressure is manage"
+      ],
+      "core_thesis": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe"
+      ],
+      "supporting_evidence": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:a7ed5972-eb0d-4f6c-823d-32a3a1f1fc30",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:e2cc5567-b28c-45b5-9bae-f73b343f5eec",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_profile:AAPL is treated as a hig",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Liquidity backdrop is st",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Macro conditions do not ",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_quote:Price trend is construct"
+      ],
+      "key_risks": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Management commentary re",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:company_news:Market participants appe"
+      ],
+      "liquidity_context": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:35da2d58-fb08-47c7-a387-53789218662e",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:a7ed5972-eb0d-4f6c-823d-32a3a1f1fc30",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_effr:Rates pressure is manage",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Liquidity backdrop is st",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:macro_treasury_rates:Macro conditions do not "
+      ],
+      "what_changes_the_view": [
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:e2cc5567-b28c-45b5-9bae-f73b343f5eec",
+        "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a5e2275-aeed-4f0a-ae34-2a79fc1845f9",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_quote:Price trend is construct",
+        "evidence:case:AAPL:buy_decision:3m:candidate:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_historical:Positioning looks suppor"
+      ]
+    },
+    "updatedObjectRefs": [
+      "thesis:case:AAPL:buy_decision:3m:core",
+      "risk:case:AAPL:buy_decision:3m:execution",
+      "macroactoraction:case:AAPL:buy_decision:3m:policy_rates",
+      "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+      "liquidityregime:case:AAPL:buy_decision:3m:primary",
+      "marketsignal:case:AAPL:buy_decision:3m:price_positioning"
+    ],
+    "sectionObjectRefs": {
+      "final_judgment": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution",
+        "macroactoraction:case:AAPL:buy_decision:3m:policy_rates",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary",
+        "marketsignal:case:AAPL:buy_decision:3m:price_positioning"
+      ],
+      "core_thesis": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ],
+      "supporting_evidence": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary",
+        "marketsignal:case:AAPL:buy_decision:3m:price_positioning"
+      ],
+      "key_risks": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ],
+      "liquidity_context": [
+        "macroactoraction:case:AAPL:buy_decision:3m:policy_rates",
+        "liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure",
+        "liquidityregime:case:AAPL:buy_decision:3m:primary"
+      ],
+      "what_changes_the_view": [
+        "thesis:case:AAPL:buy_decision:3m:core",
+        "risk:case:AAPL:buy_decision:3m:execution"
+      ]
+    },
+    "updatedObjectTypes": [
+      "Thesis",
+      "Risk",
+      "MacroActorAction",
+      "LiquidityFactor",
+      "LiquidityRegime",
+      "MarketSignal"
+    ]
+  },
+  "events": [
+    {
+      "eventId": "event_7f25bc2d-a1d9-4563-90db-71e8a350cbef",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "runtime",
+      "eventType": "run_created",
+      "title": "Run created.",
+      "payload": {
+        "queryId": "query:demo:aapl",
+        "caseId": "case:AAPL:buy_decision:3m",
+        "ticker": "AAPL"
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_e3b362e5-807d-4a6e-aa09-71844a67a9a0",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "runtime",
+      "eventType": "planner_completed",
+      "title": "Planner completed.",
+      "payload": {
+        "summary": "Created the fixed v0 four-task research plan.",
+        "taskCount": 4
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_36fe4c52-f5f7-4ee8-8d6b-ddcf26362654",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "task_assigned",
+      "title": "Assigned thesis task.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "agentType": "thesis",
+        "goal": "Build the core thesis for AAPL over the 3m horizon."
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_2702817d-0b86-46ea-a3d7-52ba5f74833d",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "task_assigned",
+      "title": "Assigned liquidity task.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "agentType": "liquidity",
+        "goal": "Explain the macro and liquidity context relevant to AAPL."
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_d7db797b-0c62-4087-9e07-21f411b0cbaf",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "task_assigned",
+      "title": "Assigned market_signal task.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "agentType": "market_signal",
+        "goal": "Assess price action, positioning, and signal saturation for AAPL."
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_614dbc21-87a9-4f52-9d97-30e0c248ba09",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "task_assigned",
+      "title": "Assigned judge task.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+        "agentType": "judge",
+        "goal": "Synthesize upstream findings into one decision and six fixed report sections for AAPL."
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_572b03b7-628e-4bfe-839b-2e67619cc5af",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "runtime",
+      "eventType": "patch_accepted",
+      "title": "Submitted runtime scaffold patch.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:runtime-scaffold",
+        "status": "accepted",
+        "reason": "accepted"
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_484ba657-b0e9-444b-9825-e319b61efd30",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "tool_started",
+      "title": "Fetching company and news snapshots.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "capability": "thesis_analysis"
+      },
+      "ts": "2026-03-18T05:44:01.596Z"
+    },
+    {
+      "eventId": "event_544f93c5-8104-48e5-98d3-9a1b7597aaba",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "tool_finished",
+      "title": "Fetched company and news snapshots.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "capability": "thesis_analysis",
+        "newsCount": 2
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_1846ab9a-9ac0-4cc0-bfaf-5ad43f88d39c",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "finding_created",
+      "title": "Finding created by thesis.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:95927613-2e4e-49cd-adc6-4a7cb539e5d0",
+        "claim": "AAPL Holdings still supports a credible medium-term fundamental thesis."
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_ec40179f-26d9-4adc-9b55-5c69460619eb",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "finding_created",
+      "title": "Finding created by thesis.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a13aac0-2bcf-4431-aa88-52173594c78e",
+        "claim": "Recent news flow on AAPL is constructive but not strong enough to remove execution risk."
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_cb587bb0-59da-4eb2-81e4-0a5fbcc2db94",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis:evidence",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_897b5e9e-3534-443b-80eb-f96d24774510",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis:stable-thesis-risk",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_ba124a73-c9b5-486b-ac27-189993c9bc60",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis:findings",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_90840c29-30d7-48e3-bf01-30482d439380",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+      "eventType": "agent_completed",
+      "title": "Agent thesis completed.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:thesis",
+        "taskStatus": "done",
+        "summary": "Generated thesis findings from fixture snapshots."
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_6a68c646-eb1a-4c7e-9040-417fbf44daf9",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "tool_started",
+      "title": "Fetching macro and liquidity snapshot.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "capability": "liquidity_analysis"
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_ce6e9c9d-d7d6-4a6b-90c4-f0493574912a",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "tool_finished",
+      "title": "Fetched macro and liquidity snapshot.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "capability": "liquidity_analysis",
+        "regimeLabel": "neutral_to_supportive"
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_d0dad8ff-b856-46b7-9931-d7c17018ebeb",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "finding_created",
+      "title": "Finding created by liquidity.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:35da2d58-fb08-47c7-a387-53789218662e",
+        "claim": "Rates pressure is manageable and liquidity conditions are not actively tightening."
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_0c86bcee-afd5-452e-9321-10b4a7e461bc",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "finding_created",
+      "title": "Finding created by liquidity.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:a7ed5972-eb0d-4f6c-823d-32a3a1f1fc30",
+        "claim": "Liquidity backdrop is stable. This does not contradict the long case for AAPL."
+      },
+      "ts": "2026-03-18T05:44:01.597Z"
+    },
+    {
+      "eventId": "event_eb28c611-139d-482d-a47c-cb13993292bf",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity:evidence",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_80b32fc6-79fa-4598-8282-4dee5e1f3dfc",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity:stable-liquidity",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_fccb250b-c02c-423c-8a19-4714d90b22b7",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity:findings",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_4f740106-491b-4c42-9a6f-0d63b3d94468",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+      "eventType": "agent_completed",
+      "title": "Agent liquidity completed.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:liquidity",
+        "taskStatus": "done",
+        "summary": "Generated liquidity findings from fixture macro snapshot."
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_0937ba72-ca97-43ab-862c-5b757f83836b",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "tool_started",
+      "title": "Fetching market snapshot.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "capability": "market_signal_analysis"
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_f7f2b280-0202-4a3e-a478-873fa6fe7e96",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "tool_finished",
+      "title": "Fetched market snapshot.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "capability": "market_signal_analysis",
+        "latestPrice": 187.42
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_da7a8f7d-00c9-4632-824b-09834accb1c2",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "finding_created",
+      "title": "Finding created by market_signal.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:e2cc5567-b28c-45b5-9bae-f73b343f5eec",
+        "claim": "AAPL price action is constructive without looking fully crowded."
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_38b5baaa-92a9-4891-bdf7-833d701ec120",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "finding_created",
+      "title": "Finding created by market_signal.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "findingId": "finding:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:2a5e2275-aeed-4f0a-ae34-2a79fc1845f9",
+        "claim": "Positioning looks supportive rather than crowded."
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_39990714-1455-4861-bb13-c6e689f0fb5a",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal:evidence",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_2e083478-53a6-49a9-8479-8ae9f69107c6",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal:stable-market-signal",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_c9454659-d513-4a61-a768-36eea99f0e99",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal:findings",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_c860a7a5-c9ba-4c67-b5c9-0519eeefa1af",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+      "eventType": "agent_completed",
+      "title": "Agent market_signal completed.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:market_signal",
+        "taskStatus": "done",
+        "summary": "Generated market signal findings from fixture market snapshot."
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_29ea4985-9be0-43c8-9d20-9639520c709a",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "judge_synthesis_started",
+      "title": "Judge synthesis started.",
+      "payload": {
+        "findingCount": 6
+      },
+      "ts": "2026-03-18T05:44:01.598Z"
+    },
+    {
+      "eventId": "event_e3064e04-894a-43c3-942d-6b95158480c0",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge:judge-decision",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    },
+    {
+      "eventId": "event_19d708f0-c084-41d5-a3f4-47e6db495134",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge:judge-report",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    },
+    {
+      "eventId": "event_65741031-38d5-4025-a50a-877fdd49bfd5",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge:judge-citations:1",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    },
+    {
+      "eventId": "event_1619f81a-e715-48d3-8f81-06070bddbe46",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "patch_accepted",
+      "title": "Graph patch accepted.",
+      "payload": {
+        "patchId": "patch:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge:judge-citations:2",
+        "status": "accepted",
+        "reason": "accepted",
+        "errors": [],
+        "warnings": []
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    },
+    {
+      "eventId": "event_bc127808-45ba-41c4-896e-2b2f5da49e97",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "agent_completed",
+      "title": "Agent judge completed.",
+      "payload": {
+        "taskId": "task:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+        "taskStatus": "done",
+        "summary": "Synthesized fixture findings into one decision and six report sections."
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    },
+    {
+      "eventId": "event_e5daaec6-49a4-4c6c-818a-5906218a5429",
+      "runId": "run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9",
+      "agentId": "agent:run_a1fb2d7b-3c1f-4ca3-81de-6217d0cdede9:judge",
+      "eventType": "report_ready",
+      "title": "Final report ready.",
+      "payload": {
+        "reportId": "report_87df2476-f207-4a06-8bb5-0d0110b35b60"
+      },
+      "ts": "2026-03-18T05:44:01.599Z"
+    }
+  ]
+}

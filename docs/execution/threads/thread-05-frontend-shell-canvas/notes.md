@@ -1,3 +1,26 @@
 # Thread 05 Notes
 
-- 
+- 当前仓库前端原本为空；本线程新增了 `frontend/` 作为可运行壳层
+- 技术取舍：
+  - 不新增外部前端依赖
+  - 先把事件消费、view model、固定 UI 槽位做实
+  - 后续若迁到 React，只需要替换渲染层，不需要重写 feed / selector 逻辑
+- feed 设计：
+  - `recorded`：读取 `frontend/public/fixtures/runtime-demo.json`
+  - `sse`：EventSource 消费 `/runs/:id/events`，并在 `report_ready` 后单独请求 snapshot
+- 重要边界：
+  - 前端不假设 `report_ready` 自带完整 report
+  - 前端不假设 4 个非 judge agent 会真并发
+  - 右侧卡片只展示 runtime 已显式暴露的高信号状态
+- UI 方向：
+  - 左侧像一份机构化研究 memo
+  - 右侧像被产品化后的 agent workbench
+  - terminal card 已升级为 event-driven transcript surface，直接消费真实 runtime events，而不是假打字动画
+  - 结果优先，过程可见但不喧宾夺主
+- 当前验证：
+  - recorded fixture 已由真实 runtime fixture demo 导出
+  - 前端 typecheck / build 已通过
+  - 本地监听端口在当前沙箱下被禁止，无法在本环境内打开页面做浏览器级验证
+- 当前明确不做的伪装：
+  - 不把 agent 事件伪装成“真实 shell/PTy 已接入”
+  - 若要做真正可交互 web terminal，需要 thread4 / backend 额外提供终端流协议或 PTY bridge

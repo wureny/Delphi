@@ -12,7 +12,11 @@
     "data:artifacts:read": "tsx ./scripts/read-persisted-artifacts.ts",
     "runtime:demo": "node --import tsx ./scripts/run-runtime-demo.ts",
     "runtime:demo:openbb": "RUNTIME_DATA_MODE=openbb node --import tsx ./scripts/run-runtime-demo.ts",
-    "typecheck": "tsc --noEmit"
+    "frontend:demo:record": "node --import tsx ./scripts/export-runtime-demo-fixture.ts",
+    "frontend:build": "tsc -p ./tsconfig.frontend.json",
+    "frontend:serve": "node --import tsx ./scripts/serve-frontend.ts",
+    "frontend:typecheck": "tsc -p ./tsconfig.frontend.json --noEmit",
+    "typecheck": "tsc --noEmit && npm run frontend:typecheck"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",

@@ -37,6 +37,19 @@ Implementation skeleton:
   - thread3 runtime adapter, normalization, evidence-ready mapping, and OpenBB integration
   - includes local file-backed artifact persistence for raw snapshots and evidence-ready bundles
 
+Frontend shell:
+
+- `frontend/`
+  - thread5 no-dependency TypeScript shell
+  - recorded runtime fixture playback + future SSE adapter placeholder
+  - left report / right agent canvas layout
+- `npm run frontend:demo:record`
+  - regenerate the recorded runtime fixture from the real thread4 fixture runtime
+- `npm run frontend:build`
+  - compile browser TypeScript into `frontend/dist`
+- `npm run frontend:serve`
+  - serve the frontend shell locally from `frontend/`
+
 OpenBB local setup:
 
 - [openbb-local-setup.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/openbb-local-setup.md)

@@ -1,0 +1,123 @@
+export const agentKeys = [
+  "thesis",
+  "liquidity",
+  "market_signal",
+  "judge",
+] as const;
+
+export type AgentKey = (typeof agentKeys)[number];
+
+export const reportSectionKeys = [
+  "final_judgment",
+  "core_thesis",
+  "supporting_evidence",
+  "key_risks",
+  "liquidity_context",
+  "what_changes_the_view",
+] as const;
+
+export type ReportSectionKey = (typeof reportSectionKeys)[number];
+
+export type ReportSectionStatus = "ready" | "empty" | "degraded";
+export type RunStatus =
+  | "created"
+  | "planned"
+  | "agent_running"
+  | "synthesizing"
+  | "completed"
+  | "failed"
+  | "degraded";
+export type RunEventType =
+  | "run_created"
+  | "planner_completed"
+  | "task_assigned"
+  | "tool_started"
+  | "tool_finished"
+  | "finding_created"
+  | "patch_accepted"
+  | "patch_rejected"
+  | "judge_synthesis_started"
+  | "agent_completed"
+  | "agent_failed"
+  | "degraded_mode_entered"
+  | "report_ready";
+
+export interface ResearchQuery {
+  queryId: string;
+  userQuestion: string;
+  ticker: string;
+  timeHorizon: string;
+  caseType: string;
+  createdAt: string;
+}
+
+export interface RunRecord {
+  runId: string;
+  caseId: string;
+  query: ResearchQuery;
+  status: RunStatus;
+  createdAt: string;
+  updatedAt: string;
+  degradedReasons: string[];
+}
+
+export interface ReportSectionRecord {
+  sectionId: string;
+  runId: string;
+  sectionKey: ReportSectionKey;
+  title: string;
+  content: string;
+  citationFindingRefs: string[];
+  citationEvidenceRefs: string[];
+  citationObjectRefs: string[];
+  status: ReportSectionStatus;
+}
+
+export interface FinalReport {
+  reportId: string;
+  runId: string;
+  caseId: string;
+  generatedBy: AgentKey;
+  generatedAt: string;
+  finalJudgment: string;
+  coreThesis: string;
+  supportingEvidence: string;
+  keyRisks: string;
+  liquidityContext: string;
+  whatChangesTheView: string;
+  sectionCitations: Record<ReportSectionKey, string[]>;
+  updatedObjectRefs: string[];
+  sectionObjectRefs: Record<ReportSectionKey, string[]>;
+  updatedObjectTypes: string[];
+}
+
+export interface RunEvent {
+  eventId: string;
+  runId: string;
+  agentId: string;
+  eventType: RunEventType;
+  title: string;
+  payload: Record<string, unknown>;
+  ts: string;
+}
+
+export interface RecordedRunFixture {
+  meta: {
+    source: string;
+    generatedAt: string;
+    notes: string;
+  };
+  run: RunRecord;
+  reportSections: ReportSectionRecord[];
+  finalReport: FinalReport | null;
+  events: RunEvent[];
+}
+
+export const reportSectionTitles: Record<ReportSectionKey, string> = {
+  final_judgment: "Final Judgment",
+  core_thesis: "Core Thesis",
+  supporting_evidence: "Supporting Evidence",
+  key_risks: "Key Risks",
+  liquidity_context: "Liquidity Context",
+  what_changes_the_view: "What Changes The View",
+};
