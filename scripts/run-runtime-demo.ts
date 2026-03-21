@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import {
   CompositeRuntimeEventSink,
   MemoryRuntimeEventSink,
@@ -9,15 +11,16 @@ import {
 import {
   ConsoleRuntimeEventSink,
   FixtureGraphContextReader,
-  createFixtureExecutors,
 } from "../src/orchestration/fixtures.ts";
 import {
   resolveRuntimeDataAdapter,
+  resolveRuntimeExecutors,
   resolveRuntimeGraphWriter,
 } from "./runtime-support.ts";
 
 async function main(): Promise<void> {
   const dataAdapter = resolveRuntimeDataAdapter();
+  const execution = resolveRuntimeExecutors();
   const graphWriter = resolveRuntimeGraphWriter();
   const memorySink = new MemoryRuntimeEventSink();
   const consoleSink = new ConsoleRuntimeEventSink();
@@ -26,14 +29,14 @@ async function main(): Promise<void> {
   try {
     const orchestrator = new RuntimeOrchestrator({
       graphWriter: graphWriter.writer,
-      executors: createFixtureExecutors(),
+      executors: execution.executors,
       eventSink,
       dataAdapter,
       graphContextReader: new FixtureGraphContextReader(),
     });
 
     const result = await orchestrator.run({
-      queryId: "query:demo:aapl",
+      queryId: `query:demo:aapl:${randomUUID()}`,
       userQuestion: "AAPL 未来三个月值不值得买？",
       ticker: "AAPL",
       timeHorizon: "3m",
@@ -49,6 +52,7 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(
       {
         dataMode: process.env.RUNTIME_DATA_MODE ?? "fixture",
+        executionMode: execution.mode,
         graphMode: graphWriter.mode,
         runId: result.run.runId,
         status: result.run.status,

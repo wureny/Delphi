@@ -36,6 +36,16 @@
   - `npm run neo4j:verify` 通过
   - `npm run runtime:demo:neo4j` 通过
   - thread4 已确认能把完整 runtime 主链写到真实 Neo4j path
+- 当前 runtime 已新增 execution mode：
+  - 默认 `fixture`
+  - 可切 `openai`
+  - `openai` mode 需要 `OPENAI_API_KEY` + `OPENAI_MODEL`
+  - 缺 key / model 时会直接失败，不会静默回退
+- `openai` mode 已完成真实验证：
+  - `npm run runtime:demo:openai` 通过
+  - `npm run runtime:demo:openai:neo4j` 通过
+- demo script 现在会为每次运行生成唯一 `queryId`，避免真实 Neo4j 重复验证时撞 `Query._ref` 唯一约束
+- 若 runtime scaffold patch 被拒，run 现在会显式进入 degraded，并发出 `degraded_mode_entered`
 - `POST /runs` 当前对 `ticker/timeHorizon/caseType` 支持显式传入；若只传 `userQuestion`，runtime 会用轻量启发式推断，v0 可用但不是最终 planner-grade parsing
 - terminal stream 当前基于受控 runtime event 映射，而不是 token-level model stream 或真实 shell 字节流；这符合 v0 产品边界
 - runtime contract 目前仍未覆盖 session continuity；这是后续阶段问题，不应倒灌回第一阶段
@@ -44,4 +54,4 @@
 ## Next Recommended Consumer
 
 - thread-05-frontend-shell-canvas（可直接接 runtime SSE / snapshot bridge）
-- thread-04-runtime-orchestration（继续推进 non-fixture executors / real provider-backed execution）
+- thread-04-runtime-orchestration（继续推进更真实的 provider/tool usage 与非 fixture data path）

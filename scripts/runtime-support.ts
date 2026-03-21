@@ -11,11 +11,20 @@ import {
 import {
   FixtureRuntimeDataAdapter,
 } from "../src/orchestration/fixtures.ts";
+import type { AgentExecutorMap } from "../src/orchestration/agent-runtime.ts";
+import { OpenAIChatCompletionsProvider } from "../src/orchestration/openai-provider.ts";
+import { createProviderExecutors } from "../src/orchestration/provider-executors.ts";
+import { createFixtureExecutors } from "../src/orchestration/fixtures.ts";
 
 export interface ResolvedRuntimeGraphWriter {
   writer: GraphWriter;
   mode: "noop" | "neo4j";
   close(): Promise<void>;
+}
+
+export interface ResolvedRuntimeExecutors {
+  executors: AgentExecutorMap;
+  mode: "fixture" | "openai";
 }
 
 export function resolveRuntimeDataAdapter():
@@ -52,5 +61,22 @@ export function resolveRuntimeGraphWriter(): ResolvedRuntimeGraphWriter {
     async close(): Promise<void> {
       return Promise.resolve();
     },
+  };
+}
+
+export function resolveRuntimeExecutors(): ResolvedRuntimeExecutors {
+  const mode = process.env.RUNTIME_EXECUTION_MODE ?? "fixture";
+
+  if (mode === "openai") {
+    const provider = OpenAIChatCompletionsProvider.fromEnv();
+    return {
+      executors: createProviderExecutors(provider),
+      mode: "openai",
+    };
+  }
+
+  return {
+    executors: createFixtureExecutors(),
+    mode: "fixture",
   };
 }

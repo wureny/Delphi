@@ -511,7 +511,7 @@ export function createFixtureExecutors(): AgentExecutorMap {
   };
 }
 
-function requireDataAdapter(context: AgentExecutionContext): RuntimeDataAdapter {
+export function requireDataAdapter(context: AgentExecutionContext): RuntimeDataAdapter {
   if (!context.dataAdapter) {
     throw new Error("Fixture executor requires a data adapter.");
   }
@@ -568,7 +568,7 @@ function createFixtureEvidenceCandidate(
   };
 }
 
-async function publishToolEvent(
+export async function publishToolEvent(
   context: AgentExecutionContext,
   eventType: "tool_started" | "tool_finished",
   title: string,
@@ -589,7 +589,7 @@ async function publishToolEvent(
   );
 }
 
-function createFinding(
+export function createFinding(
   context: AgentExecutionContext,
   input: {
     claim: string;
@@ -613,7 +613,7 @@ function createFinding(
   };
 }
 
-function buildThesisStablePatch(
+export function buildThesisStablePatch(
   context: AgentExecutionContext,
   company: CompanySnapshot,
   findings: readonly FindingRecord[],
@@ -710,7 +710,7 @@ function buildThesisStablePatch(
   return buildCaseScopePatch(context, "stable-thesis-risk", operations);
 }
 
-function buildLiquidityStablePatch(
+export function buildLiquidityStablePatch(
   context: AgentExecutionContext,
   snapshot: MacroLiquiditySnapshot,
   findings: readonly FindingRecord[],
@@ -832,7 +832,7 @@ function buildLiquidityStablePatch(
   return buildCaseScopePatch(context, "stable-liquidity", operations);
 }
 
-function buildMarketSignalStablePatch(
+export function buildMarketSignalStablePatch(
   context: AgentExecutionContext,
   snapshot: MarketSnapshot,
   findings: readonly FindingRecord[],
@@ -881,7 +881,7 @@ function buildMarketSignalStablePatch(
   return buildCaseScopePatch(context, "stable-market-signal", operations);
 }
 
-function buildCaseScopePatch(
+export function buildCaseScopePatch(
   context: AgentExecutionContext,
   suffix: string,
   operations: GraphPatch["operations"],
@@ -896,7 +896,7 @@ function buildCaseScopePatch(
   };
 }
 
-function buildStableObjectRef(
+export function buildStableObjectRef(
   nodeType: "Thesis" | "Risk" | "MacroActorAction" | "LiquidityFactor" | "LiquidityRegime" | "MarketSignal",
   caseId: string,
   localId: string,
@@ -931,7 +931,7 @@ function classifyMarketSignalDirection(findings: readonly FindingRecord[]): stri
   return "neutral";
 }
 
-function collectEvidenceCandidates(
+export function collectEvidenceCandidates(
   context: AgentExecutionContext,
   kinds: Array<keyof Omit<RuntimeDataArtifacts, "runId">>,
 ): EvidenceCandidate[] {

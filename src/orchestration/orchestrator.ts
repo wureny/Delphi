@@ -142,8 +142,32 @@ export class RuntimeOrchestrator {
           scaffoldSubmission.status === "rejected"
             ? scaffoldSubmission.reason
             : "accepted",
+        errors: scaffoldSubmission.status === "rejected" ? scaffoldSubmission.errors : [],
+        warnings:
+          scaffoldSubmission.status === "rejected"
+            ? scaffoldSubmission.warnings
+            : scaffoldSubmission.validation.warnings,
       },
     );
+
+    if (scaffoldSubmission.status === "rejected") {
+      run = this.runManager.markDegraded(
+        run.runId,
+        `Runtime scaffold patch rejected: ${scaffoldSubmission.patchId}`,
+      );
+      await this.publishRuntimeEvent(
+        eventSink,
+        run.runId,
+        "degraded_mode_entered",
+        "Run degraded after runtime scaffold rejection.",
+        {
+          patchId: scaffoldSubmission.patchId,
+          reason: scaffoldSubmission.reason,
+          errors: scaffoldSubmission.errors,
+          warnings: scaffoldSubmission.warnings,
+        },
+      );
+    }
 
     run = this.runManager.transitionRun(run.runId, "agent_running");
 

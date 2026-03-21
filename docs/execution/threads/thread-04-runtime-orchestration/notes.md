@@ -57,9 +57,8 @@
   - Judge decision / report / citation patches accepted
   - final report ready
 - 当前仍未开始：
-  - 非 fixture agent execution
   - stable `Judgment` 条件化持久化
-  - Aura 上的真实 runtime graph demo
+  - session continuity
 - 当前已补最小 frontend-facing runtime API：
   - `POST /runs` 可创建并启动真实 run，返回 `runKey` 与 `events/report` endpoint
   - `GET /runs/:runKey/events` 提供 SSE `RunEvent` 流
@@ -84,6 +83,24 @@
     - finding patch
     - judge decision / report / citation patch
     - final report ready without degraded mode
+  - 已新增 execution mode：
+    - 默认 `RUNTIME_EXECUTION_MODE=fixture`
+    - 可切 `RUNTIME_EXECUTION_MODE=openai`
+    - OpenAI mode 当前要求 `.env` 提供 `OPENAI_API_KEY` 与 `OPENAI_MODEL`
+    - 缺 key 或 model 时会显式失败，不会静默回退成 fixture
+  - provider-backed executors 当前保持 thread4 边界：
+    - 复用现有 data adapter
+    - 复用现有 graph patch builder
+    - 复用现有 final report contract
+  - 已通过 `npm run runtime:demo:openai`
+  - 已通过 `npm run runtime:demo:openai:neo4j`
+  - provider-backed execution 当前已验证可完成：
+    - structured findings 生成
+    - judge synthesis
+    - fixed six sections
+    - Neo4j graph patch write
+  - `run-runtime-demo.ts` 现在会为每次 demo 生成唯一 `queryId`，避免真实 Neo4j 上重复运行撞 `Query._ref` 唯一约束
+  - 若 runtime scaffold patch 被拒，orchestrator 现在会显式发出 `degraded_mode_entered` 并把 run 标记为 degraded
 
 ## Open Follow-Ups
 

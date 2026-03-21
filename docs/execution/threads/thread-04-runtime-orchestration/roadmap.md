@@ -61,15 +61,14 @@
 
 ### In Progress
 
-- 为 non-fixture executors 和真实 execution provider 预留接缝
 - 从 fixture execution 进入真实 provider-backed execution 路径
+- 从 fixture data path 进入真实 provider + real data 组合验证
 
 ### Not Started
 
-- 真实 LLM-backed executor / provider
 - stable `Judgment` 条件化持久化
 - session continuity
-- 真实 Aura runtime graph 验证（依赖 `NEO4J_*` 环境）
+- provider-backed execution 与真实 data path 的组合验证
 
 ## Main Design Judgment
 
@@ -104,6 +103,8 @@ thread4 第一阶段不再继续发明新静态结构，而是优先把实例级
 9. 再和 thread3 对齐 data ingestion contract
 10. 切换并验证真实 graph writer
 11. 推进 non-fixture executors
+12. 验证 provider-backed execution
+13. 验证 provider-backed execution + real data path
 
 ## Phase Plan
 

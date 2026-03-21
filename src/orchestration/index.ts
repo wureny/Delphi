@@ -12,3 +12,6 @@ export * from "./runtime-patches.ts";
 export * from "./stable-objects.ts";
 export * from "./terminal-stream.ts";
 export * from "./fixtures.ts";
+export * from "./model-provider.ts";
+export * from "./openai-provider.ts";
+export * from "./provider-executors.ts";

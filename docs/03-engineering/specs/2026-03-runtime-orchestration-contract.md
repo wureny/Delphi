@@ -87,6 +87,8 @@ tools / skills 在 v0 中是受控注册能力，而不是任意函数池。
 - v0 先使用静态 TypeScript registry
 - 先不要做配置化 registry、动态装载或工作流编排系统
 - runtime 可以保留薄抽象层，便于未来从配置生成 registry，但当前默认来源是静态代码
+- execution provider 可以作为独立切换层存在，例如 `fixture` / `openai`
+- provider 只负责生成结构化分析结果，不拥有 Delphi 的 run / graph / report 持久化语义
 
 v0 至少应存在：
 
@@ -133,6 +135,8 @@ v0 至少应存在：
 - snapshot endpoint 在 run 尚未完成时也必须可访问，至少返回当前 `run` 与固定 6 个 `ReportSection` 占位
 - terminal stream 必须来自真实 runtime action / event，而不是前端伪造动画
 - v0 默认 terminal stream 是受控 command/event stream，不等于把真实 shell / PTY 暴露给 agent 或浏览器
+- runtime 可通过显式 execution mode 切换 fixture executor 与真实 provider-backed executor
+- 若 execution mode 依赖外部模型 provider，缺少 API key 或 model 配置时必须直接失败，不允许静默回退
 
 ## 6. Parallelism Policy
 
