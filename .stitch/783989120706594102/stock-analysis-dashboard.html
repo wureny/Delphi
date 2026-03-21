@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KINETIC_TERMINAL | AI Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "error": "#ffb4ab",
+                        "surface": "#131314",
+                        "surface-container": "#201f20",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131314",
+                        "primary-fixed": "#9cf0ff",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#353436",
+                        "tertiary-fixed": "#ffdad2",
+                        "secondary": "#40e56c",
+                        "outline-variant": "#3b494c",
+                        "on-tertiary-container": "#aa2600",
+                        "on-tertiary": "#621100",
+                        "secondary-container": "#02c953",
+                        "tertiary": "#ffe7e2",
+                        "surface-container-high": "#2a2a2b",
+                        "surface-variant": "#353436",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-surface": "#e5e2e3",
+                        "on-primary": "#00363d",
+                        "inverse-primary": "#006875",
+                        "on-primary-fixed-variant": "#004f58",
+                        "on-secondary-fixed": "#002108",
+                        "inverse-surface": "#e5e2e3",
+                        "outline": "#849396",
+                        "on-primary-container": "#00626e",
+                        "on-background": "#e5e2e3",
+                        "surface-tint": "#00daf3",
+                        "inverse-on-surface": "#313031",
+                        "secondary-fixed-dim": "#3ce36a",
+                        "tertiary-fixed-dim": "#ffb4a2",
+                        "surface-bright": "#3a393a",
+                        "surface-container-low": "#1c1b1c",
+                        "surface-container-lowest": "#0e0e0f",
+                        "primary": "#c3f5ff",
+                        "on-secondary": "#003912",
+                        "on-secondary-container": "#004d1b",
+                        "on-primary-fixed": "#001f24",
+                        "on-surface-variant": "#bac9cc",
+                        "on-tertiary-fixed": "#3c0700",
+                        "secondary-fixed": "#69ff87",
+                        "background": "#131314",
+                        "primary-container": "#00e5ff",
+                        "on-tertiary-fixed-variant": "#8a1d00",
+                        "tertiary-container": "#ffc2b3",
+                        "on-secondary-fixed-variant": "#00531e"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #131314; }
+        ::-webkit-scrollbar-thumb { background: #353436; border-radius: 10px; }
+        .terminal-scroll { scrollbar-width: thin; scrollbar-color: #353436 #131314; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30">
+<!-- Top Navigation -->
+<header class="flex justify-between items-center w-full px-6 py-3 bg-[#131314] fixed top-0 z-50">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-widest text-[#00E5FF] font-headline uppercase">KINETIC_TERMINAL</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-['Space_Grotesk'] tracking-tighter uppercase text-sm font-bold text-[#00E5FF] border-b-2 border-[#00E5FF] pb-1" href="#">TERMINAL</a>
+<a class="font-['Space_Grotesk'] tracking-tighter uppercase text-sm font-bold text-[#BAC9CC] hover:text-[#00E5FF] transition-colors" href="#">ANALYTICS</a>
+<a class="font-['Space_Grotesk'] tracking-tighter uppercase text-sm font-bold text-[#BAC9CC] hover:text-[#00E5FF] transition-colors" href="#">STRATEGY</a>
+<a class="font-['Space_Grotesk'] tracking-tighter uppercase text-sm font-bold text-[#BAC9CC] hover:text-[#00E5FF] transition-colors" href="#">HISTORY</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-[#353436] transition-all duration-200 scale-95 active:opacity-80 rounded text-[#BAC9CC]">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-[#353436] transition-all duration-200 scale-95 active:opacity-80 rounded text-[#BAC9CC]">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img alt="User Profile" data-alt="Minimalist user avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLYt1jGhhwDLUomSxP_AcquGVdtzKE_ICEZYHtRHMzSlW6p88bZNWDWqmOYNhmOf2TBfW80eWSfCu4iO3P7TIX580UjqmvFblpGAgwL8FgG9nA303swgSDsPQk1EQetqq0qyjlxrMGQo_h5go7wYR238LUgkc9E0yCE6H8uS7YifDKhrKO03Bu3Ng0zXuVQLZKWFUlVYabCZWYODBOjiLkzxfqpsNA22dV54duKgMTDzSSCTHdkr5xwKxv_1bFNgo0pCqjJq34EQ"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="fixed left-0 top-0 h-full flex flex-col items-center py-8 z-40 bg-[#1C1B1C] w-20 pt-20">
+<div class="flex flex-col items-center gap-1 mb-8">
+<span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="terminal">terminal</span>
+<span class="font-['Space_Grotesk'] text-[8px] font-medium tracking-widest uppercase text-[#00E5FF]">NODE_01</span>
+</div>
+<div class="flex flex-col w-full">
+<a class="flex flex-col items-center justify-center text-[#00E5FF] bg-[#201F20] w-full py-4 border-l-2 border-[#00E5FF] transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium tracking-widest uppercase mt-1">DASHBOARD</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium tracking-widest uppercase mt-1">MARKETS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium tracking-widest uppercase mt-1">WATCHLIST</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium tracking-widest uppercase mt-1">PORTFOLIO</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100 transition-all duration-150 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium tracking-widest uppercase mt-1">SETTINGS</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col w-full gap-2">
+<button class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<button class="flex flex-col items-center justify-center text-[#BAC9CC] w-full py-4 opacity-60 hover:bg-[#353436] hover:opacity-100">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="ml-20 pt-16 h-screen flex overflow-hidden bg-background">
+<!-- Left Pane: Chat/Q&A Area -->
+<section class="w-1/3 flex flex-col border-r border-outline-variant/10 bg-surface-container-low/50">
+<div class="p-6 flex-1 flex flex-col gap-6 overflow-y-auto terminal-scroll">
+<!-- System Message -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-headline text-[10px] tracking-widest uppercase text-primary">SYSTEM_INITIALIZED</span>
+</div>
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant/5">
+<p class="text-on-surface-variant text-sm leading-relaxed">Agent swarm connected. Ready for multi-vector analysis. Input ticker or query to begin execution.</p>
+</div>
+</div>
+<!-- User Query -->
+<div class="flex flex-col gap-2 items-end">
+<div class="flex items-center gap-2">
+<span class="font-headline text-[10px] tracking-widest uppercase text-on-surface-variant">USER_AUTH_01</span>
+</div>
+<div class="bg-primary/5 p-4 rounded-lg border border-primary/20 max-w-[90%]">
+<p class="text-on-surface text-sm">Analyze $NVDA momentum based on recent GPU demand forecasts and technical resistance at $950.</p>
+</div>
+</div>
+<!-- Agent Swarm Summary -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="font-headline text-[10px] tracking-widest uppercase text-secondary">SWARM_RESPONSE</span>
+</div>
+<div class="bg-surface-container p-4 rounded-lg border border-outline-variant/5">
+<p class="text-on-surface text-sm mb-3">Synthesizing multi-agent data... Technical Analyst reports overbought RSI, while Data Miner confirms 12% increase in institutional buy orders. Sentiment remains Bullish (0.84).</p>
+<div class="flex gap-2">
+<span class="px-2 py-0.5 bg-secondary-container/20 text-secondary text-[10px] font-bold rounded-full">BULLISH</span>
+<span class="px-2 py-0.5 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold rounded-full">CONFIDENCE: 88%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="p-6 bg-surface">
+<div class="relative flex items-center">
+<input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 text-sm font-label tracking-wide focus:outline-none focus:border-primary-container/50 focus:ring-1 focus:ring-primary-container/20 text-on-surface transition-all placeholder:opacity-30" placeholder="TYPE COMMAND OR QUERY..." type="text"/>
+<button class="absolute right-2 p-1.5 bg-primary-container text-on-primary rounded hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+<div class="flex justify-between mt-3 px-1">
+<span class="text-[9px] text-on-surface-variant font-label opacity-40 uppercase">AWAITING_INPUT</span>
+<span class="text-[9px] text-on-surface-variant font-label opacity-40 uppercase">v4.2.0_STABLE</span>
+</div>
+</div>
+</section>
+<!-- Right Pane: Terminal Grid -->
+<section class="flex-1 p-4 grid grid-cols-2 grid-rows-2 gap-4 bg-surface">
+<!-- Terminal 1: Data Miner -->
+<div class="bg-surface-container rounded-lg flex flex-col overflow-hidden border border-outline-variant/10">
+<div class="h-8 bg-surface-container-high flex items-center px-3 justify-between">
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]"></div>
+<span class="ml-3 font-headline text-[10px] tracking-widest font-bold text-on-surface-variant/70 uppercase">DATA_MINER_V1.0</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant/50" data-icon="code">code</span>
+</div>
+<div class="flex-1 p-4 font-label text-[11px] leading-relaxed text-secondary-fixed-dim/90 overflow-y-auto terminal-scroll">
+<div class="mb-2"><span class="text-on-surface-variant">root@swarm:~$</span> fetching institutional_holdings...</div>
+<div class="mb-2"><span class="text-secondary opacity-50">[SUCCESS]</span> 13F filings parsed for Ticker: NVDA</div>
+<div class="mb-2"><span class="text-on-surface-variant">root@swarm:~$</span> filtering orders &gt; $10M...</div>
+<div class="mb-4">
+<div class="grid grid-cols-3 gap-2 py-1 border-b border-outline-variant/10 text-[10px] opacity-60">
+<span>INSTITUTION</span>
+<span>ACTION</span>
+<span>SHARES</span>
+</div>
+<div class="grid grid-cols-3 gap-2 py-1">
+<span>BLACKROCK</span>
+<span class="text-secondary-fixed">BUY</span>
+<span>1.2M</span>
+</div>
+<div class="grid grid-cols-3 gap-2 py-1">
+<span>VANGUARD</span>
+<span class="text-secondary-fixed">BUY</span>
+<span>850K</span>
+</div>
+</div>
+<div class="animate-pulse">_</div>
+</div>
+</div>
+<!-- Terminal 2: Sentiment Analyst -->
+<div class="bg-surface-container rounded-lg flex flex-col overflow-hidden border border-outline-variant/10">
+<div class="h-8 bg-surface-container-high flex items-center px-3 justify-between">
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]"></div>
+<span class="ml-3 font-headline text-[10px] tracking-widest font-bold text-on-surface-variant/70 uppercase">SENTIMENT_ENGINE</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant/50" data-icon="psychology">psychology</span>
+</div>
+<div class="flex-1 p-4 font-label text-[11px] leading-relaxed text-primary-fixed-dim/90 overflow-y-auto terminal-scroll">
+<div class="mb-2"><span class="text-on-surface-variant">root@swarm:~$</span> scraping social_vectors(x, reddit, bloomberg)...</div>
+<div class="mb-2">Scanning 42,019 nodes...</div>
+<div class="mb-3 p-2 bg-surface-container-highest rounded flex items-center justify-between">
+<span>COMPOSITE_SCORE:</span>
+<span class="text-secondary font-black">0.843 // BULLISH</span>
+</div>
+<div class="mb-2">KEYWORDS: <span class="text-on-surface">"H100 demand", "B200 architecture", "Growth"</span></div>
+<div class="flex items-end h-8 gap-0.5 mb-2">
+<div class="bg-primary w-full h-[40%]"></div>
+<div class="bg-primary w-full h-[60%]"></div>
+<div class="bg-primary w-full h-[90%]"></div>
+<div class="bg-primary w-full h-[75%]"></div>
+<div class="bg-primary w-full h-[95%]"></div>
+</div>
+</div>
+</div>
+<!-- Terminal 3: Technical Analyst -->
+<div class="bg-surface-container rounded-lg flex flex-col overflow-hidden border border-outline-variant/10">
+<div class="h-8 bg-surface-container-high flex items-center px-3 justify-between">
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]"></div>
+<span class="ml-3 font-headline text-[10px] tracking-widest font-bold text-on-surface-variant/70 uppercase">TECHNICAL_EVAL_X</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant/50" data-icon="insights">insights</span>
+</div>
+<div class="flex-1 p-4 font-label text-[11px] leading-relaxed text-on-surface-variant overflow-y-auto terminal-scroll">
+<div class="mb-2"><span class="text-on-surface-variant">root@swarm:~$</span> load_chart(interval: 1H)</div>
+<div class="mb-2 text-on-surface font-bold underline">RESISTANCE_LEVELS:</div>
+<ul class="mb-4 list-none">
+<li class="flex justify-between"><span>R1:</span> <span class="text-error">$950.00</span></li>
+<li class="flex justify-between"><span>R2:</span> <span class="text-error">$982.50</span></li>
+<li class="flex justify-between"><span>SUPPORT:</span> <span class="text-secondary-fixed">$892.15</span></li>
+</ul>
+<div class="p-2 border border-outline-variant/30 rounded text-center">
+<span class="text-[10px] block opacity-50 uppercase mb-1">Current RSI</span>
+<span class="text-xl font-headline font-black text-primary">74.2</span>
+<span class="text-[9px] block text-error uppercase">OVERBOUGHT</span>
+</div>
+</div>
+</div>
+<!-- Terminal 4: Strategist -->
+<div class="bg-surface-container rounded-lg flex flex-col overflow-hidden border border-outline-variant/10">
+<div class="h-8 bg-surface-container-high flex items-center px-3 justify-between">
+<div class="flex items-center gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-[#FF5F56]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-[#27C93F]"></div>
+<span class="ml-3 font-headline text-[10px] tracking-widest font-bold text-on-surface-variant/70 uppercase">STRATEGY_CORE</span>
+</div>
+<span class="material-symbols-outlined text-xs text-on-surface-variant/50" data-icon="account_tree">account_tree</span>
+</div>
+<div class="flex-1 p-4 font-label text-[11px] leading-relaxed text-tertiary-fixed-dim overflow-y-auto terminal-scroll">
+<div class="mb-2"><span class="text-on-surface-variant">root@swarm:~$</span> compute_trade_probability()</div>
+<div class="mb-2">Risk_Reward_Ratio: 1:3.4</div>
+<div class="mb-4 border-l-2 border-primary-container pl-3 py-1">
+<div class="text-on-surface font-bold uppercase mb-1">PROPOSED_ACTION:</div>
+<div class="text-primary-container">LIMIT_BUY_ORDER @ $902.50</div>
+<div class="text-on-surface-variant text-[10px]">REASON: Bounce off 20-day EMA predicted.</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="h-1 flex-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 72%"></div>
+</div>
+<span class="text-[10px] text-on-surface font-black">72% WIN_RATE</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Status Bar (Hidden on Mobile) -->
+<footer class="fixed bottom-0 left-20 right-0 h-6 bg-surface-container-lowest border-t border-outline-variant/10 flex items-center px-4 justify-between text-[9px] font-label text-on-surface-variant z-50">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-secondary"></span> LATENCY: 12ms</span>
+<span class="opacity-40">|</span>
+<span>GPU_CLUSTER_ID: KINETIC_BETA_09</span>
+</div>
+<div class="flex items-center gap-4">
+<span>MEM: 14.2GB / 64GB</span>
+<span class="text-primary tracking-widest">ENCRYPTED_SESSION_ACTIVE</span>
+</div>
+</footer>
+</body></html>

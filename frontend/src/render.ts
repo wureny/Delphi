@@ -22,79 +22,127 @@ export function renderApp(options: {
 
   return `
     <div class="app-shell ${state.canvasCollapsed ? "canvas-collapsed" : ""}">
-      <header class="top-rail">
-        <div class="brand-lockup">
-          <span class="eyebrow">Delphi v0</span>
-          <h1 class="brand-title">Structured stock research with visible execution</h1>
-          <p class="brand-copy">
-            Left side: a fixed six-section investment memo. Right side: the real multi-agent workbench driven by runtime events.
-          </p>
+      <header class="command-header">
+        <div class="header-brand">
+          <span class="brand-mark">DELPHI_TERMINAL</span>
+          <nav class="header-nav" aria-label="Primary">
+            <span class="header-nav-item active">Terminal</span>
+            <span class="header-nav-item">Analytics</span>
+            <span class="header-nav-item">Strategy</span>
+            <span class="header-nav-item">History</span>
+          </nav>
         </div>
-        <div class="rail-meta" data-role="rail-meta">
-          ${renderRailMeta(run, config)}
+        <div class="header-actions">
+          <div class="rail-meta" data-role="rail-meta">
+            ${renderRailMeta(run, config)}
+          </div>
+          <button class="toggle-button" data-action="toggle-canvas" type="button">
+            ${state.canvasCollapsed ? "Expand Canvas" : "Collapse Canvas"}
+          </button>
         </div>
-        <button class="toggle-button" data-action="toggle-canvas" type="button">
-          ${state.canvasCollapsed ? "Expand Canvas" : "Collapse Canvas"}
-        </button>
       </header>
 
-      <div class="shell-layout">
-        <section class="left-panel">
-          <section class="panel-section query-shell">
-            <form class="query-form" data-role="query-form">
-              <label class="sr-only" for="query-input">Research question</label>
-              <textarea
-                id="query-input"
-                class="query-input"
-                name="question"
-                placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
-              >${escapeHtml(state.composerText)}</textarea>
-              <div class="composer-actions">
-                <p class="composer-note" data-role="composer-note">${escapeHtml(
-                  state.errorMessage ?? state.infoMessage ?? "",
-                )}</p>
-                <button class="primary-button" type="submit">
-                  ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Submit Live Query"}
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <section class="panel-section status-strip" data-role="status-strip">
-            ${renderStatusStrip(run)}
-          </section>
-
-          <div data-role="degraded-banner-slot">
-            ${renderDegradedBanner(report)}
+      <div class="app-frame">
+        <aside class="command-sidebar">
+          <div class="sidebar-node">
+            <span class="sidebar-node-mark">■</span>
+            <span class="sidebar-node-label">NODE_05</span>
           </div>
+          <nav class="sidebar-nav" aria-label="Workspace">
+            <span class="sidebar-link active">Dashboard</span>
+            <span class="sidebar-link">Markets</span>
+            <span class="sidebar-link">Watchlist</span>
+            <span class="sidebar-link">Portfolio</span>
+            <span class="sidebar-link">Settings</span>
+          </nav>
+          <div class="sidebar-footer">
+            <span class="sidebar-link subtle">Help</span>
+            <span class="sidebar-link subtle">Exit</span>
+          </div>
+        </aside>
 
-          <section class="report-grid" data-role="report-grid">
-            ${renderReportGrid(report)}
-          </section>
-        </section>
+        <div class="workspace-shell">
+          <section class="left-panel">
+            <div class="pane-heading">
+              <span class="eyebrow">Swarm Console</span>
+              <h1 class="brand-title">Structured stock research with visible execution</h1>
+              <p class="brand-copy">
+                Input and report stay on the left. The right side exposes the controlled runtime terminals without turning the product into a debugging console.
+              </p>
+            </div>
 
-        ${
-          state.canvasCollapsed
-            ? renderCollapsedRail(agentCards, run.statusTone)
-            : `
-              <aside class="right-panel">
-                <div class="canvas-header">
-                  <h2>Agent Canvas</h2>
-                  <span class="tag">Controlled runtime terminals</span>
+            <section class="panel-section dialogue-shell">
+              <div class="section-kicker">Dialogue Feed</div>
+              <div class="dialogue-scroll">
+                ${renderDialogueFeed(state, run, report)}
+              </div>
+            </section>
+
+            <section class="panel-section status-strip" data-role="status-strip">
+              ${renderStatusStrip(run)}
+            </section>
+
+            <div data-role="degraded-banner-slot">
+              ${renderDegradedBanner(report)}
+            </div>
+
+            <section class="panel-section query-shell">
+              <div class="section-kicker">Query Composer</div>
+              <form class="query-form" data-role="query-form">
+                <label class="sr-only" for="query-input">Research question</label>
+                <textarea
+                  id="query-input"
+                  class="query-input"
+                  name="question"
+                  placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
+                >${escapeHtml(state.composerText)}</textarea>
+                <div class="composer-actions">
+                  <p class="composer-note" data-role="composer-note">${escapeHtml(
+                    state.errorMessage ?? state.infoMessage ?? "",
+                  )}</p>
+                  <button class="primary-button" type="submit">
+                    ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Submit Live Query"}
+                  </button>
                 </div>
-                <section class="agent-grid">
-                  ${agentCards.map(renderAgentCard).join("")}
-                </section>
-                <section class="timeline-panel panel-section">
-                  <h2>Recent Timeline</h2>
-                  <div class="timeline-list" data-role="timeline-list">
-                    ${renderTimelineList(timeline)}
-                  </div>
-                </section>
-              </aside>
-              <aside class="canvas-rail" aria-hidden="true"></aside>
-            `
-        }
+              </form>
+            </section>
+
+            <section class="memo-shell">
+              <div class="section-kicker">Structured Memo</div>
+              <section class="report-grid" data-role="report-grid">
+                ${renderReportGrid(report)}
+              </section>
+            </section>
+          </section>
+
+          <div class="shell-layout">
+            ${
+              state.canvasCollapsed
+                ? renderCollapsedRail(agentCards, run.statusTone)
+                : `
+                  <aside class="right-panel">
+                    <div class="canvas-header">
+                      <div>
+                        <span class="eyebrow">Agent Canvas</span>
+                        <h2>Controlled Runtime Terminals</h2>
+                      </div>
+                      <span class="tag">Mac-style windowing · real stream</span>
+                    </div>
+                    <section class="agent-grid">
+                      ${agentCards.map(renderAgentCard).join("")}
+                    </section>
+                    <section class="timeline-panel panel-section">
+                      <h2>Recent Timeline</h2>
+                      <div class="timeline-list" data-role="timeline-list">
+                        ${renderTimelineList(timeline)}
+                      </div>
+                    </section>
+                  </aside>
+                  <aside class="canvas-rail" aria-hidden="true"></aside>
+                `
+            }
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -131,6 +179,54 @@ export function renderStatusStrip(run: RunViewState): string {
     <div class="status-metrics">
       <span class="tag">${escapeHtml(run.queryLabel)}</span>
       <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents settled</span>
+    </div>
+  `;
+}
+
+function renderDialogueFeed(
+  state: AppState,
+  run: RunViewState,
+  report: ReportViewState,
+): string {
+  const finalJudgment = report.sections.find(
+    (section) => section.key === "final_judgment",
+  );
+  const swarmCopy =
+    finalJudgment?.content ||
+    run.stageDetail ||
+    "Runtime accepted the query and is preparing the multi-agent workbench.";
+
+  return `
+    <div class="dialogue-group">
+      <div class="dialogue-label system">
+        <span class="dialogue-dot"></span>
+        SYSTEM_INITIALIZED
+      </div>
+      <div class="dialogue-card system-card">
+        <p>${escapeHtml(state.infoMessage ?? "Agent swarm connected. Ready for multi-vector analysis.")}</p>
+      </div>
+    </div>
+
+    <div class="dialogue-group user-group">
+      <div class="dialogue-label user">USER_AUTH_01</div>
+      <div class="dialogue-card user-card">
+        <p>${escapeHtml(run.queryLabel)}</p>
+      </div>
+    </div>
+
+    <div class="dialogue-group">
+      <div class="dialogue-label swarm">
+        <span class="dialogue-dot"></span>
+        SWARM_RESPONSE
+      </div>
+      <div class="dialogue-card swarm-card">
+        <p>${escapeHtml(swarmCopy)}</p>
+        <div class="dialogue-metrics">
+          <span class="dialogue-chip ${run.statusTone}">${escapeHtml(run.stageLabel)}</span>
+          <span class="dialogue-chip">${run.completedAgentCount}/${run.totalAgentCount} settled</span>
+          <span class="dialogue-chip">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -224,7 +320,10 @@ function renderAgentCard(card: AgentCardState): string {
           <span class="window-dot green"></span>
         </div>
         <div class="terminal-header-copy">
-          <span class="terminal-name">${escapeHtml(card.label)}</span>
+          <div class="terminal-name-row">
+            <span class="terminal-name">${escapeHtml(card.label)}</span>
+            <span class="terminal-agent-glyph">${escapeHtml(agentGlyph(card.agent))}</span>
+          </div>
           <div class="terminal-phase-row">
             <span
               class="terminal-live-indicator ${card.isLive ? "is-live" : ""}"
@@ -246,9 +345,9 @@ function renderAgentCard(card: AgentCardState): string {
           <span class="tag" data-field="event-count">${card.eventCount} events</span>
         </div>
 
-        <div class="terminal-taskline">
-          <span class="terminal-label">Active lane</span>
-          <p class="terminal-value" data-field="current-task">${escapeHtml(card.currentTask)}</p>
+        <div class="terminal-taskline terminal-commandline">
+          <span class="terminal-shell-prompt">root@swarm:~$</span>
+          <p class="terminal-value mono" data-field="current-task">${escapeHtml(card.currentTask)}</p>
         </div>
 
         <div class="terminal-screen ${card.isLive ? "live" : ""}" data-field="terminal-screen">
@@ -281,20 +380,22 @@ function renderAgentCard(card: AgentCardState): string {
         </div>
 
         <div class="terminal-summary-grid">
-          <div class="label-group">
+          <div class="terminal-summary-cell">
             <span class="terminal-label">Recent Action</span>
             <p class="terminal-value mono" data-field="recent-action">${escapeHtml(card.recentAction)}</p>
           </div>
-
-          <div class="label-group">
+          <div class="terminal-summary-cell">
+            <span class="terminal-label">Latest Tool</span>
+            <p class="terminal-value mono" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
+          </div>
+          <div class="terminal-summary-cell">
             <span class="terminal-label">Latest Finding</span>
             <p class="terminal-value" data-field="latest-finding">${escapeHtml(card.latestFinding)}</p>
           </div>
-        </div>
-
-        <div class="terminal-tags">
-          <span class="tag" data-field="latest-tool">${escapeHtml(card.latestTool)}</span>
-          <span class="tag ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</span>
+          <div class="terminal-summary-cell">
+            <span class="terminal-label">Graph State</span>
+            <p class="terminal-value ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</p>
+          </div>
         </div>
       </div>
     </article>
@@ -375,6 +476,21 @@ function patchClass(tone: AgentCardState["patchTone"]): string {
       return "tag-warning";
     default:
       return "tag-clean";
+  }
+}
+
+function agentGlyph(agent: AgentCardState["agent"]): string {
+  switch (agent) {
+    case "thesis":
+      return "</>";
+    case "liquidity":
+      return "fx";
+    case "market_signal":
+      return "∿";
+    case "judge":
+      return "◎";
+    default:
+      return "•";
   }
 }
 
