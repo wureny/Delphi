@@ -68,8 +68,22 @@
   - `GET /runs/:runKey/terminals` 提供按 agent 分组的 terminal transcript snapshot
   - `GET /runs/:runKey/terminal-stream` 提供按 terminal chunk 推送的 SSE stream
   - terminal stream 是受控 runtime action stream，不是 OS shell / PTY 暴露
-  - 默认脚本 `npm run runtime:serve` 明确使用 `NoopGraphWriter`
-  - `npm run runtime:serve:openbb` 可切到真实 OpenBB data adapter，但 graph 仍是显式 noop demo mode
+  - runtime script 已支持通过 `RUNTIME_GRAPH_MODE=noop|neo4j` 切换 graph writer
+  - 默认脚本仍走 `NoopGraphWriter`
+  - `runtime:demo:neo4j` / `runtime:serve:neo4j` 会直接复用 thread2 的 `Neo4jGraphWriter`
+  - 若缺少 `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD`，neo4j 模式会显式失败，不会静默回退成 mock
+  - `runtime:serve:openbb` 可切到真实 OpenBB data adapter；若同时设置 `RUNTIME_GRAPH_MODE=neo4j`，可进入真实 data + 真实 graph 的 runtime 路径
+  - `package.json` 里的 runtime / neo4j / openbb 相关脚本现在会自动读取仓库根目录 `.env`
+  - 已实测 `.env` 中的 `NEO4J_*` 会被脚本读到
+  - 已通过 `npm run neo4j:verify`
+  - 已通过 `npm run runtime:demo:neo4j`
+  - 真实 Neo4j path 当前已能完成：
+    - runtime scaffold patch
+    - evidence patch
+    - stable object patch
+    - finding patch
+    - judge decision / report / citation patch
+    - final report ready without degraded mode
 
 ## Open Follow-Ups
 

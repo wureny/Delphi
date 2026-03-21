@@ -2,52 +2,60 @@ import {
   createRuntimeApiServer,
   RuntimeOrchestrator,
 } from "../src/orchestration/index.ts";
-import { NoopGraphWriter } from "../src/research-graph/graph-writer.ts";
-import {
-  OpenBBRuntimeDataAdapter,
-} from "../src/data-layer/index.ts";
 import {
   FixtureGraphContextReader,
-  FixtureRuntimeDataAdapter,
   createFixtureExecutors,
 } from "../src/orchestration/fixtures.ts";
+import {
+  resolveRuntimeDataAdapter,
+  resolveRuntimeGraphWriter,
+} from "./runtime-support.ts";
 
 async function main(): Promise<void> {
   const host = process.env.RUNTIME_API_HOST ?? "127.0.0.1";
   const port = Number(process.env.RUNTIME_API_PORT ?? 8787);
-  const dataAdapter = resolveDataAdapter();
+  const dataAdapter = resolveRuntimeDataAdapter();
+  const graphWriter = resolveRuntimeGraphWriter();
 
-  const orchestrator = new RuntimeOrchestrator({
-    graphWriter: new NoopGraphWriter(),
-    executors: createFixtureExecutors(),
-    dataAdapter,
-    graphContextReader: new FixtureGraphContextReader(),
-  });
+  try {
+    const orchestrator = new RuntimeOrchestrator({
+      graphWriter: graphWriter.writer,
+      executors: createFixtureExecutors(),
+      dataAdapter,
+      graphContextReader: new FixtureGraphContextReader(),
+    });
 
-  const server = createRuntimeApiServer({
-    orchestrator,
-  });
+    const server = createRuntimeApiServer({
+      orchestrator,
+    });
 
-  server.listen(port, host, () => {
-    console.log(`Runtime API listening at http://${host}:${port}`);
-    console.log(`Run creation endpoint: http://${host}:${port}/runs`);
-    console.log(`SSE endpoint: http://${host}:${port}/runs/demo/events`);
-    console.log(`Snapshot endpoint: http://${host}:${port}/runs/demo/report`);
-    console.log(`Terminal snapshot endpoint: http://${host}:${port}/runs/demo/terminals`);
-    console.log(`Terminal stream endpoint: http://${host}:${port}/runs/demo/terminal-stream`);
-    console.log(`Data mode: ${process.env.RUNTIME_DATA_MODE ?? "fixture"}`);
-    console.log("Graph writer: noop (explicit local demo mode)");
-  });
-}
+    const shutdown = async (): Promise<void> => {
+      server.close();
+      await graphWriter.close();
+      process.exit(0);
+    };
 
-function resolveDataAdapter(): FixtureRuntimeDataAdapter | OpenBBRuntimeDataAdapter {
-  const mode = process.env.RUNTIME_DATA_MODE ?? "fixture";
+    process.once("SIGINT", () => {
+      void shutdown();
+    });
+    process.once("SIGTERM", () => {
+      void shutdown();
+    });
 
-  if (mode === "openbb") {
-    return OpenBBRuntimeDataAdapter.fromEnv();
+    server.listen(port, host, () => {
+      console.log(`Runtime API listening at http://${host}:${port}`);
+      console.log(`Run creation endpoint: http://${host}:${port}/runs`);
+      console.log(`SSE endpoint: http://${host}:${port}/runs/demo/events`);
+      console.log(`Snapshot endpoint: http://${host}:${port}/runs/demo/report`);
+      console.log(`Terminal snapshot endpoint: http://${host}:${port}/runs/demo/terminals`);
+      console.log(`Terminal stream endpoint: http://${host}:${port}/runs/demo/terminal-stream`);
+      console.log(`Data mode: ${process.env.RUNTIME_DATA_MODE ?? "fixture"}`);
+      console.log(`Graph writer mode: ${graphWriter.mode}`);
+    });
+  } catch (error) {
+    await graphWriter.close();
+    throw error;
   }
-
-  return FixtureRuntimeDataAdapter.fromEnv();
 }
 
 await main();

@@ -30,7 +30,12 @@
 ## Risks / Open Questions
 
 - fixture runtime 已能证明主链能跑，但还没有接真实 OpenBB adapter
-- 当前 runtime API 仍显式使用 `NoopGraphWriter`；要验证 Aura 上的真实实例图，还需要切到 thread2 的真实 writer
+- 当前 runtime script 已能通过 `RUNTIME_GRAPH_MODE=neo4j` 切到 thread2 的真实 writer
+- runtime / neo4j / openbb 相关 npm script 现在会自动读取仓库根目录 `.env`
+- 当前 `.env` 中的 `NEO4J_*` 已完成真实验证：
+  - `npm run neo4j:verify` 通过
+  - `npm run runtime:demo:neo4j` 通过
+  - thread4 已确认能把完整 runtime 主链写到真实 Neo4j path
 - `POST /runs` 当前对 `ticker/timeHorizon/caseType` 支持显式传入；若只传 `userQuestion`，runtime 会用轻量启发式推断，v0 可用但不是最终 planner-grade parsing
 - terminal stream 当前基于受控 runtime event 映射，而不是 token-level model stream 或真实 shell 字节流；这符合 v0 产品边界
 - runtime contract 目前仍未覆盖 session continuity；这是后续阶段问题，不应倒灌回第一阶段
@@ -39,4 +44,4 @@
 ## Next Recommended Consumer
 
 - thread-05-frontend-shell-canvas（可直接接 runtime SSE / snapshot bridge）
-- thread-04-runtime-orchestration（继续实现真实 graph writer / non-fixture executors）
+- thread-04-runtime-orchestration（继续推进 non-fixture executors / real provider-backed execution）

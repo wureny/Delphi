@@ -5,7 +5,7 @@
 把 Delphi v0 的 orchestration runtime 从“合同存在”推进到“最小真实闭环可运行”：
 
 - 接住用户 query
-- 建立 run / session
+- 建立 run
 - 产出固定少量 tasks
 - 驱动固定 agent 执行
 - 写入 `Finding` / `Decision` / `ReportSection`
@@ -46,20 +46,30 @@
   - [validator.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/validator.ts)
   - [graph-writer.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/graph-writer.ts)
   - [neo4j-adapter.ts](/Users/wurenyu/workspace/Delphi/src/research-graph/neo4j-adapter.ts)
-- 已确认当前仓库还没有 runtime/orchestrator 代码骨架，thread4 需要从零建立最小实现
+- 已完成 `src/orchestration/` 最小骨架和可跑 runtime 主链
+- 已完成固定 4 task planner、fixture/OpenBB runtime data adapter 接缝、Judge synthesis、fixed six sections
+- 已完成 runtime API：
+  - `POST /runs`
+  - `GET /runs/:runKey/events`
+  - `GET /runs/:runKey/report`
+  - `GET /runs/:runKey/terminals`
+  - `GET /runs/:runKey/terminal-stream`
+- 已完成受控 terminal stream，前端可直接消费右侧 terminal canvas
+- 已完成 graph writer 运行时切换：
+  - 默认 `RUNTIME_GRAPH_MODE=noop`
+  - 可切 `RUNTIME_GRAPH_MODE=neo4j` 复用 thread2 `Neo4jGraphWriter`
 
 ### In Progress
 
-- 把 thread4 第一阶段从文档合同收敛成可实现 roadmap
+- 为 non-fixture executors 和真实 execution provider 预留接缝
+- 从 fixture execution 进入真实 provider-backed execution 路径
 
 ### Not Started
 
-- run/session 代码骨架
-- planner
-- agent execution runtime
-- event bus / SSE-ready event stream
-- thread3 对 runtime 的 ingestion contract
-- static tool / skill registry
+- 真实 LLM-backed executor / provider
+- stable `Judgment` 条件化持久化
+- session continuity
+- 真实 Aura runtime graph 验证（依赖 `NEO4J_*` 环境）
 
 ## Main Design Judgment
 
@@ -92,6 +102,8 @@ thread4 第一阶段不再继续发明新静态结构，而是优先把实例级
 7. 让 Judge 写出 `Decision` 和 `ReportSection`
 8. 打通 CLI/log 级别 demo run
 9. 再和 thread3 对齐 data ingestion contract
+10. 切换并验证真实 graph writer
+11. 推进 non-fixture executors
 
 ## Phase Plan
 
@@ -150,6 +162,17 @@ thread4 第一阶段不再继续发明新静态结构，而是优先把实例级
 - 能打印完整事件序列
 - 能在 Aura 中查到一条真实 runtime 主链
 - 能输出一份结构化 `FinalReport`
+
+### Phase 4: Real Graph Path
+
+- 让 runtime script 不再写死 `NoopGraphWriter`
+- 通过环境变量切换到 thread2 的 `Neo4jGraphWriter`
+- 明确缺失 `NEO4J_*` 时直接失败，而不是静默假跑
+- 用 `runtime:demo:neo4j` / `runtime:serve:neo4j` 验证真实 runtime graph 实例写入
+
+Status:
+
+- 已完成
 
 ## Solution Outline
 
