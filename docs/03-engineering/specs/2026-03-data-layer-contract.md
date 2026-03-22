@@ -47,6 +47,8 @@ thread3 第一阶段不是交付“大数据系统”，而是交付：
 ### External Sources
 
 - `OpenBB` 作为主要市场数据接入层
+  - 默认部署形态是外部 API 服务
+  - Delphi backend / Railway runtime 通过 HTTP 调用
 - `Polymarket` 或其他预测信号源仅作为可选辅助输入
 
 ## 3. Minimum External Data Set
@@ -154,6 +156,7 @@ thread3 必须明确哪些数据最终支持哪些 ontology objects：
   - raw snapshots
   - normalized snapshot bundles
   - evidence-ready candidates
+- 本地文件 store 只适合本地开发 / staging / demo，不视为正式 production persistence
 
 ## 8. Refresh Policy
 
@@ -229,6 +232,7 @@ thread3 必须明确哪些数据最终支持哪些 ontology objects：
 ## 13. Acceptance Criteria
 
 - runtime agent 明确知道去哪拉数据
+- Railway backend 明确知道如何通过 HTTP 调用外部 OpenBB 服务
 - graph writer 明确知道哪些对象写 Neo4j、哪些写 Postgres
 - 外部 provider 变动不会直接污染 agent 合同层
 - thread4 明确知道怎么消费 normalized snapshot

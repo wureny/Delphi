@@ -14,6 +14,7 @@ import {
 async function main(): Promise<void> {
   const host = process.env.RUNTIME_API_HOST ?? "127.0.0.1";
   const port = Number(process.env.RUNTIME_API_PORT ?? 8787);
+  const corsOrigin = process.env.CORS_ORIGIN ?? "*";
   const dataAdapter = resolveRuntimeDataAdapter();
   const execution = resolveRuntimeExecutors();
   const graphWriter = resolveRuntimeGraphWriter();
@@ -28,6 +29,7 @@ async function main(): Promise<void> {
 
     const server = createRuntimeApiServer({
       orchestrator,
+      corsOrigin,
     });
 
     const shutdown = async (): Promise<void> => {
@@ -53,6 +55,7 @@ async function main(): Promise<void> {
       console.log(`Data mode: ${process.env.RUNTIME_DATA_MODE ?? "fixture"}`);
       console.log(`Execution mode: ${execution.mode}`);
       console.log(`Graph writer mode: ${graphWriter.mode}`);
+      console.log(`CORS origin: ${corsOrigin}`);
     });
   } catch (error) {
     await graphWriter.close();

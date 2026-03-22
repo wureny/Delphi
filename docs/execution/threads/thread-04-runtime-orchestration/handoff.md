@@ -14,6 +14,10 @@
   - `GET /runs/:runKey/report`
   - `GET /runs/:runKey/terminals`
   - `GET /runs/:runKey/terminal-stream`
+- 当前部署目标已明确：
+  - Railway 常驻 Node runtime 服务
+  - 前端直接连接 runtime SSE
+  - 不为 Vercel serverless 改写 runtime 主链
 - 已新增受控 terminal stream：
   - backend 会把真实 `RunEvent` 转成 per-agent terminal line
   - 可同时提供 terminal snapshot 和 terminal SSE replay
@@ -41,6 +45,7 @@
   - 可切 `openai`
   - `openai` mode 需要 `OPENAI_API_KEY` + `OPENAI_MODEL`
   - 缺 key / model 时会直接失败，不会静默回退
+- `serve-runtime-api.ts` 现在支持从环境读取 `CORS_ORIGIN`
 - `openai` mode 已完成真实验证：
   - `npm run runtime:demo:openai` 通过
   - `npm run runtime:demo:openai:neo4j` 通过
@@ -54,4 +59,4 @@
 ## Next Recommended Consumer
 
 - thread-05-frontend-shell-canvas（可直接接 runtime SSE / snapshot bridge）
-- thread-04-runtime-orchestration（继续推进更真实的 provider/tool usage 与非 fixture data path）
+- thread-04-runtime-orchestration（继续推进 Railway-ready 真实 data path / CORS / SSE deployment 验证）

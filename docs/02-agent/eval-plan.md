@@ -2,6 +2,10 @@
 
 Delphi v0 的 eval 目标不是做研究级 benchmark，而是保证系统对外“像一个可靠、结构稳定、过程真实的研究系统”。
 
+线上最小 smoke / demo / regression 检查见：
+
+- [online-smoke-checklist.md](/Users/wurenyu/workspace/Delphi/docs/02-agent/online-smoke-checklist.md)
+
 ## 1. Eval Goals
 
 v0 先保证三类能力：

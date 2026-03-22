@@ -1,6 +1,15 @@
 # OpenBB Local Setup
 
-这份文档说明 Delphi v0 推荐的 OpenBB 接入方式：
+这份文档只覆盖本地开发 / staging / demo 场景。
+
+生产目标不是“开发者本机上的 OpenBB”，而是“外部 OpenBB API 服务”：
+
+- Delphi backend 通过 HTTP 调用外部 OpenBB 服务
+- Railway runtime 复用同一接法
+- provider secrets 只放在 OpenBB 服务或 backend 环境变量
+- 当前本地文件 artifacts store 不是正式 production persistence
+
+这份文档说明 Delphi v0 在本地开发阶段推荐的 OpenBB 接入方式：
 
 - 本地或自托管 OpenBB REST API
 - 默认不开 Basic Auth
@@ -186,6 +195,7 @@ provider 默认值：
 
 ## Current Limitations
 
-- raw snapshot 当前先落本地文件 store，还没有切到 Supabase
+- raw snapshot 当前先落本地文件 store，还没有切到 Supabase / Postgres 正式 persistence
 - endpoint 成功与否依赖你本地 OpenBB 环境里对应 extension 是否已安装
+- 这份文档描述的是本地开发路径，不是 Railway 生产部署形态
 - live OpenBB 路径仍需要你本地服务稳定可访问；仓库内 fixture demo 现在已经能演练 `Evidence` bridge

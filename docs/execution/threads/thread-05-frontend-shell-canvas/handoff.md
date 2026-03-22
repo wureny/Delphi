@@ -31,6 +31,7 @@
 - live mode 默认不再隐式重连 `demo`；没有 `run` 参数时保持空闲态，等待用户提交问题
 - 右侧 terminal summary 仍由 `RunEvent` 驱动，但 transcript body 已切到 thread4 的 terminal snapshot + terminal stream
 - terminal canvas 的产品定位是“受控 runtime terminal”，不是开发者 PTY / web shell
+- 目标部署平台是 Vercel，但前端不是执行层；默认设计为浏览器直连 Railway runtime
 - 固定 agent 顺序：
   - thesis
   - liquidity
@@ -51,7 +52,10 @@
 - 当前前端 live submit 只提交 `query.userQuestion`；如果后续想减少后端推断不确定性，可以再显式补 `ticker / timeHorizon / caseType`
 - recorded fixture 已升级为真实 terminal chunk 导出；如果 fixture shape 再变，需要同步 `frontend/src/feeds.ts`
 - 当前 demo runtime 实际上是顺序执行 non-judge agents；UI 没有假设强并发，但答辩展示时要注意解释
-- 当前沙箱无法监听本地端口，浏览器级验证还没在这个环境完成
+- Vercel 部署还没对齐：
+  - 还没有接 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
+  - 当前 runtime base URL 仍通过 URL query 参数注入
+  - 还没有专门验收 Railway 直连 SSE 在 Vercel 浏览器环境下的断流 / 重连表达
 - 若用户坚持“真实 Mac 终端 + agent 在终端里执行”，则需要新增后端能力：
   - per-agent terminal stream
   - browser terminal transport
@@ -60,6 +64,9 @@
 ## Next Recommended Consumer
 
 - thread5 frontend owner：
+  - 先把部署入口切到 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`，保留 query 参数作为本地 override
+  - 补 run 创建后的页面状态切换和 SSE 中断时的明确 UI 文案
+  - 继续保证左侧只吃 report snapshot、右侧状态只吃 events、右侧正文只吃 terminal transport
   - 若后续想收更稳的 query 质量，可在 composer 旁补显式 ticker / horizon / caseType controls
   - 若后续要把 terminal 做得更像产品而不是工程台，优先收滚动体验、terminal density 和 section-to-terminal 的 cross-highlight
   - 若要做真实终端，不要在前端伪装，需要 thread4 / backend 先给 PTY 级 terminal stream 能力

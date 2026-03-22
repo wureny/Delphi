@@ -67,11 +67,14 @@
   - `GET /runs/:runKey/terminals` 提供按 agent 分组的 terminal transcript snapshot
   - `GET /runs/:runKey/terminal-stream` 提供按 terminal chunk 推送的 SSE stream
   - terminal stream 是受控 runtime action stream，不是 OS shell / PTY 暴露
+  - 部署目标已明确为 Railway 常驻 Node 服务，而不是 Vercel serverless 适配
+  - SSE 应由 runtime 直接服务前端，不通过 Vercel 中转
   - runtime script 已支持通过 `RUNTIME_GRAPH_MODE=noop|neo4j` 切换 graph writer
   - 默认脚本仍走 `NoopGraphWriter`
   - `runtime:demo:neo4j` / `runtime:serve:neo4j` 会直接复用 thread2 的 `Neo4jGraphWriter`
   - 若缺少 `NEO4J_URI` / `NEO4J_USERNAME` / `NEO4J_PASSWORD`，neo4j 模式会显式失败，不会静默回退成 mock
   - `runtime:serve:openbb` 可切到真实 OpenBB data adapter；若同时设置 `RUNTIME_GRAPH_MODE=neo4j`，可进入真实 data + 真实 graph 的 runtime 路径
+  - `serve-runtime-api.ts` 现在会读取 `CORS_ORIGIN` 并传给 runtime API server
   - `package.json` 里的 runtime / neo4j / openbb 相关脚本现在会自动读取仓库根目录 `.env`
   - 已实测 `.env` 中的 `NEO4J_*` 会被脚本读到
   - 已通过 `npm run neo4j:verify`
@@ -104,5 +107,10 @@
 
 ## Open Follow-Ups
 
+- Railway 部署形态仍待最终验证：
+  - `RUNTIME_DATA_MODE=openbb`
+  - `RUNTIME_GRAPH_MODE=neo4j`
+  - `CORS_ORIGIN=<vercel frontend origin>`
+  - 至少一条真实数据 run 完成
 - thread2 未来可能还需要补更适合 runtime 消费的 graph CLI / SDK / API
 - 如果后续考虑接 OpenAI Agents SDK，只应放在 execution / session-continuity 层，不拥有 Delphi 的 run / case / graph / report 语义

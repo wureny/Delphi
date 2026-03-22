@@ -63,12 +63,14 @@
 
 - 从 fixture execution 进入真实 provider-backed execution 路径
 - 从 fixture data path 进入真实 provider + real data 组合验证
+- 从本地 demo service 进入 Railway 常驻 runtime service 形态
 
 ### Not Started
 
 - stable `Judgment` 条件化持久化
 - session continuity
 - provider-backed execution 与真实 data path 的组合验证
+- Railway 上的真实部署验证
 
 ## Main Design Judgment
 
@@ -105,6 +107,7 @@ thread4 第一阶段不再继续发明新静态结构，而是优先把实例级
 11. 推进 non-fixture executors
 12. 验证 provider-backed execution
 13. 验证 provider-backed execution + real data path
+14. 验证 Railway runtime service deployment
 
 ## Phase Plan
 
@@ -174,6 +177,38 @@ thread4 第一阶段不再继续发明新静态结构，而是优先把实例级
 Status:
 
 - 已完成
+
+### Phase 5: Railway Runtime Service
+
+- 部署目标不是 Vercel serverless，而是 Railway 常驻 Node 服务
+- runtime 直接服务前端：
+  - `POST /runs`
+  - `GET /runs/:runKey/events`
+  - `GET /runs/:runKey/report`
+  - `GET /runs/:runKey/terminals`
+  - `GET /runs/:runKey/terminal-stream`
+- SSE 不经过 Vercel 中转
+- 真实部署形态必须使用：
+  - `RUNTIME_DATA_MODE=openbb`
+  - `RUNTIME_GRAPH_MODE=neo4j`
+  - `CORS_ORIGIN=<frontend origin>`
+- 最小环境变量：
+  - `RUNTIME_API_HOST`
+  - `RUNTIME_API_PORT`
+  - `RUNTIME_DATA_MODE`
+  - `CORS_ORIGIN`
+  - `NEO4J_URI`
+  - `NEO4J_USERNAME`
+  - `NEO4J_PASSWORD`
+  - `NEO4J_DATABASE`
+  - `OPENBB_*`
+- 完成标准：
+  - Railway 上能启动 runtime 服务
+  - 前端可调用 `/runs`
+  - SSE 正常
+  - terminal stream 正常
+  - 至少一条真实数据 run 可完成
+  - 失败/降级路径能在报告和事件里体现
 
 ## Solution Outline
 

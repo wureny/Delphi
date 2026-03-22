@@ -126,6 +126,7 @@ v0 至少应存在：
 - 事件必须是 run-scoped
 - UI 只消费事件，不依赖 runtime 内存状态
 - `ReportSection` 在 runtime 中固定映射为 6 个 section 节点，即使某 section 内容为空也保留节点
+- v0 的 runtime API 应以常驻 Node 服务形态部署，前端直接连接 runtime SSE，不通过 Vercel serverless 中转
 - 对 frontend shell 的最小 transport contract 可以是：
   - `POST /runs` 接收 query submission，并返回 `runKey` 与后续消费 endpoint
   - `GET /runs/:runKey/events` 返回 SSE `RunEvent`

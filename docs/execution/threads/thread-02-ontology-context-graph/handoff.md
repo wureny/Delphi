@@ -26,6 +26,7 @@
 - 现在已经绑定真实 `neo4j-driver`，真实落库 smoke write 与 Aura bootstrap 已执行通过。
 - ontology 和 context graph 现在有了“可持续存在的初始化入口”，不再只是 smoke data。
 - 真实 Neo4j writer 在写入前会再次执行 validator，不接受绕过 `submitGraphPatch()` 的非法 patch。
+- 生产默认图数据库路径收敛为 Railway runtime -> Neo4j Aura，不再把本地 Neo4j 视作默认部署目标。
 
 ## Risks / Open Questions
 
@@ -34,6 +35,27 @@
 - `Finding -UPDATES-> stable object` 的细化 merge 策略还需要 runtime 实现时进一步落地。
 - validator 目前只能基于当前 patch 和调用方提供的 `existingStableIdentities` 拦截“该 merge 却 create”的情况；等 thread4 接入时需要把这份 context 真正喂进来。
 - runtime 现阶段还没有持续产出实例级 context graph；真实运行图还要等 thread4 接入。
+
+## Production Interface For Thread4
+
+- 生产环境必须配置：
+  - `NEO4J_URI`
+  - `NEO4J_USERNAME`
+  - `NEO4J_PASSWORD`
+  - `NEO4J_DATABASE`
+- thread4 初始化路径应固定为：
+  - `readNeo4jConfigFromEnv()`
+  - `createNeo4jDriverExecutor()`
+  - `new Neo4jGraphWriter(executor)`
+  - `submitGraphPatch(patch, context, writer)`
+- `NoopGraphWriter` 仅允许本地 demo / test 使用，不允许作为 Railway 默认 writer
+- 失败语义必须显式暴露：
+  - validator 拒绝 -> `patch_rejected`
+  - writer / Aura 失败 -> `patch_rejected` with `writer_failed`
+- Aura bootstrap 属于一次性环境初始化，不能放进每次 runtime 启动流程
+- 生产部署回归最少包括：
+  - `neo4j:verify`
+  - `neo4j:smoke-write`
 
 ## Next Recommended Consumer
 

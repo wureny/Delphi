@@ -16,16 +16,26 @@
     - `terminal-stream` 做增量 append
   - 若 URL 显式带 `run`，前端仍可重连既有 run；若不带 `run`，页面保持空闲态等待提交
   - 新增 `npm run dev:live`，一键同时启动 runtime bridge 和 frontend shell
+- 部署边界：
+  - 目标部署平台是 Vercel，但前端不是执行层
+  - 前端只消费 Railway runtime API / streams，不直接接 OpenBB、Supabase service role、Neo4j
+  - 推荐先走浏览器直连 Railway，不先做 Vercel server route SSE 代理
+  - backend contract 当前以 `POST /runs` + `report/events/terminals/terminal-stream` 为准
 - 重要边界：
   - 前端不假设 `report_ready` 自带完整 report
   - 前端不假设 4 个非 judge agent 会真并发
   - RunEvent 负责 run 状态 / timeline / summary；Terminal transport 负责右侧 transcript body
   - 当前前端提交只传 `query.userQuestion`；`ticker / timeHorizon / caseType` 仍交给 thread4 v0 轻量推断
+  - terminal card 保持 terminal-like，不伪装成 PTY，也不退化成纯日志墙
 - UI 方向：
   - 左侧像一份机构化研究 memo
   - 右侧像被产品化后的 agent workbench
   - terminal card 现在像克制的 Mac terminal window，但正文来自受控 runtime terminal stream，不是假打字动画，也不是裸 shell
   - 结果优先，过程可见但不喧宾夺主
+- 仍待补齐的部署项：
+  - 需要预留 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
+  - 当前代码实际仍以 URL query 参数 `runtime=` 驱动 runtime base URL，尚未切到环境变量注入
+  - 需要更明确处理 run 创建后的视图切换、SSE 中断表达、degraded 的用户文案
 - 当前验证：
   - recorded fixture 已由真实 runtime fixture demo 导出
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge

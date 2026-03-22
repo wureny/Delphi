@@ -54,6 +54,7 @@
 
 - 等待 thread3 / thread4 开工后再把 thread2 边界接入真实消费方
 - 收敛 snapshot-to-evidence mapping interface
+- 收敛 Railway runtime 到 Neo4j Aura 的生产 graph access path
 
 ### Not Started
 
@@ -102,12 +103,42 @@
 - v0 优先拒绝不清晰 patch，而不是容忍隐式写入
 - 先保证 schema 清楚、trace 可回放，再考虑优化灵活性
 
+### 5. Production Graph Access Path
+
+- 生产环境默认外部图数据库为 Neo4j Aura，不支持把本地 Neo4j 视作默认运行路径
+- Railway runtime 只能通过 `GraphPatch -> validateGraphPatch -> submitGraphPatch -> Neo4jGraphWriter` 写图
+- 不允许为了部署方便绕过 validator
+- 不允许在线上把 `NoopGraphWriter` 作为默认展示路径
+- 不允许让 agent 直接执行 Cypher
+
+### 6. Thread4 Production Interface
+
+- thread4 必须从环境变量读取 Aura 连接信息：
+  - `NEO4J_URI`
+  - `NEO4J_USERNAME`
+  - `NEO4J_PASSWORD`
+  - `NEO4J_DATABASE`
+- thread4 必须用 `readNeo4jConfigFromEnv()` + `createNeo4jDriverExecutor()` 初始化真实 executor
+- thread4 必须用 `Neo4jGraphWriter` 作为生产默认 writer
+- thread4 只能通过 `submitGraphPatch()` 调用图层
+- 若连接失败、validator 拒绝、writer 执行失败，必须显式暴露为错误或 `patch_rejected`，不能静默降级到 `NoopGraphWriter`
+
+### 7. Aura Bootstrap Policy
+
+- bootstrap 是环境级一次性初始化动作，不是每次 runtime 启动都跑
+- 新环境首次部署时先执行 `npm run neo4j:bootstrap`
+- 生产前至少执行一次 `npm run neo4j:verify`
+- 生产前至少执行一次真实 `npm run neo4j:smoke-write`
+- smoke write 只作为部署回归，不作为线上请求路径的一部分
+
 ## Next Concrete Tasks
 
 - 定义 snapshot-to-evidence mapping interface
 - 补一组合法 / 非法 patch 样例
 - 和 thread3 对齐 `Evidence.source_type / source_ref / observed_at` 的来源
 - 和 thread4 对齐 patch 提交流程与 `patch_accepted / patch_rejected` 事件
+- 把 Railway -> Aura 的生产初始化说明再细化成可直接照抄的 thread4 接线步骤
+- 明确 `neo4j:bootstrap` / `neo4j:verify` / `neo4j:smoke-write` 在生产部署中的执行时机
 
 ## Dependencies
 
@@ -135,3 +166,4 @@
 - thread3 可以直接按 contract 产出可映射到 `Evidence` 的对象
 - 非法 patch 有稳定错误码和拒绝语义
 - graph 模块目录在 v0 阶段不需要继续大规模重构
+- Railway runtime 可稳定连接 Aura，并通过真实 `Neo4jGraphWriter` 完成至少一次 patch 写入回归
