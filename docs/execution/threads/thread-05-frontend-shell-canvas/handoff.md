@@ -33,6 +33,10 @@
 - terminal canvas 的产品定位是“受控 runtime terminal”，不是开发者 PTY / web shell
 - 目标部署平台是 Vercel，但前端不是执行层；默认设计为浏览器直连 Railway runtime
 - 当部署环境提供 `NEXT_PUBLIC_RUNTIME_API_BASE_URL` 时，页面默认进入 live mode；需要 recorded demo 时用 `?source=recorded`
+- 最新 UI 方向已经从 dashboard-like shell 往 chat-first layout 收：
+  - 左边是简化 conversation + composer + structured output
+  - 左侧窄栏承接 runtime log
+  - 右边是固定 4 terminal-like cards 的整齐工作台
 - 固定 agent 顺序：
   - thesis
   - liquidity
@@ -56,6 +60,10 @@
 - Vercel 部署还没对齐：
   - 还没有专门验收 Railway 直连 SSE 在 Vercel 浏览器环境下的断流 / 重连表达
   - Railway runtime 还需要把 `CORS_ORIGIN` 配到 Vercel 前端域名
+- 当前线上 runtime 自身还有真实 blocker：
+  - thesis / liquidity / market_signal 的数据抓取会 `fetch failed`
+  - judge 当前使用的 OpenAI key 不正确
+  - 所以前端即便联通，也会看到 failed / degraded / empty report
 - 若用户坚持“真实 Mac 终端 + agent 在终端里执行”，则需要新增后端能力：
   - per-agent terminal stream
   - browser terminal transport

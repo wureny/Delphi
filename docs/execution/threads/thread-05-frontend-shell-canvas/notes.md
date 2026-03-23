@@ -28,8 +28,9 @@
   - 当前前端提交只传 `query.userQuestion`；`ticker / timeHorizon / caseType` 仍交给 thread4 v0 轻量推断
   - terminal card 保持 terminal-like，不伪装成 PTY，也不退化成纯日志墙
 - UI 方向：
-  - 左侧像一份机构化研究 memo
-  - 右侧像被产品化后的 agent workbench
+  - 左侧收成更接近 chat product 的 conversation + composer + structured output
+  - 最左栏保留为导航和 runtime log，不再把 log 挤在 terminal 下方
+  - 右侧像被产品化后的 agent workbench，固定 4 张 terminal-like cards，优先做整齐的 2x2 实时画布
   - terminal card 现在像克制的 Mac terminal window，但正文来自受控 runtime terminal stream，不是假打字动画，也不是裸 shell
   - 结果优先，过程可见但不喧宾夺主
 - 仍待补齐的部署项：
@@ -43,6 +44,10 @@
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge
   - 前端 typecheck / build 已通过
   - `POST /runs`、`GET /runs/:runKey/events`、`GET /runs/:runKey/report`、`GET /runs/:runKey/terminals`、`GET /runs/:runKey/terminal-stream` 已实际联调验证
+  - 2026-03-23 线上 Railway runtime 当前会出现真实 backend failure：
+    - thesis / liquidity / market_signal 出现 `fetch failed`
+    - judge 出现 OpenAI API key 错误
+    - 所以前端当前看到“空 report / 不完整输出”不只是 UI 问题，也有 runtime 配置问题
 - 当前明确不做的伪装：
   - 不把 controlled runtime terminal stream 伪装成真实 shell / PTY
   - 若要做真正可交互 web terminal，仍需要 thread4 / backend 额外提供终端流协议或 PTY bridge

@@ -114,7 +114,7 @@ export function createInitialState(
   return {
     feedMode,
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
-    composerText: "AAPL 未来三个月值不值得买？",
+    composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     canvasCollapsed: false,
     connectionStatus: "idle",
     errorMessage: null,
@@ -203,6 +203,7 @@ export function selectRunViewState(state: AppState): RunViewState {
     ["done", "degraded", "failed"].includes(card.status),
   ).length;
   const degradedReasons = collectDegradedReasons(state);
+  const runStatus = state.run?.status;
   const hasReportReady = state.receivedEvents.some(
     (event) => event.eventType === "report_ready",
   );
@@ -236,6 +237,12 @@ export function selectRunViewState(state: AppState): RunViewState {
     stageDetail =
       "Fetching the latest report snapshot and terminal transcript before live streaming continues.";
     statusTone = "running";
+  } else if (runStatus === "failed") {
+    stageLabel = degradedReasons.length > 0 ? "Run Failed" : "Runtime Failed";
+    stageDetail =
+      degradedReasons[0] ??
+      "The runtime failed before a usable structured report was produced.";
+    statusTone = "failed";
   } else if (hasReportReady) {
     stageLabel = degradedReasons.length > 0 ? "Degraded Result" : "Completed";
     stageDetail =
@@ -283,6 +290,7 @@ export function selectReportViewState(state: AppState): ReportViewState {
   const isSynthesizing = state.receivedEvents.some(
     (event) => event.eventType === "judge_synthesis_started",
   );
+  const runFailed = state.run?.status === "failed";
 
   const sections = hasReport
     ? state.reportSections.map((section) => ({
@@ -303,6 +311,8 @@ export function selectReportViewState(state: AppState): ReportViewState {
         content:
           section.sectionKey === "final_judgment" && isSynthesizing
             ? "Synthesizing judgment..."
+            : runFailed && section.sectionKey === "final_judgment"
+              ? "This run failed before Delphi could assemble a usable final judgment."
             : "",
         status: "empty",
         citations: [],
@@ -312,10 +322,12 @@ export function selectReportViewState(state: AppState): ReportViewState {
 
   return {
     sections,
-    degraded: degradedReasons.length > 0,
+    degraded: degradedReasons.length > 0 || runFailed,
     degradedMessage:
-      degradedReasons.length > 0
-        ? "This run completed in degraded mode. Some evidence collection or validation steps were incomplete."
+      runFailed
+        ? `Runtime failed: ${degradedReasons[0] ?? "upstream agents did not produce a usable report."}`
+        : degradedReasons.length > 0
+          ? `This run completed in degraded mode. ${degradedReasons[0] ?? "Some evidence collection or validation steps were incomplete."}`
         : null,
   };
 }
@@ -463,7 +475,7 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
 
     card.transcriptLines =
       terminalLines.length > 0
-        ? terminalLines.slice(-28).map((line) => ({
+        ? terminalLines.slice(-9).map((line) => ({
             id: line.lineId,
             prefix: line.prefix,
             text: line.text,
@@ -659,7 +671,7 @@ function summarizeTimelineEvent(event: RunEvent): string {
 function buildTranscriptLines(
   events: readonly RunEvent[],
 ): TerminalLineState[] {
-  return events.slice(-7).map((event) => ({
+  return events.slice(-8).map((event) => ({
     id: event.eventId,
     prefix: terminalPrefix(event),
     text: summarizeTranscriptEvent(event),

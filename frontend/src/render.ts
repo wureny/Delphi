@@ -55,6 +55,12 @@ export function renderApp(options: {
             <span class="sidebar-link">Portfolio</span>
             <span class="sidebar-link">Settings</span>
           </nav>
+          <section class="sidebar-log panel-section">
+            <div class="section-kicker">Runtime Log</div>
+            <div class="sidebar-log-list" data-role="timeline-list">
+              ${renderTimelineList(timeline)}
+            </div>
+          </section>
           <div class="sidebar-footer">
             <span class="sidebar-link subtle">Help</span>
             <span class="sidebar-link subtle">Exit</span>
@@ -63,38 +69,36 @@ export function renderApp(options: {
 
         <div class="workspace-shell">
           <section class="left-panel">
-            <div class="pane-heading">
-              <span class="eyebrow">Swarm Console</span>
-              <h1 class="brand-title">Structured stock research with visible execution</h1>
-              <p class="brand-copy">
-                Input and report stay on the left. The right side exposes the controlled runtime terminals without turning the product into a debugging console.
-              </p>
-            </div>
+            <div class="chat-shell panel-section">
+              <div class="pane-heading compact">
+                <span class="eyebrow">Conversation</span>
+                <h1 class="brand-title compact">Ask Delphi</h1>
+                <p class="brand-copy compact">
+                  A simple research chat on the left. The execution canvas stays visible on the right.
+                </p>
+              </div>
 
-            <section class="panel-section dialogue-shell">
-              <div class="section-kicker">Dialogue Feed</div>
-              <div class="dialogue-scroll" data-role="dialogue-feed">
+              <section class="status-strip compact" data-role="status-strip">
+                ${renderStatusStrip(run)}
+              </section>
+
+              <div class="chat-thread" data-role="dialogue-feed">
                 ${renderDialogueFeed(state, run, report)}
               </div>
-            </section>
-
-            <section class="panel-section status-strip" data-role="status-strip">
-              ${renderStatusStrip(run)}
-            </section>
+            </div>
 
             <div data-role="degraded-banner-slot">
               ${renderDegradedBanner(report)}
             </div>
 
-            <section class="panel-section query-shell">
-              <div class="section-kicker">Query Composer</div>
+            <section class="panel-section query-shell chat-composer-shell">
               <form class="query-form" data-role="query-form">
                 <label class="sr-only" for="query-input">Research question</label>
                 <textarea
                   id="query-input"
                   class="query-input"
                   name="question"
-                  placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
+                  placeholder="Ask one stock question. Example: MSFT 未来六个月值不值得买？"
                   ${state.connectionStatus === "creating" ? "disabled" : ""}
                 >${escapeHtml(state.composerText)}</textarea>
                 <div class="composer-actions">
@@ -114,7 +118,7 @@ export function renderApp(options: {
             </section>
 
             <section class="memo-shell">
-              <div class="section-kicker">Structured Memo</div>
+              <div class="section-kicker">Structured Output</div>
               <section class="report-grid" data-role="report-grid">
                 ${renderReportGrid(report)}
               </section>
@@ -132,16 +136,10 @@ export function renderApp(options: {
                         <span class="eyebrow">Agent Canvas</span>
                         <h2>Controlled Runtime Terminals</h2>
                       </div>
-                      <span class="tag">Mac-style windowing · real stream</span>
+                      <span class="tag">4 live agents · controlled stream</span>
                     </div>
                     <section class="agent-grid">
                       ${agentCards.map(renderAgentCard).join("")}
-                    </section>
-                    <section class="timeline-panel panel-section">
-                      <h2>Recent Timeline</h2>
-                      <div class="timeline-list" data-role="timeline-list">
-                        ${renderTimelineList(timeline)}
-                      </div>
                     </section>
                   </aside>
                   <aside class="canvas-rail" aria-hidden="true"></aside>
@@ -175,17 +173,12 @@ export function renderRailMeta(
 
 export function renderStatusStrip(run: RunViewState): string {
   return `
-    <div class="status-main">
-      <div class="status-title-row">
-        <h2 class="status-title">${escapeHtml(run.stageLabel)}</h2>
-        ${renderStatusBadge(run.statusTone, run.connectionStatus)}
-      </div>
-      <p class="status-subtitle">${escapeHtml(run.stageDetail)}</p>
+    <div class="chat-status-row">
+      ${renderStatusBadge(run.statusTone, run.stageLabel)}
+      <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
+      <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
     </div>
-    <div class="status-metrics">
-      <span class="tag">${escapeHtml(run.queryLabel)}</span>
-      <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents settled</span>
-    </div>
+    <p class="chat-status-copy">${escapeHtml(run.stageDetail)}</p>
   `;
 }
 
@@ -197,43 +190,56 @@ export function renderDialogueFeed(
   const finalJudgment = report.sections.find(
     (section) => section.key === "final_judgment",
   );
+  const queryLabel = state.run ? run.queryLabel : state.composerText.trim();
   const swarmCopy =
     finalJudgment?.content ||
     run.stageDetail ||
     "Runtime accepted the query and is preparing the multi-agent workbench.";
+  const failureCopy =
+    report.degradedMessage && !finalJudgment?.content
+      ? `
+        <div class="chat-message assistant warning">
+          <div class="chat-avatar">!</div>
+          <div class="chat-bubble">
+            <p>${escapeHtml(report.degradedMessage)}</p>
+          </div>
+        </div>
+      `
+      : "";
 
   return `
-    <div class="dialogue-group">
-      <div class="dialogue-label system">
-        <span class="dialogue-dot"></span>
-        SYSTEM_INITIALIZED
-      </div>
-      <div class="dialogue-card system-card">
-        <p>${escapeHtml(state.infoMessage ?? "Agent swarm connected. Ready for multi-vector analysis.")}</p>
+    <div class="chat-message assistant">
+      <div class="chat-avatar">D</div>
+      <div class="chat-bubble">
+        <p>${escapeHtml(state.infoMessage ?? "Ask a stock question to start a live multi-agent research run.")}</p>
       </div>
     </div>
 
-    <div class="dialogue-group user-group">
-      <div class="dialogue-label user">USER_AUTH_01</div>
-      <div class="dialogue-card user-card">
-        <p>${escapeHtml(run.queryLabel)}</p>
-      </div>
-    </div>
+    ${
+      queryLabel
+        ? `
+          <div class="chat-message user">
+            <div class="chat-bubble">
+              <p>${escapeHtml(queryLabel)}</p>
+            </div>
+          </div>
+        `
+        : ""
+    }
 
-    <div class="dialogue-group">
-      <div class="dialogue-label swarm">
-        <span class="dialogue-dot"></span>
-        SWARM_RESPONSE
-      </div>
-      <div class="dialogue-card swarm-card">
+    <div class="chat-message assistant">
+      <div class="chat-avatar">D</div>
+      <div class="chat-bubble">
         <p>${escapeHtml(swarmCopy)}</p>
         <div class="dialogue-metrics">
           <span class="dialogue-chip ${run.statusTone}">${escapeHtml(run.stageLabel)}</span>
           <span class="dialogue-chip">${run.completedAgentCount}/${run.totalAgentCount} settled</span>
-          <span class="dialogue-chip">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
+          <span class="dialogue-chip">${escapeHtml(run.feedLabel)}</span>
         </div>
       </div>
     </div>
+
+    ${failureCopy}
   `;
 }
 
@@ -361,20 +367,14 @@ function renderAgentCard(card: AgentCardState): string {
             <span class="terminal-screen-title">runtime transcript</span>
             <span class="terminal-screen-meta" data-field="screen-meta">${escapeHtml(card.phaseLabel)}</span>
           </div>
-          <div class="terminal-scroll" data-role="terminal-scroll" data-agent="${card.agent}">
-            <div class="terminal-lines" data-role="terminal-lines" data-agent="${card.agent}">
-              ${renderTerminalLines(card.transcriptLines)}
-            </div>
+          <div class="terminal-lines" data-role="terminal-lines" data-agent="${card.agent}">
+            ${renderTerminalLines(card.transcriptLines)}
           </div>
           <div class="terminal-screen-footer">
-            <button
-              class="ghost-button jump-live-button is-hidden"
-              data-action="jump-terminal"
-              data-agent="${card.agent}"
-              type="button"
-            >
-              Jump to live
-            </button>
+            <div class="terminal-mini-summary">
+              <span class="terminal-mini-chip">${escapeHtml(card.latestTool)}</span>
+              <span class="terminal-mini-chip ${patchClass(card.patchTone)}">${escapeHtml(card.latestPatch)}</span>
+            </div>
             <div
               class="terminal-cursor-row ${card.isLive ? "" : "is-hidden"}"
               data-role="terminal-cursor"
@@ -385,23 +385,17 @@ function renderAgentCard(card: AgentCardState): string {
           </div>
         </div>
 
-        <div class="terminal-summary-grid">
+        <div class="terminal-summary-grid compact">
           <div class="terminal-summary-cell">
             <span class="terminal-label">Recent Action</span>
             <p class="terminal-value mono" data-field="recent-action">${escapeHtml(card.recentAction)}</p>
           </div>
           <div class="terminal-summary-cell">
-            <span class="terminal-label">Latest Tool</span>
-            <p class="terminal-value mono" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
-          </div>
-          <div class="terminal-summary-cell">
             <span class="terminal-label">Latest Finding</span>
             <p class="terminal-value" data-field="latest-finding">${escapeHtml(card.latestFinding)}</p>
           </div>
-          <div class="terminal-summary-cell">
-            <span class="terminal-label">Graph State</span>
-            <p class="terminal-value ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</p>
-          </div>
+          <p class="sr-only" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
+          <p class="sr-only ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</p>
         </div>
       </div>
     </article>
@@ -410,12 +404,11 @@ function renderAgentCard(card: AgentCardState): string {
 
 function renderTimelineItem(item: TimelineItemViewState): string {
   return `
-    <article class="timeline-item">
+    <article class="timeline-item compact">
       <span class="timeline-time">${escapeHtml(item.timestampLabel)}</span>
-      <span class="timeline-agent">${escapeHtml(item.agentLabel)}</span>
       <div class="timeline-copy">
-        <strong>${escapeHtml(item.title)}</strong>
-        <span>${escapeHtml(item.summary)}</span>
+        <strong>${escapeHtml(item.agentLabel)}</strong>
+        <span>${escapeHtml(item.title)}</span>
       </div>
     </article>
   `;

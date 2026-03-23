@@ -150,6 +150,9 @@ export function createSseFeedSource(options: {
       let closed = false;
       let eventSource: EventSource | null = null;
       let terminalSource: EventSource | null = null;
+      let hydrated = false;
+      let receivedEvent = false;
+      let receivedTerminalChunk = false;
 
       const connect = async (): Promise<void> => {
         handlers.onMessage({
@@ -160,10 +163,12 @@ export function createSseFeedSource(options: {
         try {
           if (options.terminalsUrl) {
             await loadTerminalSnapshot(options.terminalsUrl, handlers);
+            hydrated = true;
           }
 
           if (options.snapshotUrl) {
             await loadSnapshot(options.snapshotUrl, handlers);
+            hydrated = true;
           }
 
           if (closed) {
@@ -178,6 +183,7 @@ export function createSseFeedSource(options: {
 
             try {
               const event = JSON.parse(message.data) as RunEvent;
+              receivedEvent = true;
               handlers.onMessage({ kind: "event", event });
 
               if (event.eventType === "report_ready" && options.snapshotUrl) {
@@ -193,6 +199,11 @@ export function createSseFeedSource(options: {
 
           eventSource.onerror = () => {
             if (closed) {
+              return;
+            }
+
+            if (receivedEvent || hydrated) {
+              handlers.onMessage({ kind: "complete" });
               return;
             }
 
@@ -212,6 +223,7 @@ export function createSseFeedSource(options: {
 
               try {
                 const chunk = JSON.parse(message.data) as TerminalStreamChunk;
+                receivedTerminalChunk = true;
                 handlers.onMessage({
                   kind: "terminal_chunk",
                   chunk,
@@ -226,6 +238,10 @@ export function createSseFeedSource(options: {
 
             terminalSource.onerror = () => {
               if (closed) {
+                return;
+              }
+
+              if (receivedTerminalChunk || receivedEvent || hydrated) {
                 return;
               }
 
