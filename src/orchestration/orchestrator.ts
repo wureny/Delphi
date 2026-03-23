@@ -232,14 +232,24 @@ export class RuntimeOrchestrator {
         decision = judgeResult.decision;
       }
 
-      reportSections = normalizeReportSections(run.runId, judgeResult.reportSections);
-      finalReport =
-        judgeResult.finalReport ??
-        buildFinalReport({
-          runId: run.runId,
-          caseId: run.caseId,
-          sections: reportSections,
-        });
+      const normalizedSections = normalizeReportSections(
+        run.runId,
+        judgeResult.reportSections,
+      );
+      const hasMeaningfulSections = normalizedSections.some((section) =>
+        section.status !== "empty" || section.content.trim().length > 0
+      );
+
+      if (judgeResult.taskStatus !== "failed" && hasMeaningfulSections) {
+        reportSections = normalizedSections;
+        finalReport =
+          judgeResult.finalReport ??
+          buildFinalReport({
+            runId: run.runId,
+            caseId: run.caseId,
+            sections: reportSections,
+          });
+      }
 
       if (judgeResult.taskStatus === "failed") {
         run = this.runManager.transitionRun(run.runId, "failed");

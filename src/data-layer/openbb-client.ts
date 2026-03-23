@@ -87,9 +87,18 @@ export class OpenBBRestClient {
       }
     }
 
-    const response = await fetch(url, {
-      headers: this.buildHeaders(),
-    });
+    let response: Response;
+
+    try {
+      response = await fetch(url, {
+        headers: this.buildHeaders(),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown fetch failure.";
+      throw new Error(
+        `OpenBB request failed for ${path} at ${url.toString()}: ${message}`,
+      );
+    }
 
     if (!response.ok) {
       throw new Error(`OpenBB request failed for ${path} with status ${response.status}.`);
