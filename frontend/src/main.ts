@@ -16,13 +16,16 @@ if (!root) {
 }
 
 const searchParams = new URLSearchParams(window.location.search);
-const feedMode = (searchParams.get("source") === "sse" ? "sse" : "recorded") as FeedMode;
+const explicitSource = searchParams.get("source");
 const recordedFixtureUrl =
   searchParams.get("fixture") ?? "./public/fixtures/runtime-demo.json";
-const runtimeApiBaseUrl =
+const configuredRuntimeApiBaseUrl =
   searchParams.get("runtime") ??
-  window.__DELHI_FRONTEND_CONFIG__?.runtimeApiBaseUrl ??
+  window.__DELHI_FRONTEND_CONFIG__?.runtimeApiBaseUrl;
+const runtimeApiBaseUrl =
+  configuredRuntimeApiBaseUrl ??
   deriveLocalRuntimeApiBaseUrl();
+const feedMode = resolveFeedMode(explicitSource, configuredRuntimeApiBaseUrl);
 const runtimeRunKey = searchParams.get("run") ?? undefined;
 const derivedEventsUrl = runtimeRunKey && runtimeApiBaseUrl
   ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/events`
@@ -66,4 +69,19 @@ function deriveLocalRuntimeApiBaseUrl(): string | undefined {
   }
 
   return `${protocol}//127.0.0.1:8787`;
+}
+
+function resolveFeedMode(
+  explicitSource: string | null,
+  configuredRuntimeApiBaseUrl: string | undefined,
+): FeedMode {
+  if (explicitSource === "recorded") {
+    return "recorded";
+  }
+
+  if (explicitSource === "sse") {
+    return "sse";
+  }
+
+  return configuredRuntimeApiBaseUrl ? "sse" : "recorded";
 }

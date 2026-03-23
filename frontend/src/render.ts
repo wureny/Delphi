@@ -5,7 +5,7 @@ import type {
   TerminalLineState,
   TimelineItemViewState,
 } from "./state.js";
-import type { AppState } from "./state.js";
+import { renderComposerButtonLabel, type AppState } from "./state.js";
 
 export function renderApp(options: {
   state: AppState;
@@ -73,7 +73,7 @@ export function renderApp(options: {
 
             <section class="panel-section dialogue-shell">
               <div class="section-kicker">Dialogue Feed</div>
-              <div class="dialogue-scroll">
+              <div class="dialogue-scroll" data-role="dialogue-feed">
                 ${renderDialogueFeed(state, run, report)}
               </div>
             </section>
@@ -95,13 +95,19 @@ export function renderApp(options: {
                   class="query-input"
                   name="question"
                   placeholder="Ask a single-ticker US equity question, for example: AAPL 未来三个月值不值得买？"
+                  ${state.connectionStatus === "creating" ? "disabled" : ""}
                 >${escapeHtml(state.composerText)}</textarea>
                 <div class="composer-actions">
                   <p class="composer-note" data-role="composer-note">${escapeHtml(
                     state.errorMessage ?? state.infoMessage ?? "",
                   )}</p>
-                  <button class="primary-button" type="submit">
-                    ${state.feedMode === "recorded" ? "Replay Recorded Run" : "Submit Live Query"}
+                  <button
+                    class="primary-button"
+                    data-role="submit-button"
+                    type="submit"
+                    ${state.connectionStatus === "creating" ? "disabled" : ""}
+                  >
+                    ${renderComposerButtonLabel(state)}
                   </button>
                 </div>
               </form>
@@ -183,7 +189,7 @@ export function renderStatusStrip(run: RunViewState): string {
   `;
 }
 
-function renderDialogueFeed(
+export function renderDialogueFeed(
   state: AppState,
   run: RunViewState,
   report: ReportViewState,

@@ -60,6 +60,8 @@ Frontend shell:
 - Vercel deploy note:
   - set `NEXT_PUBLIC_RUNTIME_API_BASE_URL` to the Railway runtime base URL
   - configure Railway runtime `CORS_ORIGIN` to the Vercel frontend origin
+  - when `NEXT_PUBLIC_RUNTIME_API_BASE_URL` is present, the deployed shell defaults to live mode
+  - append `?source=recorded` if you want to force the recorded demo fixture
 
 OpenBB local setup:
 

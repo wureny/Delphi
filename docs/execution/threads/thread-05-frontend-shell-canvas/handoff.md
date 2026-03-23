@@ -32,6 +32,7 @@
 - 右侧 terminal summary 仍由 `RunEvent` 驱动，但 transcript body 已切到 thread4 的 terminal snapshot + terminal stream
 - terminal canvas 的产品定位是“受控 runtime terminal”，不是开发者 PTY / web shell
 - 目标部署平台是 Vercel，但前端不是执行层；默认设计为浏览器直连 Railway runtime
+- 当部署环境提供 `NEXT_PUBLIC_RUNTIME_API_BASE_URL` 时，页面默认进入 live mode；需要 recorded demo 时用 `?source=recorded`
 - 固定 agent 顺序：
   - thesis
   - liquidity

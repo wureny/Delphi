@@ -14,6 +14,7 @@ import {
 
 export type ConnectionStatus =
   | "idle"
+  | "creating"
   | "connecting"
   | "streaming"
   | "completed"
@@ -216,13 +217,25 @@ export function selectRunViewState(state: AppState): RunViewState {
   const activeCards = agentCards.filter((card) => card.status === "running");
 
   let stageLabel = "Awaiting Run";
-  let stageDetail = "Load a recorded fixture or connect to an SSE endpoint.";
+  let stageDetail =
+    state.feedMode === "sse"
+      ? "Submit a question to create a live run against the runtime API."
+      : "Replay the recorded fixture to inspect the shell with known runtime output.";
   let statusTone: RunViewState["statusTone"] = "idle";
 
-  if (state.connectionStatus === "error") {
+  if (state.connectionStatus === "creating") {
+    stageLabel = "Creating Run";
+    stageDetail = "Submitting your question and preparing report + terminal hydration.";
+    statusTone = "running";
+  } else if (state.connectionStatus === "error") {
     stageLabel = "Connection Error";
     stageDetail = state.errorMessage ?? "The feed could not be established.";
     statusTone = "failed";
+  } else if (state.connectionStatus === "connecting" && state.run) {
+    stageLabel = "Hydrating Run";
+    stageDetail =
+      "Fetching the latest report snapshot and terminal transcript before live streaming continues.";
+    statusTone = "running";
   } else if (hasReportReady) {
     stageLabel = degradedReasons.length > 0 ? "Degraded Result" : "Completed";
     stageDetail =
@@ -305,6 +318,18 @@ export function selectReportViewState(state: AppState): ReportViewState {
         ? "This run completed in degraded mode. Some evidence collection or validation steps were incomplete."
         : null,
   };
+}
+
+export function renderComposerButtonLabel(state: AppState): string {
+  if (state.feedMode === "recorded") {
+    return "Replay Recorded Run";
+  }
+
+  if (state.connectionStatus === "creating") {
+    return "Creating Run...";
+  }
+
+  return state.run ? "Create New Live Run" : "Submit Live Query";
 }
 
 export function selectAgentCardStates(state: AppState): AgentCardState[] {

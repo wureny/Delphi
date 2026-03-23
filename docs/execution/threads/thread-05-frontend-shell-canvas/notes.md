@@ -35,6 +35,7 @@
 - 仍待补齐的部署项：
   - 已预留 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
   - 当前代码优先读 URL query 参数 `runtime=`，其次读构建时注入的 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
+  - 若部署环境注入了 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`，页面默认进入 live mode；本地/演示仍可通过 `?source=recorded` 强制回放 fixture
   - 需要更明确处理 run 创建后的视图切换、SSE 中断表达、degraded 的用户文案
   - Railway runtime 仍需配置 `CORS_ORIGIN` 指向 Vercel 前端域名
 - 当前验证：

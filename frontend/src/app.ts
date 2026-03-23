@@ -9,6 +9,7 @@ import {
   type RunFeedSource,
 } from "./feeds.js";
 import {
+  renderDialogueFeed,
   renderApp,
   renderDegradedBanner,
   renderRailMeta,
@@ -27,6 +28,7 @@ import {
   createInitialState,
   createRestartState,
   reduceFeedMessage,
+  renderComposerButtonLabel,
   selectAgentCardStates,
   selectReportViewState,
   selectRunViewState,
@@ -269,10 +271,13 @@ export class DelphiFrontendApp {
     this.connection?.close();
     this.connection = null;
     this.resetTerminalUiState();
-    this.state = createRestartState(
-      this.state,
-      `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
-    );
+    this.state = {
+      ...createRestartState(
+        this.state,
+        `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
+      ),
+      connectionStatus: "creating",
+    };
     this.renderShell();
 
     try {
@@ -349,6 +354,22 @@ export class DelphiFrontendApp {
     const composerNote = this.root.querySelector<HTMLElement>('[data-role="composer-note"]');
     if (composerNote) {
       composerNote.textContent = this.state.errorMessage ?? this.state.infoMessage ?? "";
+    }
+
+    const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
+    if (dialogueFeed) {
+      dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report);
+    }
+
+    const submitButton = this.root.querySelector<HTMLButtonElement>('[data-role="submit-button"]');
+    if (submitButton) {
+      submitButton.textContent = renderComposerButtonLabel(this.state);
+      submitButton.disabled = this.state.connectionStatus === "creating";
+    }
+
+    const queryInput = this.root.querySelector<HTMLTextAreaElement>("#query-input");
+    if (queryInput) {
+      queryInput.disabled = this.state.connectionStatus === "creating";
     }
 
     const statusStrip = this.root.querySelector<HTMLElement>('[data-role="status-strip"]');
