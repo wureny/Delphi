@@ -33,9 +33,10 @@
   - terminal card 现在像克制的 Mac terminal window，但正文来自受控 runtime terminal stream，不是假打字动画，也不是裸 shell
   - 结果优先，过程可见但不喧宾夺主
 - 仍待补齐的部署项：
-  - 需要预留 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
-  - 当前代码实际仍以 URL query 参数 `runtime=` 驱动 runtime base URL，尚未切到环境变量注入
+  - 已预留 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
+  - 当前代码优先读 URL query 参数 `runtime=`，其次读构建时注入的 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
   - 需要更明确处理 run 创建后的视图切换、SSE 中断表达、degraded 的用户文案
+  - Railway runtime 仍需配置 `CORS_ORIGIN` 指向 Vercel 前端域名
 - 当前验证：
   - recorded fixture 已由真实 runtime fixture demo 导出
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge

@@ -53,9 +53,8 @@
 - recorded fixture 已升级为真实 terminal chunk 导出；如果 fixture shape 再变，需要同步 `frontend/src/feeds.ts`
 - 当前 demo runtime 实际上是顺序执行 non-judge agents；UI 没有假设强并发，但答辩展示时要注意解释
 - Vercel 部署还没对齐：
-  - 还没有接 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
-  - 当前 runtime base URL 仍通过 URL query 参数注入
   - 还没有专门验收 Railway 直连 SSE 在 Vercel 浏览器环境下的断流 / 重连表达
+  - Railway runtime 还需要把 `CORS_ORIGIN` 配到 Vercel 前端域名
 - 若用户坚持“真实 Mac 终端 + agent 在终端里执行”，则需要新增后端能力：
   - per-agent terminal stream
   - browser terminal transport
@@ -64,7 +63,6 @@
 ## Next Recommended Consumer
 
 - thread5 frontend owner：
-  - 先把部署入口切到 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`，保留 query 参数作为本地 override
   - 补 run 创建后的页面状态切换和 SSE 中断时的明确 UI 文案
   - 继续保证左侧只吃 report snapshot、右侧状态只吃 events、右侧正文只吃 terminal transport
   - 若后续想收更稳的 query 质量，可在 composer 旁补显式 ticker / horizon / caseType controls

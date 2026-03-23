@@ -12,8 +12,8 @@ import {
 } from "./runtime-support.ts";
 
 async function main(): Promise<void> {
-  const host = process.env.RUNTIME_API_HOST ?? "127.0.0.1";
-  const port = Number(process.env.RUNTIME_API_PORT ?? 8787);
+  const host = process.env.RUNTIME_API_HOST ?? process.env.HOST ?? "0.0.0.0";
+  const port = Number(process.env.RUNTIME_API_PORT ?? process.env.PORT ?? 8787);
   const corsOrigin = process.env.CORS_ORIGIN ?? "*";
   const dataAdapter = resolveRuntimeDataAdapter();
   const execution = resolveRuntimeExecutors();

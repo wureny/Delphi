@@ -47,12 +47,19 @@ Frontend shell:
   - regenerate the recorded runtime fixture from the real thread4 fixture runtime, including terminal chunks
 - `npm run frontend:build`
   - compile browser TypeScript into `frontend/dist`
+  - also writes `frontend/runtime-config.js` from `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
 - `npm run frontend:serve`
   - serve the frontend shell locally from `frontend/`
 - `npm run dev:live`
   - start the thread4 runtime bridge and thread5 frontend shell together
   - opens the live path via `/?source=sse&runtime=http://127.0.0.1:8787`
   - submit a question in the composer to create a live run, or append `&run=<runKey>` to reconnect one
+- `vercel.json`
+  - points Vercel at `npm run frontend:build`
+  - serves `frontend/` as the output directory
+- Vercel deploy note:
+  - set `NEXT_PUBLIC_RUNTIME_API_BASE_URL` to the Railway runtime base URL
+  - configure Railway runtime `CORS_ORIGIN` to the Vercel frontend origin
 
 OpenBB local setup:
 

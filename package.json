@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "start": "npm run start:runtime",
+    "start:runtime": "node --env-file-if-exists=.env --import tsx ./scripts/serve-runtime-api.ts",
     "neo4j:bootstrap": "node --env-file-if-exists=.env --import tsx ./scripts/bootstrap-research-graph.ts",
     "check:research-graph": "node --env-file-if-exists=.env --import tsx ./src/research-graph/index.ts",
     "neo4j:smoke-write": "node --env-file-if-exists=.env --import tsx ./scripts/run-neo4j-smoke-write.ts",
@@ -28,7 +30,8 @@
     "runtime:smoke:graph-degraded": "node --env-file-if-exists=.env --import tsx ./scripts/run-runtime-smoke.ts graph-degraded",
     "runtime:smoke:terminal": "node --env-file-if-exists=.env --import tsx ./scripts/run-runtime-smoke.ts terminal",
     "frontend:demo:record": "node --env-file-if-exists=.env --import tsx ./scripts/export-runtime-demo-fixture.ts",
-    "frontend:build": "tsc -p ./tsconfig.frontend.json",
+    "frontend:config": "node --import tsx ./scripts/build-frontend-runtime-config.ts",
+    "frontend:build": "npm run frontend:config && tsc -p ./tsconfig.frontend.json",
     "frontend:serve": "node --env-file-if-exists=.env --import tsx ./scripts/serve-frontend.ts",
     "dev:live": "node --env-file-if-exists=.env --import tsx ./scripts/dev-live.ts",
     "frontend:typecheck": "tsc -p ./tsconfig.frontend.json --noEmit",
@@ -36,10 +39,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
-    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "neo4j-driver": "^6.0.1"
+    "neo4j-driver": "^6.0.1",
+    "tsx": "^4.21.0"
   }
 }
