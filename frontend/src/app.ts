@@ -39,6 +39,8 @@ import {
   type TerminalLineState,
 } from "./state.js";
 
+const MAX_RENDERED_TERMINAL_LINES = 9;
+
 export interface DelphiAppConfig {
   root: HTMLElement;
   feedMode: FeedMode;
@@ -353,7 +355,8 @@ export class DelphiFrontendApp {
 
     const composerNote = this.root.querySelector<HTMLElement>('[data-role="composer-note"]');
     if (composerNote) {
-      composerNote.textContent = this.state.errorMessage ?? this.state.infoMessage ?? "";
+      composerNote.textContent =
+        this.state.errorMessage ?? run.streamWarning ?? this.state.infoMessage ?? "";
     }
 
     const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
@@ -505,6 +508,7 @@ export class DelphiFrontendApp {
     }
 
     linesContainer.innerHTML = renderTerminalLines(lines);
+    trimTerminalLines(linesContainer, MAX_RENDERED_TERMINAL_LINES);
     this.renderedTerminalLineIds.set(
       agent,
       new Set(lines.map((line) => line.id)),
@@ -546,6 +550,7 @@ export class DelphiFrontendApp {
 
     const appendedLine = linesContainer.lastElementChild as HTMLElement | null;
     appendedLine?.classList.add("is-streamed");
+    trimTerminalLines(linesContainer, MAX_RENDERED_TERMINAL_LINES);
 
     renderedIds.add(chunk.line.lineId);
     this.renderedTerminalLineIds.set(agent, renderedIds);
@@ -669,4 +674,10 @@ function agentStatusColor(status: "idle" | "running" | "blocked" | "done" | "deg
 
 function isAgentKey(value: string | undefined): value is AgentKey {
   return typeof value === "string" && agentKeys.includes(value as AgentKey);
+}
+
+function trimTerminalLines(container: HTMLElement, maxLines: number): void {
+  while (container.children.length > maxLines) {
+    container.firstElementChild?.remove();
+  }
 }

@@ -1,4 +1,4 @@
-import type { FeedMessage, FeedMode } from "./feeds.js";
+import type { FeedMessage, FeedMode, StreamKind } from "./feeds.js";
 import {
   agentKeys,
   reportSectionKeys,
@@ -17,6 +17,7 @@ export type ConnectionStatus =
   | "creating"
   | "connecting"
   | "streaming"
+  | "interrupted"
   | "completed"
   | "error";
 
@@ -36,6 +37,7 @@ export interface AppState {
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
   infoMessage: string | null;
+  streamWarnings: Partial<Record<StreamKind, string>>;
   run: RunRecord | null;
   reportSections: ReportSectionRecord[];
   finalReportReady: boolean;
@@ -55,6 +57,7 @@ export interface RunViewState {
   degraded: boolean;
   degradedReasons: string[];
   connectionStatus: ConnectionStatus;
+  streamWarning: string | null;
   feedLabel: string;
 }
 
@@ -123,6 +126,7 @@ export function createInitialState(
       (feedMode === "recorded"
         ? "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run."
         : "SSE mode expects a runtime event endpoint plus an optional snapshot endpoint for final report hydration."),
+    streamWarnings: {},
     run: null,
     reportSections: createEmptySections(),
     finalReportReady: false,
@@ -157,7 +161,11 @@ export function reduceFeedMessage(
     case "snapshot":
       return {
         ...state,
-        connectionStatus: state.connectionStatus === "completed" ? "completed" : "streaming",
+        connectionStatus: deriveConnectionStatusFromRun(
+          message.run,
+          state.connectionStatus,
+          state.streamWarnings,
+        ),
         run: message.run,
         reportSections: message.reportSections.length
           ? message.reportSections
@@ -166,7 +174,12 @@ export function reduceFeedMessage(
     case "event":
       return {
         ...state,
-        connectionStatus: "streaming",
+        connectionStatus: deriveConnectionStatusFromRun(
+          state.run ?? null,
+          "streaming",
+          clearStreamWarning(state.streamWarnings, "events"),
+        ),
+        streamWarnings: clearStreamWarning(state.streamWarnings, "events"),
         receivedEvents: [...state.receivedEvents, message.event],
         finalReportReady:
           state.finalReportReady || message.event.eventType === "report_ready",
@@ -179,8 +192,40 @@ export function reduceFeedMessage(
     case "terminal_chunk":
       return {
         ...state,
+        connectionStatus: deriveConnectionStatusFromRun(
+          state.run ?? null,
+          state.connectionStatus === "connecting" ? "connecting" : "streaming",
+          clearStreamWarning(state.streamWarnings, "terminal"),
+        ),
+        streamWarnings: clearStreamWarning(state.streamWarnings, "terminal"),
         terminalLines: appendTerminalChunk(state.terminalLines, message.chunk),
       };
+    case "stream_interrupted": {
+      const nextWarnings = {
+        ...state.streamWarnings,
+        [message.stream]: message.message,
+      };
+
+      return {
+        ...state,
+        connectionStatus:
+          isRunSettled(state.run) ? "completed" : "interrupted",
+        streamWarnings: nextWarnings,
+      };
+    }
+    case "stream_recovered": {
+      const nextWarnings = clearStreamWarning(state.streamWarnings, message.stream);
+
+      return {
+        ...state,
+        connectionStatus: deriveConnectionStatusFromRun(
+          state.run ?? null,
+          state.connectionStatus,
+          nextWarnings,
+        ),
+        streamWarnings: nextWarnings,
+      };
+    }
     case "complete":
       return {
         ...state,
@@ -204,6 +249,7 @@ export function selectRunViewState(state: AppState): RunViewState {
   ).length;
   const degradedReasons = collectDegradedReasons(state);
   const runStatus = state.run?.status;
+  const streamWarning = summarizeStreamWarnings(state.streamWarnings);
   const hasReportReady = state.receivedEvents.some(
     (event) => event.eventType === "report_ready",
   );
@@ -232,6 +278,12 @@ export function selectRunViewState(state: AppState): RunViewState {
     stageLabel = "Connection Error";
     stageDetail = state.errorMessage ?? "The feed could not be established.";
     statusTone = "failed";
+  } else if (state.connectionStatus === "interrupted") {
+    stageLabel = "Stream Reconnecting";
+    stageDetail =
+      streamWarning ??
+      "Live transport dropped temporarily. The latest report snapshot stays on screen while the browser reconnects.";
+    statusTone = "degraded";
   } else if (state.connectionStatus === "connecting" && state.run) {
     stageLabel = "Hydrating Run";
     stageDetail =
@@ -243,7 +295,7 @@ export function selectRunViewState(state: AppState): RunViewState {
       degradedReasons[0] ??
       "The runtime failed before a usable structured report was produced.";
     statusTone = "failed";
-  } else if (hasReportReady) {
+  } else if (runStatus === "completed" || runStatus === "degraded" || hasReportReady) {
     stageLabel = degradedReasons.length > 0 ? "Degraded Result" : "Completed";
     stageDetail =
       degradedReasons.length > 0
@@ -280,6 +332,7 @@ export function selectRunViewState(state: AppState): RunViewState {
     degraded: degradedReasons.length > 0,
     degradedReasons,
     connectionStatus: state.connectionStatus,
+    streamWarning,
     feedLabel: state.feedLabel,
   };
 }
@@ -541,6 +594,76 @@ function collectDegradedReasons(state: AppState): string[] {
   }
 
   return [...reasons];
+}
+
+function deriveConnectionStatusFromRun(
+  run: RunRecord | null,
+  previousStatus: ConnectionStatus,
+  streamWarnings: Partial<Record<StreamKind, string>>,
+): ConnectionStatus {
+  if (!run) {
+    return hasStreamWarnings(streamWarnings) ? "interrupted" : previousStatus;
+  }
+
+  if (run.status === "completed" || run.status === "failed" || run.status === "degraded") {
+    return "completed";
+  }
+
+  if (hasStreamWarnings(streamWarnings)) {
+    return "interrupted";
+  }
+
+  if (run.status === "created" || run.status === "planned") {
+    return "connecting";
+  }
+
+  if (previousStatus === "creating" || previousStatus === "connecting") {
+    return "connecting";
+  }
+
+  return "streaming";
+}
+
+function hasStreamWarnings(
+  streamWarnings: Partial<Record<StreamKind, string>>,
+): boolean {
+  return Object.values(streamWarnings).some((warning) => Boolean(warning));
+}
+
+function summarizeStreamWarnings(
+  streamWarnings: Partial<Record<StreamKind, string>>,
+): string | null {
+  if (streamWarnings.events) {
+    return streamWarnings.events;
+  }
+
+  if (streamWarnings.terminal) {
+    return streamWarnings.terminal;
+  }
+
+  return null;
+}
+
+function clearStreamWarning(
+  streamWarnings: Partial<Record<StreamKind, string>>,
+  stream: StreamKind,
+): Partial<Record<StreamKind, string>> {
+  if (!(stream in streamWarnings)) {
+    return streamWarnings;
+  }
+
+  const nextWarnings = { ...streamWarnings };
+  delete nextWarnings[stream];
+  return nextWarnings;
+}
+
+function isRunSettled(run: RunRecord | null): boolean {
+  return Boolean(
+    run &&
+      (run.status === "completed" ||
+        run.status === "failed" ||
+        run.status === "degraded"),
+  );
 }
 
 function createEmptySections(runId = "run:pending"): ReportSectionRecord[] {

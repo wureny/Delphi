@@ -16,6 +16,11 @@
     - `terminal-stream` 做增量 append
   - 若 URL 显式带 `run`，前端仍可重连既有 run；若不带 `run`，页面保持空闲态等待提交
   - 新增 `npm run dev:live`，一键同时启动 runtime bridge 和 frontend shell
+  - SSE 完成语义已经按 thread4 最新约定对齐：
+    - `events` / `terminal-stream` 是长连接，不以 stream close 判断 run 完成
+    - 前端以 `report_ready` 和 `/runs/:runKey/report` 的 `run.status` 作为完成态权威来源
+    - 若 `events` 在完成前中断，前端会临时轮询 `/report` 收敛到最终状态
+    - stream 中断只做可恢复提示，不再误判成 run 未完成或重新回退到 demo
 - 部署边界：
   - 目标部署平台是 Vercel，但前端不是执行层
   - 前端只消费 Railway runtime API / streams，不直接接 OpenBB、Supabase service role、Neo4j
@@ -44,10 +49,11 @@
   - `npm run dev:live` 可同时拉起 frontend + runtime bridge
   - 前端 typecheck / build 已通过
   - `POST /runs`、`GET /runs/:runKey/events`、`GET /runs/:runKey/report`、`GET /runs/:runKey/terminals`、`GET /runs/:runKey/terminal-stream` 已实际联调验证
-  - 2026-03-23 线上 Railway runtime 当前会出现真实 backend failure：
-    - thesis / liquidity / market_signal 出现 `fetch failed`
-    - judge 出现 OpenAI API key 错误
-    - 所以前端当前看到“空 report / 不完整输出”不只是 UI 问题，也有 runtime 配置问题
+  - 2026-03-23 再次实测 Railway runtime：
+    - 新建 run 可从 `agent_running` 进入 `synthesizing`
+    - `/runs/:runKey/report` 最终返回 `run.status = completed`
+    - 6 个 ReportSection 全部 ready，`finalReport.finalJudgment` 有真实内容
+    - `events` SSE 在 run 完成后仍保持长连接，符合 thread4 当前语义
 - 当前明确不做的伪装：
   - 不把 controlled runtime terminal stream 伪装成真实 shell / PTY
   - 若要做真正可交互 web terminal，仍需要 thread4 / backend 额外提供终端流协议或 PTY bridge

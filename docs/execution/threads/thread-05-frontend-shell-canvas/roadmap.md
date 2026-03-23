@@ -55,6 +55,7 @@
   - 右侧状态来自 runtime events
   - 右侧终端正文来自 terminal snapshot / terminal stream
 - `report_ready` 只视为报告已可请求，不假设事件里已经携带完整 `FinalReport`
+- run 完成态以 report snapshot 为权威来源，不以 SSE close 判断完成
 - Vercel 前端优先浏览器直连 Railway runtime，不先做 Vercel server route 的 SSE 代理
 - 必须预留 `NEXT_PUBLIC_RUNTIME_API_BASE_URL`
 

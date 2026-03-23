@@ -709,7 +709,8 @@ a {
 }
 
 .badge.degraded,
-.status-chip.degraded {
+.status-chip.degraded,
+.tag.warning {
   border-color: rgba(239, 189, 99, 0.34);
   color: var(--degraded);
 }

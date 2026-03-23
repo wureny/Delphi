@@ -177,6 +177,7 @@ export function renderStatusStrip(run: RunViewState): string {
       ${renderStatusBadge(run.statusTone, run.stageLabel)}
       <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
       <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
+      ${run.streamWarning ? `<span class="tag warning">Reconnecting</span>` : ""}
     </div>
     <p class="chat-status-copy">${escapeHtml(run.stageDetail)}</p>
   `;
@@ -206,6 +207,16 @@ export function renderDialogueFeed(
         </div>
       `
       : "";
+  const streamWarningCopy = run.streamWarning
+    ? `
+      <div class="chat-message assistant warning">
+        <div class="chat-avatar">!</div>
+        <div class="chat-bubble">
+          <p>${escapeHtml(run.streamWarning)}</p>
+        </div>
+      </div>
+    `
+    : "";
 
   return `
     <div class="chat-message assistant">
@@ -240,6 +251,7 @@ export function renderDialogueFeed(
     </div>
 
     ${failureCopy}
+    ${streamWarningCopy}
   `;
 }
 

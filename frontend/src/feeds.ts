@@ -9,6 +9,7 @@ import type {
 } from "./run-contract.js";
 
 export type FeedMode = "recorded" | "sse";
+export type StreamKind = "events" | "terminal";
 
 export type FeedMessage =
   | { kind: "connected"; label: string }
@@ -27,6 +28,8 @@ export type FeedMessage =
       chunk: TerminalStreamChunk;
     }
   | { kind: "event"; event: RunEvent }
+  | { kind: "stream_interrupted"; stream: StreamKind; message: string }
+  | { kind: "stream_recovered"; stream: StreamKind }
   | { kind: "complete" }
   | { kind: "error"; message: string };
 
@@ -153,6 +156,42 @@ export function createSseFeedSource(options: {
       let hydrated = false;
       let receivedEvent = false;
       let receivedTerminalChunk = false;
+      let eventStreamInterrupted = false;
+      let terminalStreamInterrupted = false;
+      let snapshotPollId: number | null = null;
+
+      const stopSnapshotPolling = (): void => {
+        if (snapshotPollId === null) {
+          return;
+        }
+
+        window.clearInterval(snapshotPollId);
+        snapshotPollId = null;
+      };
+
+      const refreshSnapshot = async (): Promise<void> => {
+        if (!options.snapshotUrl) {
+          return;
+        }
+
+        const snapshot = await loadSnapshot(options.snapshotUrl, handlers);
+
+        if (isSettledRunStatus(snapshot.run.status)) {
+          stopSnapshotPolling();
+        }
+      };
+
+      const startSnapshotPolling = (): void => {
+        if (!options.snapshotUrl || snapshotPollId !== null) {
+          return;
+        }
+
+        snapshotPollId = window.setInterval(() => {
+          void refreshSnapshot().catch(() => {
+            // Keep the last rendered snapshot visible while EventSource retries.
+          });
+        }, 4000);
+      };
 
       const connect = async (): Promise<void> => {
         handlers.onMessage({
@@ -167,7 +206,7 @@ export function createSseFeedSource(options: {
           }
 
           if (options.snapshotUrl) {
-            await loadSnapshot(options.snapshotUrl, handlers);
+            await refreshSnapshot();
             hydrated = true;
           }
 
@@ -176,6 +215,18 @@ export function createSseFeedSource(options: {
           }
 
           eventSource = new EventSource(options.eventsUrl);
+          eventSource.onopen = () => {
+            if (closed || !eventStreamInterrupted) {
+              return;
+            }
+
+            eventStreamInterrupted = false;
+            stopSnapshotPolling();
+            handlers.onMessage({
+              kind: "stream_recovered",
+              stream: "events",
+            });
+          };
           eventSource.onmessage = async (message) => {
             if (closed) {
               return;
@@ -187,7 +238,7 @@ export function createSseFeedSource(options: {
               handlers.onMessage({ kind: "event", event });
 
               if (event.eventType === "report_ready" && options.snapshotUrl) {
-                await loadSnapshot(options.snapshotUrl, handlers);
+                await refreshSnapshot();
               }
             } catch {
               handlers.onMessage({
@@ -203,7 +254,16 @@ export function createSseFeedSource(options: {
             }
 
             if (receivedEvent || hydrated) {
-              handlers.onMessage({ kind: "complete" });
+              if (!eventStreamInterrupted) {
+                eventStreamInterrupted = true;
+                handlers.onMessage({
+                  kind: "stream_interrupted",
+                  stream: "events",
+                  message:
+                    "Event stream interrupted. Showing the latest report snapshot while the browser reconnects.",
+                });
+                startSnapshotPolling();
+              }
               return;
             }
 
@@ -216,6 +276,17 @@ export function createSseFeedSource(options: {
 
           if (options.terminalStreamUrl) {
             terminalSource = new EventSource(options.terminalStreamUrl);
+            terminalSource.onopen = () => {
+              if (closed || !terminalStreamInterrupted) {
+                return;
+              }
+
+              terminalStreamInterrupted = false;
+              handlers.onMessage({
+                kind: "stream_recovered",
+                stream: "terminal",
+              });
+            };
             terminalSource.onmessage = (message) => {
               if (closed) {
                 return;
@@ -242,6 +313,15 @@ export function createSseFeedSource(options: {
               }
 
               if (receivedTerminalChunk || receivedEvent || hydrated) {
+                if (!terminalStreamInterrupted) {
+                  terminalStreamInterrupted = true;
+                  handlers.onMessage({
+                    kind: "stream_interrupted",
+                    stream: "terminal",
+                    message:
+                      "Terminal stream interrupted. The latest transcript stays visible while the browser reconnects.",
+                  });
+                }
                 return;
               }
 
@@ -268,6 +348,7 @@ export function createSseFeedSource(options: {
       return {
         close() {
           closed = true;
+          stopSnapshotPolling();
           eventSource?.close();
           terminalSource?.close();
         },
@@ -331,7 +412,11 @@ async function loadFixture(fixtureUrl: string): Promise<RecordedRunFixture> {
 async function loadSnapshot(
   snapshotUrl: string,
   handlers: FeedHandlers,
-): Promise<void> {
+): Promise<{
+  run: RunRecord;
+  reportSections: ReportSectionRecord[];
+  finalReport: FinalReport | null;
+}> {
   const response = await fetch(snapshotUrl);
 
   if (!response.ok) {
@@ -350,6 +435,8 @@ async function loadSnapshot(
     reportSections: snapshot.reportSections,
     finalReport: snapshot.finalReport,
   });
+
+  return snapshot;
 }
 
 async function loadTerminalSnapshot(
@@ -407,4 +494,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+function isSettledRunStatus(status: RunRecord["status"]): boolean {
+  return status === "completed" || status === "failed" || status === "degraded";
 }

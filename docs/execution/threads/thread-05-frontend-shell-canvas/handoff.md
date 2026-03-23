@@ -31,6 +31,11 @@
 - live mode 默认不再隐式重连 `demo`；没有 `run` 参数时保持空闲态，等待用户提交问题
 - 右侧 terminal summary 仍由 `RunEvent` 驱动，但 transcript body 已切到 thread4 的 terminal snapshot + terminal stream
 - terminal canvas 的产品定位是“受控 runtime terminal”，不是开发者 PTY / web shell
+- run 完成态已经按最新 runtime 语义对齐：
+  - 不等待 SSE 关闭
+  - 以 `report_ready` + `/runs/:runKey/report` 的 `run.status` 为权威
+  - 若 `events` 在完成前中断，前端会继续拉 `/report` 收敛到最终状态
+  - stream 中断只做可恢复 UI 提示
 - 目标部署平台是 Vercel，但前端不是执行层；默认设计为浏览器直连 Railway runtime
 - 当部署环境提供 `NEXT_PUBLIC_RUNTIME_API_BASE_URL` 时，页面默认进入 live mode；需要 recorded demo 时用 `?source=recorded`
 - 最新 UI 方向已经从 dashboard-like shell 往 chat-first layout 收：
@@ -60,10 +65,7 @@
 - Vercel 部署还没对齐：
   - 还没有专门验收 Railway 直连 SSE 在 Vercel 浏览器环境下的断流 / 重连表达
   - Railway runtime 还需要把 `CORS_ORIGIN` 配到 Vercel 前端域名
-- 当前线上 runtime 自身还有真实 blocker：
-  - thesis / liquidity / market_signal 的数据抓取会 `fetch failed`
-  - judge 当前使用的 OpenAI key 不正确
-  - 所以前端即便联通，也会看到 failed / degraded / empty report
+- 2026-03-23 最新复测里，Railway runtime 已能真实返回 completed run 和完整 report；如果后续再次出现 empty report，需要重新区分是 UI 问题还是 runtime 回归，而不是沿用旧结论
 - 若用户坚持“真实 Mac 终端 + agent 在终端里执行”，则需要新增后端能力：
   - per-agent terminal stream
   - browser terminal transport
