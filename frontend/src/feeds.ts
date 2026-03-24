@@ -1,6 +1,7 @@
 import type {
   FinalReport,
   RecordedRunFixture,
+  ResearchMapSnapshot,
   ReportSectionRecord,
   TerminalSnapshot,
   TerminalStreamChunk,
@@ -18,6 +19,10 @@ export type FeedMessage =
       run: RunRecord;
       reportSections: ReportSectionRecord[];
       finalReport: FinalReport | null;
+    }
+  | {
+      kind: "research_map_snapshot";
+      snapshot: ResearchMapSnapshot;
     }
   | {
       kind: "terminal_snapshot";
@@ -51,6 +56,7 @@ export interface RuntimeRunSubmission {
   endpoints: {
     events: string;
     report: string;
+    researchMap: string;
     terminals: string;
     terminalStream: string;
   };
@@ -145,6 +151,7 @@ export function createRecordedFeedSource(options: {
 export function createSseFeedSource(options: {
   eventsUrl: string;
   snapshotUrl?: string;
+  researchMapUrl?: string;
   terminalsUrl?: string;
   terminalStreamUrl?: string;
 }): RunFeedSource {
@@ -181,6 +188,14 @@ export function createSseFeedSource(options: {
         }
       };
 
+      const refreshResearchMap = async (): Promise<void> => {
+        if (!options.researchMapUrl) {
+          return;
+        }
+
+        await loadResearchMapSnapshot(options.researchMapUrl, handlers);
+      };
+
       const startSnapshotPolling = (): void => {
         if (!options.snapshotUrl || snapshotPollId !== null) {
           return;
@@ -202,6 +217,11 @@ export function createSseFeedSource(options: {
         try {
           if (options.terminalsUrl) {
             await loadTerminalSnapshot(options.terminalsUrl, handlers);
+            hydrated = true;
+          }
+
+          if (options.researchMapUrl) {
+            await refreshResearchMap();
             hydrated = true;
           }
 
@@ -236,6 +256,15 @@ export function createSseFeedSource(options: {
               const event = JSON.parse(message.data) as RunEvent;
               receivedEvent = true;
               handlers.onMessage({ kind: "event", event });
+
+              if (
+                (event.eventType === "patch_accepted" ||
+                  event.eventType === "report_section_ready" ||
+                  event.eventType === "report_ready") &&
+                options.researchMapUrl
+              ) {
+                await refreshResearchMap();
+              }
 
               if (event.eventType === "report_ready" && options.snapshotUrl) {
                 await refreshSnapshot();
@@ -452,6 +481,23 @@ async function loadTerminalSnapshot(
   const snapshot = (await response.json()) as TerminalSnapshot;
   handlers.onMessage({
     kind: "terminal_snapshot",
+    snapshot,
+  });
+}
+
+async function loadResearchMapSnapshot(
+  researchMapUrl: string,
+  handlers: FeedHandlers,
+): Promise<void> {
+  const response = await fetch(researchMapUrl);
+
+  if (!response.ok) {
+    throw new Error(`Research map request failed with status ${response.status}.`);
+  }
+
+  const snapshot = (await response.json()) as ResearchMapSnapshot;
+  handlers.onMessage({
+    kind: "research_map_snapshot",
     snapshot,
   });
 }

@@ -13,6 +13,7 @@ import {
   renderApp,
   renderDegradedBanner,
   renderRailMeta,
+  renderResearchMap,
   renderReportGrid,
   renderStatusStrip,
   renderTerminalLine,
@@ -29,11 +30,13 @@ import {
   createRestartState,
   reduceFeedMessage,
   renderComposerButtonLabel,
+  selectResearchMapViewState,
   selectAgentCardStates,
   selectReportViewState,
   selectRunViewState,
   selectTimelineState,
   toggleCanvas,
+  toggleOutputPanel,
   toggleTerminalExpansion,
   updateComposerText,
   type AppState,
@@ -48,6 +51,7 @@ export interface DelphiAppConfig {
   runtimeRunKey?: string;
   sseEventsUrl?: string;
   sseSnapshotUrl?: string;
+  sseResearchMapUrl?: string;
   sseTerminalsUrl?: string;
   sseTerminalStreamUrl?: string;
 }
@@ -145,6 +149,9 @@ export class DelphiFrontendApp {
         ...(this.config.sseSnapshotUrl
           ? { snapshotUrl: this.config.sseSnapshotUrl }
           : {}),
+        ...(this.config.sseResearchMapUrl
+          ? { researchMapUrl: this.config.sseResearchMapUrl }
+          : {}),
         ...(this.config.sseTerminalsUrl
           ? { terminalsUrl: this.config.sseTerminalsUrl }
           : {}),
@@ -203,6 +210,18 @@ export class DelphiFrontendApp {
       }
 
       this.state = toggleTerminalExpansion(this.state, agent);
+      this.renderShell();
+      return;
+    }
+
+    if (actionNode.dataset.action === "toggle-output-panel") {
+      const panel = actionNode.dataset.panel;
+
+      if (panel !== "report" && panel !== "research_map") {
+        return;
+      }
+
+      this.state = toggleOutputPanel(this.state, panel);
       this.renderShell();
       return;
     }
@@ -300,6 +319,10 @@ export class DelphiFrontendApp {
         this.config.runtimeApiBaseUrl,
         submission.endpoints.report,
       );
+      this.config.sseResearchMapUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.researchMap,
+      );
       this.config.sseTerminalsUrl = resolveRuntimeEndpoint(
         this.config.runtimeApiBaseUrl,
         submission.endpoints.terminals,
@@ -330,6 +353,7 @@ export class DelphiFrontendApp {
       config: this.config,
       run: selectRunViewState(this.state),
       report: selectReportViewState(this.state),
+      researchMap: selectResearchMapViewState(this.state),
       agentCards: selectAgentCardStates(this.state),
       timeline: selectTimelineState(this.state),
     });
@@ -344,6 +368,7 @@ export class DelphiFrontendApp {
   }): void {
     const run = selectRunViewState(this.state);
     const report = selectReportViewState(this.state);
+    const researchMap = selectResearchMapViewState(this.state);
     const agentCards = selectAgentCardStates(this.state);
     const timeline = selectTimelineState(this.state);
 
@@ -387,6 +412,35 @@ export class DelphiFrontendApp {
     const reportGrid = this.root.querySelector<HTMLElement>('[data-role="report-grid"]');
     if (reportGrid) {
       reportGrid.innerHTML = renderReportGrid(report);
+    }
+
+    const researchMapPanel = this.root.querySelector<HTMLElement>('[data-role="research-map"]');
+    if (researchMapPanel) {
+      researchMapPanel.innerHTML = renderResearchMap(researchMap);
+    }
+
+    for (const panel of ["report", "research_map"] as const) {
+      const button = this.root.querySelector<HTMLButtonElement>(
+        `[data-action="toggle-output-panel"][data-panel="${panel}"]`,
+      );
+
+      if (!button) {
+        continue;
+      }
+
+      const active = this.state.activeOutputPanel === panel;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+
+    const reportPanel = this.root.querySelector<HTMLElement>('[data-role="report-panel"]');
+    if (reportPanel) {
+      reportPanel.hidden = this.state.activeOutputPanel !== "report";
+    }
+
+    const mapPanel = this.root.querySelector<HTMLElement>('[data-role="research-map-panel"]');
+    if (mapPanel) {
+      mapPanel.hidden = this.state.activeOutputPanel !== "research_map";
     }
 
     const timelineList = this.root.querySelector<HTMLElement>('[data-role="timeline-list"]');

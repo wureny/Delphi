@@ -33,6 +33,9 @@ const derivedEventsUrl = runtimeRunKey && runtimeApiBaseUrl
 const derivedSnapshotUrl = runtimeRunKey && runtimeApiBaseUrl
   ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/report`
   : undefined;
+const derivedResearchMapUrl = runtimeRunKey && runtimeApiBaseUrl
+  ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/research-map`
+  : undefined;
 const derivedTerminalsUrl = runtimeRunKey && runtimeApiBaseUrl
   ? `${runtimeApiBaseUrl}/runs/${encodeURIComponent(runtimeRunKey)}/terminals`
   : undefined;
@@ -41,6 +44,7 @@ const derivedTerminalStreamUrl = runtimeRunKey && runtimeApiBaseUrl
   : undefined;
 const sseEventsUrl = searchParams.get("events") ?? derivedEventsUrl;
 const sseSnapshotUrl = searchParams.get("snapshot") ?? derivedSnapshotUrl;
+const sseResearchMapUrl = searchParams.get("researchMap") ?? derivedResearchMapUrl;
 const sseTerminalsUrl = searchParams.get("terminals") ?? derivedTerminalsUrl;
 const sseTerminalStreamUrl =
   searchParams.get("terminalStream") ?? derivedTerminalStreamUrl;
@@ -53,6 +57,7 @@ const appConfig = {
   ...(feedMode === "sse" && runtimeRunKey ? { runtimeRunKey } : {}),
   ...(sseEventsUrl ? { sseEventsUrl } : {}),
   ...(sseSnapshotUrl ? { sseSnapshotUrl } : {}),
+  ...(sseResearchMapUrl ? { sseResearchMapUrl } : {}),
   ...(sseTerminalsUrl ? { sseTerminalsUrl } : {}),
   ...(sseTerminalStreamUrl ? { sseTerminalStreamUrl } : {}),
 };

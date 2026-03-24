@@ -143,6 +143,37 @@ export interface TerminalSnapshot {
   terminals: Record<AgentKey, TerminalLine[]>;
 }
 
+export type ResearchMapTone =
+  | "primary"
+  | "supporting"
+  | "signal"
+  | "caution"
+  | "watch";
+
+export type ResearchMapStatus = "ready" | "partial" | "waiting";
+
+export interface ResearchMapCard {
+  cardId: string;
+  label: string;
+  tone: ResearchMapTone;
+  status: ResearchMapStatus;
+  summary: string;
+  findingRefs: string[];
+  evidenceRefs: string[];
+  objectRefs: string[];
+}
+
+export interface ResearchMapSnapshot {
+  runId: string;
+  caseId: string;
+  status: RunStatus;
+  headline: string;
+  summary: string;
+  updatedAt: string;
+  cards: ResearchMapCard[];
+  evidenceTrail: string[];
+}
+
 export interface RecordedRunFixture {
   meta: {
     source: string;

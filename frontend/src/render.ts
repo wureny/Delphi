@@ -1,6 +1,7 @@
 import type {
   AgentCardState,
   ReportViewState,
+  ResearchMapViewState,
   RunViewState,
   TerminalLineState,
   TimelineItemViewState,
@@ -15,10 +16,11 @@ export function renderApp(options: {
   };
   run: RunViewState;
   report: ReportViewState;
+  researchMap: ResearchMapViewState;
   agentCards: AgentCardState[];
   timeline: TimelineItemViewState[];
 }): string {
-  const { state, config, run, report, agentCards, timeline } = options;
+  const { state, config, run, report, researchMap, agentCards, timeline } = options;
   const hasRunActivity = Boolean(state.run || state.receivedEvents.length > 0);
 
   return `
@@ -139,9 +141,47 @@ export function renderApp(options: {
               hasRunActivity
                 ? `
                   <section class="memo-shell">
-                    <div class="section-kicker">Structured Output</div>
-                    <section class="report-grid" data-role="report-grid">
-                      ${renderReportGrid(report)}
+                    <div class="memo-shell-header">
+                      <div>
+                        <div class="section-kicker">Structured Output</div>
+                        <p class="memo-shell-copy">
+                          Read the report, or open the Research Map to see how Delphi connected the main view.
+                        </p>
+                      </div>
+                      <div class="memo-shell-tabs">
+                        <button
+                          class="memo-tab ${state.activeOutputPanel === "report" ? "active" : ""}"
+                          type="button"
+                          data-action="toggle-output-panel"
+                          data-panel="report"
+                          aria-pressed="${state.activeOutputPanel === "report" ? "true" : "false"}"
+                        >
+                          Report
+                        </button>
+                        <button
+                          class="memo-tab ${state.activeOutputPanel === "research_map" ? "active" : ""}"
+                          type="button"
+                          data-action="toggle-output-panel"
+                          data-panel="research_map"
+                          aria-pressed="${state.activeOutputPanel === "research_map" ? "true" : "false"}"
+                        >
+                          Research Map
+                        </button>
+                      </div>
+                    </div>
+                    <section
+                      class="report-grid"
+                      data-role="report-panel"
+                      ${state.activeOutputPanel === "report" ? "" : "hidden"}
+                    >
+                      <div data-role="report-grid">${renderReportGrid(report)}</div>
+                    </section>
+                    <section
+                      class="research-map-shell"
+                      data-role="research-map-panel"
+                      ${state.activeOutputPanel === "research_map" ? "" : "hidden"}
+                    >
+                      <div data-role="research-map">${renderResearchMap(researchMap)}</div>
                     </section>
                   </section>
                 `
@@ -302,6 +342,39 @@ export function renderReportGrid(report: ReportViewState): string {
   return report.sections.map(renderReportSection).join("");
 }
 
+export function renderResearchMap(map: ResearchMapViewState): string {
+  return `
+    <div class="research-map">
+      <header class="research-map-hero">
+        <div>
+          <span class="research-map-kicker">Why Delphi Thinks This</span>
+          <h3>${escapeHtml(map.headline)}</h3>
+        </div>
+        ${map.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(map.updatedAtLabel)}</span>` : ""}
+      </header>
+      <p class="research-map-summary">${escapeHtml(map.summary)}</p>
+      <div class="research-map-grid">
+        ${map.cards.map(renderResearchMapCard).join("")}
+      </div>
+      <footer class="research-map-footer">
+        <span class="research-map-footer-label">Evidence Trail</span>
+        <div class="citations">
+          ${
+            map.evidenceTrail.length > 0
+              ? map.evidenceTrail
+                  .map(
+                    (citation) =>
+                      `<span class="citation-pill">${escapeHtml(truncateMiddle(citation, 28))}</span>`,
+                  )
+                  .join("")
+              : `<span class="citation-pill">Evidence refs will appear here as the run settles.</span>`
+          }
+        </div>
+      </footer>
+    </div>
+  `;
+}
+
 export function renderTimelineList(timeline: TimelineItemViewState[]): string {
   return timeline.map(renderTimelineItem).join("");
 }
@@ -362,6 +435,23 @@ function renderReportSection(section: ReportViewState["sections"][number]): stri
             : `<span class="citation-pill">No citations yet</span>`
         }
       </div>
+    </article>
+  `;
+}
+
+function renderResearchMapCard(
+  card: ResearchMapViewState["cards"][number],
+): string {
+  return `
+    <article class="panel-section research-card ${card.isPrimary ? "primary" : ""} tone-${card.tone}">
+      <header class="research-card-header">
+        <div>
+          <span class="research-card-label">${escapeHtml(card.label)}</span>
+          <span class="status-chip ${card.status}">${escapeHtml(card.status)}</span>
+        </div>
+        <span class="research-card-meta">${escapeHtml(card.meta)}</span>
+      </header>
+      <p class="research-card-copy">${escapeHtml(card.summary)}</p>
     </article>
   `;
 }

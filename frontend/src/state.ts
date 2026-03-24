@@ -1,6 +1,10 @@
 import type { FeedMessage, FeedMode, StreamKind } from "./feeds.js";
 import {
   agentKeys,
+  type ResearchMapCard,
+  type ResearchMapSnapshot,
+  type ResearchMapStatus,
+  type ResearchMapTone,
   reportSectionKeys,
   reportSectionTitles,
   type AgentKey,
@@ -34,6 +38,7 @@ export interface AppState {
   feedLabel: string;
   composerText: string;
   canvasCollapsed: boolean;
+  activeOutputPanel: "report" | "research_map";
   expandedTerminalAgent: AgentKey | null;
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
@@ -41,6 +46,7 @@ export interface AppState {
   streamWarnings: Partial<Record<StreamKind, string>>;
   run: RunRecord | null;
   reportSections: ReportSectionRecord[];
+  researchMapSnapshot: ResearchMapSnapshot | null;
   finalReportReady: boolean;
   receivedEvents: RunEvent[];
   terminalLines: Record<AgentKey, TerminalLine[]>;
@@ -76,6 +82,24 @@ export interface ReportViewState {
   sections: ReportSectionViewState[];
   degraded: boolean;
   degradedMessage: string | null;
+}
+
+export interface ResearchMapCardViewState {
+  cardId: string;
+  label: string;
+  tone: ResearchMapTone;
+  status: ResearchMapStatus;
+  summary: string;
+  meta: string;
+  isPrimary: boolean;
+}
+
+export interface ResearchMapViewState {
+  headline: string;
+  summary: string;
+  cards: ResearchMapCardViewState[];
+  evidenceTrail: string[];
+  updatedAtLabel: string | null;
 }
 
 export interface AgentCardState {
@@ -121,6 +145,7 @@ export function createInitialState(
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     canvasCollapsed: false,
+    activeOutputPanel: "report",
     expandedTerminalAgent: null,
     connectionStatus: "idle",
     errorMessage: null,
@@ -132,6 +157,7 @@ export function createInitialState(
     streamWarnings: {},
     run: null,
     reportSections: createEmptySections(),
+    researchMapSnapshot: null,
     finalReportReady: false,
     receivedEvents: [],
     terminalLines: createEmptyTerminalLines(),
@@ -146,6 +172,7 @@ export function createRestartState(
     ...createInitialState(previous.feedMode, infoMessage),
     composerText: previous.composerText,
     canvasCollapsed: previous.canvasCollapsed,
+    activeOutputPanel: previous.activeOutputPanel,
     expandedTerminalAgent: null,
   };
 }
@@ -175,6 +202,11 @@ export function reduceFeedMessage(
           ? message.reportSections
           : createEmptySections(message.run.runId),
         finalReportReady: state.finalReportReady || Boolean(message.finalReport),
+      };
+    case "research_map_snapshot":
+      return {
+        ...state,
+        researchMapSnapshot: message.snapshot,
       };
     case "event":
       return {
@@ -406,6 +438,32 @@ export function selectReportViewState(state: AppState): ReportViewState {
   };
 }
 
+export function selectResearchMapViewState(state: AppState): ResearchMapViewState {
+  const snapshot =
+    state.researchMapSnapshot ??
+    deriveResearchMapSnapshot(
+      state.run,
+      state.reportSections,
+      state.receivedEvents,
+    );
+
+  return {
+    headline: snapshot.headline,
+    summary: snapshot.summary,
+    cards: snapshot.cards.map((card) => ({
+      cardId: card.cardId,
+      label: card.label,
+      tone: card.tone,
+      status: card.status,
+      summary: card.summary,
+      meta: summarizeResearchMapCardMeta(card),
+      isPrimary: card.cardId === "current_view",
+    })),
+    evidenceTrail: snapshot.evidenceTrail,
+    updatedAtLabel: snapshot.updatedAt ? formatTime(snapshot.updatedAt) : null,
+  };
+}
+
 export function renderComposerButtonLabel(state: AppState): string {
   if (state.feedMode === "recorded") {
     return "Replay Recorded Run";
@@ -588,6 +646,16 @@ export function toggleCanvas(state: AppState): AppState {
   return {
     ...state,
     canvasCollapsed: !state.canvasCollapsed,
+  };
+}
+
+export function toggleOutputPanel(
+  state: AppState,
+  panel: "report" | "research_map",
+): AppState {
+  return {
+    ...state,
+    activeOutputPanel: panel,
   };
 }
 
@@ -1178,6 +1246,170 @@ function dedupeTerminalLines(lines: TerminalLine[]): TerminalLine[] {
 
 function truncateLong(value: string, limit: number): string {
   return value.length > limit ? `${value.slice(0, limit - 1)}…` : value;
+}
+
+function deriveResearchMapSnapshot(
+  run: RunRecord | null,
+  reportSections: readonly ReportSectionRecord[],
+  events: readonly RunEvent[],
+): ResearchMapSnapshot {
+  const latestFindings = collectLatestFindingClaims(events);
+  const finalJudgment = findSection(reportSections, "final_judgment");
+  const coreThesis = findSection(reportSections, "core_thesis");
+  const liquidityContext = findSection(reportSections, "liquidity_context");
+  const keyRisks = findSection(reportSections, "key_risks");
+  const watchpoints = findSection(reportSections, "what_changes_the_view");
+  const supportingEvidence = findSection(reportSections, "supporting_evidence");
+
+  return {
+    runId: run?.runId ?? "run:pending",
+    caseId: run?.caseId ?? "case:pending",
+    status: run?.status ?? "created",
+    headline:
+      finalJudgment.content.trim() ||
+      supportingEvidence.content.trim() ||
+      "Delphi is still assembling the current view.",
+    summary:
+      run?.status === "completed" || run?.status === "degraded"
+        ? "This map shows how Delphi connected the main thesis, risks, liquidity, and market signal before publishing the report."
+        : "This map updates as each research lane contributes to the final view.",
+    updatedAt: run?.updatedAt ?? "",
+    cards: [
+      createResearchMapCard("current_view", "Current View", "primary", finalJudgment),
+      createResearchMapCard("core_thesis", "Core Thesis", "supporting", coreThesis),
+      {
+        cardId: "market_signal",
+        label: "Market Signal",
+        tone: "signal",
+        status: latestFindings.market_signal ? "ready" : "waiting",
+        summary:
+          latestFindings.market_signal?.claim ??
+          "Market signal lane is still updating its latest read.",
+        findingRefs: latestFindings.market_signal?.findingRefs ?? [],
+        evidenceRefs: latestFindings.market_signal?.evidenceRefs ?? [],
+        objectRefs: latestFindings.market_signal?.objectRefs ?? [],
+      },
+      createResearchMapCard(
+        "liquidity_context",
+        "Liquidity Context",
+        "supporting",
+        liquidityContext,
+      ),
+      createResearchMapCard("key_risks", "Key Risks", "caution", keyRisks),
+      createResearchMapCard(
+        "watchpoints",
+        "What Would Change the View",
+        "watch",
+        watchpoints,
+      ),
+    ],
+    evidenceTrail: [
+      ...supportingEvidence.citationFindingRefs,
+      ...supportingEvidence.citationEvidenceRefs,
+      ...supportingEvidence.citationObjectRefs,
+    ].slice(0, 8),
+  };
+}
+
+function createResearchMapCard(
+  cardId: string,
+  label: string,
+  tone: ResearchMapTone,
+  section: ReportSectionRecord,
+): ResearchMapCard {
+  const summary = section.content.trim();
+
+  return {
+    cardId,
+    label,
+    tone,
+    status:
+      section.status === "ready"
+        ? "ready"
+        : summary.length > 0
+          ? "partial"
+          : "waiting",
+    summary: summary || `${label} is still being assembled.`,
+    findingRefs: section.citationFindingRefs,
+    evidenceRefs: section.citationEvidenceRefs,
+    objectRefs: section.citationObjectRefs,
+  };
+}
+
+function collectLatestFindingClaims(
+  events: readonly RunEvent[],
+): Partial<
+  Record<
+    "thesis" | "liquidity" | "market_signal",
+    { claim: string; findingRefs: string[]; evidenceRefs: string[]; objectRefs: string[] }
+  >
+> {
+  const latest: Partial<
+    Record<
+      "thesis" | "liquidity" | "market_signal",
+      { claim: string; findingRefs: string[]; evidenceRefs: string[]; objectRefs: string[] }
+    >
+  > = {};
+
+  for (const event of events) {
+    if (event.eventType !== "finding_created") {
+      continue;
+    }
+
+    const agent = stringPayload(event, "agentType");
+    const claim = stringPayload(event, "claim");
+
+    if (
+      (agent === "thesis" ||
+        agent === "liquidity" ||
+        agent === "market_signal") &&
+      claim
+    ) {
+      latest[agent] = {
+        claim,
+        findingRefs: stringPayload(event, "findingId")
+          ? [stringPayload(event, "findingId") as string]
+          : [],
+        evidenceRefs: readStringArrayFromPayload(event.payload, "evidenceRefs"),
+        objectRefs: readStringArrayFromPayload(event.payload, "objectRefs"),
+      };
+    }
+  }
+
+  return latest;
+}
+
+function findSection(
+  sections: readonly ReportSectionRecord[],
+  sectionKey: ReportSectionKey,
+): ReportSectionRecord {
+  return (
+    sections.find((section) => section.sectionKey === sectionKey) ??
+    createEmptySections()[reportSectionKeys.indexOf(sectionKey)]!
+  );
+}
+
+function summarizeResearchMapCardMeta(card: ResearchMapCard): string {
+  const parts = [
+    card.findingRefs.length > 0 ? `${card.findingRefs.length} finding` : null,
+    card.evidenceRefs.length > 0 ? `${card.evidenceRefs.length} evidence` : null,
+    card.objectRefs.length > 0 ? `${card.objectRefs.length} objects` : null,
+  ].filter((value): value is string => Boolean(value));
+
+  return parts.length > 0 ? parts.join(" · ") : "Structured view";
+}
+
+function readStringArrayFromPayload(
+  payload: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = payload[key];
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((entry): entry is string => typeof entry === "string");
 }
 
 function formatTime(ts: string): string {

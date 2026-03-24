@@ -30,6 +30,32 @@ type RunSnapshot = {
   finalReport: FinalReport | null;
 };
 
+type ResearchMapTone = "primary" | "supporting" | "signal" | "caution" | "watch";
+
+type ResearchMapStatus = "ready" | "partial" | "waiting";
+
+type ResearchMapCard = {
+  cardId: string;
+  label: string;
+  tone: ResearchMapTone;
+  status: ResearchMapStatus;
+  summary: string;
+  findingRefs: string[];
+  evidenceRefs: string[];
+  objectRefs: string[];
+};
+
+type ResearchMapSnapshot = {
+  runId: string;
+  caseId: string;
+  status: RunRecord["status"];
+  headline: string;
+  summary: string;
+  updatedAt: string;
+  cards: ResearchMapCard[];
+  evidenceTrail: string[];
+};
+
 interface RuntimeSession {
   key: string;
   query: ResearchQuery;
@@ -136,6 +162,7 @@ export function createRuntimeApiServer(
         endpoints: {
           events: `/runs/${encodeURIComponent(session.key)}/events`,
           report: `/runs/${encodeURIComponent(session.key)}/report`,
+          researchMap: `/runs/${encodeURIComponent(session.key)}/research-map`,
           terminals: `/runs/${encodeURIComponent(session.key)}/terminals`,
           terminalStream: `/runs/${encodeURIComponent(session.key)}/terminal-stream`,
         },
@@ -172,6 +199,33 @@ export function createRuntimeApiServer(
 
       const session = ensureSession(runKey, sessions, options);
       writeJson(response, 200, session.snapshot);
+      return;
+    }
+
+    const researchMapMatch = requestUrl.pathname.match(
+      /^\/runs\/([^/]+)\/research-map$/,
+    );
+
+    if (researchMapMatch) {
+      const runKey = researchMapMatch[1];
+
+      if (!runKey) {
+        writeJson(response, 400, {
+          error: "Missing run key.",
+        });
+        return;
+      }
+
+      if (!normalizeRunKey(runKey)) {
+        writeJson(response, 400, {
+          error:
+            "Invalid runKey. Use only letters, numbers, underscores, or hyphens.",
+        });
+        return;
+      }
+
+      const session = ensureSession(runKey, sessions, options);
+      writeJson(response, 200, buildResearchMapSnapshot(session.snapshot, session.events));
       return;
     }
 
@@ -815,4 +869,216 @@ function markSnapshotRunFailed(run: RunRecord, reason: string): RunRecord {
     updatedAt: new Date().toISOString(),
     degradedReasons: mergeDegradedReasons(run.degradedReasons, [reason]),
   };
+}
+
+function buildResearchMapSnapshot(
+  snapshot: RunSnapshot,
+  events: readonly RunEvent[],
+): ResearchMapSnapshot {
+  const latestFindings = collectLatestFindingEvents(events);
+  const finalJudgment = readSection(snapshot.reportSections, "final_judgment");
+  const coreThesis = readSection(snapshot.reportSections, "core_thesis");
+  const liquidityContext = readSection(snapshot.reportSections, "liquidity_context");
+  const keyRisks = readSection(snapshot.reportSections, "key_risks");
+  const watchpoints = readSection(snapshot.reportSections, "what_changes_the_view");
+  const supportingEvidence = readSection(
+    snapshot.reportSections,
+    "supporting_evidence",
+  );
+  const marketSignalFinding = latestFindings.market_signal;
+  const evidenceTrail = [
+    ...supportingEvidence.citationFindingRefs,
+    ...supportingEvidence.citationEvidenceRefs,
+    ...supportingEvidence.citationObjectRefs,
+  ].slice(0, 8);
+
+  return {
+    runId: snapshot.run.runId,
+    caseId: snapshot.run.caseId,
+    status: snapshot.run.status,
+    headline:
+      finalJudgment.content.trim() ||
+      supportingEvidence.content.trim() ||
+      "Delphi is still assembling the current view.",
+    summary: buildResearchMapSummary(snapshot.run, latestFindings),
+    updatedAt: snapshot.run.updatedAt,
+    cards: [
+      buildResearchMapCard({
+        cardId: "current_view",
+        label: "Current View",
+        tone: "primary",
+        section: finalJudgment,
+      }),
+      buildResearchMapCard({
+        cardId: "core_thesis",
+        label: "Core Thesis",
+        tone: "supporting",
+        section: coreThesis,
+      }),
+      buildResearchMapCard({
+        cardId: "market_signal",
+        label: "Market Signal",
+        tone: "signal",
+        section: {
+          title: "Market Signal",
+          content:
+            readEventString(marketSignalFinding, "claim") ??
+            "Market signal lane is still updating its latest read.",
+          citationFindingRefs: readEventString(marketSignalFinding, "findingId")
+            ? [readEventString(marketSignalFinding, "findingId") as string]
+            : [],
+          citationEvidenceRefs: readEventStringArray(
+            marketSignalFinding,
+            "evidenceRefs",
+          ),
+          citationObjectRefs: readEventStringArray(
+            marketSignalFinding,
+            "objectRefs",
+          ),
+          status: marketSignalFinding ? "ready" : "empty",
+        },
+      }),
+      buildResearchMapCard({
+        cardId: "liquidity_context",
+        label: "Liquidity Context",
+        tone: "supporting",
+        section: liquidityContext,
+      }),
+      buildResearchMapCard({
+        cardId: "key_risks",
+        label: "Key Risks",
+        tone: "caution",
+        section: keyRisks,
+      }),
+      buildResearchMapCard({
+        cardId: "watchpoints",
+        label: "What Would Change the View",
+        tone: "watch",
+        section: watchpoints,
+      }),
+    ],
+    evidenceTrail,
+  };
+}
+
+function buildResearchMapSummary(
+  run: RunRecord,
+  latestFindings: Partial<Record<"thesis" | "liquidity" | "market_signal", RunEvent>>,
+): string {
+  const activeLanes = [
+    latestFindings.thesis ? "thesis" : null,
+    latestFindings.liquidity ? "liquidity" : null,
+    latestFindings.market_signal ? "market signal" : null,
+  ].filter((value): value is string => Boolean(value));
+
+  if (run.status === "completed" || run.status === "degraded") {
+    return activeLanes.length > 0
+      ? `This view is anchored by ${activeLanes.join(", ")} inputs and the current evidence trail.`
+      : "This view is anchored by the current report sections and evidence trail.";
+  }
+
+  return activeLanes.length > 0
+    ? `Delphi is still connecting ${activeLanes.join(", ")} inputs into one investment view.`
+    : "Delphi is still building the structured investment map.";
+}
+
+function buildResearchMapCard(input: {
+  cardId: string;
+  label: string;
+  tone: ResearchMapTone;
+  section: Pick<
+    ReportSectionRecord,
+    | "title"
+    | "content"
+    | "citationFindingRefs"
+    | "citationEvidenceRefs"
+    | "citationObjectRefs"
+    | "status"
+  >;
+}): ResearchMapCard {
+  const content = input.section.content.trim();
+
+  return {
+    cardId: input.cardId,
+    label: input.label,
+    tone: input.tone,
+    status:
+      input.section.status === "ready"
+        ? "ready"
+        : content.length > 0
+          ? "partial"
+          : "waiting",
+    summary: content || `${input.label} is still being assembled.`,
+    findingRefs: input.section.citationFindingRefs,
+    evidenceRefs: input.section.citationEvidenceRefs,
+    objectRefs: input.section.citationObjectRefs,
+  };
+}
+
+function collectLatestFindingEvents(
+  events: readonly RunEvent[],
+): Partial<Record<"thesis" | "liquidity" | "market_signal", RunEvent>> {
+  const latest: Partial<Record<"thesis" | "liquidity" | "market_signal", RunEvent>> = {};
+
+  for (const event of events) {
+    if (event.eventType !== "finding_created") {
+      continue;
+    }
+
+    const agentType = readEventString(event, "agentType");
+
+    if (
+      agentType === "thesis" ||
+      agentType === "liquidity" ||
+      agentType === "market_signal"
+    ) {
+      latest[agentType] = event;
+    }
+  }
+
+  return latest;
+}
+
+function readSection(
+  sections: readonly ReportSectionRecord[],
+  key: ReportSectionRecord["sectionKey"],
+): ReportSectionRecord {
+  const section = sections.find((current) => current.sectionKey === key);
+
+  return (
+    section ?? {
+      sectionId: `section:pending:${key}`,
+      runId: "run:pending",
+      sectionKey: key,
+      title: key,
+      content: "",
+      citationFindingRefs: [],
+      citationEvidenceRefs: [],
+      citationObjectRefs: [],
+      status: "empty",
+    }
+  );
+}
+
+function readEventString(event: RunEvent | undefined, key: string): string | null {
+  if (!event) {
+    return null;
+  }
+
+  const value = event.payload[key];
+  return typeof value === "string" ? value : null;
+}
+
+function readEventStringArray(event: RunEvent | undefined, key: string): string[] {
+  if (!event) {
+    return [];
+  }
+
+  const value = event.payload[key];
+
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((entry): entry is string => typeof entry === "string");
 }
