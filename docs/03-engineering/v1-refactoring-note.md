@@ -6,6 +6,7 @@
 
 - 已落地：真实 `GraphContextReader` 注入 runtime，并在 provider executors 调模型前读取 run/case graph context。
 - 已落地：skill registry 从纯声明升级为最小可执行 dispatch layer，runtime executors 已经通过 registry 分发主 skill。
+- 已落地：项目内已 vendoring 投资分析 skill playbooks，并将其 prompt guidance 接入 provider agents，用于 thesis/liquidity/market-signal/judge 的实际分析。
 - 已落地：固定 6 sections 的 `report_section_ready` 流式发布，前端已支持逐段渲染。
 - 已落地：第一版 `research-map` snapshot API 和前端 `Research Map` 面板，但当前是**面向用户解释的派生视图**，不是完整 raw graph visualization。
 - 尚未落地：dynamic report sections、完整 graph tab/force layout 可视化、stable `Judgment` 持久化。

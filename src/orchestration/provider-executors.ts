@@ -200,8 +200,10 @@ async function runProviderThesisAnalysis(
     schemaName: "delphi_thesis_findings",
     schemaDescription: "Structured thesis findings for one investment research run.",
     schema: providerFindingSchema(["thesis_core", "risk_execution"]),
-    developerPrompt:
-      "You are Delphi thesis agent. Produce 1-3 concise findings grounded only in the supplied company and news snapshots. Do not invent evidence. Use the allowed object keys only.",
+    developerPrompt: buildSkillGuidedPrompt(
+      "You are Delphi thesis agent. Produce 2-4 substantial findings grounded only in the supplied company and news snapshots. Each finding should capture a decisive investment point rather than a generic summary. Do not invent evidence. Use the allowed object keys only.",
+      skill,
+    ),
     userPrompt: [
       `Ticker: ${context.query.ticker}`,
       `Question: ${context.query.userQuestion}`,
@@ -276,8 +278,10 @@ async function runProviderLiquidityAnalysis(
       "liquidity_factor_rates_pressure",
       "liquidity_regime_primary",
     ]),
-    developerPrompt:
-      "You are Delphi liquidity agent. Produce 1-3 concise findings grounded only in the supplied macro and liquidity snapshot. Do not invent evidence. Use the allowed object keys only.",
+    developerPrompt: buildSkillGuidedPrompt(
+      "You are Delphi liquidity agent. Produce 2-4 substantial findings grounded only in the supplied macro and liquidity snapshot. Each finding should state the regime implication for the investment case, not generic macro commentary. Do not invent evidence. Use the allowed object keys only.",
+      skill,
+    ),
     userPrompt: [
       `Ticker: ${context.query.ticker}`,
       `Question: ${context.query.userQuestion}`,
@@ -348,8 +352,10 @@ async function runProviderMarketSignalAnalysis(
     schemaName: "delphi_market_signal_findings",
     schemaDescription: "Structured market signal findings for one investment research run.",
     schema: providerFindingSchema(["market_signal_price_positioning"]),
-    developerPrompt:
-      "You are Delphi market signal agent. Produce 1-3 concise findings grounded only in the supplied market snapshot. Do not invent evidence. Use the allowed object key only.",
+    developerPrompt: buildSkillGuidedPrompt(
+      "You are Delphi market signal agent. Produce 2-4 substantial findings grounded only in the supplied market snapshot. Focus on positioning, crowding, and practical risk posture rather than generic tape reading. Do not invent evidence. Use the allowed object key only.",
+      skill,
+    ),
     userPrompt: [
       `Ticker: ${context.query.ticker}`,
       `Question: ${context.query.userQuestion}`,
@@ -402,7 +408,7 @@ async function runProviderMarketSignalAnalysis(
 async function runProviderJudgeSynthesis(
   context: AgentExecutionContext,
   provider: StructuredModelProvider,
-  _skill: SkillDefinition,
+  skill: SkillDefinition,
 ): Promise<AgentExecutionResult> {
   const graphContext = await loadGraphContext(context);
   const upstream = context.upstreamFindings.map((finding, index) => ({
@@ -420,8 +426,10 @@ async function runProviderJudgeSynthesis(
     schemaName: "delphi_judge_report",
     schemaDescription: "Structured decision and six fixed report sections for one run.",
     schema: providerJudgeSchema(),
-    developerPrompt:
-      "You are Delphi judge. Use only the supplied findings to produce one decision summary and six fixed report sections. Do not invent evidence or findings. Every section must be present.",
+    developerPrompt: buildSkillGuidedPrompt(
+      "You are Delphi judge. Use only the supplied findings to produce one decision summary and six fixed report sections. Write memo-style sections with concrete reasoning and explicit conflicts or tradeoffs when they exist. Do not invent evidence or findings. Every section must be present.",
+      skill,
+    ),
     userPrompt: [
       `Ticker: ${context.query.ticker}`,
       `Question: ${context.query.userQuestion}`,
@@ -547,7 +555,7 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
       findings: {
         type: "array",
         minItems: 1,
-        maxItems: 3,
+        maxItems: 4,
         items: {
           type: "object",
           additionalProperties: false,
@@ -583,6 +591,17 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
       },
     },
   };
+}
+
+function buildSkillGuidedPrompt(
+  basePrompt: string,
+  skill: Pick<SkillDefinition, "promptGuidance">,
+): string {
+  if (skill.promptGuidance.trim().length === 0) {
+    return basePrompt;
+  }
+
+  return `${basePrompt}\n\nFollow this analysis playbook:\n${skill.promptGuidance}`;
 }
 
 function providerJudgeSchema(): Record<string, unknown> {

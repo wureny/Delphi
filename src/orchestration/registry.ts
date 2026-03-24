@@ -19,6 +19,7 @@ export interface SkillDefinition {
   description: string;
   inputShape: string;
   outputShape: string;
+  promptGuidance: string;
   allowedAgents: readonly AgentType[];
   failureSemantics: CapabilityFailureSemantics;
 }
@@ -153,6 +154,13 @@ export const defaultSkillDefinitions: readonly SkillDefinition[] = [
     description: "Turn company snapshots into thesis-oriented findings.",
     inputShape: "Normalized company + news snapshots",
     outputShape: "Finding[]",
+    promptGuidance: [
+      "Reference playbooks: us-value-investing, tech-earnings-deepdive.",
+      "Anchor the analysis in 2-4 decisive business forces, not a generic summary of facts.",
+      "Judge the business on long-horizon durability: ROE persistence, balance-sheet safety, free-cash-flow quality, and moat strength.",
+      "Use recent execution, guidance, and news flow as evidence about whether the core thesis is strengthening, weakening, or merely getting noisier.",
+      "Prefer findings that can change an investment decision over descriptive restatement.",
+    ].join("\n"),
     allowedAgents: ["thesis"],
     failureSemantics: "degrade",
   },
@@ -161,6 +169,13 @@ export const defaultSkillDefinitions: readonly SkillDefinition[] = [
     description: "Turn macro and liquidity snapshots into liquidity findings.",
     inputShape: "Normalized macro/liquidity snapshot",
     outputShape: "Finding[]",
+    promptGuidance: [
+      "Reference playbook: macro-liquidity.",
+      "Assess liquidity through the state and direction of rates pressure, funding stress, bond volatility, and cross-asset carry risk.",
+      "Distinguish clearly between easing, neutral, and tightening liquidity conditions over the stated time horizon.",
+      "Translate macro state into investable consequences for valuation support, downside risk, and willingness to own risk assets.",
+      "Do not drift into generic macro commentary that does not affect the current case.",
+    ].join("\n"),
     allowedAgents: ["liquidity"],
     failureSemantics: "degrade",
   },
@@ -169,6 +184,13 @@ export const defaultSkillDefinitions: readonly SkillDefinition[] = [
     description: "Turn market snapshots into signal-oriented findings.",
     inputShape: "Normalized market snapshot",
     outputShape: "Finding[]",
+    promptGuidance: [
+      "Reference playbook: us-market-sentiment.",
+      "Read the snapshot as a positioning and sentiment state assessment, not as deterministic price prophecy.",
+      "Focus on crowding, risk appetite, valuation stretch, and whether current price action confirms or conflicts with the fundamental thesis.",
+      "Convert the signal into practical stance language such as buyable, holdable, crowded, or avoid-for-now.",
+      "Prefer signal findings that sharpen timing and risk control rather than repeating the quote tape.",
+    ].join("\n"),
     allowedAgents: ["market_signal"],
     failureSemantics: "degrade",
   },
@@ -177,6 +199,13 @@ export const defaultSkillDefinitions: readonly SkillDefinition[] = [
     description: "Synthesize upstream findings into a decision and six report sections.",
     inputShape: "Finding[]",
     outputShape: "Decision + ReportSection[] + FinalReport",
+    promptGuidance: [
+      "Reference playbook: investment-metacognition.",
+      "Start from the real investment decision, then weigh business quality, recent execution, liquidity regime, and market sentiment without averaging them mechanically.",
+      "If frameworks disagree, name the conflict and decide which side wins and why.",
+      "End decisively with a verdict, the few reasons that dominate, the main avoidable mistakes, and the hard triggers that would change the view.",
+      "Write like an investment memo for an informed non-technical investor, not like an internal schema dump.",
+    ].join("\n"),
     allowedAgents: ["judge"],
     failureSemantics: "fail_run",
   },
