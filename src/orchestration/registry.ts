@@ -23,6 +23,13 @@ export interface SkillDefinition {
   failureSemantics: CapabilityFailureSemantics;
 }
 
+export const defaultSkillCapabilityByAgent: Record<AgentType, string> = {
+  thesis: "thesis_analysis",
+  liquidity: "liquidity_analysis",
+  market_signal: "market_signal_analysis",
+  judge: "judge_synthesis",
+};
+
 export class ToolRegistry {
   private readonly definitions: Map<string, ToolDefinition>;
 
@@ -44,6 +51,19 @@ export class ToolRegistry {
     return this.list().filter((definition) =>
       definition.allowedAgents.includes(agentType),
     );
+  }
+
+  getForAgent(
+    agentType: AgentType,
+    capabilityName: string,
+  ): ToolDefinition | undefined {
+    const definition = this.get(capabilityName);
+
+    if (!definition || !definition.allowedAgents.includes(agentType)) {
+      return undefined;
+    }
+
+    return definition;
   }
 }
 
@@ -68,6 +88,19 @@ export class SkillRegistry {
     return this.list().filter((definition) =>
       definition.allowedAgents.includes(agentType),
     );
+  }
+
+  getForAgent(
+    agentType: AgentType,
+    capabilityName: string,
+  ): SkillDefinition | undefined {
+    const definition = this.get(capabilityName);
+
+    if (!definition || !definition.allowedAgents.includes(agentType)) {
+      return undefined;
+    }
+
+    return definition;
   }
 }
 

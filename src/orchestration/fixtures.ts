@@ -49,6 +49,10 @@ import {
 } from "./runtime-patches.ts";
 import { createRunEvent } from "./events.ts";
 import {
+  defaultSkillCapabilityByAgent,
+  type SkillDefinition,
+} from "./registry.ts";
+import {
   collectStableObjectRefs,
   collectStableObjectRefsForSection,
   inferStableObjectType,
@@ -254,61 +258,7 @@ class FixtureThesisExecutor implements AgentExecutor {
   readonly agentType = "thesis" as const;
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    await publishToolEvent(context, "tool_started", "Fetching company and news snapshots.");
-    const [company, news] = await Promise.all([
-      adapter.getCompanySnapshot(context.query.ticker, context.run.runId),
-      adapter.getNewsSnapshot(context.query.ticker, context.run.runId),
-    ]);
-    await publishToolEvent(context, "tool_finished", "Fetched company and news snapshots.", {
-      newsCount: news.items.length,
-    });
-    const evidenceCandidates = collectEvidenceCandidates(context, ["company", "news"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const thesisRef = buildStableObjectRef("Thesis", context.run.caseId, "core");
-    const riskRef = buildStableObjectRef("Risk", context.run.caseId, "execution");
-
-    const findings = [
-      createFinding(context, {
-        claim: `${company.companyName} still supports a credible medium-term fundamental thesis.`,
-        impact: "positive",
-        confidence: 0.72,
-        evidenceRefs: evidenceRefs.slice(0, 2),
-        objectRefs: [thesisRef],
-      }),
-      createFinding(context, {
-        claim: `Recent news flow on ${context.query.ticker} is constructive but not strong enough to remove execution risk.`,
-        impact: "mixed",
-        confidence: 0.65,
-        evidenceRefs: evidenceRefs.slice(1),
-        objectRefs: [thesisRef, riskRef],
-      }),
-    ];
-
-    return {
-      ...createEmptyAgentExecutionResult("done", "Generated thesis findings from fixture snapshots."),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildThesisStablePatch(context, company, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:thesis_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchFixtureSkill(context);
   }
 }
 
@@ -316,62 +266,7 @@ class FixtureLiquidityExecutor implements AgentExecutor {
   readonly agentType = "liquidity" as const;
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    await publishToolEvent(context, "tool_started", "Fetching macro and liquidity snapshot.");
-    const snapshot = await adapter.getMacroLiquiditySnapshot(context.run.runId);
-    await publishToolEvent(context, "tool_finished", "Fetched macro and liquidity snapshot.", {
-      regimeLabel: snapshot.regimeLabel,
-    });
-    const evidenceCandidates = collectEvidenceCandidates(context, ["macro"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const primaryLiquiditySignal =
-      snapshot.liquiditySignals[0] ??
-      "Liquidity signals are incomplete, so the macro read should be treated as degraded.";
-    const macroActionRef = buildStableObjectRef("MacroActorAction", context.run.caseId, "policy_rates");
-    const factorRef = buildStableObjectRef("LiquidityFactor", context.run.caseId, "rates_pressure");
-    const regimeRef = buildStableObjectRef("LiquidityRegime", context.run.caseId, "primary");
-
-    const findings = [
-      createFinding(context, {
-        claim: `${snapshot.ratesSummary}`,
-        impact: "neutral",
-        confidence: 0.68,
-        evidenceRefs: evidenceRefs.slice(0, 1),
-        objectRefs: [macroActionRef, factorRef, regimeRef],
-      }),
-      createFinding(context, {
-        claim: `${primaryLiquiditySignal} This does not contradict the long case for ${context.query.ticker}.`,
-        impact: "positive",
-        confidence: 0.63,
-        evidenceRefs: evidenceRefs.slice(1),
-        objectRefs: [factorRef, regimeRef],
-      }),
-    ];
-
-    return {
-      ...createEmptyAgentExecutionResult("done", "Generated liquidity findings from fixture macro snapshot."),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildLiquidityStablePatch(context, snapshot, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:liquidity_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchFixtureSkill(context);
   }
 }
 
@@ -379,61 +274,7 @@ class FixtureMarketSignalExecutor implements AgentExecutor {
   readonly agentType = "market_signal" as const;
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    await publishToolEvent(context, "tool_started", "Fetching market snapshot.");
-    const snapshot = await adapter.getMarketSnapshot(context.query.ticker, context.run.runId);
-    await publishToolEvent(context, "tool_finished", "Fetched market snapshot.", {
-      latestPrice: snapshot.latestPrice ?? null,
-    });
-    const evidenceCandidates = collectEvidenceCandidates(context, ["market"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const secondarySignal =
-      snapshot.signalSummaries[1] ??
-      snapshot.signalSummaries[0] ??
-      `${context.query.ticker} market signal coverage is incomplete, so the positioning read is degraded.`;
-    const signalRef = buildStableObjectRef("MarketSignal", context.run.caseId, "price_positioning");
-
-    const findings = [
-      createFinding(context, {
-        claim: `${context.query.ticker} price action is constructive without looking fully crowded.`,
-        impact: "positive",
-        confidence: 0.67,
-        evidenceRefs: evidenceRefs.slice(0, 1),
-        objectRefs: [signalRef],
-      }),
-      createFinding(context, {
-        claim: secondarySignal,
-        impact: "neutral",
-        confidence: 0.61,
-        evidenceRefs: evidenceRefs.slice(1),
-        objectRefs: [signalRef],
-      }),
-    ];
-
-    return {
-      ...createEmptyAgentExecutionResult("done", "Generated market signal findings from fixture market snapshot."),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildMarketSignalStablePatch(context, snapshot, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:market_signal_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchFixtureSkill(context);
   }
 }
 
@@ -441,79 +282,7 @@ class FixtureJudgeExecutor implements AgentExecutor {
   readonly agentType = "judge" as const;
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const basisFindingRefs = context.upstreamFindings.map((finding) => finding.findingId);
-    const positiveCount = context.upstreamFindings.filter((finding) => finding.impact === "positive").length;
-    const mixedCount = context.upstreamFindings.filter((finding) => finding.impact === "mixed").length;
-
-    const decision: DecisionRecord = {
-      decisionId: `decision:${context.run.runId}:primary`,
-      runId: context.run.runId,
-      decisionType: "investment_view",
-      summary:
-        positiveCount >= 3
-          ? `${context.query.ticker} looks investable on the fixture path, but entry timing still depends on execution and sentiment staying stable.`
-          : `${context.query.ticker} has a workable case, but the evidence base is not strong enough for a high-conviction call.`,
-      confidenceBand: mixedCount > 0 ? "medium" : "medium_high",
-      basisFindingRefs,
-      updatedObjectRefs: collectStableObjectRefs(context.upstreamFindings),
-    };
-
-    const sectionContents = buildSectionContents(context.upstreamFindings, decision.summary);
-    const reportSections = createEmptyReportSections(context.run.runId).map((section) => ({
-      ...section,
-      content: sectionContents[section.sectionKey],
-      citationFindingRefs: pickCitationFindingRefs(context.upstreamFindings, section.sectionKey),
-      citationEvidenceRefs: pickCitationEvidenceRefs(context.upstreamFindings, section.sectionKey),
-      citationObjectRefs: pickCitationObjectRefs(context.upstreamFindings, section.sectionKey),
-      status: (sectionContents[section.sectionKey] ? "ready" : "empty") as ReportSectionStatus,
-    }));
-
-    const finalReport = buildFinalReport({
-      runId: context.run.runId,
-      caseId: context.run.caseId,
-      sections: reportSections,
-    });
-
-    for (const section of reportSections) {
-      await context.eventSink.publish(
-        createRunEvent({
-          runId: context.run.runId,
-          agentId: `agent:${context.run.runId}:judge`,
-          eventType: "report_section_ready",
-          title: `Report section ready: ${section.title}.`,
-          payload: {
-            reportId: finalReport.reportId,
-            ...section,
-          },
-        }),
-      );
-    }
-
-    return {
-      ...createEmptyAgentExecutionResult("done", "Synthesized fixture findings into one decision and six report sections."),
-      decision,
-      reportSections,
-      finalReport,
-      graphPatches: [
-        buildJudgeDecisionPatch(
-          context.run,
-          context.task.taskId,
-          decision,
-        ),
-        buildJudgeReportPatch(
-          context.run,
-          context.task.taskId,
-          decision,
-          reportSections,
-        ),
-        ...buildJudgeCitationPatches(
-          context.run,
-          context.task.taskId,
-          decision,
-          reportSections,
-        ),
-      ],
-    };
+    return dispatchFixtureSkill(context);
   }
 }
 
@@ -523,6 +292,307 @@ export function createFixtureExecutors(): AgentExecutorMap {
     liquidity: new FixtureLiquidityExecutor(),
     market_signal: new FixtureMarketSignalExecutor(),
     judge: new FixtureJudgeExecutor(),
+  };
+}
+
+type FixtureSkillRunner = (
+  context: AgentExecutionContext,
+  skill: SkillDefinition,
+) => Promise<AgentExecutionResult>;
+
+const fixtureSkillRunners: Record<string, FixtureSkillRunner> = {
+  thesis_analysis: runFixtureThesisAnalysis,
+  liquidity_analysis: runFixtureLiquidityAnalysis,
+  market_signal_analysis: runFixtureMarketSignalAnalysis,
+  judge_synthesis: runFixtureJudgeSynthesis,
+};
+
+async function dispatchFixtureSkill(
+  context: AgentExecutionContext,
+): Promise<AgentExecutionResult> {
+  const capabilityName = defaultSkillCapabilityByAgent[context.task.agentType];
+  const skill = context.skillRegistry.getForAgent(
+    context.task.agentType,
+    capabilityName,
+  );
+
+  if (!skill) {
+    throw new Error(
+      `Missing registered skill ${capabilityName} for agent ${context.task.agentType}.`,
+    );
+  }
+
+  const runner = fixtureSkillRunners[skill.capabilityName];
+
+  if (!runner) {
+    throw new Error(
+      `No fixture skill runner registered for ${skill.capabilityName}.`,
+    );
+  }
+
+  return runner(context, skill);
+}
+
+async function runFixtureThesisAnalysis(
+  context: AgentExecutionContext,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  await publishToolEvent(context, "tool_started", "Fetching company and news snapshots.");
+  const [company, news] = await Promise.all([
+    adapter.getCompanySnapshot(context.query.ticker, context.run.runId),
+    adapter.getNewsSnapshot(context.query.ticker, context.run.runId),
+  ]);
+  await publishToolEvent(context, "tool_finished", "Fetched company and news snapshots.", {
+    newsCount: news.items.length,
+  });
+  const evidenceCandidates = collectEvidenceCandidates(context, ["company", "news"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const thesisRef = buildStableObjectRef("Thesis", context.run.caseId, "core");
+  const riskRef = buildStableObjectRef("Risk", context.run.caseId, "execution");
+
+  const findings = [
+    createFinding(context, {
+      claim: `${company.companyName} still supports a credible medium-term fundamental thesis.`,
+      impact: "positive",
+      confidence: 0.72,
+      evidenceRefs: evidenceRefs.slice(0, 2),
+      objectRefs: [thesisRef],
+    }),
+    createFinding(context, {
+      claim: `Recent news flow on ${context.query.ticker} is constructive but not strong enough to remove execution risk.`,
+      impact: "mixed",
+      confidence: 0.65,
+      evidenceRefs: evidenceRefs.slice(1),
+      objectRefs: [thesisRef, riskRef],
+    }),
+  ];
+
+  return {
+    ...createEmptyAgentExecutionResult("done", "Generated thesis findings from fixture snapshots."),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildThesisStablePatch(context, company, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runFixtureLiquidityAnalysis(
+  context: AgentExecutionContext,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  await publishToolEvent(context, "tool_started", "Fetching macro and liquidity snapshot.");
+  const snapshot = await adapter.getMacroLiquiditySnapshot(context.run.runId);
+  await publishToolEvent(context, "tool_finished", "Fetched macro and liquidity snapshot.", {
+    regimeLabel: snapshot.regimeLabel,
+  });
+  const evidenceCandidates = collectEvidenceCandidates(context, ["macro"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const primaryLiquiditySignal =
+    snapshot.liquiditySignals[0] ??
+    "Liquidity signals are incomplete, so the macro read should be treated as degraded.";
+  const macroActionRef = buildStableObjectRef("MacroActorAction", context.run.caseId, "policy_rates");
+  const factorRef = buildStableObjectRef("LiquidityFactor", context.run.caseId, "rates_pressure");
+  const regimeRef = buildStableObjectRef("LiquidityRegime", context.run.caseId, "primary");
+
+  const findings = [
+    createFinding(context, {
+      claim: `${snapshot.ratesSummary}`,
+      impact: "neutral",
+      confidence: 0.68,
+      evidenceRefs: evidenceRefs.slice(0, 1),
+      objectRefs: [macroActionRef, factorRef, regimeRef],
+    }),
+    createFinding(context, {
+      claim: `${primaryLiquiditySignal} This does not contradict the long case for ${context.query.ticker}.`,
+      impact: "positive",
+      confidence: 0.63,
+      evidenceRefs: evidenceRefs.slice(1),
+      objectRefs: [factorRef, regimeRef],
+    }),
+  ];
+
+  return {
+    ...createEmptyAgentExecutionResult("done", "Generated liquidity findings from fixture macro snapshot."),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildLiquidityStablePatch(context, snapshot, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runFixtureMarketSignalAnalysis(
+  context: AgentExecutionContext,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  await publishToolEvent(context, "tool_started", "Fetching market snapshot.");
+  const snapshot = await adapter.getMarketSnapshot(context.query.ticker, context.run.runId);
+  await publishToolEvent(context, "tool_finished", "Fetched market snapshot.", {
+    latestPrice: snapshot.latestPrice ?? null,
+  });
+  const evidenceCandidates = collectEvidenceCandidates(context, ["market"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const secondarySignal =
+    snapshot.signalSummaries[1] ??
+    snapshot.signalSummaries[0] ??
+    `${context.query.ticker} market signal coverage is incomplete, so the positioning read is degraded.`;
+  const signalRef = buildStableObjectRef("MarketSignal", context.run.caseId, "price_positioning");
+
+  const findings = [
+    createFinding(context, {
+      claim: `${context.query.ticker} price action is constructive without looking fully crowded.`,
+      impact: "positive",
+      confidence: 0.67,
+      evidenceRefs: evidenceRefs.slice(0, 1),
+      objectRefs: [signalRef],
+    }),
+    createFinding(context, {
+      claim: secondarySignal,
+      impact: "neutral",
+      confidence: 0.61,
+      evidenceRefs: evidenceRefs.slice(1),
+      objectRefs: [signalRef],
+    }),
+  ];
+
+  return {
+    ...createEmptyAgentExecutionResult("done", "Generated market signal findings from fixture market snapshot."),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildMarketSignalStablePatch(context, snapshot, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runFixtureJudgeSynthesis(
+  context: AgentExecutionContext,
+  _skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const basisFindingRefs = context.upstreamFindings.map((finding) => finding.findingId);
+  const positiveCount = context.upstreamFindings.filter((finding) => finding.impact === "positive").length;
+  const mixedCount = context.upstreamFindings.filter((finding) => finding.impact === "mixed").length;
+
+  const decision: DecisionRecord = {
+    decisionId: `decision:${context.run.runId}:primary`,
+    runId: context.run.runId,
+    decisionType: "investment_view",
+    summary:
+      positiveCount >= 3
+        ? `${context.query.ticker} looks investable on the fixture path, but entry timing still depends on execution and sentiment staying stable.`
+        : `${context.query.ticker} has a workable case, but the evidence base is not strong enough for a high-conviction call.`,
+    confidenceBand: mixedCount > 0 ? "medium" : "medium_high",
+    basisFindingRefs,
+    updatedObjectRefs: collectStableObjectRefs(context.upstreamFindings),
+  };
+
+  const sectionContents = buildSectionContents(context.upstreamFindings, decision.summary);
+  const reportSections = createEmptyReportSections(context.run.runId).map((section) => ({
+    ...section,
+    content: sectionContents[section.sectionKey],
+    citationFindingRefs: pickCitationFindingRefs(context.upstreamFindings, section.sectionKey),
+    citationEvidenceRefs: pickCitationEvidenceRefs(context.upstreamFindings, section.sectionKey),
+    citationObjectRefs: pickCitationObjectRefs(context.upstreamFindings, section.sectionKey),
+    status: (sectionContents[section.sectionKey] ? "ready" : "empty") as ReportSectionStatus,
+  }));
+
+  const finalReport = buildFinalReport({
+    runId: context.run.runId,
+    caseId: context.run.caseId,
+    sections: reportSections,
+  });
+
+  for (const section of reportSections) {
+    await context.eventSink.publish(
+      createRunEvent({
+        runId: context.run.runId,
+        agentId: `agent:${context.run.runId}:judge`,
+        eventType: "report_section_ready",
+        title: `Report section ready: ${section.title}.`,
+        payload: {
+          reportId: finalReport.reportId,
+          ...section,
+        },
+      }),
+    );
+  }
+
+  return {
+    ...createEmptyAgentExecutionResult("done", "Synthesized fixture findings into one decision and six report sections."),
+    decision,
+    reportSections,
+    finalReport,
+    graphPatches: [
+      buildJudgeDecisionPatch(
+        context.run,
+        context.task.taskId,
+        decision,
+      ),
+      buildJudgeReportPatch(
+        context.run,
+        context.task.taskId,
+        decision,
+        reportSections,
+      ),
+      ...buildJudgeCitationPatches(
+        context.run,
+        context.task.taskId,
+        decision,
+        reportSections,
+      ),
+    ],
   };
 }
 
@@ -626,6 +696,13 @@ export function createFinding(
     impact: input.impact,
     timestamp: new Date().toISOString(),
   };
+}
+
+function buildSkillRef(
+  context: AgentExecutionContext,
+  skill: Pick<SkillDefinition, "capabilityName">,
+): string {
+  return `skill:${context.run.runId}:${skill.capabilityName}`;
 }
 
 export function buildThesisStablePatch(

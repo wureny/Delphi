@@ -26,6 +26,10 @@ import {
 } from "./runtime-patches.ts";
 import { createRunEvent } from "./events.ts";
 import {
+  defaultSkillCapabilityByAgent,
+  type SkillDefinition,
+} from "./registry.ts";
+import {
   buildLiquidityStablePatch,
   buildMarketSignalStablePatch,
   buildStableObjectRef,
@@ -80,74 +84,7 @@ class ProviderThesisExecutor implements AgentExecutor {
   }
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    const graphContext = await loadGraphContext(context);
-    await publishToolEvent(context, "tool_started", "Fetching company and news snapshots.");
-    const [company, news] = await Promise.all([
-      adapter.getCompanySnapshot(context.query.ticker, context.run.runId),
-      adapter.getNewsSnapshot(context.query.ticker, context.run.runId),
-    ]);
-    await publishToolEvent(context, "tool_finished", "Fetched company and news snapshots.", {
-      newsCount: news.items.length,
-    });
-
-    const evidenceCandidates = collectEvidenceCandidates(context, ["company", "news"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const plan = await this.provider.generateObject<ProviderFindingPlan<ThesisObjectKey>>({
-      schemaName: "delphi_thesis_findings",
-      schemaDescription: "Structured thesis findings for one investment research run.",
-      schema: providerFindingSchema(["thesis_core", "risk_execution"]),
-      developerPrompt:
-        "You are Delphi thesis agent. Produce 1-3 concise findings grounded only in the supplied company and news snapshots. Do not invent evidence. Use the allowed object keys only.",
-      userPrompt: [
-        `Ticker: ${context.query.ticker}`,
-        `Question: ${context.query.userQuestion}`,
-        `Time horizon: ${context.query.timeHorizon}`,
-        ...(graphContext?.summary.trim().length
-          ? [`Graph context:\n${graphContext.summary}`]
-          : []),
-        `Company snapshot: ${JSON.stringify(company)}`,
-        `News snapshot: ${JSON.stringify(news)}`,
-        formatEvidenceCandidates(evidenceCandidates),
-        "Allowed object keys:",
-        '- "thesis_core": the primary Thesis object',
-        '- "risk_execution": the primary execution Risk object',
-      ].join("\n"),
-    });
-
-    const findings = plan.output.findings.map((finding) =>
-      createFinding(context, {
-        claim: finding.claim,
-        impact: finding.impact,
-        confidence: normalizeConfidence(finding.confidence),
-        evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
-        objectRefs: finding.objectKeys.map((key) => thesisObjectRef(context, key)),
-      }));
-
-    return {
-      ...createEmptyAgentExecutionResult("done", plan.output.summary),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildThesisStablePatch(context, company, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:thesis_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchProviderSkill(context, this.provider);
   }
 }
 
@@ -160,75 +97,7 @@ class ProviderLiquidityExecutor implements AgentExecutor {
   }
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    const graphContext = await loadGraphContext(context);
-    await publishToolEvent(context, "tool_started", "Fetching macro and liquidity snapshot.");
-    const snapshot = await adapter.getMacroLiquiditySnapshot(context.run.runId);
-    await publishToolEvent(context, "tool_finished", "Fetched macro and liquidity snapshot.", {
-      regimeLabel: snapshot.regimeLabel,
-    });
-
-    const evidenceCandidates = collectEvidenceCandidates(context, ["macro"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const plan = await this.provider.generateObject<ProviderFindingPlan<LiquidityObjectKey>>({
-      schemaName: "delphi_liquidity_findings",
-      schemaDescription: "Structured liquidity findings for one investment research run.",
-      schema: providerFindingSchema([
-        "macro_action_policy_rates",
-        "liquidity_factor_rates_pressure",
-        "liquidity_regime_primary",
-      ]),
-      developerPrompt:
-        "You are Delphi liquidity agent. Produce 1-3 concise findings grounded only in the supplied macro and liquidity snapshot. Do not invent evidence. Use the allowed object keys only.",
-      userPrompt: [
-        `Ticker: ${context.query.ticker}`,
-        `Question: ${context.query.userQuestion}`,
-        `Time horizon: ${context.query.timeHorizon}`,
-        ...(graphContext?.summary.trim().length
-          ? [`Graph context:\n${graphContext.summary}`]
-          : []),
-        `Macro/liquidity snapshot: ${JSON.stringify(snapshot)}`,
-        formatEvidenceCandidates(evidenceCandidates),
-        "Allowed object keys:",
-        '- "macro_action_policy_rates": the MacroActorAction object',
-        '- "liquidity_factor_rates_pressure": the LiquidityFactor object',
-        '- "liquidity_regime_primary": the LiquidityRegime object',
-      ].join("\n"),
-    });
-
-    const findings = plan.output.findings.map((finding) =>
-      createFinding(context, {
-        claim: finding.claim,
-        impact: finding.impact,
-        confidence: normalizeConfidence(finding.confidence),
-        evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
-        objectRefs: finding.objectKeys.map((key) => liquidityObjectRef(context, key)),
-      }));
-
-    return {
-      ...createEmptyAgentExecutionResult("done", plan.output.summary),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildLiquidityStablePatch(context, snapshot, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:liquidity_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchProviderSkill(context, this.provider);
   }
 }
 
@@ -241,69 +110,7 @@ class ProviderMarketSignalExecutor implements AgentExecutor {
   }
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const adapter = requireDataAdapter(context);
-    const graphContext = await loadGraphContext(context);
-    await publishToolEvent(context, "tool_started", "Fetching market snapshot.");
-    const snapshot = await adapter.getMarketSnapshot(context.query.ticker, context.run.runId);
-    await publishToolEvent(context, "tool_finished", "Fetched market snapshot.", {
-      latestPrice: snapshot.latestPrice ?? null,
-    });
-
-    const evidenceCandidates = collectEvidenceCandidates(context, ["market"]);
-    const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
-    const plan = await this.provider.generateObject<ProviderFindingPlan<MarketObjectKey>>({
-      schemaName: "delphi_market_signal_findings",
-      schemaDescription: "Structured market signal findings for one investment research run.",
-      schema: providerFindingSchema(["market_signal_price_positioning"]),
-      developerPrompt:
-        "You are Delphi market signal agent. Produce 1-3 concise findings grounded only in the supplied market snapshot. Do not invent evidence. Use the allowed object key only.",
-      userPrompt: [
-        `Ticker: ${context.query.ticker}`,
-        `Question: ${context.query.userQuestion}`,
-        `Time horizon: ${context.query.timeHorizon}`,
-        ...(graphContext?.summary.trim().length
-          ? [`Graph context:\n${graphContext.summary}`]
-          : []),
-        `Market snapshot: ${JSON.stringify(snapshot)}`,
-        formatEvidenceCandidates(evidenceCandidates),
-        "Allowed object keys:",
-        '- "market_signal_price_positioning": the primary MarketSignal object',
-      ].join("\n"),
-    });
-
-    const findings = plan.output.findings.map((finding) =>
-      createFinding(context, {
-        claim: finding.claim,
-        impact: finding.impact,
-        confidence: normalizeConfidence(finding.confidence),
-        evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
-        objectRefs: finding.objectKeys.map((key) => marketObjectRef(context, key)),
-      }));
-
-    return {
-      ...createEmptyAgentExecutionResult("done", plan.output.summary),
-      findings,
-      graphPatches: [
-        ...(evidenceCandidates.length > 0
-          ? [
-              buildEvidenceCandidatePatch(
-                context.run,
-                context.task.agentType,
-                context.task.taskId,
-                evidenceCandidates,
-              ),
-            ]
-          : []),
-        buildMarketSignalStablePatch(context, snapshot, findings, evidenceRefs),
-        buildFindingPatch(
-          context.run,
-          context.task.agentType,
-          context.task.taskId,
-          `skill:${context.run.runId}:market_signal_analysis`,
-          findings,
-        ),
-      ],
-    };
+    return dispatchProviderSkill(context, this.provider);
   }
 }
 
@@ -316,82 +123,7 @@ class ProviderJudgeExecutor implements AgentExecutor {
   }
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
-    const graphContext = await loadGraphContext(context);
-    const upstream = context.upstreamFindings.map((finding, index) => ({
-      index,
-      findingId: finding.findingId,
-      agentType: finding.agentType,
-      claim: finding.claim,
-      impact: finding.impact,
-      confidence: finding.confidence,
-      evidenceRefs: finding.evidenceRefs,
-      objectRefs: finding.objectRefs,
-    }));
-
-    const plan = await this.provider.generateObject<ProviderJudgePlan>({
-      schemaName: "delphi_judge_report",
-      schemaDescription: "Structured decision and six fixed report sections for one run.",
-      schema: providerJudgeSchema(),
-      developerPrompt:
-        "You are Delphi judge. Use only the supplied findings to produce one decision summary and six fixed report sections. Do not invent evidence or findings. Every section must be present.",
-      userPrompt: [
-        `Ticker: ${context.query.ticker}`,
-        `Question: ${context.query.userQuestion}`,
-        `Time horizon: ${context.query.timeHorizon}`,
-        ...(graphContext?.summary.trim().length
-          ? [`Graph context:\n${graphContext.summary}`]
-          : []),
-        `Available findings: ${JSON.stringify(upstream)}`,
-      ].join("\n"),
-    });
-
-    const decision: DecisionRecord = {
-      decisionId: `decision:${context.run.runId}:primary`,
-      runId: context.run.runId,
-      decisionType: "investment_view",
-      summary: plan.output.summary,
-      confidenceBand: plan.output.confidenceBand,
-      basisFindingRefs: context.upstreamFindings.map((finding) => finding.findingId),
-      updatedObjectRefs: unique(
-        context.upstreamFindings.flatMap((finding) => finding.objectRefs),
-      ),
-    };
-
-    const reportSections = createEmptyReportSections(context.run.runId).map((section) =>
-      buildProviderReportSection(section, context.upstreamFindings, plan.output.sections[section.sectionKey]));
-
-    const finalReport = buildFinalReport({
-      runId: context.run.runId,
-      caseId: context.run.caseId,
-      sections: reportSections,
-    });
-
-    for (const section of reportSections) {
-      await context.eventSink.publish(
-        createRunEvent({
-          runId: context.run.runId,
-          agentId: `agent:${context.run.runId}:judge`,
-          eventType: "report_section_ready",
-          title: `Report section ready: ${section.title}.`,
-          payload: {
-            reportId: finalReport.reportId,
-            ...section,
-          },
-        }),
-      );
-    }
-
-    return {
-      ...createEmptyAgentExecutionResult("done", "Synthesized provider-backed findings into one decision and six report sections."),
-      decision,
-      reportSections,
-      finalReport,
-      graphPatches: [
-        buildJudgeDecisionPatch(context.run, context.task.taskId, decision),
-        buildJudgeReportPatch(context.run, context.task.taskId, decision, reportSections),
-        ...buildJudgeCitationPatches(context.run, context.task.taskId, decision, reportSections),
-      ],
-    };
+    return dispatchProviderSkill(context, this.provider);
   }
 }
 
@@ -403,6 +135,350 @@ export function createProviderExecutors(
     liquidity: new ProviderLiquidityExecutor(provider),
     market_signal: new ProviderMarketSignalExecutor(provider),
     judge: new ProviderJudgeExecutor(provider),
+  };
+}
+
+type ProviderSkillRunner = (
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+  skill: SkillDefinition,
+) => Promise<AgentExecutionResult>;
+
+const providerSkillRunners: Record<string, ProviderSkillRunner> = {
+  thesis_analysis: runProviderThesisAnalysis,
+  liquidity_analysis: runProviderLiquidityAnalysis,
+  market_signal_analysis: runProviderMarketSignalAnalysis,
+  judge_synthesis: runProviderJudgeSynthesis,
+};
+
+async function dispatchProviderSkill(
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+): Promise<AgentExecutionResult> {
+  const capabilityName = defaultSkillCapabilityByAgent[context.task.agentType];
+  const skill = context.skillRegistry.getForAgent(
+    context.task.agentType,
+    capabilityName,
+  );
+
+  if (!skill) {
+    throw new Error(
+      `Missing registered skill ${capabilityName} for agent ${context.task.agentType}.`,
+    );
+  }
+
+  const runner = providerSkillRunners[skill.capabilityName];
+
+  if (!runner) {
+    throw new Error(
+      `No provider skill runner registered for ${skill.capabilityName}.`,
+    );
+  }
+
+  return runner(context, provider, skill);
+}
+
+async function runProviderThesisAnalysis(
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  const graphContext = await loadGraphContext(context);
+  await publishToolEvent(context, "tool_started", "Fetching company and news snapshots.");
+  const [company, news] = await Promise.all([
+    adapter.getCompanySnapshot(context.query.ticker, context.run.runId),
+    adapter.getNewsSnapshot(context.query.ticker, context.run.runId),
+  ]);
+  await publishToolEvent(context, "tool_finished", "Fetched company and news snapshots.", {
+    newsCount: news.items.length,
+  });
+
+  const evidenceCandidates = collectEvidenceCandidates(context, ["company", "news"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const plan = await provider.generateObject<ProviderFindingPlan<ThesisObjectKey>>({
+    schemaName: "delphi_thesis_findings",
+    schemaDescription: "Structured thesis findings for one investment research run.",
+    schema: providerFindingSchema(["thesis_core", "risk_execution"]),
+    developerPrompt:
+      "You are Delphi thesis agent. Produce 1-3 concise findings grounded only in the supplied company and news snapshots. Do not invent evidence. Use the allowed object keys only.",
+    userPrompt: [
+      `Ticker: ${context.query.ticker}`,
+      `Question: ${context.query.userQuestion}`,
+      `Time horizon: ${context.query.timeHorizon}`,
+      ...(graphContext?.summary.trim().length
+        ? [`Graph context:\n${graphContext.summary}`]
+        : []),
+      `Company snapshot: ${JSON.stringify(company)}`,
+      `News snapshot: ${JSON.stringify(news)}`,
+      formatEvidenceCandidates(evidenceCandidates),
+      "Allowed object keys:",
+      '- "thesis_core": the primary Thesis object',
+      '- "risk_execution": the primary execution Risk object',
+    ].join("\n"),
+  });
+
+  const findings = plan.output.findings.map((finding) =>
+    createFinding(context, {
+      claim: finding.claim,
+      impact: finding.impact,
+      confidence: normalizeConfidence(finding.confidence),
+      evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
+      objectRefs: finding.objectKeys.map((key) => thesisObjectRef(context, key)),
+    }));
+
+  return {
+    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildThesisStablePatch(context, company, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runProviderLiquidityAnalysis(
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  const graphContext = await loadGraphContext(context);
+  await publishToolEvent(context, "tool_started", "Fetching macro and liquidity snapshot.");
+  const snapshot = await adapter.getMacroLiquiditySnapshot(context.run.runId);
+  await publishToolEvent(context, "tool_finished", "Fetched macro and liquidity snapshot.", {
+    regimeLabel: snapshot.regimeLabel,
+  });
+
+  const evidenceCandidates = collectEvidenceCandidates(context, ["macro"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const plan = await provider.generateObject<ProviderFindingPlan<LiquidityObjectKey>>({
+    schemaName: "delphi_liquidity_findings",
+    schemaDescription: "Structured liquidity findings for one investment research run.",
+    schema: providerFindingSchema([
+      "macro_action_policy_rates",
+      "liquidity_factor_rates_pressure",
+      "liquidity_regime_primary",
+    ]),
+    developerPrompt:
+      "You are Delphi liquidity agent. Produce 1-3 concise findings grounded only in the supplied macro and liquidity snapshot. Do not invent evidence. Use the allowed object keys only.",
+    userPrompt: [
+      `Ticker: ${context.query.ticker}`,
+      `Question: ${context.query.userQuestion}`,
+      `Time horizon: ${context.query.timeHorizon}`,
+      ...(graphContext?.summary.trim().length
+        ? [`Graph context:\n${graphContext.summary}`]
+        : []),
+      `Macro/liquidity snapshot: ${JSON.stringify(snapshot)}`,
+      formatEvidenceCandidates(evidenceCandidates),
+      "Allowed object keys:",
+      '- "macro_action_policy_rates": the MacroActorAction object',
+      '- "liquidity_factor_rates_pressure": the LiquidityFactor object',
+      '- "liquidity_regime_primary": the LiquidityRegime object',
+    ].join("\n"),
+  });
+
+  const findings = plan.output.findings.map((finding) =>
+    createFinding(context, {
+      claim: finding.claim,
+      impact: finding.impact,
+      confidence: normalizeConfidence(finding.confidence),
+      evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
+      objectRefs: finding.objectKeys.map((key) => liquidityObjectRef(context, key)),
+    }));
+
+  return {
+    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildLiquidityStablePatch(context, snapshot, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runProviderMarketSignalAnalysis(
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+  skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const adapter = requireDataAdapter(context);
+  const graphContext = await loadGraphContext(context);
+  await publishToolEvent(context, "tool_started", "Fetching market snapshot.");
+  const snapshot = await adapter.getMarketSnapshot(context.query.ticker, context.run.runId);
+  await publishToolEvent(context, "tool_finished", "Fetched market snapshot.", {
+    latestPrice: snapshot.latestPrice ?? null,
+  });
+
+  const evidenceCandidates = collectEvidenceCandidates(context, ["market"]);
+  const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
+  const plan = await provider.generateObject<ProviderFindingPlan<MarketObjectKey>>({
+    schemaName: "delphi_market_signal_findings",
+    schemaDescription: "Structured market signal findings for one investment research run.",
+    schema: providerFindingSchema(["market_signal_price_positioning"]),
+    developerPrompt:
+      "You are Delphi market signal agent. Produce 1-3 concise findings grounded only in the supplied market snapshot. Do not invent evidence. Use the allowed object key only.",
+    userPrompt: [
+      `Ticker: ${context.query.ticker}`,
+      `Question: ${context.query.userQuestion}`,
+      `Time horizon: ${context.query.timeHorizon}`,
+      ...(graphContext?.summary.trim().length
+        ? [`Graph context:\n${graphContext.summary}`]
+        : []),
+      `Market snapshot: ${JSON.stringify(snapshot)}`,
+      formatEvidenceCandidates(evidenceCandidates),
+      "Allowed object keys:",
+      '- "market_signal_price_positioning": the primary MarketSignal object',
+    ].join("\n"),
+  });
+
+  const findings = plan.output.findings.map((finding) =>
+    createFinding(context, {
+      claim: finding.claim,
+      impact: finding.impact,
+      confidence: normalizeConfidence(finding.confidence),
+      evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
+      objectRefs: finding.objectKeys.map((key) => marketObjectRef(context, key)),
+    }));
+
+  return {
+    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    findings,
+    graphPatches: [
+      ...(evidenceCandidates.length > 0
+        ? [
+            buildEvidenceCandidatePatch(
+              context.run,
+              context.task.agentType,
+              context.task.taskId,
+              evidenceCandidates,
+            ),
+          ]
+        : []),
+      buildMarketSignalStablePatch(context, snapshot, findings, evidenceRefs),
+      buildFindingPatch(
+        context.run,
+        context.task.agentType,
+        context.task.taskId,
+        buildSkillRef(context, skill),
+        findings,
+      ),
+    ],
+  };
+}
+
+async function runProviderJudgeSynthesis(
+  context: AgentExecutionContext,
+  provider: StructuredModelProvider,
+  _skill: SkillDefinition,
+): Promise<AgentExecutionResult> {
+  const graphContext = await loadGraphContext(context);
+  const upstream = context.upstreamFindings.map((finding, index) => ({
+    index,
+    findingId: finding.findingId,
+    agentType: finding.agentType,
+    claim: finding.claim,
+    impact: finding.impact,
+    confidence: finding.confidence,
+    evidenceRefs: finding.evidenceRefs,
+    objectRefs: finding.objectRefs,
+  }));
+
+  const plan = await provider.generateObject<ProviderJudgePlan>({
+    schemaName: "delphi_judge_report",
+    schemaDescription: "Structured decision and six fixed report sections for one run.",
+    schema: providerJudgeSchema(),
+    developerPrompt:
+      "You are Delphi judge. Use only the supplied findings to produce one decision summary and six fixed report sections. Do not invent evidence or findings. Every section must be present.",
+    userPrompt: [
+      `Ticker: ${context.query.ticker}`,
+      `Question: ${context.query.userQuestion}`,
+      `Time horizon: ${context.query.timeHorizon}`,
+      ...(graphContext?.summary.trim().length
+        ? [`Graph context:\n${graphContext.summary}`]
+        : []),
+      `Available findings: ${JSON.stringify(upstream)}`,
+    ].join("\n"),
+  });
+
+  const decision: DecisionRecord = {
+    decisionId: `decision:${context.run.runId}:primary`,
+    runId: context.run.runId,
+    decisionType: "investment_view",
+    summary: plan.output.summary,
+    confidenceBand: plan.output.confidenceBand,
+    basisFindingRefs: context.upstreamFindings.map((finding) => finding.findingId),
+    updatedObjectRefs: unique(
+      context.upstreamFindings.flatMap((finding) => finding.objectRefs),
+    ),
+  };
+
+  const reportSections = createEmptyReportSections(context.run.runId).map((section) =>
+    buildProviderReportSection(section, context.upstreamFindings, plan.output.sections[section.sectionKey]));
+
+  const finalReport = buildFinalReport({
+    runId: context.run.runId,
+    caseId: context.run.caseId,
+    sections: reportSections,
+  });
+
+  for (const section of reportSections) {
+    await context.eventSink.publish(
+      createRunEvent({
+        runId: context.run.runId,
+        agentId: `agent:${context.run.runId}:judge`,
+        eventType: "report_section_ready",
+        title: `Report section ready: ${section.title}.`,
+        payload: {
+          reportId: finalReport.reportId,
+          ...section,
+        },
+      }),
+    );
+  }
+
+  return {
+    ...createEmptyAgentExecutionResult("done", "Synthesized provider-backed findings into one decision and six report sections."),
+    decision,
+    reportSections,
+    finalReport,
+    graphPatches: [
+      buildJudgeDecisionPatch(context.run, context.task.taskId, decision),
+      buildJudgeReportPatch(context.run, context.task.taskId, decision, reportSections),
+      ...buildJudgeCitationPatches(context.run, context.task.taskId, decision, reportSections),
+    ],
   };
 }
 
@@ -617,6 +693,13 @@ function formatEvidenceCandidates(candidates: readonly EvidenceCandidate[]): str
       supportedObjects: candidate.supportedObjects,
     })),
   )}`;
+}
+
+function buildSkillRef(
+  context: AgentExecutionContext,
+  skill: Pick<SkillDefinition, "capabilityName">,
+): string {
+  return `skill:${context.run.runId}:${skill.capabilityName}`;
 }
 
 function buildProviderReportSection(
