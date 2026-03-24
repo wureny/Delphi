@@ -34,6 +34,7 @@ export interface AppState {
   feedLabel: string;
   composerText: string;
   canvasCollapsed: boolean;
+  expandedTerminalAgent: AgentKey | null;
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
   infoMessage: string | null;
@@ -91,6 +92,7 @@ export interface AgentCardState {
   transcriptLines: TerminalLineState[];
   eventCount: number;
   isLive: boolean;
+  expanded: boolean;
 }
 
 export interface TerminalLineState {
@@ -119,13 +121,14 @@ export function createInitialState(
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     canvasCollapsed: false,
+    expandedTerminalAgent: null,
     connectionStatus: "idle",
     errorMessage: null,
     infoMessage:
       infoMessage ??
       (feedMode === "recorded"
-        ? "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run."
-        : "SSE mode expects a runtime event endpoint plus an optional snapshot endpoint for final report hydration."),
+        ? "Replay the recorded AAPL demo run."
+        : "Ask one stock question to start a live run."),
     streamWarnings: {},
     run: null,
     reportSections: createEmptySections(),
@@ -143,6 +146,7 @@ export function createRestartState(
     ...createInitialState(previous.feedMode, infoMessage),
     composerText: previous.composerText,
     canvasCollapsed: previous.canvasCollapsed,
+    expandedTerminalAgent: null,
   };
 }
 
@@ -418,6 +422,7 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
         transcriptLines: [],
         eventCount: 0,
         isLive: false,
+        expanded: false,
       },
     ]),
   );
@@ -528,7 +533,7 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
 
     card.transcriptLines =
       terminalLines.length > 0
-        ? terminalLines.slice(-9).map((line) => ({
+        ? terminalLines.map((line) => ({
             id: line.lineId,
             prefix: line.prefix,
             text: line.text,
@@ -539,6 +544,7 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
         : buildTranscriptLines(agentEvents);
     card.eventCount = agentEvents.length;
     card.isLive = card.status === "running";
+    card.expanded = state.expandedTerminalAgent === agent;
 
     return card;
   });
@@ -558,6 +564,17 @@ export function toggleCanvas(state: AppState): AppState {
   return {
     ...state,
     canvasCollapsed: !state.canvasCollapsed,
+  };
+}
+
+export function toggleTerminalExpansion(
+  state: AppState,
+  agent: AgentKey,
+): AppState {
+  return {
+    ...state,
+    expandedTerminalAgent:
+      state.expandedTerminalAgent === agent ? null : agent,
   };
 }
 
@@ -794,7 +811,7 @@ function summarizeTimelineEvent(event: RunEvent): string {
 function buildTranscriptLines(
   events: readonly RunEvent[],
 ): TerminalLineState[] {
-  return events.slice(-8).map((event) => ({
+  return events.map((event) => ({
     id: event.eventId,
     prefix: terminalPrefix(event),
     text: summarizeTranscriptEvent(event),

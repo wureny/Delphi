@@ -34,12 +34,11 @@ import {
   selectRunViewState,
   selectTimelineState,
   toggleCanvas,
+  toggleTerminalExpansion,
   updateComposerText,
   type AppState,
   type TerminalLineState,
 } from "./state.js";
-
-const MAX_RENDERED_TERMINAL_LINES = 9;
 
 export interface DelphiAppConfig {
   root: HTMLElement;
@@ -196,17 +195,18 @@ export class DelphiFrontendApp {
       return;
     }
 
-    if (actionNode.dataset.action === "jump-terminal") {
+    if (actionNode.dataset.action === "toggle-terminal") {
       const agent = actionNode.dataset.agent;
 
       if (!isAgentKey(agent)) {
         return;
       }
 
-      this.pausedTerminalAgents.delete(agent);
-      this.scrollTerminalToBottom(agent);
-      this.syncJumpButton(agent);
+      this.state = toggleTerminalExpansion(this.state, agent);
+      this.renderShell();
+      return;
     }
+
   }
 
   private handleInput(event: Event): void {
@@ -242,7 +242,6 @@ export class DelphiFrontendApp {
       this.pausedTerminalAgents.add(agent);
     }
 
-    this.syncJumpButton(agent);
   }
 
   private shouldAutoStartFeed(): boolean {
@@ -417,6 +416,7 @@ export class DelphiFrontendApp {
       cardElement.classList.toggle("running", card.status === "running");
       cardElement.classList.toggle("degraded", card.status === "degraded");
       cardElement.classList.toggle("failed", card.status === "failed");
+      cardElement.classList.toggle("expanded", card.expanded);
 
       const liveIndicator = cardElement.querySelector<HTMLElement>('[data-field="live-indicator"]');
       if (liveIndicator) {
@@ -481,6 +481,14 @@ export class DelphiFrontendApp {
         screenMeta.textContent = card.phaseLabel;
       }
 
+      const terminalToggle = cardElement.querySelector<HTMLButtonElement>(
+        '[data-action="toggle-terminal"]',
+      );
+      if (terminalToggle) {
+        terminalToggle.textContent = card.expanded ? "Collapse" : "Expand";
+        terminalToggle.setAttribute("aria-pressed", card.expanded ? "true" : "false");
+      }
+
       const cursorRow = cardElement.querySelector<HTMLElement>(`[data-role="terminal-cursor"][data-agent="${card.agent}"]`);
       if (cursorRow) {
         cursorRow.classList.toggle("is-hidden", !card.isLive);
@@ -490,7 +498,6 @@ export class DelphiFrontendApp {
         this.replaceTerminalLines(card.agent, card.transcriptLines);
       }
 
-      this.syncJumpButton(card.agent);
     }
 
     if (options?.appendTerminalChunk) {
@@ -500,7 +507,7 @@ export class DelphiFrontendApp {
 
   private replaceTerminalLines(agent: AgentKey, lines: TerminalLineState[]): void {
     const linesContainer = this.root.querySelector<HTMLElement>(
-      `[data-role="terminal-lines"][data-agent="${agent}"]`,
+      `[data-role="terminal-scroll"][data-agent="${agent}"]`,
     );
 
     if (!linesContainer) {
@@ -508,7 +515,6 @@ export class DelphiFrontendApp {
     }
 
     linesContainer.innerHTML = renderTerminalLines(lines);
-    trimTerminalLines(linesContainer, MAX_RENDERED_TERMINAL_LINES);
     this.renderedTerminalLineIds.set(
       agent,
       new Set(lines.map((line) => line.id)),
@@ -528,7 +534,7 @@ export class DelphiFrontendApp {
     }
 
     const linesContainer = this.root.querySelector<HTMLElement>(
-      `[data-role="terminal-lines"][data-agent="${agent}"]`,
+      `[data-role="terminal-scroll"][data-agent="${agent}"]`,
     );
 
     if (!linesContainer) {
@@ -550,7 +556,6 @@ export class DelphiFrontendApp {
 
     const appendedLine = linesContainer.lastElementChild as HTMLElement | null;
     appendedLine?.classList.add("is-streamed");
-    trimTerminalLines(linesContainer, MAX_RENDERED_TERMINAL_LINES);
 
     renderedIds.add(chunk.line.lineId);
     this.renderedTerminalLineIds.set(agent, renderedIds);
@@ -559,7 +564,6 @@ export class DelphiFrontendApp {
       this.scrollTerminalToBottom(agent);
     }
 
-    this.syncJumpButton(agent);
   }
 
   private scrollTerminalToBottom(agent: AgentKey): void {
@@ -572,18 +576,6 @@ export class DelphiFrontendApp {
     }
 
     terminalScroll.scrollTop = terminalScroll.scrollHeight;
-  }
-
-  private syncJumpButton(agent: AgentKey): void {
-    const jumpButton = this.root.querySelector<HTMLElement>(
-      `[data-action="jump-terminal"][data-agent="${agent}"]`,
-    );
-
-    if (!jumpButton) {
-      return;
-    }
-
-    jumpButton.classList.toggle("is-hidden", !this.pausedTerminalAgents.has(agent));
   }
 
   private resetTerminalUiState(): void {
@@ -674,10 +666,4 @@ function agentStatusColor(status: "idle" | "running" | "blocked" | "done" | "deg
 
 function isAgentKey(value: string | undefined): value is AgentKey {
   return typeof value === "string" && agentKeys.includes(value as AgentKey);
-}
-
-function trimTerminalLines(container: HTMLElement, maxLines: number): void {
-  while (container.children.length > maxLines) {
-    container.firstElementChild?.remove();
-  }
 }

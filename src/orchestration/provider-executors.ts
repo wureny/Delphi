@@ -24,6 +24,7 @@ import {
   buildJudgeDecisionPatch,
   buildJudgeReportPatch,
 } from "./runtime-patches.ts";
+import { createRunEvent } from "./events.ts";
 import {
   buildLiquidityStablePatch,
   buildMarketSignalStablePatch,
@@ -65,6 +66,11 @@ interface ProviderJudgePlan {
   };
 }
 
+interface LoadedGraphContext {
+  summary: string;
+  refs: string[];
+}
+
 class ProviderThesisExecutor implements AgentExecutor {
   readonly agentType = "thesis" as const;
   private readonly provider: StructuredModelProvider;
@@ -75,6 +81,7 @@ class ProviderThesisExecutor implements AgentExecutor {
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
     const adapter = requireDataAdapter(context);
+    const graphContext = await loadGraphContext(context);
     await publishToolEvent(context, "tool_started", "Fetching company and news snapshots.");
     const [company, news] = await Promise.all([
       adapter.getCompanySnapshot(context.query.ticker, context.run.runId),
@@ -96,6 +103,9 @@ class ProviderThesisExecutor implements AgentExecutor {
         `Ticker: ${context.query.ticker}`,
         `Question: ${context.query.userQuestion}`,
         `Time horizon: ${context.query.timeHorizon}`,
+        ...(graphContext?.summary.trim().length
+          ? [`Graph context:\n${graphContext.summary}`]
+          : []),
         `Company snapshot: ${JSON.stringify(company)}`,
         `News snapshot: ${JSON.stringify(news)}`,
         formatEvidenceCandidates(evidenceCandidates),
@@ -151,6 +161,7 @@ class ProviderLiquidityExecutor implements AgentExecutor {
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
     const adapter = requireDataAdapter(context);
+    const graphContext = await loadGraphContext(context);
     await publishToolEvent(context, "tool_started", "Fetching macro and liquidity snapshot.");
     const snapshot = await adapter.getMacroLiquiditySnapshot(context.run.runId);
     await publishToolEvent(context, "tool_finished", "Fetched macro and liquidity snapshot.", {
@@ -173,6 +184,9 @@ class ProviderLiquidityExecutor implements AgentExecutor {
         `Ticker: ${context.query.ticker}`,
         `Question: ${context.query.userQuestion}`,
         `Time horizon: ${context.query.timeHorizon}`,
+        ...(graphContext?.summary.trim().length
+          ? [`Graph context:\n${graphContext.summary}`]
+          : []),
         `Macro/liquidity snapshot: ${JSON.stringify(snapshot)}`,
         formatEvidenceCandidates(evidenceCandidates),
         "Allowed object keys:",
@@ -228,6 +242,7 @@ class ProviderMarketSignalExecutor implements AgentExecutor {
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
     const adapter = requireDataAdapter(context);
+    const graphContext = await loadGraphContext(context);
     await publishToolEvent(context, "tool_started", "Fetching market snapshot.");
     const snapshot = await adapter.getMarketSnapshot(context.query.ticker, context.run.runId);
     await publishToolEvent(context, "tool_finished", "Fetched market snapshot.", {
@@ -246,6 +261,9 @@ class ProviderMarketSignalExecutor implements AgentExecutor {
         `Ticker: ${context.query.ticker}`,
         `Question: ${context.query.userQuestion}`,
         `Time horizon: ${context.query.timeHorizon}`,
+        ...(graphContext?.summary.trim().length
+          ? [`Graph context:\n${graphContext.summary}`]
+          : []),
         `Market snapshot: ${JSON.stringify(snapshot)}`,
         formatEvidenceCandidates(evidenceCandidates),
         "Allowed object keys:",
@@ -298,6 +316,7 @@ class ProviderJudgeExecutor implements AgentExecutor {
   }
 
   async execute(context: AgentExecutionContext): Promise<AgentExecutionResult> {
+    const graphContext = await loadGraphContext(context);
     const upstream = context.upstreamFindings.map((finding, index) => ({
       index,
       findingId: finding.findingId,
@@ -319,6 +338,9 @@ class ProviderJudgeExecutor implements AgentExecutor {
         `Ticker: ${context.query.ticker}`,
         `Question: ${context.query.userQuestion}`,
         `Time horizon: ${context.query.timeHorizon}`,
+        ...(graphContext?.summary.trim().length
+          ? [`Graph context:\n${graphContext.summary}`]
+          : []),
         `Available findings: ${JSON.stringify(upstream)}`,
       ].join("\n"),
     });
@@ -366,6 +388,59 @@ export function createProviderExecutors(
     liquidity: new ProviderLiquidityExecutor(provider),
     market_signal: new ProviderMarketSignalExecutor(provider),
     judge: new ProviderJudgeExecutor(provider),
+  };
+}
+
+async function loadGraphContext(
+  context: AgentExecutionContext,
+): Promise<LoadedGraphContext | null> {
+  if (!context.graphContextReader) {
+    return null;
+  }
+
+  await context.eventSink.publish(
+    createRunEvent({
+      runId: context.run.runId,
+      agentId: `agent:${context.run.runId}:${context.task.agentType}`,
+      eventType: "tool_started",
+      title: "Reading graph context.",
+      payload: {
+        taskId: context.task.taskId,
+        capability: "graph_context_retrieval",
+      },
+    }),
+  );
+
+  const [runContext, caseContext] = await Promise.all([
+    context.graphContextReader.getRunContext(context.run.runId),
+    context.graphContextReader.getCaseContext(context.run.caseId),
+  ]);
+
+  const refs = unique([...runContext.refs, ...caseContext.refs]);
+  const summaryParts = [
+    runContext.refs.length > 0 ? `Run context:\n${runContext.summary}` : null,
+    caseContext.refs.length > 0 ? `Case context:\n${caseContext.summary}` : null,
+  ].filter((part): part is string => Boolean(part));
+
+  await context.eventSink.publish(
+    createRunEvent({
+      runId: context.run.runId,
+      agentId: `agent:${context.run.runId}:${context.task.agentType}`,
+      eventType: "tool_finished",
+      title: "Loaded graph context.",
+      payload: {
+        taskId: context.task.taskId,
+        capability: "graph_context_retrieval",
+        runContextRefs: runContext.refs.length,
+        caseContextRefs: caseContext.refs.length,
+        totalRefs: refs.length,
+      },
+    }),
+  );
+
+  return {
+    summary: summaryParts.join("\n\n"),
+    refs,
   };
 }
 

@@ -19,6 +19,7 @@ export function renderApp(options: {
   timeline: TimelineItemViewState[];
 }): string {
   const { state, config, run, report, agentCards, timeline } = options;
+  const hasRunActivity = Boolean(state.run || state.receivedEvents.length > 0);
 
   return `
     <div class="app-shell ${state.canvasCollapsed ? "canvas-collapsed" : ""}">
@@ -48,19 +49,18 @@ export function renderApp(options: {
             <span class="sidebar-node-mark">■</span>
             <span class="sidebar-node-label">NODE_05</span>
           </div>
-          <nav class="sidebar-nav" aria-label="Workspace">
-            <span class="sidebar-link active">Dashboard</span>
-            <span class="sidebar-link">Markets</span>
-            <span class="sidebar-link">Watchlist</span>
-            <span class="sidebar-link">Portfolio</span>
-            <span class="sidebar-link">Settings</span>
-          </nav>
-          <section class="sidebar-log panel-section">
-            <div class="section-kicker">Runtime Log</div>
-            <div class="sidebar-log-list" data-role="timeline-list">
-              ${renderTimelineList(timeline)}
-            </div>
-          </section>
+          ${
+            hasRunActivity
+              ? `
+                <section class="sidebar-log panel-section">
+                  <div class="section-kicker">Runtime Log</div>
+                  <div class="sidebar-log-list" data-role="timeline-list">
+                    ${renderTimelineList(timeline)}
+                  </div>
+                </section>
+              `
+              : `<div class="sidebar-note">Awaiting the first run.</div>`
+          }
           <div class="sidebar-footer">
             <span class="sidebar-link subtle">Help</span>
             <span class="sidebar-link subtle">Exit</span>
@@ -74,22 +74,40 @@ export function renderApp(options: {
                 <span class="eyebrow">Conversation</span>
                 <h1 class="brand-title compact">Ask Delphi</h1>
                 <p class="brand-copy compact">
-                  A simple research chat on the left. The execution canvas stays visible on the right.
+                  Ask one stock question. Delphi will hydrate data, graph, and report.
                 </p>
               </div>
 
-              <section class="status-strip compact" data-role="status-strip">
-                ${renderStatusStrip(run)}
-              </section>
+              ${
+                hasRunActivity
+                  ? `
+                    <section class="status-strip compact" data-role="status-strip">
+                      ${renderStatusStrip(run)}
+                    </section>
+                  `
+                  : `
+                    <section class="idle-strip compact">
+                      <span class="tag">Live runtime</span>
+                      <span class="tag">4 agents</span>
+                      <span class="tag">Graph-backed</span>
+                    </section>
+                  `
+              }
 
               <div class="chat-thread" data-role="dialogue-feed">
                 ${renderDialogueFeed(state, run, report)}
               </div>
             </div>
 
-            <div data-role="degraded-banner-slot">
-              ${renderDegradedBanner(report)}
-            </div>
+            ${
+              hasRunActivity
+                ? `
+                  <div data-role="degraded-banner-slot">
+                    ${renderDegradedBanner(report)}
+                  </div>
+                `
+                : ""
+            }
 
             <section class="panel-section query-shell chat-composer-shell">
               <form class="query-form" data-role="query-form">
@@ -117,12 +135,18 @@ export function renderApp(options: {
               </form>
             </section>
 
-            <section class="memo-shell">
-              <div class="section-kicker">Structured Output</div>
-              <section class="report-grid" data-role="report-grid">
-                ${renderReportGrid(report)}
-              </section>
-            </section>
+            ${
+              hasRunActivity
+                ? `
+                  <section class="memo-shell">
+                    <div class="section-kicker">Structured Output</div>
+                    <section class="report-grid" data-role="report-grid">
+                      ${renderReportGrid(report)}
+                    </section>
+                  </section>
+                `
+                : ""
+            }
           </section>
 
           <div class="shell-layout">
@@ -188,6 +212,17 @@ export function renderDialogueFeed(
   run: RunViewState,
   report: ReportViewState,
 ): string {
+  if (!state.run && state.receivedEvents.length === 0) {
+    return `
+      <div class="chat-message assistant">
+        <div class="chat-avatar">D</div>
+        <div class="chat-bubble idle">
+          <p>${escapeHtml(state.infoMessage ?? "Ask one stock question to start a live run.")}</p>
+        </div>
+      </div>
+    `;
+  }
+
   const finalJudgment = report.sections.find(
     (section) => section.key === "final_judgment",
   );
@@ -334,7 +369,7 @@ function renderReportSection(section: ReportViewState["sections"][number]): stri
 function renderAgentCard(card: AgentCardState): string {
   return `
     <article
-      class="panel-section terminal-card ${card.status === "running" ? "running" : ""}"
+      class="panel-section terminal-card ${card.status === "running" ? "running" : ""} ${card.expanded ? "expanded" : ""}"
       data-agent-card="${card.agent}"
     >
       <div class="terminal-topbar">
@@ -359,6 +394,15 @@ function renderAgentCard(card: AgentCardState): string {
             <span class="terminal-phase" data-field="phase-label">${escapeHtml(card.phaseLabel)}</span>
           </div>
         </div>
+        <button
+          class="terminal-card-button"
+          type="button"
+          data-action="toggle-terminal"
+          data-agent="${card.agent}"
+          aria-pressed="${card.expanded ? "true" : "false"}"
+        >
+          ${card.expanded ? "Collapse" : "Expand"}
+        </button>
       </div>
       <div class="terminal-body">
         <div class="terminal-status-row">
@@ -379,7 +423,7 @@ function renderAgentCard(card: AgentCardState): string {
             <span class="terminal-screen-title">runtime transcript</span>
             <span class="terminal-screen-meta" data-field="screen-meta">${escapeHtml(card.phaseLabel)}</span>
           </div>
-          <div class="terminal-lines" data-role="terminal-lines" data-agent="${card.agent}">
+          <div class="terminal-lines" data-role="terminal-scroll" data-agent="${card.agent}">
             ${renderTerminalLines(card.transcriptLines)}
           </div>
           <div class="terminal-screen-footer">
@@ -447,7 +491,7 @@ function renderCollapsedRail(
         </div>
       </div>
     </aside>
-  `;
+    `;
 }
 
 function renderStatusBadge(
