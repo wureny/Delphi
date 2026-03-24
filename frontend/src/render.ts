@@ -71,122 +71,42 @@ export function renderApp(options: {
 
         <div class="workspace-shell">
           <section class="left-panel">
-            <div class="chat-shell panel-section">
-              <div class="pane-heading compact">
-                <span class="eyebrow">Conversation</span>
-                <h1 class="brand-title compact">Ask Delphi</h1>
-                <p class="brand-copy compact">
-                  Ask one stock question. Delphi will hydrate data, graph, and report.
-                </p>
-              </div>
-
+            <div class="chat-shell panel-section conversation-main">
               ${
                 hasRunActivity
                   ? `
-                    <section class="status-strip compact" data-role="status-strip">
-                      ${renderStatusStrip(run)}
-                    </section>
-                  `
-                  : `
-                    <section class="idle-strip compact">
-                      <span class="tag">Live runtime</span>
-                      <span class="tag">4 agents</span>
-                      <span class="tag">Graph-backed</span>
-                    </section>
-                  `
-              }
-
-              <div class="chat-thread" data-role="dialogue-feed">
-                ${renderDialogueFeed(state, run, report)}
-              </div>
-            </div>
-
-            ${
-              hasRunActivity
-                ? `
-                  <div data-role="degraded-banner-slot">
-                    ${renderDegradedBanner(report)}
-                  </div>
-                `
-                : ""
-            }
-
-            <section class="panel-section query-shell chat-composer-shell">
-              <form class="query-form" data-role="query-form">
-                <label class="sr-only" for="query-input">Research question</label>
-                <textarea
-                  id="query-input"
-                  class="query-input"
-                  name="question"
-                  placeholder="Ask one stock question. Example: MSFT 未来六个月值不值得买？"
-                  ${state.connectionStatus === "creating" ? "disabled" : ""}
-                >${escapeHtml(state.composerText)}</textarea>
-                <div class="composer-actions">
-                  <p class="composer-note" data-role="composer-note">${escapeHtml(
-                    state.errorMessage ?? state.infoMessage ?? "",
-                  )}</p>
-                  <button
-                    class="primary-button"
-                    data-role="submit-button"
-                    type="submit"
-                    ${state.connectionStatus === "creating" ? "disabled" : ""}
-                  >
-                    ${renderComposerButtonLabel(state)}
-                  </button>
-                </div>
-              </form>
-            </section>
-
-            ${
-              hasRunActivity
-                ? `
-                  <section class="memo-shell">
-                    <div class="memo-shell-header">
-                      <div>
-                        <div class="section-kicker">Structured Output</div>
-                        <p class="memo-shell-copy">
-                          Read the report, or open the Research Map to see how Delphi connected the main view.
-                        </p>
-                      </div>
-                      <div class="memo-shell-tabs">
-                        <button
-                          class="memo-tab ${state.activeOutputPanel === "report" ? "active" : ""}"
-                          type="button"
-                          data-action="toggle-output-panel"
-                          data-panel="report"
-                          aria-pressed="${state.activeOutputPanel === "report" ? "true" : "false"}"
-                        >
-                          Report
-                        </button>
-                        <button
-                          class="memo-tab ${state.activeOutputPanel === "research_map" ? "active" : ""}"
-                          type="button"
-                          data-action="toggle-output-panel"
-                          data-panel="research_map"
-                          aria-pressed="${state.activeOutputPanel === "research_map" ? "true" : "false"}"
-                        >
-                          Research Map
-                        </button>
-                      </div>
+                    <div class="chat-thread answer-thread" data-role="dialogue-feed">
+                      ${renderDialogueFeed(state, run, report, researchMap)}
                     </div>
-                    <section
-                      class="report-grid"
-                      data-role="report-panel"
-                      ${state.activeOutputPanel === "report" ? "" : "hidden"}
+                  `
+                  : renderIdleConversation(state)
+              }
+              <section class="query-shell answer-composer-shell">
+                <form class="query-form" data-role="query-form">
+                  <label class="sr-only" for="query-input">Research question</label>
+                  <textarea
+                    id="query-input"
+                    class="query-input"
+                    name="question"
+                    placeholder="Ask one stock question. Example: MSFT 未来六个月值不值得买？"
+                    ${state.connectionStatus === "creating" ? "disabled" : ""}
+                  >${escapeHtml(state.composerText)}</textarea>
+                  <div class="composer-actions">
+                    <p class="composer-note" data-role="composer-note">${escapeHtml(
+                      state.errorMessage ?? state.infoMessage ?? "",
+                    )}</p>
+                    <button
+                      class="primary-button"
+                      data-role="submit-button"
+                      type="submit"
+                      ${state.connectionStatus === "creating" ? "disabled" : ""}
                     >
-                      <div data-role="report-grid">${renderReportGrid(report)}</div>
-                    </section>
-                    <section
-                      class="research-map-shell"
-                      data-role="research-map-panel"
-                      ${state.activeOutputPanel === "research_map" ? "" : "hidden"}
-                    >
-                      <div data-role="research-map">${renderResearchMap(researchMap)}</div>
-                    </section>
-                  </section>
-                `
-                : ""
-            }
+                      ${renderComposerButtonLabel(state)}
+                    </button>
+                  </div>
+                </form>
+              </section>
+            </div>
           </section>
 
           <div class="shell-layout">
@@ -251,56 +171,26 @@ export function renderDialogueFeed(
   state: AppState,
   run: RunViewState,
   report: ReportViewState,
+  researchMap: ResearchMapViewState,
 ): string {
-  if (!state.run && state.receivedEvents.length === 0) {
-    return `
-      <div class="chat-message assistant">
-        <div class="chat-avatar">D</div>
-        <div class="chat-bubble idle">
-          <p>${escapeHtml(state.infoMessage ?? "Ask one stock question to start a live run.")}</p>
-        </div>
-      </div>
-    `;
-  }
-
   const finalJudgment = report.sections.find(
     (section) => section.key === "final_judgment",
   );
   const queryLabel = state.run ? run.queryLabel : state.composerText.trim();
-  const swarmCopy =
+  const answerLead =
     finalJudgment?.content ||
     run.stageDetail ||
     "Runtime accepted the query and is preparing the multi-agent workbench.";
-  const failureCopy =
-    report.degradedMessage && !finalJudgment?.content
-      ? `
-        <div class="chat-message assistant warning">
-          <div class="chat-avatar">!</div>
-          <div class="chat-bubble">
-            <p>${escapeHtml(report.degradedMessage)}</p>
-          </div>
-        </div>
-      `
-      : "";
-  const streamWarningCopy = run.streamWarning
-    ? `
-      <div class="chat-message assistant warning">
-        <div class="chat-avatar">!</div>
-        <div class="chat-bubble">
-          <p>${escapeHtml(run.streamWarning)}</p>
-        </div>
-      </div>
-    `
-    : "";
+  const visibleSections = report.sections.filter(
+    (section) =>
+      section.key !== "final_judgment" &&
+      (section.content.trim().length > 0 || section.isSkeleton || report.degraded),
+  );
+  const showReasoningMap =
+    researchMap.cards.some((card) => card.status !== "waiting") ||
+    researchMap.evidenceTrail.length > 0;
 
   return `
-    <div class="chat-message assistant">
-      <div class="chat-avatar">D</div>
-      <div class="chat-bubble">
-        <p>${escapeHtml(state.infoMessage ?? "Ask a stock question to start a live multi-agent research run.")}</p>
-      </div>
-    </div>
-
     ${
       queryLabel
         ? `
@@ -315,18 +205,75 @@ export function renderDialogueFeed(
 
     <div class="chat-message assistant">
       <div class="chat-avatar">D</div>
-      <div class="chat-bubble">
-        <p>${escapeHtml(swarmCopy)}</p>
-        <div class="dialogue-metrics">
+      <div class="chat-bubble answer-bubble">
+        <div class="answer-meta-row">
           <span class="dialogue-chip ${run.statusTone}">${escapeHtml(run.stageLabel)}</span>
-          <span class="dialogue-chip">${run.completedAgentCount}/${run.totalAgentCount} settled</span>
+          <span class="dialogue-chip">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
           <span class="dialogue-chip">${escapeHtml(run.feedLabel)}</span>
+          ${run.streamWarning ? `<span class="dialogue-chip degraded">Reconnecting</span>` : ""}
+        </div>
+        <div class="answer-stream">
+          <section class="answer-hero">
+            <span class="answer-kicker">Delphi Answer</span>
+            <p class="answer-lead">${escapeHtml(answerLead)}</p>
+          </section>
+          ${
+            report.degradedMessage
+              ? `<div class="answer-alert">${escapeHtml(report.degradedMessage)}</div>`
+              : ""
+          }
+          ${
+            showReasoningMap
+              ? `
+                <section class="answer-map-block">
+                  <div class="answer-block-heading">
+                    <span class="answer-block-kicker">Reasoning Structure</span>
+                    <p class="answer-block-copy">${escapeHtml(researchMap.summary)}</p>
+                  </div>
+                  ${renderResearchMap(researchMap)}
+                </section>
+              `
+              : ""
+          }
+          ${
+            visibleSections.length > 0
+              ? `
+                <section class="answer-sections">
+                  ${visibleSections.map(renderReportSection).join("")}
+                </section>
+              `
+              : `
+                <section class="answer-pending">
+                  <p>${escapeHtml(run.stageDetail)}</p>
+                </section>
+              `
+          }
         </div>
       </div>
     </div>
+  `;
+}
 
-    ${failureCopy}
-    ${streamWarningCopy}
+function renderIdleConversation(state: AppState): string {
+  return `
+    <div class="idle-conversation">
+      <span class="eyebrow">Delphi Research</span>
+      <h1 class="brand-title">Ask about any US stock</h1>
+      <p class="brand-copy">
+        Delphi turns one natural-language question into a structured investment view, with the answer on the left and the multi-agent workbench on the right.
+      </p>
+      <div class="idle-strip compact">
+        <span class="tag">Chat-first</span>
+        <span class="tag">Streaming report</span>
+        <span class="tag">Research map</span>
+      </div>
+      <div class="idle-example-list">
+        <span class="idle-example">AAPL 未来三个月值不值得买？</span>
+        <span class="idle-example">NVDA 这次财报后还能追吗？</span>
+        <span class="idle-example">MSFT 当前风险收益比怎么样？</span>
+      </div>
+      <p class="idle-helper">${escapeHtml(state.infoMessage ?? "Ask one stock question to start a live run.")}</p>
+    </div>
   `;
 }
 

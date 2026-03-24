@@ -11,11 +11,7 @@ import {
 import {
   renderDialogueFeed,
   renderApp,
-  renderDegradedBanner,
   renderRailMeta,
-  renderResearchMap,
-  renderReportGrid,
-  renderStatusStrip,
   renderTerminalLine,
   renderTerminalLines,
   renderTimelineList,
@@ -38,7 +34,6 @@ import {
   selectTimelineState,
   toggleCanvas,
   toggleInsightFocus,
-  toggleOutputPanel,
   toggleTerminalExpansion,
   updateComposerText,
   type AppState,
@@ -212,18 +207,6 @@ export class DelphiFrontendApp {
       }
 
       this.state = toggleTerminalExpansion(this.state, agent);
-      this.renderShell();
-      return;
-    }
-
-    if (actionNode.dataset.action === "toggle-output-panel") {
-      const panel = actionNode.dataset.panel;
-
-      if (panel !== "report" && panel !== "research_map") {
-        return;
-      }
-
-      this.state = toggleOutputPanel(this.state, panel);
       this.renderShell();
       return;
     }
@@ -423,7 +406,7 @@ export class DelphiFrontendApp {
 
     const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
     if (dialogueFeed) {
-      dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report);
+      dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report, researchMap);
     }
 
     const submitButton = this.root.querySelector<HTMLButtonElement>('[data-role="submit-button"]');
@@ -435,50 +418,6 @@ export class DelphiFrontendApp {
     const queryInput = this.root.querySelector<HTMLTextAreaElement>("#query-input");
     if (queryInput) {
       queryInput.disabled = this.state.connectionStatus === "creating";
-    }
-
-    const statusStrip = this.root.querySelector<HTMLElement>('[data-role="status-strip"]');
-    if (statusStrip) {
-      statusStrip.innerHTML = renderStatusStrip(run);
-    }
-
-    const degradedSlot = this.root.querySelector<HTMLElement>('[data-role="degraded-banner-slot"]');
-    if (degradedSlot) {
-      degradedSlot.innerHTML = renderDegradedBanner(report);
-    }
-
-    const reportGrid = this.root.querySelector<HTMLElement>('[data-role="report-grid"]');
-    if (reportGrid) {
-      reportGrid.innerHTML = renderReportGrid(report);
-    }
-
-    const researchMapPanel = this.root.querySelector<HTMLElement>('[data-role="research-map"]');
-    if (researchMapPanel) {
-      researchMapPanel.innerHTML = renderResearchMap(researchMap);
-    }
-
-    for (const panel of ["report", "research_map"] as const) {
-      const button = this.root.querySelector<HTMLButtonElement>(
-        `[data-action="toggle-output-panel"][data-panel="${panel}"]`,
-      );
-
-      if (!button) {
-        continue;
-      }
-
-      const active = this.state.activeOutputPanel === panel;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", active ? "true" : "false");
-    }
-
-    const reportPanel = this.root.querySelector<HTMLElement>('[data-role="report-panel"]');
-    if (reportPanel) {
-      reportPanel.hidden = this.state.activeOutputPanel !== "report";
-    }
-
-    const mapPanel = this.root.querySelector<HTMLElement>('[data-role="research-map-panel"]');
-    if (mapPanel) {
-      mapPanel.hidden = this.state.activeOutputPanel !== "research_map";
     }
 
     const timelineList = this.root.querySelector<HTMLElement>('[data-role="timeline-list"]');
