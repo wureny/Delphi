@@ -411,6 +411,7 @@ function startSession(
     publish: async (event) => {
       session.events.push(event);
       session.snapshot.run = applyRuntimeEvent(session.snapshot.run, event);
+      session.snapshot = applyRuntimeSnapshotEvent(session.snapshot, event);
       broadcastEvent(session, event);
       broadcastTerminalChunk(session, event);
     },
@@ -736,6 +737,24 @@ function applyRuntimeEvent(run: RunRecord, event: RunEvent): RunRecord {
     status: inferRunStatus(run.status, event),
     updatedAt: event.ts,
     degradedReasons,
+  };
+}
+
+function applyRuntimeSnapshotEvent(
+  snapshot: RunSnapshot,
+  event: RunEvent,
+): RunSnapshot {
+  if (event.eventType !== "report_section_ready") {
+    return snapshot;
+  }
+
+  const section = event.payload as unknown as ReportSectionRecord;
+
+  return {
+    ...snapshot,
+    reportSections: snapshot.reportSections.map((current) =>
+      current.sectionKey === section.sectionKey ? section : current,
+    ),
   };
 }
 

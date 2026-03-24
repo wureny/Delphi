@@ -37,6 +37,7 @@ export type RunEventType =
   | "patch_accepted"
   | "patch_rejected"
   | "judge_synthesis_started"
+  | "report_section_ready"
   | "agent_completed"
   | "agent_failed"
   | "degraded_mode_entered"

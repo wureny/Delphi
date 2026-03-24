@@ -115,6 +115,8 @@ function summarizeTerminalEvent(event: RunEvent): string | null {
       return "graph patch rejected; degraded mode may apply";
     case "judge_synthesis_started":
       return "collecting upstream findings for fixed six-section report";
+    case "report_section_ready":
+      return summarizeReportSection(event);
     case "agent_completed":
       return stringPayload(event, "summary") ?? "agent completed";
     case "agent_failed":
@@ -180,6 +182,7 @@ function terminalPrefix(event: RunEvent): string {
     case "patch_rejected":
       return "graph>";
     case "judge_synthesis_started":
+    case "report_section_ready":
       return "synth>";
     case "agent_completed":
       return "done>";
@@ -207,6 +210,7 @@ function terminalKind(event: RunEvent): TerminalLineKind {
     case "patch_rejected":
       return "graph";
     case "judge_synthesis_started":
+    case "report_section_ready":
     case "report_ready":
       return "synthesis";
     case "degraded_mode_entered":
@@ -223,6 +227,7 @@ function terminalTone(event: RunEvent): TerminalLineTone {
     case "tool_started":
     case "tool_finished":
     case "judge_synthesis_started":
+    case "report_section_ready":
       return "running";
     case "agent_completed":
     case "report_ready":
@@ -236,6 +241,21 @@ function terminalTone(event: RunEvent): TerminalLineTone {
     default:
       return "neutral";
   }
+}
+
+function summarizeReportSection(event: RunEvent): string {
+  const title = stringPayload(event, "title");
+  const sectionKey = stringPayload(event, "sectionKey");
+
+  if (title) {
+    return `section ready · ${title}`;
+  }
+
+  if (sectionKey) {
+    return `section ready · ${sectionKey}`;
+  }
+
+  return "section ready";
 }
 
 function stringPayload(event: RunEvent, key: string): string | null {

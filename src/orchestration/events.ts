@@ -13,6 +13,7 @@ export const runEventTypes = [
   "agent_completed",
   "agent_failed",
   "degraded_mode_entered",
+  "report_section_ready",
   "report_ready",
 ] as const;
 

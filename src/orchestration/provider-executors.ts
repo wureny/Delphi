@@ -366,6 +366,21 @@ class ProviderJudgeExecutor implements AgentExecutor {
       sections: reportSections,
     });
 
+    for (const section of reportSections) {
+      await context.eventSink.publish(
+        createRunEvent({
+          runId: context.run.runId,
+          agentId: `agent:${context.run.runId}:judge`,
+          eventType: "report_section_ready",
+          title: `Report section ready: ${section.title}.`,
+          payload: {
+            reportId: finalReport.reportId,
+            ...section,
+          },
+        }),
+      );
+    }
+
     return {
       ...createEmptyAgentExecutionResult("done", "Synthesized provider-backed findings into one decision and six report sections."),
       decision,

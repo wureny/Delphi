@@ -174,6 +174,7 @@ export function reduceFeedMessage(
         reportSections: message.reportSections.length
           ? message.reportSections
           : createEmptySections(message.run.runId),
+        finalReportReady: state.finalReportReady || Boolean(message.finalReport),
       };
     case "event":
       return {
@@ -185,8 +186,13 @@ export function reduceFeedMessage(
         ),
         streamWarnings: clearStreamWarning(state.streamWarnings, "events"),
         receivedEvents: [...state.receivedEvents, message.event],
+        reportSections:
+          message.event.eventType === "report_section_ready"
+            ? upsertReportSection(state.reportSections, message.event)
+            : state.reportSections,
         finalReportReady:
-          state.finalReportReady || message.event.eventType === "report_ready",
+          state.finalReportReady ||
+          message.event.eventType === "report_ready",
       };
     case "terminal_snapshot":
       return {
@@ -260,6 +266,9 @@ export function selectRunViewState(state: AppState): RunViewState {
   const hasJudgeStarted = state.receivedEvents.some(
     (event) => event.eventType === "judge_synthesis_started",
   );
+  const hasReportSectionReady = state.receivedEvents.some(
+    (event) => event.eventType === "report_section_ready",
+  );
   const hasPlan = state.receivedEvents.some(
     (event) =>
       event.eventType === "planner_completed" ||
@@ -308,7 +317,9 @@ export function selectRunViewState(state: AppState): RunViewState {
     statusTone = degradedReasons.length > 0 ? "degraded" : "completed";
   } else if (hasJudgeStarted) {
     stageLabel = "Synthesizing";
-    stageDetail = "Judge is consolidating upstream findings into the final report.";
+    stageDetail = hasReportSectionReady
+      ? "Judge is publishing report sections incrementally."
+      : "Judge is consolidating upstream findings into the final report.";
     statusTone = "running";
   } else if (activeCards.length > 0) {
     stageLabel = "Agent Research";
@@ -343,7 +354,10 @@ export function selectRunViewState(state: AppState): RunViewState {
 
 export function selectReportViewState(state: AppState): ReportViewState {
   const degradedReasons = collectDegradedReasons(state);
-  const hasReport = state.finalReportReady;
+  const hasPartialReport = state.reportSections.some(
+    (section) => section.status !== "empty" || section.content.trim().length > 0,
+  );
+  const hasReport = state.finalReportReady || hasPartialReport;
   const isSynthesizing = state.receivedEvents.some(
     (event) => event.eventType === "judge_synthesis_started",
   );
@@ -359,7 +373,10 @@ export function selectReportViewState(state: AppState): ReportViewState {
             ? "degraded"
             : section.status,
         citations: compactCitations(section),
-        isSkeleton: false,
+        isSkeleton:
+          !state.finalReportReady &&
+          section.status === "empty" &&
+          section.content.trim().length === 0,
         highlight: section.sectionKey === "final_judgment",
       }))
     : createEmptySections().map((section): ReportSectionViewState => ({
@@ -488,6 +505,13 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
         card.status = "running";
         card.phaseLabel = "Synthesizing";
         card.recentAction = event.title;
+        break;
+      case "report_section_ready":
+        card.status = "running";
+        card.phaseLabel = "Publishing";
+        card.recentAction = summarizeReportSection(event) ?? event.title;
+        card.latestPatch = `Section ${reportSectionLabelFromEvent(event)} published.`;
+        card.patchTone = "clean";
         break;
       case "agent_completed":
         card.status =
@@ -748,6 +772,177 @@ function stringPayload(event: RunEvent, key: string): string | null {
   return typeof value === "string" ? value : null;
 }
 
+function upsertReportSection(
+  sections: ReportSectionRecord[],
+  event: RunEvent,
+): ReportSectionRecord[] {
+  const update = readReportSectionUpdate(event);
+
+  if (!update) {
+    return sections;
+  }
+
+  const index = sections.findIndex((section) => section.sectionKey === update.sectionKey);
+
+  if (index === -1) {
+    return sections;
+  }
+
+  const next = [...sections];
+  const existing = next[index];
+
+  if (!existing) {
+    return sections;
+  }
+
+  next[index] = mergeReportSection(existing, update);
+  return next;
+}
+
+function mergeReportSection(
+  existing: ReportSectionRecord,
+  update: Partial<ReportSectionRecord> & Pick<ReportSectionRecord, "sectionKey">,
+): ReportSectionRecord {
+  return {
+    ...existing,
+    ...update,
+    sectionId: update.sectionId ?? existing.sectionId,
+    runId: existing.runId,
+    sectionKey: existing.sectionKey,
+    title: update.title ?? existing.title,
+    content: update.content ?? existing.content,
+    citationFindingRefs: update.citationFindingRefs ?? existing.citationFindingRefs,
+    citationEvidenceRefs: update.citationEvidenceRefs ?? existing.citationEvidenceRefs,
+    citationObjectRefs: update.citationObjectRefs ?? existing.citationObjectRefs,
+    status: update.status ?? existing.status,
+  };
+}
+
+function readReportSectionUpdate(
+  event: RunEvent,
+): (Partial<ReportSectionRecord> & Pick<ReportSectionRecord, "sectionKey">) | null {
+  const payload = readRecord(event.payload.section) ?? event.payload;
+  const sectionKey = recordStringPayload(payload, "sectionKey");
+
+  if (!sectionKey || !reportSectionKeys.includes(sectionKey as ReportSectionKey)) {
+    return null;
+  }
+
+  const content = recordStringPayload(payload, "content");
+
+  if (content === null) {
+    return null;
+  }
+
+  return {
+    sectionKey: sectionKey as ReportSectionKey,
+    ...(recordStringPayload(payload, "sectionId")
+      ? { sectionId: recordStringPayload(payload, "sectionId") ?? "" }
+      : {}),
+    ...(recordStringPayload(payload, "title")
+      ? { title: recordStringPayload(payload, "title") ?? "" }
+      : {}),
+    content,
+    ...(recordStringArrayPayload(payload, "citationFindingRefs")
+      ? {
+          citationFindingRefs: recordStringArrayPayload(payload, "citationFindingRefs") ?? [],
+        }
+      : {}),
+    ...(recordStringArrayPayload(payload, "citationEvidenceRefs")
+      ? {
+          citationEvidenceRefs: recordStringArrayPayload(payload, "citationEvidenceRefs") ?? [],
+        }
+      : {}),
+    ...(recordStringArrayPayload(payload, "citationObjectRefs")
+      ? {
+          citationObjectRefs: recordStringArrayPayload(payload, "citationObjectRefs") ?? [],
+        }
+      : {}),
+    status: normalizeReportSectionStatus(recordStringPayload(payload, "status")),
+  };
+}
+
+function readRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  return value as Record<string, unknown>;
+}
+
+function recordStringPayload(
+  value: Record<string, unknown>,
+  key: string,
+): string | null {
+  const candidate = value[key];
+  return typeof candidate === "string" ? candidate : null;
+}
+
+function recordStringArrayPayload(
+  value: Record<string, unknown>,
+  key: string,
+): string[] | null {
+  const candidate = value[key];
+
+  if (!Array.isArray(candidate)) {
+    return null;
+  }
+
+  const strings = candidate.filter((item): item is string => typeof item === "string");
+
+  return strings.length === candidate.length ? strings : null;
+}
+
+function normalizeReportSectionStatus(
+  value: string | null,
+): ReportSectionStatus {
+  switch (value) {
+    case "ready":
+    case "empty":
+    case "degraded":
+      return value;
+    default:
+      return "ready";
+  }
+}
+
+function summarizeReportSection(event: RunEvent): string | null {
+  const payload = readRecord(event.payload.section) ?? event.payload;
+  const sectionKey = recordStringPayload(payload, "sectionKey");
+
+  if (!sectionKey || !reportSectionKeys.includes(sectionKey as ReportSectionKey)) {
+    return null;
+  }
+
+  const label = reportSectionLabel(sectionKey as ReportSectionKey, payload);
+  return `${label} section ready.`;
+}
+
+function reportSectionLabelFromEvent(event: RunEvent): string {
+  const payload = readRecord(event.payload.section) ?? event.payload;
+  const sectionKey = recordStringPayload(payload, "sectionKey");
+
+  if (!sectionKey || !reportSectionKeys.includes(sectionKey as ReportSectionKey)) {
+    return "report section";
+  }
+
+  return reportSectionLabel(sectionKey as ReportSectionKey, payload);
+}
+
+function reportSectionLabel(
+  sectionKey: ReportSectionKey,
+  payload: Record<string, unknown> | null = null,
+): string {
+  if (payload) {
+    const title = recordStringPayload(payload, "title");
+    if (title) {
+      return title;
+    }
+  }
+
+  return reportSectionTitles[sectionKey];
+}
+
 function summarizeToolResult(event: RunEvent): string {
   const parts = [
     stringPayload(event, "capability"),
@@ -801,6 +996,8 @@ function summarizeTimelineEvent(event: RunEvent): string {
       );
     case "degraded_mode_entered":
       return summarizeReasons(event) ?? "Run entered degraded mode.";
+    case "report_section_ready":
+      return summarizeReportSection(event) ?? "Report section ready.";
     case "report_ready":
       return stringPayload(event, "reportId") ?? "Final report ready.";
     default:
@@ -847,6 +1044,8 @@ function summarizeTranscriptEvent(event: RunEvent): string {
       );
     case "degraded_mode_entered":
       return summarizeReasons(event) ?? "degraded mode entered";
+    case "report_section_ready":
+      return summarizeReportSection(event) ?? "report section ready";
     case "report_ready":
       return `final report ready · ${truncateLong(stringPayload(event, "reportId") ?? "report", 28)}`;
     default:
@@ -868,6 +1067,8 @@ function terminalPrefix(event: RunEvent): string {
       return "graph>";
     case "judge_synthesis_started":
       return "synth>";
+    case "report_section_ready":
+      return "synth>";
     case "agent_completed":
       return "done>";
     case "agent_failed":
@@ -888,6 +1089,7 @@ function terminalTone(
     case "tool_started":
     case "tool_finished":
     case "judge_synthesis_started":
+    case "report_section_ready":
       return "running";
     case "agent_completed":
     case "report_ready":
@@ -918,6 +1120,7 @@ function inferTerminalKindFromEvent(
     case "patch_rejected":
       return "graph";
     case "judge_synthesis_started":
+    case "report_section_ready":
     case "report_ready":
       return "synthesis";
     case "degraded_mode_entered":
