@@ -407,7 +407,15 @@ export function renderTerminalLine(line: TerminalLineState): string {
 
 function renderReportSection(section: ReportViewState["sections"][number]): string {
   return `
-    <article class="panel-section report-card ${section.highlight ? "highlight" : ""}">
+    <article
+      class="panel-section report-card ${section.highlight ? "highlight" : ""} emphasis-${section.emphasis}"
+      data-action="toggle-insight-focus"
+      data-focus-kind="report_section"
+      data-section-key="${escapeHtml(section.key)}"
+      tabindex="0"
+      role="button"
+      aria-pressed="${section.emphasis === "selected" ? "true" : "false"}"
+    >
       <header class="report-card-header">
         <h3>${escapeHtml(section.title)}</h3>
         <span class="status-chip ${section.status}">
@@ -443,7 +451,15 @@ function renderResearchMapCard(
   card: ResearchMapViewState["cards"][number],
 ): string {
   return `
-    <article class="panel-section research-card ${card.isPrimary ? "primary" : ""} tone-${card.tone}">
+    <article
+      class="panel-section research-card ${card.isPrimary ? "primary" : ""} tone-${card.tone} emphasis-${card.emphasis}"
+      data-action="toggle-insight-focus"
+      data-focus-kind="research_card"
+      data-card-id="${escapeHtml(card.cardId)}"
+      tabindex="0"
+      role="button"
+      aria-pressed="${card.emphasis === "selected" ? "true" : "false"}"
+    >
       <header class="research-card-header">
         <div>
           <span class="research-card-label">${escapeHtml(card.label)}</span>

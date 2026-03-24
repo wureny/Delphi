@@ -951,6 +951,22 @@ a {
   overflow: hidden;
 }
 
+.report-card,
+.research-card {
+  cursor: pointer;
+}
+
+.report-card.emphasis-selected,
+.research-card.emphasis-selected {
+  border-color: rgba(0, 229, 255, 0.42);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.18);
+}
+
+.report-card.emphasis-related,
+.research-card.emphasis-related {
+  border-color: rgba(156, 240, 255, 0.28);
+}
+
 .report-card.highlight {
   grid-column: auto;
   min-height: 0;

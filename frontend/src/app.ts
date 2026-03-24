@@ -23,6 +23,7 @@ import {
 import {
   agentKeys,
   type AgentKey,
+  reportSectionKeys,
   type TerminalStreamChunk,
 } from "./run-contract.js";
 import {
@@ -36,6 +37,7 @@ import {
   selectRunViewState,
   selectTimelineState,
   toggleCanvas,
+  toggleInsightFocus,
   toggleOutputPanel,
   toggleTerminalExpansion,
   updateComposerText,
@@ -224,6 +226,42 @@ export class DelphiFrontendApp {
       this.state = toggleOutputPanel(this.state, panel);
       this.renderShell();
       return;
+    }
+
+    if (actionNode.dataset.action === "toggle-insight-focus") {
+      const focusKind = actionNode.dataset.focusKind;
+
+      if (focusKind === "report_section") {
+        const sectionKey = actionNode.dataset.sectionKey;
+
+        if (
+          !sectionKey ||
+          !reportSectionKeys.includes(sectionKey as (typeof reportSectionKeys)[number])
+        ) {
+          return;
+        }
+
+        this.state = toggleInsightFocus(this.state, {
+          kind: "report_section",
+          key: sectionKey as (typeof reportSectionKeys)[number],
+        });
+        this.syncView();
+        return;
+      }
+
+      if (focusKind === "research_card") {
+        const cardId = actionNode.dataset.cardId;
+
+        if (!cardId) {
+          return;
+        }
+
+        this.state = toggleInsightFocus(this.state, {
+          kind: "research_card",
+          cardId,
+        });
+        this.syncView();
+      }
     }
 
   }

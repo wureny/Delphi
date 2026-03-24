@@ -39,6 +39,10 @@ export interface AppState {
   composerText: string;
   canvasCollapsed: boolean;
   activeOutputPanel: "report" | "research_map";
+  selectedInsight:
+    | { kind: "report_section"; key: ReportSectionKey }
+    | { kind: "research_card"; cardId: string }
+    | null;
   expandedTerminalAgent: AgentKey | null;
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
@@ -76,6 +80,7 @@ export interface ReportSectionViewState {
   citations: string[];
   isSkeleton: boolean;
   highlight: boolean;
+  emphasis: "none" | "selected" | "related";
 }
 
 export interface ReportViewState {
@@ -92,6 +97,7 @@ export interface ResearchMapCardViewState {
   summary: string;
   meta: string;
   isPrimary: boolean;
+  emphasis: "none" | "selected" | "related";
 }
 
 export interface ResearchMapViewState {
@@ -146,6 +152,7 @@ export function createInitialState(
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     canvasCollapsed: false,
     activeOutputPanel: "report",
+    selectedInsight: null,
     expandedTerminalAgent: null,
     connectionStatus: "idle",
     errorMessage: null,
@@ -173,6 +180,7 @@ export function createRestartState(
     composerText: previous.composerText,
     canvasCollapsed: previous.canvasCollapsed,
     activeOutputPanel: previous.activeOutputPanel,
+    selectedInsight: null,
     expandedTerminalAgent: null,
   };
 }
@@ -396,21 +404,26 @@ export function selectReportViewState(state: AppState): ReportViewState {
   const runFailed = state.run?.status === "failed";
 
   const sections = hasReport
-    ? state.reportSections.map((section) => ({
-        key: section.sectionKey,
-        title: section.title,
-        content: section.content,
-        status:
-          degradedReasons.length > 0 && !section.content
-            ? "degraded"
-            : section.status,
-        citations: compactCitations(section),
-        isSkeleton:
-          !state.finalReportReady &&
-          section.status === "empty" &&
-          section.content.trim().length === 0,
-        highlight: section.sectionKey === "final_judgment",
-      }))
+    ? state.reportSections.map((section) => {
+        const citations = compactCitations(section);
+
+        return {
+          key: section.sectionKey,
+          title: section.title,
+          content: section.content,
+          status:
+            degradedReasons.length > 0 && !section.content
+              ? "degraded"
+              : section.status,
+          citations,
+          isSkeleton:
+            !state.finalReportReady &&
+            section.status === "empty" &&
+            section.content.trim().length === 0,
+          highlight: section.sectionKey === "final_judgment",
+          emphasis: deriveReportSectionEmphasis(state.selectedInsight, section.sectionKey, citations, state),
+        };
+      })
     : createEmptySections().map((section): ReportSectionViewState => ({
         key: section.sectionKey,
         title: section.title,
@@ -424,6 +437,7 @@ export function selectReportViewState(state: AppState): ReportViewState {
         citations: [],
         isSkeleton: true,
         highlight: section.sectionKey === "final_judgment",
+        emphasis: deriveReportSectionEmphasis(state.selectedInsight, section.sectionKey, [], state),
       }));
 
   return {
@@ -458,6 +472,7 @@ export function selectResearchMapViewState(state: AppState): ResearchMapViewStat
       summary: card.summary,
       meta: summarizeResearchMapCardMeta(card),
       isPrimary: card.cardId === "current_view",
+      emphasis: deriveResearchMapCardEmphasis(state.selectedInsight, card, state),
     })),
     evidenceTrail: snapshot.evidenceTrail,
     updatedAtLabel: snapshot.updatedAt ? formatTime(snapshot.updatedAt) : null,
@@ -659,6 +674,24 @@ export function toggleOutputPanel(
   };
 }
 
+export function toggleInsightFocus(
+  state: AppState,
+  focus:
+    | { kind: "report_section"; key: ReportSectionKey }
+    | { kind: "research_card"; cardId: string },
+): AppState {
+  const current = state.selectedInsight;
+  const sameFocus =
+    focus.kind === "report_section"
+      ? current?.kind === "report_section" && current.key === focus.key
+      : current?.kind === "research_card" && current.cardId === focus.cardId;
+
+  return {
+    ...state,
+    selectedInsight: sameFocus ? null : focus,
+  };
+}
+
 export function toggleTerminalExpansion(
   state: AppState,
   agent: AgentKey,
@@ -832,6 +865,7 @@ function compactCitations(section: ReportSectionRecord): string[] {
   return [
     ...section.citationFindingRefs,
     ...section.citationEvidenceRefs,
+    ...section.citationObjectRefs,
   ].slice(0, 6);
 }
 
@@ -1397,6 +1431,83 @@ function summarizeResearchMapCardMeta(card: ResearchMapCard): string {
   ].filter((value): value is string => Boolean(value));
 
   return parts.length > 0 ? parts.join(" · ") : "Structured view";
+}
+
+function deriveReportSectionEmphasis(
+  selectedInsight: AppState["selectedInsight"],
+  sectionKey: ReportSectionKey,
+  citations: readonly string[],
+  state: AppState,
+): ReportSectionViewState["emphasis"] {
+  if (!selectedInsight) {
+    return "none";
+  }
+
+  if (
+    selectedInsight.kind === "report_section" &&
+    selectedInsight.key === sectionKey
+  ) {
+    return "selected";
+  }
+
+  if (selectedInsight.kind === "research_card") {
+    const card = findResearchMapCard(state, selectedInsight.cardId);
+
+    if (card && hasSharedRef(citations, collectResearchCardRefs(card))) {
+      return "related";
+    }
+  }
+
+  return "none";
+}
+
+function deriveResearchMapCardEmphasis(
+  selectedInsight: AppState["selectedInsight"],
+  card: ResearchMapCard,
+  state: AppState,
+): ResearchMapCardViewState["emphasis"] {
+  if (!selectedInsight) {
+    return "none";
+  }
+
+  if (
+    selectedInsight.kind === "research_card" &&
+    selectedInsight.cardId === card.cardId
+  ) {
+    return "selected";
+  }
+
+  if (selectedInsight.kind === "report_section") {
+    const section = state.reportSections.find(
+      (current) => current.sectionKey === selectedInsight.key,
+    );
+
+    if (section && hasSharedRef(compactCitations(section), collectResearchCardRefs(card))) {
+      return "related";
+    }
+  }
+
+  return "none";
+}
+
+function findResearchMapCard(
+  state: AppState,
+  cardId: string,
+): ResearchMapCard | null {
+  const snapshot =
+    state.researchMapSnapshot ??
+    deriveResearchMapSnapshot(state.run, state.reportSections, state.receivedEvents);
+
+  return snapshot.cards.find((card) => card.cardId === cardId) ?? null;
+}
+
+function collectResearchCardRefs(card: ResearchMapCard): string[] {
+  return [...card.findingRefs, ...card.evidenceRefs, ...card.objectRefs];
+}
+
+function hasSharedRef(left: readonly string[], right: readonly string[]): boolean {
+  const rightSet = new Set(right);
+  return left.some((value) => rightSet.has(value));
 }
 
 function readStringArrayFromPayload(
