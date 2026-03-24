@@ -75,6 +75,41 @@ interface LoadedGraphContext {
   refs: string[];
 }
 
+const thesisCoverageContract = [
+  "Coverage requirements:",
+  "- Include at least one finding on business durability or core thesis quality.",
+  "- Include at least one finding on recent execution, guidance, or management signaling.",
+  "- Include at least one finding on why the stock is or is not attractive over the stated time horizon.",
+  "- Avoid repeating the same point in slightly different words.",
+].join("\n");
+
+const liquidityCoverageContract = [
+  "Coverage requirements:",
+  "- Include one finding on the current liquidity regime.",
+  "- Include one finding on how rates or funding conditions affect valuation support or downside risk.",
+  "- Include one finding on the practical portfolio implication for owning this stock now.",
+  "- Avoid generic macro commentary that does not change the case.",
+].join("\n");
+
+const marketSignalCoverageContract = [
+  "Coverage requirements:",
+  "- Include one finding on current price behavior or trend confirmation.",
+  "- Include one finding on crowding, positioning, or sentiment saturation.",
+  "- Include one finding on the practical trading stance: buyable, holdable, crowded, or avoid-for-now.",
+  "- Avoid pure tape description without a decision implication.",
+].join("\n");
+
+const judgeSectionContract = [
+  "Section writing contract:",
+  '- final_judgment: give one decisive stance, explain the main conflict, and state the practical action.',
+  '- core_thesis: explain the business-side logic that matters most over the stated horizon.',
+  '- supporting_evidence: summarize the strongest evidence in layered form, not as a raw list.',
+  '- key_risks: name the specific risks that could make this decision wrong or low-payoff.',
+  '- liquidity_context: explain how macro/liquidity changes support, limit, or threaten the thesis.',
+  '- what_changes_the_view: give explicit triggers that would make you more bullish or more cautious.',
+  "Write every section like a short investment memo paragraph, not like a schema placeholder.",
+].join("\n");
+
 class ProviderThesisExecutor implements AgentExecutor {
   readonly agentType = "thesis" as const;
   private readonly provider: StructuredModelProvider;
@@ -217,6 +252,7 @@ async function runProviderThesisAnalysis(
       "Allowed object keys:",
       '- "thesis_core": the primary Thesis object',
       '- "risk_execution": the primary execution Risk object',
+      thesisCoverageContract,
     ].join("\n"),
   });
 
@@ -295,6 +331,7 @@ async function runProviderLiquidityAnalysis(
       '- "macro_action_policy_rates": the MacroActorAction object',
       '- "liquidity_factor_rates_pressure": the LiquidityFactor object',
       '- "liquidity_regime_primary": the LiquidityRegime object',
+      liquidityCoverageContract,
     ].join("\n"),
   });
 
@@ -367,6 +404,7 @@ async function runProviderMarketSignalAnalysis(
       formatEvidenceCandidates(evidenceCandidates),
       "Allowed object keys:",
       '- "market_signal_price_positioning": the primary MarketSignal object',
+      marketSignalCoverageContract,
     ].join("\n"),
   });
 
@@ -438,6 +476,7 @@ async function runProviderJudgeSynthesis(
         ? [`Graph context:\n${graphContext.summary}`]
         : []),
       `Available findings: ${JSON.stringify(upstream)}`,
+      judgeSectionContract,
     ].join("\n"),
   });
 
