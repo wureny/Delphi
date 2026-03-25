@@ -353,9 +353,16 @@ export function renderTerminalLine(line: TerminalLineState): string {
 }
 
 function renderReportSection(section: ReportViewState["sections"][number]): string {
+  const linkageLabel =
+    section.citations.length > 0
+      ? `${section.citations.length} linked signals`
+      : section.status === "ready"
+        ? "No linked signals"
+        : "";
+
   return `
     <article
-      class="panel-section report-card ${section.highlight ? "highlight" : ""} emphasis-${section.emphasis}"
+      class="answer-section-block ${section.highlight ? "highlight" : ""} emphasis-${section.emphasis}"
       data-action="toggle-insight-focus"
       data-focus-kind="report_section"
       data-section-key="${escapeHtml(section.key)}"
@@ -363,13 +370,22 @@ function renderReportSection(section: ReportViewState["sections"][number]): stri
       role="button"
       aria-pressed="${section.emphasis === "selected" ? "true" : "false"}"
     >
-      <header class="report-card-header">
-        <h3>${escapeHtml(section.title)}</h3>
-        <span class="status-chip ${section.status}">
-          ${escapeHtml(section.status)}
-        </span>
+      <header class="answer-section-header">
+        <div class="answer-section-title-wrap">
+          <span class="answer-section-kicker">Memo Section</span>
+          <h3>${escapeHtml(section.title)}</h3>
+        </div>
+        ${
+          section.status !== "ready"
+            ? `
+              <span class="status-chip ${section.status}">
+                ${escapeHtml(section.status)}
+              </span>
+            `
+            : ""
+        }
       </header>
-      <p class="report-copy ${section.isSkeleton ? "skeleton" : section.content ? "" : "placeholder"}">
+      <p class="answer-section-copy ${section.isSkeleton ? "skeleton" : section.content ? "" : "placeholder"}">
         ${
           section.content
             ? escapeHtml(section.content)
@@ -378,18 +394,11 @@ function renderReportSection(section: ReportViewState["sections"][number]): stri
               : "No content available yet."
         }
       </p>
-      <div class="citations">
-        ${
-          section.citations.length > 0
-            ? section.citations
-                .map(
-                  (citation) =>
-                    `<span class="citation-pill">${escapeHtml(truncateMiddle(citation, 28))}</span>`,
-                )
-                .join("")
-            : `<span class="citation-pill">No citations yet</span>`
-        }
-      </div>
+      ${
+        linkageLabel
+          ? `<div class="answer-section-meta">${escapeHtml(linkageLabel)}</div>`
+          : ""
+      }
     </article>
   `;
 }
