@@ -68,6 +68,7 @@ export class DelphiFrontendApp {
   private readonly renderedTerminalLineIds = new Map<AgentKey, Set<string>>();
   private pauseDialogueAutoscroll = false;
   private lastInsightScrollTarget: string | null = null;
+  private lastGraphFocusTarget: string | null = null;
 
   constructor(config: DelphiAppConfig) {
     this.config = config;
@@ -514,6 +515,7 @@ export class DelphiFrontendApp {
 
       if (panel === "graph") {
         canvasPanelBody.innerHTML = renderGraphSnapshot(graphSnapshot);
+        this.syncGraphViewport(canvasPanelBody);
       }
     }
 
@@ -573,6 +575,51 @@ export class DelphiFrontendApp {
       behavior: "smooth",
       block: "nearest",
       inline: "nearest",
+    });
+  }
+
+  private syncGraphViewport(canvasPanelBody: HTMLElement): void {
+    const graphStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
+
+    if (!graphStage) {
+      this.lastGraphFocusTarget = null;
+      return;
+    }
+
+    const selectedNode =
+      graphStage.querySelector<Element>(".graph-node.focus-selected") ??
+      graphStage.querySelector<Element>(".graph-node.focus-related");
+
+    if (!selectedNode) {
+      this.lastGraphFocusTarget = null;
+      return;
+    }
+
+    const targetNodeId =
+      selectedNode.getAttribute("data-node-id") ??
+      selectedNode.getAttribute("id");
+
+    if (!targetNodeId || this.lastGraphFocusTarget === targetNodeId) {
+      return;
+    }
+
+    this.lastGraphFocusTarget = targetNodeId;
+
+    const nodeRect = selectedNode.getBoundingClientRect();
+    const stageRect = graphStage.getBoundingClientRect();
+    const nextLeft =
+      graphStage.scrollLeft +
+      (nodeRect.left - stageRect.left) -
+      (stageRect.width / 2 - nodeRect.width / 2);
+    const nextTop =
+      graphStage.scrollTop +
+      (nodeRect.top - stageRect.top) -
+      (stageRect.height / 2 - nodeRect.height / 2);
+
+    graphStage.scrollTo({
+      left: Math.max(nextLeft, 0),
+      top: Math.max(nextTop, 0),
+      behavior: "smooth",
     });
   }
 

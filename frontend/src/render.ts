@@ -83,11 +83,12 @@ export function renderApp(options: {
                       </button>
                     </div>
                     <div class="canvas-header">
-                      <div>
-                        <span class="eyebrow">Agent Canvas</span>
-                        <h2>Controlled Runtime Terminals</h2>
+                      <div class="canvas-header-copy">
+                        <span class="eyebrow">Delphi Workspace</span>
+                        <h2>Research Workspace</h2>
+                        <p class="canvas-subcopy">Follow the specialist lanes live, or inspect how the current call is connected.</p>
                       </div>
-                      <span class="tag">4 live agents · controlled stream</span>
+                      <span class="tag">${escapeHtml(renderWorkspaceTag(run))}</span>
                     </div>
                     <div class="canvas-tabs" data-role="canvas-tabs">
                       ${renderCanvasTab("terminals", "Agent Terminals", state.activeCanvasPanel === "terminals")}
@@ -118,15 +119,11 @@ export function renderRailMeta(
     runtimeRunKey?: string;
   },
 ): string {
+  void config;
   return `
     ${renderStatusBadge(run.statusTone, `${run.stageLabel}`)}
     <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
-    <span class="tag">${escapeHtml(run.feedLabel)}</span>
-    ${
-      config.feedMode === "sse" && config.runtimeRunKey
-        ? `<span class="tag">run ${escapeHtml(config.runtimeRunKey)}</span>`
-        : ""
-    }
+    <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} lanes</span>
   `;
 }
 
@@ -170,6 +167,7 @@ export function renderDialogueFeed(
       <div class="chat-avatar">D</div>
       <div class="chat-bubble answer-bubble">
         <div class="answer-stream">
+          ${renderAnswerLead(run)}
           ${renderInlineRunStatus(run)}
           ${
             report.degradedMessage
@@ -183,7 +181,7 @@ export function renderDialogueFeed(
             showReasoningMap
               ? `
                 <section class="answer-map-inline">
-                  <h3 class="res-heading">Research Map</h3>
+                  <h3 class="res-heading">Why this call hangs together</h3>
                   <p class="answer-map-summary">${escapeHtml(researchMap.summary)}</p>
                   ${renderResearchMap(researchMap)}
                 </section>
@@ -200,7 +198,12 @@ function renderIdleConversation(state: AppState): string {
   return `
     <div class="idle-conversation">
       <p class="idle-kicker">Ask about any US stock</p>
-      <p class="idle-helper">${escapeHtml(state.infoMessage ?? "Ask one stock question to start a live run.")}</p>
+      <p class="idle-helper">${escapeHtml(state.infoMessage ?? "Ask one stock question and Delphi will turn it into a structured investment case.")}</p>
+      <div class="idle-examples">
+        <span class="idle-example">Is AAPL a buy over the next 3 months?</span>
+        <span class="idle-example">What would change the view on NVDA?</span>
+        <span class="idle-example">How fragile is TSLA if liquidity tightens again?</span>
+      </div>
     </div>
   `;
 }
@@ -257,6 +260,7 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         <div>
           <span class="research-map-kicker">Research Structure</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
+          <p class="graph-header-copy">Each point represents a part of the current case, and each link shows how Delphi connected it into the answer.</p>
         </div>
         <div class="graph-meta">
           <span class="tag">${snapshot.nodeCount} points</span>
@@ -326,7 +330,11 @@ export function renderReportSection(section: ReportViewState["sections"][number]
     >
       <header class="answer-section-header">
         <div class="answer-section-title-wrap">
-          ${section.key === "final_judgment" ? "" : `<h3 class="res-heading">${escapeHtml(section.title)}</h3>`}
+          ${
+            section.key === "final_judgment"
+              ? `<span class="answer-section-kicker">Current call</span>`
+              : `<h3 class="res-heading">${escapeHtml(section.title)}</h3>`
+          }
         </div>
         ${
           section.status !== "ready"
@@ -426,7 +434,7 @@ function renderGraphEdge(edge: GraphSnapshotViewState["edges"][number]): string 
   const controlX = (edge.fromX + edge.toX) / 2;
 
   return `
-    <g class="graph-edge">
+    <g class="graph-edge focus-${edge.focus}">
       <path d="M ${edge.fromX} ${edge.fromY} C ${controlX} ${edge.fromY}, ${controlX} ${edge.toY}, ${edge.toX} ${edge.toY}"></path>
       <text class="graph-edge-label" x="${controlX}" y="${(edge.fromY + edge.toY) / 2 - 6}">${escapeHtml(edge.label)}</text>
     </g>
@@ -645,14 +653,46 @@ function renderResponseSections(report: ReportViewState, run: RunViewState): str
 
 function renderInlineRunStatus(run: RunViewState): string {
   return `
-    <div class="inline-status">
-      <span class="inline-status-dot ${run.statusTone}"></span>
-      <span>${escapeHtml(run.stageLabel)}</span>
-      <span class="inline-status-sep">·</span>
-      <span>${run.completedAgentCount}/${run.totalAgentCount} agents</span>
-      ${run.streamWarning ? `<span class="inline-status-warning">Reconnecting</span>` : ""}
+    <div class="inline-status-block">
+      <div class="inline-status">
+        <span class="inline-status-dot ${run.statusTone}"></span>
+        <span>${escapeHtml(run.stageLabel)}</span>
+        <span class="inline-status-sep">·</span>
+        <span>${run.completedAgentCount}/${run.totalAgentCount} lanes</span>
+        ${run.streamWarning ? `<span class="inline-status-warning">Reconnecting</span>` : ""}
+      </div>
+      <p class="inline-status-copy">${escapeHtml(run.stageDetail)}</p>
     </div>
   `;
+}
+
+function renderAnswerLead(run: RunViewState): string {
+  return `
+    <div class="answer-lead">
+      <span class="answer-lead-tag">Investment memo</span>
+      <span class="answer-lead-meta">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} horizon</span>
+    </div>
+  `;
+}
+
+function renderWorkspaceTag(run: RunViewState): string {
+  if (run.statusTone === "completed") {
+    return "Answer assembled";
+  }
+
+  if (run.statusTone === "degraded") {
+    return "Partial result";
+  }
+
+  if (run.statusTone === "failed") {
+    return "Needs another pass";
+  }
+
+  if (run.statusTone === "running") {
+    return `${run.completedAgentCount}/${run.totalAgentCount} lanes moving`;
+  }
+
+  return "Ready for a question";
 }
 
 function renderTypingIndicator(): string {

@@ -129,11 +129,14 @@ export interface GraphNodeViewState {
 
 export interface GraphEdgeViewState {
   edgeId: string;
+  fromNodeId: string;
+  toNodeId: string;
   fromX: number;
   fromY: number;
   toX: number;
   toY: number;
   label: string;
+  focus: "none" | "selected" | "related";
 }
 
 export interface GraphSnapshotViewState {
@@ -530,6 +533,11 @@ export function selectGraphSnapshotViewState(state: AppState): GraphSnapshotView
     state.graphSnapshot ??
     deriveGraphSnapshot(state.run, state.reportSections, state.receivedEvents);
   const layout = layoutGraph(snapshot.nodes, snapshot.edges);
+  const nodes = layout.nodes.map((node) => ({
+    ...node,
+    focus: deriveGraphNodeFocus(state.selectedInsight, node, state),
+  }));
+  const nodeFocusById = new Map(nodes.map((node) => [node.nodeId, node.focus]));
 
   return {
     headline: snapshot.headline,
@@ -537,11 +545,18 @@ export function selectGraphSnapshotViewState(state: AppState): GraphSnapshotView
     updatedAtLabel: snapshot.updatedAt ? formatTime(snapshot.updatedAt) : null,
     nodeCount: snapshot.nodes.length,
     edgeCount: snapshot.edges.length,
-    nodes: layout.nodes.map((node) => ({
-      ...node,
-      focus: deriveGraphNodeFocus(state.selectedInsight, node, state),
+    nodes,
+    edges: layout.edges.map((edge) => ({
+      ...edge,
+      focus:
+        nodeFocusById.get(edge.fromNodeId) === "selected" ||
+        nodeFocusById.get(edge.toNodeId) === "selected"
+          ? "selected"
+          : nodeFocusById.get(edge.fromNodeId) === "related" ||
+              nodeFocusById.get(edge.toNodeId) === "related"
+            ? "related"
+            : "none",
     })),
-    edges: layout.edges,
   };
 }
 
@@ -1685,11 +1700,14 @@ function layoutGraph(
 
     return [{
       edgeId: edge.edgeId,
+      fromNodeId: edge.from,
+      toNodeId: edge.to,
       fromX: from.x + from.width,
       fromY: from.y + from.height / 2,
       toX: to.x,
       toY: to.y + to.height / 2,
       label: edge.label,
+      focus: "none",
     }];
   });
 
