@@ -1,5 +1,6 @@
 import type {
   FinalReport,
+  GraphSnapshot,
   RecordedRunFixture,
   ResearchMapSnapshot,
   ReportSectionRecord,
@@ -23,6 +24,10 @@ export type FeedMessage =
   | {
       kind: "research_map_snapshot";
       snapshot: ResearchMapSnapshot;
+    }
+  | {
+      kind: "graph_snapshot";
+      snapshot: GraphSnapshot;
     }
   | {
       kind: "terminal_snapshot";
@@ -57,6 +62,7 @@ export interface RuntimeRunSubmission {
     events: string;
     report: string;
     researchMap: string;
+    graphSnapshot: string;
     terminals: string;
     terminalStream: string;
   };
@@ -152,6 +158,7 @@ export function createSseFeedSource(options: {
   eventsUrl: string;
   snapshotUrl?: string;
   researchMapUrl?: string;
+  graphSnapshotUrl?: string;
   terminalsUrl?: string;
   terminalStreamUrl?: string;
 }): RunFeedSource {
@@ -196,6 +203,14 @@ export function createSseFeedSource(options: {
         await loadResearchMapSnapshot(options.researchMapUrl, handlers);
       };
 
+      const refreshGraphSnapshot = async (): Promise<void> => {
+        if (!options.graphSnapshotUrl) {
+          return;
+        }
+
+        await loadGraphSnapshot(options.graphSnapshotUrl, handlers);
+      };
+
       const startSnapshotPolling = (): void => {
         if (!options.snapshotUrl || snapshotPollId !== null) {
           return;
@@ -222,6 +237,11 @@ export function createSseFeedSource(options: {
 
           if (options.researchMapUrl) {
             await refreshResearchMap();
+            hydrated = true;
+          }
+
+          if (options.graphSnapshotUrl) {
+            await refreshGraphSnapshot();
             hydrated = true;
           }
 
@@ -264,6 +284,16 @@ export function createSseFeedSource(options: {
                 options.researchMapUrl
               ) {
                 await refreshResearchMap();
+              }
+
+              if (
+                (event.eventType === "patch_accepted" ||
+                  event.eventType === "report_section_ready" ||
+                  event.eventType === "report_ready" ||
+                  event.eventType === "finding_created") &&
+                options.graphSnapshotUrl
+              ) {
+                await refreshGraphSnapshot();
               }
 
               if (event.eventType === "report_ready" && options.snapshotUrl) {
@@ -498,6 +528,23 @@ async function loadResearchMapSnapshot(
   const snapshot = (await response.json()) as ResearchMapSnapshot;
   handlers.onMessage({
     kind: "research_map_snapshot",
+    snapshot,
+  });
+}
+
+async function loadGraphSnapshot(
+  graphSnapshotUrl: string,
+  handlers: FeedHandlers,
+): Promise<void> {
+  const response = await fetch(graphSnapshotUrl);
+
+  if (!response.ok) {
+    throw new Error(`Graph snapshot request failed with status ${response.status}.`);
+  }
+
+  const snapshot = (await response.json()) as GraphSnapshot;
+  handlers.onMessage({
+    kind: "graph_snapshot",
     snapshot,
   });
 }

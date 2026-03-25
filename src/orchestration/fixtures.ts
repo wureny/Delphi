@@ -46,6 +46,7 @@ import {
   buildFindingPatch,
   buildJudgeDecisionPatch,
   buildJudgeReportPatch,
+  buildJudgeStableJudgmentPatch,
 } from "./runtime-patches.ts";
 import { createRunEvent } from "./events.ts";
 import {
@@ -250,6 +251,20 @@ export class FixtureGraphContextReader implements GraphContextReader {
     return {
       summary: `Case context for ${caseId} is currently fixture-backed.`,
       refs: [caseId],
+    };
+  }
+
+  async getPriorJudgments(caseId: string) {
+    return {
+      summary: `No historical judgments are available for fixture-backed case ${caseId}.`,
+      refs: [],
+    };
+  }
+
+  async getContradictions(caseId: string, claim: string) {
+    return {
+      summary: `No contradiction retrieval is available for fixture-backed case ${caseId}. Claim: ${claim}`,
+      refs: [],
     };
   }
 }
@@ -590,6 +605,13 @@ async function runFixtureJudgeSynthesis(
         context.run,
         context.task.taskId,
         decision,
+        reportSections,
+      ),
+      buildJudgeStableJudgmentPatch(
+        context.run,
+        context.task.taskId,
+        decision,
+        finalReport,
         reportSections,
       ),
     ],

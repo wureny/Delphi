@@ -4,6 +4,7 @@ import type { AgentType } from "../research-graph/runtime.ts";
 import type {
   AgentTask,
   DecisionRecord,
+  FinalReport,
   FindingRecord,
   ReportSectionRecord,
   RunRecord,
@@ -372,6 +373,64 @@ export function buildJudgeCitationPatches(
   }));
 }
 
+export function buildJudgeStableJudgmentPatch(
+  run: RunRecord,
+  taskId: string,
+  decision: DecisionRecord,
+  finalReport: FinalReport,
+  sections: readonly ReportSectionRecord[],
+): GraphPatch {
+  const judgmentRef = `judgment:${run.caseId}:primary`;
+  const evidenceRefs = unique(sections.flatMap((section) => section.citationEvidenceRefs));
+  const operations: GraphPatch["operations"] = [
+    {
+      opId: `op:${taskId}:judgment:merge`,
+      type: "merge_node",
+      resolvedRef: judgmentRef,
+      nodeType: "Judgment",
+      matchKeys: {
+        caseId: run.caseId,
+        judgmentId: "primary",
+      },
+      properties: {
+        judgmentId: "primary",
+        caseId: run.caseId,
+        stance: inferJudgmentStance(finalReport.finalJudgment, finalReport.whatChangesTheView),
+        confidenceBand: decision.confidenceBand,
+        summary: finalReport.finalJudgment || decision.summary,
+        asOf: finalReport.generatedAt,
+      },
+    },
+    {
+      opId: `op:${taskId}:case-has-judgment`,
+      type: "create_edge",
+      edgeType: "HAS_JUDGMENT",
+      fromRef: run.caseId,
+      toRef: judgmentRef,
+      properties: {},
+    },
+  ];
+
+  for (const [index, evidenceRef] of evidenceRefs.entries()) {
+    operations.push({
+      opId: `op:${taskId}:judgment-supported-by:${index + 1}`,
+      type: "attach_evidence",
+      targetRef: judgmentRef,
+      evidenceRef,
+      relationType: "SUPPORTED_BY",
+    });
+  }
+
+  return {
+    patchId: `patch:${run.runId}:${taskId}:judge-stable-judgment`,
+    runId: run.runId,
+    agentType: "judge",
+    targetScope: "case",
+    basisRefs: decision.basisFindingRefs,
+    operations,
+  };
+}
+
 function buildAgentRef(runId: string, agentType: AgentType): string {
   return `agent:${runId}:${agentType}`;
 }
@@ -387,4 +446,34 @@ function chunkOperations(
   }
 
   return chunks;
+}
+
+function inferJudgmentStance(finalJudgment: string, whatChangesTheView: string): string {
+  const text = `${finalJudgment}\n${whatChangesTheView}`.toLowerCase();
+
+  if (
+    text.includes("不值得买") ||
+    text.includes("回避") ||
+    text.includes("avoid") ||
+    text.includes("sell") ||
+    text.includes("减仓")
+  ) {
+    return "cautious";
+  }
+
+  if (
+    text.includes("值得买") ||
+    text.includes("可以买") ||
+    text.includes("buyable") ||
+    text.includes("持有") ||
+    text.includes("holdable")
+  ) {
+    return "constructive";
+  }
+
+  return "mixed";
+}
+
+function unique<T>(values: readonly T[]): T[] {
+  return [...new Set(values)];
 }

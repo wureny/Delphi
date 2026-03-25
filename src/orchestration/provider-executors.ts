@@ -14,7 +14,11 @@ import type {
   ReportSectionRecord,
   ReportSectionStatus,
 } from "./contracts.ts";
-import { createEmptyReportSections, buildFinalReport } from "./report.ts";
+import {
+  createEmptyReportSections,
+  buildFinalReport,
+  reportSectionTitles,
+} from "./report.ts";
 import type { StructuredModelProvider } from "./model-provider.ts";
 import {
   buildEvidenceCandidatePatch,
@@ -23,6 +27,7 @@ import {
   buildJudgeCitationPatches,
   buildJudgeDecisionPatch,
   buildJudgeReportPatch,
+  buildJudgeStableJudgmentPatch,
 } from "./runtime-patches.ts";
 import { createRunEvent } from "./events.ts";
 import {
@@ -460,7 +465,8 @@ async function runProviderJudgeSynthesis(
     objectRefs: finding.objectRefs,
   }));
 
-  const plan = await provider.generateObject<ProviderJudgePlan>({
+  const emittedSections = new Set<FinalReportSectionKey>();
+  const request = {
     schemaName: "delphi_judge_report",
     schemaDescription: "Structured decision and six fixed report sections for one run.",
     schema: providerJudgeSchema(),
@@ -478,7 +484,34 @@ async function runProviderJudgeSynthesis(
       `Available findings: ${JSON.stringify(upstream)}`,
       judgeSectionContract,
     ].join("\n"),
-  });
+  } as const;
+  const plan = await (provider.generateObjectStream
+    ? provider.generateObjectStream<ProviderJudgePlan>(request, {
+        onSectionReady: async (sectionKey, content) => {
+          if (!isFinalReportSectionKey(sectionKey) || emittedSections.has(sectionKey)) {
+            return;
+          }
+
+          emittedSections.add(sectionKey);
+          await context.eventSink.publish(
+            createRunEvent({
+              runId: context.run.runId,
+              agentId: `agent:${context.run.runId}:judge`,
+              eventType: "report_section_ready",
+              title: `Report section ready: ${reportSectionTitles[sectionKey]}.`,
+              payload: {
+                sectionId: `section:${context.run.runId}:${sectionKey}`,
+                runId: context.run.runId,
+                sectionKey,
+                title: reportSectionTitles[sectionKey],
+                content,
+                status: "ready",
+              },
+            }),
+          );
+        },
+      })
+    : provider.generateObject<ProviderJudgePlan>(request));
 
   const decision: DecisionRecord = {
     decisionId: `decision:${context.run.runId}:primary`,
@@ -502,6 +535,10 @@ async function runProviderJudgeSynthesis(
   });
 
   for (const section of reportSections) {
+    if (emittedSections.has(section.sectionKey)) {
+      continue;
+    }
+
     await context.eventSink.publish(
       createRunEvent({
         runId: context.run.runId,
@@ -525,6 +562,13 @@ async function runProviderJudgeSynthesis(
       buildJudgeDecisionPatch(context.run, context.task.taskId, decision),
       buildJudgeReportPatch(context.run, context.task.taskId, decision, reportSections),
       ...buildJudgeCitationPatches(context.run, context.task.taskId, decision, reportSections),
+      buildJudgeStableJudgmentPatch(
+        context.run,
+        context.task.taskId,
+        decision,
+        finalReport,
+        reportSections,
+      ),
     ],
   };
 }
@@ -549,15 +593,36 @@ async function loadGraphContext(
     }),
   );
 
-  const [runContext, caseContext] = await Promise.all([
+  const contradictionClaim = buildContradictionClaim(context);
+  const [runContext, caseContext, priorJudgments, contradictions] = await Promise.all([
     context.graphContextReader.getRunContext(context.run.runId),
     context.graphContextReader.getCaseContext(context.run.caseId),
+    context.graphContextReader.getPriorJudgments
+      ? context.graphContextReader.getPriorJudgments(context.run.caseId)
+      : Promise.resolve(null),
+    context.graphContextReader.getContradictions
+      ? context.graphContextReader.getContradictions(
+          context.run.caseId,
+          contradictionClaim,
+        )
+      : Promise.resolve(null),
   ]);
 
-  const refs = unique([...runContext.refs, ...caseContext.refs]);
+  const refs = unique([
+    ...runContext.refs,
+    ...caseContext.refs,
+    ...(priorJudgments?.refs ?? []),
+    ...(contradictions?.refs ?? []),
+  ]);
   const summaryParts = [
     runContext.refs.length > 0 ? `Run context:\n${runContext.summary}` : null,
     caseContext.refs.length > 0 ? `Case context:\n${caseContext.summary}` : null,
+    priorJudgments && priorJudgments.refs.length > 0
+      ? `Prior judgments:\n${priorJudgments.summary}`
+      : null,
+    contradictions && contradictions.refs.length > 0
+      ? `Contradictions:\n${contradictions.summary}`
+      : null,
   ].filter((part): part is string => Boolean(part));
 
   await context.eventSink.publish(
@@ -571,6 +636,8 @@ async function loadGraphContext(
         capability: "graph_context_retrieval",
         runContextRefs: runContext.refs.length,
         caseContextRefs: caseContext.refs.length,
+        priorJudgmentRefs: priorJudgments?.refs.length ?? 0,
+        contradictionRefs: contradictions?.refs.length ?? 0,
         totalRefs: refs.length,
       },
     }),
@@ -580,6 +647,19 @@ async function loadGraphContext(
     summary: summaryParts.join("\n\n"),
     refs,
   };
+}
+
+function buildContradictionClaim(context: AgentExecutionContext): string {
+  const upstreamClaims = context.upstreamFindings
+    .slice(0, 3)
+    .map((finding) => finding.claim.trim())
+    .filter((claim) => claim.length > 0);
+
+  if (upstreamClaims.length > 0) {
+    return upstreamClaims.join(" | ");
+  }
+
+  return context.query.userQuestion;
 }
 
 function providerFindingSchema(objectKeys: readonly string[]): Record<string, unknown> {
@@ -791,4 +871,8 @@ function normalizeConfidence(value: number): number {
 
 function unique<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
+}
+
+function isFinalReportSectionKey(value: string): value is FinalReportSectionKey {
+  return Object.hasOwn(reportSectionTitles, value);
 }

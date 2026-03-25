@@ -11,7 +11,9 @@ import {
 import {
   renderDialogueFeed,
   renderApp,
+  renderGraphSnapshot,
   renderRailMeta,
+  renderReportSection,
   renderTerminalLine,
   renderTerminalLines,
   renderTimelineList,
@@ -20,6 +22,7 @@ import {
   agentKeys,
   type AgentKey,
   reportSectionKeys,
+  type ReportSectionKey,
   type TerminalStreamChunk,
 } from "./run-contract.js";
 import {
@@ -27,12 +30,14 @@ import {
   createRestartState,
   reduceFeedMessage,
   renderComposerButtonLabel,
+  selectGraphSnapshotViewState,
   selectResearchMapViewState,
   selectAgentCardStates,
   selectReportViewState,
   selectRunViewState,
   selectTimelineState,
   toggleCanvas,
+  toggleCanvasPanel,
   toggleInsightFocus,
   toggleTerminalExpansion,
   updateComposerText,
@@ -49,6 +54,7 @@ export interface DelphiAppConfig {
   sseEventsUrl?: string;
   sseSnapshotUrl?: string;
   sseResearchMapUrl?: string;
+  sseGraphSnapshotUrl?: string;
   sseTerminalsUrl?: string;
   sseTerminalStreamUrl?: string;
 }
@@ -60,6 +66,8 @@ export class DelphiFrontendApp {
   private connection: FeedConnection | null = null;
   private readonly pausedTerminalAgents = new Set<AgentKey>();
   private readonly renderedTerminalLineIds = new Map<AgentKey, Set<string>>();
+  private pauseDialogueAutoscroll = false;
+  private lastInsightScrollTarget: string | null = null;
 
   constructor(config: DelphiAppConfig) {
     this.config = config;
@@ -114,8 +122,14 @@ export class DelphiFrontendApp {
       return;
     }
 
+    const reportSectionKey =
+      message.kind === "event" && message.event.eventType === "report_section_ready"
+        ? readReportSectionKey(message.event.payload.sectionKey)
+        : undefined;
+
     this.syncView({
       forceTerminalRefresh: message.kind === "terminal_snapshot",
+      ...(reportSectionKey ? { reportSectionKey } : {}),
     });
   }
 
@@ -148,6 +162,9 @@ export class DelphiFrontendApp {
           : {}),
         ...(this.config.sseResearchMapUrl
           ? { researchMapUrl: this.config.sseResearchMapUrl }
+          : {}),
+        ...(this.config.sseGraphSnapshotUrl
+          ? { graphSnapshotUrl: this.config.sseGraphSnapshotUrl }
           : {}),
         ...(this.config.sseTerminalsUrl
           ? { terminalsUrl: this.config.sseTerminalsUrl }
@@ -183,13 +200,13 @@ export class DelphiFrontendApp {
   private handleClick(event: Event): void {
     const target = event.target;
 
-    if (!(target instanceof HTMLElement)) {
+    if (!(target instanceof Element)) {
       return;
     }
 
-    const actionNode = target.closest<HTMLElement>("[data-action]");
+    const actionNode = target.closest("[data-action]");
 
-    if (!actionNode) {
+    if (!(actionNode instanceof HTMLElement) && !(actionNode instanceof SVGElement)) {
       return;
     }
 
@@ -207,6 +224,18 @@ export class DelphiFrontendApp {
       }
 
       this.state = toggleTerminalExpansion(this.state, agent);
+      this.renderShell();
+      return;
+    }
+
+    if (actionNode.dataset.action === "toggle-canvas-panel") {
+      const panel = actionNode.dataset.panel;
+
+      if (panel !== "terminals" && panel !== "graph") {
+        return;
+      }
+
+      this.state = toggleCanvasPanel(this.state, panel);
       this.renderShell();
       return;
     }
@@ -244,6 +273,21 @@ export class DelphiFrontendApp {
           cardId,
         });
         this.syncView();
+        return;
+      }
+
+      if (focusKind === "graph_node") {
+        const nodeId = actionNode.dataset.nodeId;
+
+        if (!nodeId) {
+          return;
+        }
+
+        this.state = toggleInsightFocus(this.state, {
+          kind: "graph_node",
+          nodeId,
+        });
+        this.syncView();
       }
     }
 
@@ -257,12 +301,25 @@ export class DelphiFrontendApp {
     }
 
     this.state = updateComposerText(this.state, target.value);
+    resizeComposerInput(target);
   }
 
   private handleScroll(event: Event): void {
     const target = event.target;
 
-    if (!(target instanceof HTMLElement) || target.dataset.role !== "terminal-scroll") {
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+
+    const followThreshold = 18;
+
+    if (target.dataset.role === "dialogue-feed") {
+      this.pauseDialogueAutoscroll =
+        target.scrollHeight - target.scrollTop - target.clientHeight > followThreshold;
+      return;
+    }
+
+    if (target.dataset.role !== "terminal-scroll") {
       return;
     }
 
@@ -272,7 +329,6 @@ export class DelphiFrontendApp {
       return;
     }
 
-    const followThreshold = 18;
     const isNearBottom =
       target.scrollHeight - target.scrollTop - target.clientHeight <= followThreshold;
 
@@ -344,6 +400,10 @@ export class DelphiFrontendApp {
         this.config.runtimeApiBaseUrl,
         submission.endpoints.researchMap,
       );
+      this.config.sseGraphSnapshotUrl = resolveRuntimeEndpoint(
+        this.config.runtimeApiBaseUrl,
+        submission.endpoints.graphSnapshot,
+      );
       this.config.sseTerminalsUrl = resolveRuntimeEndpoint(
         this.config.runtimeApiBaseUrl,
         submission.endpoints.terminals,
@@ -375,6 +435,7 @@ export class DelphiFrontendApp {
       run: selectRunViewState(this.state),
       report: selectReportViewState(this.state),
       researchMap: selectResearchMapViewState(this.state),
+      graphSnapshot: selectGraphSnapshotViewState(this.state),
       agentCards: selectAgentCardStates(this.state),
       timeline: selectTimelineState(this.state),
     });
@@ -386,10 +447,12 @@ export class DelphiFrontendApp {
   private syncView(options?: {
     forceTerminalRefresh?: boolean;
     appendTerminalChunk?: TerminalStreamChunk;
+    reportSectionKey?: ReportSectionKey;
   }): void {
     const run = selectRunViewState(this.state);
     const report = selectReportViewState(this.state);
     const researchMap = selectResearchMapViewState(this.state);
+    const graphSnapshot = selectGraphSnapshotViewState(this.state);
     const agentCards = selectAgentCardStates(this.state);
     const timeline = selectTimelineState(this.state);
 
@@ -406,7 +469,21 @@ export class DelphiFrontendApp {
 
     const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
     if (dialogueFeed) {
-      dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report, researchMap);
+      if (
+        options?.reportSectionKey &&
+        this.state.run &&
+        this.patchReportSection(dialogueFeed, report, options.reportSectionKey)
+      ) {
+        // Keep existing DOM and only patch the changed section.
+      } else {
+        dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report, researchMap);
+      }
+
+      if (!this.pauseDialogueAutoscroll) {
+        dialogueFeed.scrollTop = dialogueFeed.scrollHeight;
+      }
+
+      this.syncInsightScroll(dialogueFeed);
     }
 
     const submitButton = this.root.querySelector<HTMLButtonElement>('[data-role="submit-button"]');
@@ -418,6 +495,7 @@ export class DelphiFrontendApp {
     const queryInput = this.root.querySelector<HTMLTextAreaElement>("#query-input");
     if (queryInput) {
       queryInput.disabled = this.state.connectionStatus === "creating";
+      resizeComposerInput(queryInput);
     }
 
     const timelineList = this.root.querySelector<HTMLElement>('[data-role="timeline-list"]');
@@ -425,7 +503,77 @@ export class DelphiFrontendApp {
       timelineList.innerHTML = renderTimelineList(timeline);
     }
 
+    const canvasPanelBody = this.root.querySelector<HTMLElement>('[data-role="canvas-panel-body"]');
+    if (canvasPanelBody) {
+      const panel = this.state.activeCanvasPanel;
+
+      if (canvasPanelBody.dataset.panel !== panel) {
+        this.renderShell();
+        return;
+      }
+
+      if (panel === "graph") {
+        canvasPanelBody.innerHTML = renderGraphSnapshot(graphSnapshot);
+      }
+    }
+
     this.syncAgentCards(agentCards, options);
+  }
+
+  private patchReportSection(
+    dialogueFeed: HTMLElement,
+    report: ReturnType<typeof selectReportViewState>,
+    sectionKey: ReportSectionKey,
+  ): boolean {
+    const answerSections = dialogueFeed.querySelector<HTMLElement>(".answer-sections");
+    const nextSection = report.sections.find((section) => section.key === sectionKey);
+
+    if (!answerSections || !nextSection) {
+      return false;
+    }
+
+    const existingSection = answerSections.querySelector<HTMLElement>(
+      `[data-section="${sectionKey}"]`,
+    );
+    const sectionMarkup = renderReportSection(nextSection);
+
+    if (existingSection) {
+      existingSection.outerHTML = sectionMarkup;
+      return true;
+    }
+
+    answerSections.insertAdjacentHTML("beforeend", sectionMarkup);
+    const pending = dialogueFeed.querySelector<HTMLElement>(".answer-pending");
+    pending?.remove();
+    return true;
+  }
+
+  private syncInsightScroll(dialogueFeed: HTMLElement): void {
+    const targetSectionKey = resolveInsightSectionKey(this.state);
+
+    if (!targetSectionKey) {
+      this.lastInsightScrollTarget = null;
+      return;
+    }
+
+    if (this.lastInsightScrollTarget === targetSectionKey) {
+      return;
+    }
+
+    const targetSection = dialogueFeed.querySelector<HTMLElement>(
+      `[data-section="${targetSectionKey}"]`,
+    );
+
+    if (!targetSection) {
+      return;
+    }
+
+    this.lastInsightScrollTarget = targetSectionKey;
+    targetSection.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
   }
 
   private syncAgentCards(
@@ -615,6 +763,70 @@ export class DelphiFrontendApp {
   }
 }
 
+function readReportSectionKey(value: unknown): ReportSectionKey | undefined {
+  return typeof value === "string" && reportSectionKeys.includes(value as ReportSectionKey)
+    ? (value as ReportSectionKey)
+    : undefined;
+}
+
+function resolveInsightSectionKey(state: AppState): ReportSectionKey | null {
+  const insight = state.selectedInsight;
+
+  if (!insight) {
+    return null;
+  }
+
+  if (insight.kind === "report_section") {
+    return insight.key;
+  }
+
+  if (insight.kind === "research_card") {
+    return resolveSectionKeyFromResearchCard(insight.cardId);
+  }
+
+  return resolveSectionKeyFromNodeId(state, insight.nodeId);
+}
+
+function resolveSectionKeyFromResearchCard(cardId: string): ReportSectionKey | null {
+  if (cardId === "current_view") return "final_judgment";
+  if (cardId === "watchpoints") return "what_changes_the_view";
+  if (reportSectionKeys.includes(cardId as ReportSectionKey)) {
+    return cardId as ReportSectionKey;
+  }
+
+  return null;
+}
+
+function resolveSectionKeyFromNodeId(
+  state: AppState,
+  nodeId: string,
+): ReportSectionKey | null {
+  if (state.run?.caseId === nodeId) {
+    return "final_judgment";
+  }
+
+  for (const section of state.reportSections) {
+    if (section.sectionId === nodeId) {
+      return section.sectionKey;
+    }
+
+    if (
+      section.citationFindingRefs.includes(nodeId) ||
+      section.citationEvidenceRefs.includes(nodeId) ||
+      section.citationObjectRefs.includes(nodeId)
+    ) {
+      return section.sectionKey;
+    }
+  }
+
+  return null;
+}
+
+function resizeComposerInput(textarea: HTMLTextAreaElement): void {
+  textarea.style.height = "0px";
+  textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+}
+
 function buildFeedInfoMessage(config: DelphiAppConfig): string {
   if (config.feedMode === "sse") {
     const runKey = config.runtimeRunKey ?? inferRunKeyFromUrl(config.sseEventsUrl);
@@ -662,6 +874,7 @@ function syncLiveLocation(runtimeApiBaseUrl: string, runKey: string): void {
   url.searchParams.set("run", runKey);
   url.searchParams.delete("events");
   url.searchParams.delete("snapshot");
+  url.searchParams.delete("graphSnapshot");
   url.searchParams.delete("terminals");
   url.searchParams.delete("terminalStream");
   window.history.replaceState(null, "", url);

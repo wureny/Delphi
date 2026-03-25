@@ -3,17 +3,20 @@ import { NoopGraphWriter } from "../src/research-graph/graph-writer.ts";
 import {
   createNeo4jDriverExecutor,
   Neo4jGraphWriter,
+  Neo4jContextReader,
   readNeo4jConfigFromEnv,
 } from "../src/research-graph/index.ts";
 import {
   OpenBBRuntimeDataAdapter,
 } from "../src/data-layer/index.ts";
 import {
+  FixtureGraphContextReader,
   FixtureRuntimeDataAdapter,
 } from "../src/orchestration/fixtures.ts";
 import type { AgentExecutorMap } from "../src/orchestration/agent-runtime.ts";
 import type {
   CompanySnapshot,
+  GraphContextReader,
   MacroLiquiditySnapshot,
   MarketSnapshot,
   NewsSnapshot,
@@ -37,6 +40,12 @@ export interface ResolvedRuntimeGraphWriter {
 export interface ResolvedRuntimeExecutors {
   executors: AgentExecutorMap;
   mode: "fixture" | "openai";
+}
+
+export interface ResolvedRuntimeGraphContextReader {
+  reader: GraphContextReader;
+  mode: "fixture" | "neo4j";
+  close(): Promise<void>;
 }
 
 export function resolveRuntimeDataAdapter():
@@ -72,6 +81,29 @@ export function resolveRuntimeGraphWriter(): ResolvedRuntimeGraphWriter {
   return {
     writer: withRuntimeSmokeFaults(new NoopGraphWriter(), faultConfig),
     mode: "noop",
+    async close(): Promise<void> {
+      return Promise.resolve();
+    },
+  };
+}
+
+export function resolveRuntimeGraphContextReader(): ResolvedRuntimeGraphContextReader {
+  const mode = process.env.RUNTIME_GRAPH_MODE ?? "noop";
+
+  if (mode === "neo4j") {
+    const executor = createNeo4jDriverExecutor(readNeo4jConfigFromEnv());
+    return {
+      reader: new Neo4jContextReader(executor),
+      mode: "neo4j",
+      async close(): Promise<void> {
+        await executor.close();
+      },
+    };
+  }
+
+  return {
+    reader: new FixtureGraphContextReader(),
+    mode: "fixture",
     async close(): Promise<void> {
       return Promise.resolve();
     },

@@ -174,6 +174,39 @@ export interface ResearchMapSnapshot {
   evidenceTrail: string[];
 }
 
+export type GraphSnapshotNodeKind =
+  | "case"
+  | "section"
+  | "finding"
+  | "object"
+  | "evidence";
+
+export interface GraphSnapshotNode {
+  nodeId: string;
+  label: string;
+  kind: GraphSnapshotNodeKind;
+  summary: string;
+  emphasis: "primary" | "supporting" | "caution" | "neutral";
+}
+
+export interface GraphSnapshotEdge {
+  edgeId: string;
+  from: string;
+  to: string;
+  label: string;
+}
+
+export interface GraphSnapshot {
+  runId: string;
+  caseId: string;
+  status: RunStatus;
+  headline: string;
+  summary: string;
+  updatedAt: string;
+  nodes: GraphSnapshotNode[];
+  edges: GraphSnapshotEdge[];
+}
+
 export interface RecordedRunFixture {
   meta: {
     source: string;

@@ -66,6 +66,8 @@ export interface GraphContextSnapshot {
 export interface GraphContextReader {
   getRunContext(runId: string): Promise<GraphContextSnapshot>;
   getCaseContext(caseId: string): Promise<GraphContextSnapshot>;
+  getPriorJudgments?(caseId: string): Promise<GraphContextSnapshot>;
+  getContradictions?(caseId: string, claim: string): Promise<GraphContextSnapshot>;
 }
 
 export interface AgentExecutionContext {

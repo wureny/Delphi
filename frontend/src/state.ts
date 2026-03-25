@@ -1,6 +1,9 @@
 import type { FeedMessage, FeedMode, StreamKind } from "./feeds.js";
 import {
   agentKeys,
+  type GraphSnapshot,
+  type GraphSnapshotEdge,
+  type GraphSnapshotNode,
   type ResearchMapCard,
   type ResearchMapSnapshot,
   type ResearchMapStatus,
@@ -39,9 +42,11 @@ export interface AppState {
   composerText: string;
   canvasCollapsed: boolean;
   activeOutputPanel: "report" | "research_map";
+  activeCanvasPanel: "terminals" | "graph";
   selectedInsight:
     | { kind: "report_section"; key: ReportSectionKey }
     | { kind: "research_card"; cardId: string }
+    | { kind: "graph_node"; nodeId: string }
     | null;
   expandedTerminalAgent: AgentKey | null;
   connectionStatus: ConnectionStatus;
@@ -51,6 +56,7 @@ export interface AppState {
   run: RunRecord | null;
   reportSections: ReportSectionRecord[];
   researchMapSnapshot: ResearchMapSnapshot | null;
+  graphSnapshot: GraphSnapshot | null;
   finalReportReady: boolean;
   receivedEvents: RunEvent[];
   terminalLines: Record<AgentKey, TerminalLine[]>;
@@ -108,6 +114,38 @@ export interface ResearchMapViewState {
   updatedAtLabel: string | null;
 }
 
+export interface GraphNodeViewState {
+  nodeId: string;
+  label: string;
+  kind: GraphSnapshotNode["kind"];
+  summary: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  emphasis: GraphSnapshotNode["emphasis"];
+  focus: "none" | "selected" | "related";
+}
+
+export interface GraphEdgeViewState {
+  edgeId: string;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+  label: string;
+}
+
+export interface GraphSnapshotViewState {
+  headline: string;
+  summary: string;
+  updatedAtLabel: string | null;
+  nodeCount: number;
+  edgeCount: number;
+  nodes: GraphNodeViewState[];
+  edges: GraphEdgeViewState[];
+}
+
 export interface AgentCardState {
   agent: AgentKey;
   label: string;
@@ -152,6 +190,7 @@ export function createInitialState(
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     canvasCollapsed: false,
     activeOutputPanel: "report",
+    activeCanvasPanel: "terminals",
     selectedInsight: null,
     expandedTerminalAgent: null,
     connectionStatus: "idle",
@@ -165,6 +204,7 @@ export function createInitialState(
     run: null,
     reportSections: createEmptySections(),
     researchMapSnapshot: null,
+    graphSnapshot: null,
     finalReportReady: false,
     receivedEvents: [],
     terminalLines: createEmptyTerminalLines(),
@@ -180,6 +220,7 @@ export function createRestartState(
     composerText: previous.composerText,
     canvasCollapsed: previous.canvasCollapsed,
     activeOutputPanel: previous.activeOutputPanel,
+    activeCanvasPanel: previous.activeCanvasPanel,
     selectedInsight: null,
     expandedTerminalAgent: null,
   };
@@ -215,6 +256,11 @@ export function reduceFeedMessage(
       return {
         ...state,
         researchMapSnapshot: message.snapshot,
+      };
+    case "graph_snapshot":
+      return {
+        ...state,
+        graphSnapshot: message.snapshot,
       };
     case "event":
       return {
@@ -479,6 +525,26 @@ export function selectResearchMapViewState(state: AppState): ResearchMapViewStat
   };
 }
 
+export function selectGraphSnapshotViewState(state: AppState): GraphSnapshotViewState {
+  const snapshot =
+    state.graphSnapshot ??
+    deriveGraphSnapshot(state.run, state.reportSections, state.receivedEvents);
+  const layout = layoutGraph(snapshot.nodes, snapshot.edges);
+
+  return {
+    headline: snapshot.headline,
+    summary: snapshot.summary,
+    updatedAtLabel: snapshot.updatedAt ? formatTime(snapshot.updatedAt) : null,
+    nodeCount: snapshot.nodes.length,
+    edgeCount: snapshot.edges.length,
+    nodes: layout.nodes.map((node) => ({
+      ...node,
+      focus: deriveGraphNodeFocus(state.selectedInsight, node, state),
+    })),
+    edges: layout.edges,
+  };
+}
+
 export function renderComposerButtonLabel(state: AppState): string {
   if (state.feedMode === "recorded") {
     return "Replay Recorded Run";
@@ -674,17 +740,30 @@ export function toggleOutputPanel(
   };
 }
 
+export function toggleCanvasPanel(
+  state: AppState,
+  panel: "terminals" | "graph",
+): AppState {
+  return {
+    ...state,
+    activeCanvasPanel: panel,
+  };
+}
+
 export function toggleInsightFocus(
   state: AppState,
   focus:
     | { kind: "report_section"; key: ReportSectionKey }
-    | { kind: "research_card"; cardId: string },
+    | { kind: "research_card"; cardId: string }
+    | { kind: "graph_node"; nodeId: string },
 ): AppState {
   const current = state.selectedInsight;
   const sameFocus =
     focus.kind === "report_section"
       ? current?.kind === "report_section" && current.key === focus.key
-      : current?.kind === "research_card" && current.cardId === focus.cardId;
+      : focus.kind === "research_card"
+        ? current?.kind === "research_card" && current.cardId === focus.cardId
+        : current?.kind === "graph_node" && current.nodeId === focus.nodeId;
 
   return {
     ...state,
@@ -1345,6 +1424,281 @@ function deriveResearchMapSnapshot(
   };
 }
 
+function deriveGraphSnapshot(
+  run: RunRecord | null,
+  reportSections: readonly ReportSectionRecord[],
+  events: readonly RunEvent[],
+): GraphSnapshot {
+  const nodes = new Map<string, GraphSnapshotNode>();
+  const edges = new Map<string, GraphSnapshotEdge>();
+  const caseId = run?.caseId ?? "case:pending";
+  const finalJudgment = findSection(reportSections, "final_judgment");
+
+  const putNode = (node: GraphSnapshotNode): void => {
+    if (!nodes.has(node.nodeId)) {
+      nodes.set(node.nodeId, node);
+    }
+  };
+
+  const putEdge = (edge: GraphSnapshotEdge): void => {
+    if (!edges.has(edge.edgeId)) {
+      edges.set(edge.edgeId, edge);
+    }
+  };
+
+    putNode({
+      nodeId: caseId,
+      label: run ? `${run.query.ticker} · ${run.query.timeHorizon}` : "Current Case",
+      kind: "case",
+      summary: run?.query.userQuestion ?? "Waiting for a live run.",
+    emphasis: "primary",
+  });
+
+  for (const section of reportSections) {
+    if (section.content.trim().length === 0 && section.status === "empty") {
+      continue;
+    }
+
+    putNode({
+      nodeId: section.sectionId,
+      label: section.title,
+      kind: "section",
+      summary: section.content.trim() || `${section.title} is still being assembled.`,
+      emphasis: section.sectionKey === "final_judgment" ? "primary" : "supporting",
+    });
+    putEdge({
+      edgeId: `edge:${caseId}:${section.sectionId}:section`,
+      from: caseId,
+      to: section.sectionId,
+      label: "section",
+    });
+
+    for (const findingRef of section.citationFindingRefs) {
+      const finding = findFindingById(events, findingRef);
+      putNode({
+        nodeId: findingRef,
+        label: formatGraphFindingLabel(finding?.agentType),
+        kind: "finding",
+        summary:
+          finding?.claim ?? "A structured research point feeding the current answer.",
+        emphasis: "supporting",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${findingRef}:finding`,
+        from: section.sectionId,
+        to: findingRef,
+        label: "cites",
+      });
+    }
+
+    for (const objectRef of section.citationObjectRefs) {
+      putNode({
+        nodeId: objectRef,
+        label: formatGraphObjectLabel(objectRef),
+        kind: "object",
+        summary: summarizeGraphObjectRef(objectRef),
+        emphasis: objectRef.startsWith("risk:") ? "caution" : "supporting",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${objectRef}:object`,
+        from: section.sectionId,
+        to: objectRef,
+        label: "tracks",
+      });
+    }
+
+    for (const evidenceRef of section.citationEvidenceRefs) {
+      putNode({
+        nodeId: evidenceRef,
+        label: "Supporting Evidence",
+        kind: "evidence",
+        summary: "Evidence captured during the run and linked back to the answer.",
+        emphasis: "neutral",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${evidenceRef}:evidence`,
+        from: section.sectionId,
+        to: evidenceRef,
+        label: "grounds",
+      });
+    }
+  }
+
+  return {
+    runId: run?.runId ?? "run:pending",
+    caseId,
+    status: run?.status ?? "created",
+    headline:
+      finalJudgment.content.trim() ||
+      "This structure updates as Delphi connects the current investment case.",
+    summary:
+      "This view shows how Delphi links the case, the live report sections, the key findings, and the supporting evidence behind the current answer.",
+    updatedAt: run?.updatedAt ?? "",
+    nodes: [...nodes.values()],
+    edges: [...edges.values()],
+  };
+}
+
+function formatGraphFindingLabel(agentType?: string): string {
+  if (agentType === "thesis") return "Core Thesis";
+  if (agentType === "liquidity") return "Liquidity Read";
+  if (agentType === "market_signal") return "Market Signal";
+  if (agentType === "judge") return "Judge Synthesis";
+  return "Research Finding";
+}
+
+function findFindingById(
+  events: readonly RunEvent[],
+  findingId: string,
+): { claim: string; agentType: string } | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+
+    if (!event || event.eventType !== "finding_created") {
+      continue;
+    }
+
+    if (stringPayload(event, "findingId") !== findingId) {
+      continue;
+    }
+
+    return {
+      claim: stringPayload(event, "claim") ?? findingId,
+      agentType: stringPayload(event, "agentType") ?? "agent",
+    };
+  }
+
+  return null;
+}
+
+function formatGraphObjectLabel(objectRef: string): string {
+  if (objectRef.startsWith("thesis:")) return "Core Thesis";
+  if (objectRef.startsWith("risk:")) return "Key Risk";
+  if (objectRef.startsWith("liquidityregime:")) return "Liquidity Context";
+  if (objectRef.startsWith("liquidityfactor:")) return "Liquidity Factor";
+  if (objectRef.startsWith("macroactoraction:")) return "Macro Driver";
+  if (objectRef.startsWith("marketsignal:")) return "Market Signal";
+  if (objectRef.startsWith("judgment:")) return "Stored View";
+  return "Structured Insight";
+}
+
+function summarizeGraphObjectRef(objectRef: string): string {
+  if (objectRef.startsWith("thesis:")) {
+    return "The durable thesis object supporting the current investment view.";
+  }
+
+  if (objectRef.startsWith("risk:")) {
+    return "A persistent risk object that can weaken the current view.";
+  }
+
+  if (objectRef.startsWith("liquidityregime:")) {
+    return "The liquidity regime Delphi believes is shaping positioning risk.";
+  }
+
+  if (objectRef.startsWith("liquidityfactor:")) {
+    return "A liquidity factor influencing the near-term setup.";
+  }
+
+  if (objectRef.startsWith("macroactoraction:")) {
+    return "A macro driver or policy action feeding the liquidity read.";
+  }
+
+  if (objectRef.startsWith("marketsignal:")) {
+    return "A market signal object tied to trend, positioning, or sentiment.";
+  }
+
+  if (objectRef.startsWith("judgment:")) {
+    return "A stored judgment from this case that can be reused later.";
+  }
+
+  return "A structured research object linked to this run.";
+}
+
+function layoutGraph(
+  nodes: readonly GraphSnapshotNode[],
+  edges: readonly GraphSnapshotEdge[],
+): {
+  nodes: GraphNodeViewState[];
+  edges: GraphEdgeViewState[];
+} {
+  const laneOrder: GraphSnapshotNode["kind"][] = [
+    "case",
+    "section",
+    "finding",
+    "object",
+    "evidence",
+  ];
+  const xByLane: Record<GraphSnapshotNode["kind"], number> = {
+    case: 110,
+    section: 360,
+    finding: 610,
+    object: 860,
+    evidence: 1110,
+  };
+  const widthByLane: Record<GraphSnapshotNode["kind"], number> = {
+    case: 180,
+    section: 190,
+    finding: 190,
+    object: 170,
+    evidence: 150,
+  };
+  const grouped = new Map<GraphSnapshotNode["kind"], GraphSnapshotNode[]>();
+
+  for (const lane of laneOrder) {
+    grouped.set(lane, []);
+  }
+
+  for (const node of nodes) {
+    grouped.get(node.kind)?.push(node);
+  }
+
+  const laidOutNodes: GraphNodeViewState[] = [];
+
+  for (const lane of laneOrder) {
+    const laneNodes = grouped.get(lane) ?? [];
+    laneNodes.forEach((node, index) => {
+      const width = widthByLane[lane];
+      const height = lane === "case" ? 88 : 78;
+      laidOutNodes.push({
+        nodeId: node.nodeId,
+        label: node.label,
+        kind: node.kind,
+        summary: truncateLong(node.summary, lane === "case" ? 140 : 110),
+        x: xByLane[lane],
+        y: 56 + index * 106,
+        width,
+        height,
+        emphasis: node.emphasis,
+        focus: "none",
+      });
+    });
+  }
+
+  const nodeById = new Map(laidOutNodes.map((node) => [node.nodeId, node]));
+  const laidOutEdges: GraphEdgeViewState[] = edges.flatMap((edge) => {
+    const from = nodeById.get(edge.from);
+    const to = nodeById.get(edge.to);
+
+    if (!from || !to) {
+      return [];
+    }
+
+    return [{
+      edgeId: edge.edgeId,
+      fromX: from.x + from.width,
+      fromY: from.y + from.height / 2,
+      toX: to.x,
+      toY: to.y + to.height / 2,
+      label: edge.label,
+    }];
+  });
+
+  return {
+    nodes: laidOutNodes,
+    edges: laidOutEdges,
+  };
+}
+
 function createResearchMapCard(
   cardId: string,
   label: string,
@@ -1458,6 +1812,14 @@ function deriveReportSectionEmphasis(
     }
   }
 
+  if (selectedInsight.kind === "graph_node") {
+    const section = state.reportSections.find((current) => current.sectionKey === sectionKey);
+
+    if (section && sectionMatchesGraphNode(section, selectedInsight.nodeId, state.run?.caseId ?? null)) {
+      return "related";
+    }
+  }
+
   return "none";
 }
 
@@ -1487,6 +1849,46 @@ function deriveResearchMapCardEmphasis(
     }
   }
 
+  if (selectedInsight.kind === "graph_node") {
+    if (collectResearchCardRefs(card).includes(selectedInsight.nodeId)) {
+      return "related";
+    }
+  }
+
+  return "none";
+}
+
+function deriveGraphNodeFocus(
+  selectedInsight: AppState["selectedInsight"],
+  node: GraphNodeViewState,
+  state: AppState,
+): GraphNodeViewState["focus"] {
+  if (!selectedInsight) {
+    return "none";
+  }
+
+  if (selectedInsight.kind === "graph_node") {
+    return selectedInsight.nodeId === node.nodeId ? "selected" : "none";
+  }
+
+  if (selectedInsight.kind === "report_section") {
+    const section = state.reportSections.find(
+      (current) => current.sectionKey === selectedInsight.key,
+    );
+
+    if (section && sectionMatchesGraphNode(section, node.nodeId, state.run?.caseId ?? null)) {
+      return "related";
+    }
+  }
+
+  if (selectedInsight.kind === "research_card") {
+    const card = findResearchMapCard(state, selectedInsight.cardId);
+
+    if (card && collectResearchCardRefs(card).includes(node.nodeId)) {
+      return "related";
+    }
+  }
+
   return "none";
 }
 
@@ -1503,6 +1905,22 @@ function findResearchMapCard(
 
 function collectResearchCardRefs(card: ResearchMapCard): string[] {
   return [...card.findingRefs, ...card.evidenceRefs, ...card.objectRefs];
+}
+
+function sectionMatchesGraphNode(
+  section: ReportSectionRecord,
+  nodeId: string,
+  caseId: string | null,
+): boolean {
+  if (section.sectionId === nodeId) {
+    return true;
+  }
+
+  if (caseId && caseId === nodeId) {
+    return true;
+  }
+
+  return compactCitations(section).includes(nodeId);
 }
 
 function hasSharedRef(left: readonly string[], right: readonly string[]): boolean {

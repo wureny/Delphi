@@ -56,6 +56,39 @@ type ResearchMapSnapshot = {
   evidenceTrail: string[];
 };
 
+type GraphSnapshotNodeKind =
+  | "case"
+  | "section"
+  | "finding"
+  | "object"
+  | "evidence";
+
+type GraphSnapshotNode = {
+  nodeId: string;
+  label: string;
+  kind: GraphSnapshotNodeKind;
+  summary: string;
+  emphasis: "primary" | "supporting" | "caution" | "neutral";
+};
+
+type GraphSnapshotEdge = {
+  edgeId: string;
+  from: string;
+  to: string;
+  label: string;
+};
+
+type GraphSnapshot = {
+  runId: string;
+  caseId: string;
+  status: RunRecord["status"];
+  headline: string;
+  summary: string;
+  updatedAt: string;
+  nodes: GraphSnapshotNode[];
+  edges: GraphSnapshotEdge[];
+};
+
 interface RuntimeSession {
   key: string;
   query: ResearchQuery;
@@ -163,6 +196,7 @@ export function createRuntimeApiServer(
           events: `/runs/${encodeURIComponent(session.key)}/events`,
           report: `/runs/${encodeURIComponent(session.key)}/report`,
           researchMap: `/runs/${encodeURIComponent(session.key)}/research-map`,
+          graphSnapshot: `/runs/${encodeURIComponent(session.key)}/graph-snapshot`,
           terminals: `/runs/${encodeURIComponent(session.key)}/terminals`,
           terminalStream: `/runs/${encodeURIComponent(session.key)}/terminal-stream`,
         },
@@ -226,6 +260,33 @@ export function createRuntimeApiServer(
 
       const session = ensureSession(runKey, sessions, options);
       writeJson(response, 200, buildResearchMapSnapshot(session.snapshot, session.events));
+      return;
+    }
+
+    const graphSnapshotMatch = requestUrl.pathname.match(
+      /^\/runs\/([^/]+)\/graph-snapshot$/,
+    );
+
+    if (graphSnapshotMatch) {
+      const runKey = graphSnapshotMatch[1];
+
+      if (!runKey) {
+        writeJson(response, 400, {
+          error: "Missing run key.",
+        });
+        return;
+      }
+
+      if (!normalizeRunKey(runKey)) {
+        writeJson(response, 400, {
+          error:
+            "Invalid runKey. Use only letters, numbers, underscores, or hyphens.",
+        });
+        return;
+      }
+
+      const session = ensureSession(runKey, sessions, options);
+      writeJson(response, 200, buildGraphSnapshot(session.snapshot, session.events));
       return;
     }
 
@@ -802,12 +863,24 @@ function applyRuntimeSnapshotEvent(
     return snapshot;
   }
 
-  const section = event.payload as unknown as ReportSectionRecord;
+  const section = event.payload as Partial<ReportSectionRecord> & {
+    sectionKey?: ReportSectionRecord["sectionKey"];
+  };
+
+  if (!section.sectionKey) {
+    return snapshot;
+  }
 
   return {
     ...snapshot,
     reportSections: snapshot.reportSections.map((current) =>
-      current.sectionKey === section.sectionKey ? section : current,
+      current.sectionKey === section.sectionKey
+        ? {
+            ...current,
+            ...section,
+            sectionKey: current.sectionKey,
+          }
+        : current,
     ),
   };
 }
@@ -961,6 +1034,121 @@ function buildResearchMapSnapshot(
   };
 }
 
+function buildGraphSnapshot(
+  snapshot: RunSnapshot,
+  events: readonly RunEvent[],
+): GraphSnapshot {
+  const nodes = new Map<string, GraphSnapshotNode>();
+  const edges = new Map<string, GraphSnapshotEdge>();
+
+  const putNode = (node: GraphSnapshotNode): void => {
+    if (!nodes.has(node.nodeId)) {
+      nodes.set(node.nodeId, node);
+    }
+  };
+
+  const putEdge = (edge: GraphSnapshotEdge): void => {
+    if (!edges.has(edge.edgeId)) {
+      edges.set(edge.edgeId, edge);
+    }
+  };
+
+  putNode({
+    nodeId: snapshot.run.caseId,
+    label: `${snapshot.run.query.ticker} · ${snapshot.run.query.timeHorizon}`,
+    kind: "case",
+    summary: snapshot.run.query.userQuestion,
+    emphasis: "primary",
+  });
+
+  for (const section of snapshot.reportSections) {
+    if (section.content.trim().length === 0 && section.status === "empty") {
+      continue;
+    }
+
+    putNode({
+      nodeId: section.sectionId,
+      label: section.title,
+      kind: "section",
+      summary: section.content.trim() || `${section.title} is still being assembled.`,
+      emphasis: section.sectionKey === "final_judgment" ? "primary" : "supporting",
+    });
+    putEdge({
+      edgeId: `edge:${snapshot.run.caseId}:${section.sectionId}:section`,
+      from: snapshot.run.caseId,
+      to: section.sectionId,
+      label: "section",
+    });
+
+    for (const findingRef of section.citationFindingRefs) {
+      const findingEvent = findFindingEvent(events, findingRef);
+      putNode({
+        nodeId: findingRef,
+        label: findingEvent ? formatFindingLabel(findingEvent) : "Research Finding",
+        kind: "finding",
+        summary:
+          readEventString(findingEvent, "claim") ??
+          "A structured research point feeding the current answer.",
+        emphasis: "supporting",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${findingRef}:finding`,
+        from: section.sectionId,
+        to: findingRef,
+        label: "cites",
+      });
+    }
+
+    for (const objectRef of section.citationObjectRefs) {
+      putNode({
+        nodeId: objectRef,
+        label: formatObjectLabel(objectRef),
+        kind: "object",
+        summary: summarizeObjectRef(objectRef),
+        emphasis: objectRef.startsWith("risk:") ? "caution" : "supporting",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${objectRef}:object`,
+        from: section.sectionId,
+        to: objectRef,
+        label: "tracks",
+      });
+    }
+
+    for (const evidenceRef of section.citationEvidenceRefs) {
+      putNode({
+        nodeId: evidenceRef,
+        label: "Supporting Evidence",
+        kind: "evidence",
+        summary: summarizeEvidenceRef(evidenceRef),
+        emphasis: "neutral",
+      });
+      putEdge({
+        edgeId: `edge:${section.sectionId}:${evidenceRef}:evidence`,
+        from: section.sectionId,
+        to: evidenceRef,
+        label: "grounds",
+      });
+    }
+  }
+
+  const finalJudgment = readSection(snapshot.reportSections, "final_judgment");
+
+  return {
+    runId: snapshot.run.runId,
+    caseId: snapshot.run.caseId,
+    status: snapshot.run.status,
+    headline:
+      finalJudgment.content.trim() ||
+      "This structure updates as Delphi connects the current investment case.",
+    summary:
+      "This view shows how Delphi links the case, the live report sections, the key findings, and the supporting evidence behind the current answer.",
+    updatedAt: snapshot.run.updatedAt,
+    nodes: [...nodes.values()],
+    edges: [...edges.values()],
+  };
+}
+
 function buildResearchMapSummary(
   run: RunRecord,
   latestFindings: Partial<Record<"thesis" | "liquidity" | "market_signal", RunEvent>>,
@@ -980,6 +1168,103 @@ function buildResearchMapSummary(
   return activeLanes.length > 0
     ? `Delphi is still connecting ${activeLanes.join(", ")} inputs into one investment view.`
     : "Delphi is still building the structured investment map.";
+}
+
+function findFindingEvent(
+  events: readonly RunEvent[],
+  findingRef: string,
+): RunEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+
+    if (
+      event &&
+      event.eventType === "finding_created" &&
+      readEventString(event, "findingId") === findingRef
+    ) {
+      return event;
+    }
+  }
+
+  return null;
+}
+
+function formatFindingLabel(event: RunEvent): string {
+  const agentType = readEventString(event, "agentType");
+
+  if (agentType === "thesis") return "Core Thesis";
+  if (agentType === "liquidity") return "Liquidity Read";
+  if (agentType === "market_signal") return "Market Signal";
+  if (agentType === "judge") return "Judge Synthesis";
+  return "Research Finding";
+}
+
+function formatObjectLabel(objectRef: string): string {
+  if (objectRef.startsWith("thesis:")) {
+    return "Core Thesis";
+  }
+
+  if (objectRef.startsWith("risk:")) {
+    return "Key Risk";
+  }
+
+  if (objectRef.startsWith("liquidityregime:")) {
+    return "Liquidity Context";
+  }
+
+  if (objectRef.startsWith("liquidityfactor:")) {
+    return "Liquidity Factor";
+  }
+
+  if (objectRef.startsWith("macroactoraction:")) {
+    return "Macro Driver";
+  }
+
+  if (objectRef.startsWith("marketsignal:")) {
+    return "Market Signal";
+  }
+
+  if (objectRef.startsWith("judgment:")) {
+    return "Stored View";
+  }
+
+  return "Structured Insight";
+}
+
+function summarizeObjectRef(objectRef: string): string {
+  if (objectRef.startsWith("thesis:")) {
+    return "The durable thesis object supporting the current investment view.";
+  }
+
+  if (objectRef.startsWith("risk:")) {
+    return "A persistent risk object that can weaken the current view.";
+  }
+
+  if (objectRef.startsWith("liquidityregime:")) {
+    return "The liquidity regime Delphi believes is shaping positioning risk.";
+  }
+
+  if (objectRef.startsWith("liquidityfactor:")) {
+    return "A liquidity factor influencing the near-term setup.";
+  }
+
+  if (objectRef.startsWith("macroactoraction:")) {
+    return "A macro driver or policy action feeding the liquidity read.";
+  }
+
+  if (objectRef.startsWith("marketsignal:")) {
+    return "A market signal object tied to trend, positioning, or sentiment.";
+  }
+
+  if (objectRef.startsWith("judgment:")) {
+    return "A stored judgment from this case that can be reused later.";
+  }
+
+  return "A structured research object linked to this run.";
+}
+
+function summarizeEvidenceRef(_evidenceRef: string): string {
+  return "An evidence reference captured during the run and linked back to the answer.";
 }
 
 function buildResearchMapCard(input: {
@@ -1060,7 +1345,7 @@ function readSection(
   );
 }
 
-function readEventString(event: RunEvent | undefined, key: string): string | null {
+function readEventString(event: RunEvent | null | undefined, key: string): string | null {
   if (!event) {
     return null;
   }
@@ -1069,7 +1354,7 @@ function readEventString(event: RunEvent | undefined, key: string): string | nul
   return typeof value === "string" ? value : null;
 }
 
-function readEventStringArray(event: RunEvent | undefined, key: string): string[] {
+function readEventStringArray(event: RunEvent | null | undefined, key: string): string[] {
   if (!event) {
     return [];
   }

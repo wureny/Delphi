@@ -10,11 +10,11 @@ import {
 } from "../src/data-layer/index.ts";
 import {
   ConsoleRuntimeEventSink,
-  FixtureGraphContextReader,
 } from "../src/orchestration/fixtures.ts";
 import {
   resolveRuntimeDataAdapter,
   resolveRuntimeExecutors,
+  resolveRuntimeGraphContextReader,
   resolveRuntimeGraphWriter,
 } from "./runtime-support.ts";
 
@@ -22,6 +22,7 @@ async function main(): Promise<void> {
   const dataAdapter = resolveRuntimeDataAdapter();
   const execution = resolveRuntimeExecutors();
   const graphWriter = resolveRuntimeGraphWriter();
+  const graphContextReader = resolveRuntimeGraphContextReader();
   const memorySink = new MemoryRuntimeEventSink();
   const consoleSink = new ConsoleRuntimeEventSink();
   const eventSink = new CompositeRuntimeEventSink([consoleSink, memorySink]);
@@ -32,7 +33,7 @@ async function main(): Promise<void> {
       executors: execution.executors,
       eventSink,
       dataAdapter,
-      graphContextReader: new FixtureGraphContextReader(),
+      graphContextReader: graphContextReader.reader,
     });
 
     const result = await orchestrator.run({
@@ -77,6 +78,7 @@ async function main(): Promise<void> {
       2,
     ));
   } finally {
+    await graphContextReader.close();
     await graphWriter.close();
   }
 }

@@ -9,8 +9,13 @@
 - 已落地：项目内已 vendoring 投资分析 skill playbooks，并将其 prompt guidance 接入 provider agents，用于 thesis/liquidity/market-signal/judge 的实际分析。
 - 已落地：provider prompts 已增加更明确的 memo-style coverage contract，固定 6 sections 仍保留，但内容目标已从“简短总结”提升为“可执行投资备忘录”。
 - 已落地：固定 6 sections 的 `report_section_ready` 流式发布，前端已支持逐段渲染。
+- 已落地：OpenAI provider 已接入真实 section-level streaming；Judge 现在会随着模型输出逐段发出 `report_section_ready`，不再等完整 JSON 生成后一次性批量发出。
+- 已落地：左侧问答区已砍掉装饰性 header/sidebar，收敛为 chat-first 主布局；assistant 响应按 memo sections 内联呈现，并支持轻量 markdown 和 typing indicator。
 - 已落地：第一版 `research-map` snapshot API 和前端 `Research Map` 面板，但当前是**面向用户解释的派生视图**，不是完整 raw graph visualization。
-- 尚未落地：dynamic report sections、完整 graph tab/force layout 可视化、stable `Judgment` 持久化。
+- 已落地：第一版 `graph-snapshot` API 和右侧 `Research Structure` tab，可把当前 case、report sections、findings、structured objects、evidence refs 以产品化方式展示出来，并与左侧报告做最小联动高亮。
+- 已落地：Judge 默认会把当前 run 的综合结论持久化为 stable `Judgment`，并在 Neo4j 图上复用 `HAS_JUDGMENT` / `SUPPORTED_BY` 关系。
+- 已落地：Neo4j context reader 现在除了 run/case 摘要，还会读取历史 `Judgment` 与 case 级反向证据摘要，供 provider agents 在 prompt 中使用。
+- 尚未落地：dynamic report sections、raw graph explorer / force layout 可视化。
 
 ---
 

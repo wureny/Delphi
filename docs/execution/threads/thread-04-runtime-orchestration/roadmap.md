@@ -52,9 +52,12 @@
   - `POST /runs`
   - `GET /runs/:runKey/events`
   - `GET /runs/:runKey/report`
+  - `GET /runs/:runKey/research-map`
+  - `GET /runs/:runKey/graph-snapshot`
   - `GET /runs/:runKey/terminals`
   - `GET /runs/:runKey/terminal-stream`
 - 已完成受控 terminal stream，前端可直接消费右侧 terminal canvas
+- 已完成第一版 `Research Structure` 图视图，前端可切到 graph snapshot 观察 case / section / finding / evidence 的当前结构
 - 已完成 graph writer 运行时切换：
   - 默认 `RUNTIME_GRAPH_MODE=noop`
   - 可切 `RUNTIME_GRAPH_MODE=neo4j` 复用 thread2 `Neo4jGraphWriter`
@@ -64,10 +67,10 @@
 - 从 fixture execution 进入真实 provider-backed execution 路径
 - 从 fixture data path 进入真实 provider + real data 组合验证
 - 从本地 demo service 进入 Railway 常驻 runtime service 形态
+- graph retrieval 读侧增强（历史 `Judgment` / contradiction 摘要）
 
 ### Not Started
 
-- stable `Judgment` 条件化持久化
 - session continuity
 - provider-backed execution 与真实 data path 的组合验证
 - Railway 上的真实部署验证

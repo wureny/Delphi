@@ -14,10 +14,21 @@ export interface StructuredGenerationResult<TOutput> {
   rawText: string;
 }
 
+export interface StreamingCallbacks {
+  onSectionReady?(
+    sectionKey: string,
+    content: string,
+  ): void | Promise<void>;
+}
+
 export interface StructuredModelProvider {
   readonly providerName: string;
   readonly modelName: string;
   generateObject<TOutput>(
     request: StructuredGenerationRequest,
+  ): Promise<StructuredGenerationResult<TOutput>>;
+  generateObjectStream?<TOutput>(
+    request: StructuredGenerationRequest,
+    callbacks: StreamingCallbacks,
   ): Promise<StructuredGenerationResult<TOutput>>;
 }
