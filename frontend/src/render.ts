@@ -3,7 +3,6 @@ import type {
   ReportViewState,
   RunViewState,
   TerminalLineState,
-  TimelineItemViewState,
 } from "./state.js";
 import { renderComposerButtonLabel, type AppState } from "./state.js";
 
@@ -16,94 +15,33 @@ export function renderApp(options: {
   run: RunViewState;
   report: ReportViewState;
   agentCards: AgentCardState[];
-  timeline: TimelineItemViewState[];
 }): string {
-  const { state, config, run, report, agentCards, timeline } = options;
+  const { state, config, run, report, agentCards } = options;
+  const panelMode = state.run ? "active" : "idle";
 
   return `
     <div class="app-shell ${state.canvasCollapsed ? "canvas-collapsed" : ""}">
-      <header class="command-header">
-        <div class="header-brand">
-          <span class="brand-mark">DELPHI_TERMINAL</span>
-          <nav class="header-nav" aria-label="Primary">
-            <span class="header-nav-item active">Terminal</span>
-            <span class="header-nav-item">Analytics</span>
-            <span class="header-nav-item">Strategy</span>
-            <span class="header-nav-item">History</span>
-          </nav>
-        </div>
-        <div class="header-actions">
-          <div class="rail-meta" data-role="rail-meta">
-            ${renderRailMeta(run, config)}
-          </div>
-          <button class="toggle-button" data-action="toggle-canvas" type="button">
-            ${state.canvasCollapsed ? "Expand Canvas" : "Collapse Canvas"}
-          </button>
-        </div>
-      </header>
-
       <div class="app-frame">
-        <aside class="command-sidebar">
-          <div class="sidebar-node">
-            <span class="sidebar-node-mark">■</span>
-            <span class="sidebar-node-label">NODE_05</span>
-          </div>
-          <nav class="sidebar-nav" aria-label="Workspace">
-            <span class="sidebar-link active">Dashboard</span>
-            <span class="sidebar-link">Markets</span>
-            <span class="sidebar-link">Watchlist</span>
-            <span class="sidebar-link">Portfolio</span>
-            <span class="sidebar-link">Settings</span>
-          </nav>
-          <section class="sidebar-log panel-section">
-            <div class="section-kicker">Runtime Log</div>
-            <div class="sidebar-log-list" data-role="timeline-list">
-              ${renderTimelineList(timeline)}
-            </div>
-          </section>
-          <div class="sidebar-footer">
-            <span class="sidebar-link subtle">Help</span>
-            <span class="sidebar-link subtle">Exit</span>
-          </div>
-        </aside>
-
         <div class="workspace-shell">
-          <section class="left-panel">
-            <div class="chat-shell panel-section">
-              <div class="pane-heading compact">
-                <span class="eyebrow">Conversation</span>
-                <h1 class="brand-title compact">Ask Delphi</h1>
-                <p class="brand-copy compact">
-                  A simple research chat on the left. The execution canvas stays visible on the right.
-                </p>
-              </div>
-
-              <section class="status-strip compact" data-role="status-strip">
-                ${renderStatusStrip(run)}
-              </section>
-
-              <div class="chat-thread" data-role="dialogue-feed">
-                ${renderDialogueFeed(state, run, report)}
-              </div>
+          <section class="left-panel ${panelMode}">
+            <div class="chat-thread" data-role="dialogue-feed">
+              ${renderDialogueFeed(state, run, report)}
             </div>
 
-            <div data-role="degraded-banner-slot">
-              ${renderDegradedBanner(report)}
-            </div>
-
-            <section class="panel-section query-shell chat-composer-shell">
-              <form class="query-form" data-role="query-form">
+            <div class="chat-composer-wrap">
+              ${panelMode === "idle" ? `<p class="composer-lead">Ask about any US stock</p>` : ""}
+              <form class="chat-composer" data-role="query-form">
                 <label class="sr-only" for="query-input">Research question</label>
                 <textarea
                   id="query-input"
-                  class="query-input"
+                  class="chat-input"
                   name="question"
-                  placeholder="Ask one stock question. Example: MSFT 未来六个月值不值得买？"
+                  placeholder="e.g. MSFT 未来六个月值不值得买？"
                   ${state.connectionStatus === "creating" ? "disabled" : ""}
                 >${escapeHtml(state.composerText)}</textarea>
                 <div class="composer-actions">
                   <p class="composer-note" data-role="composer-note">${escapeHtml(
-                    state.errorMessage ?? state.infoMessage ?? "",
+                    state.errorMessage ?? "",
                   )}</p>
                   <button
                     class="primary-button"
@@ -115,14 +53,7 @@ export function renderApp(options: {
                   </button>
                 </div>
               </form>
-            </section>
-
-            <section class="memo-shell">
-              <div class="section-kicker">Structured Output</div>
-              <section class="report-grid" data-role="report-grid">
-                ${renderReportGrid(report)}
-              </section>
-            </section>
+            </div>
           </section>
 
           <div class="shell-layout">
@@ -136,7 +67,13 @@ export function renderApp(options: {
                         <span class="eyebrow">Agent Canvas</span>
                         <h2>Controlled Runtime Terminals</h2>
                       </div>
-                      <span class="tag">4 live agents · controlled stream</span>
+                      <div class="canvas-header-actions">
+                        <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
+                        ${renderStatusBadge(run.statusTone, run.stageLabel)}
+                        <button class="toggle-button" data-action="toggle-canvas" type="button">
+                          Collapse
+                        </button>
+                      </div>
                     </div>
                     <section class="agent-grid">
                       ${agentCards.map(renderAgentCard).join("")}
@@ -152,123 +89,93 @@ export function renderApp(options: {
   `;
 }
 
-export function renderRailMeta(
-  run: RunViewState,
-  config: {
-    feedMode: AppState["feedMode"];
-    runtimeRunKey?: string;
-  },
-): string {
-  return `
-    ${renderStatusBadge(run.statusTone, `${run.stageLabel}`)}
-    <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
-    <span class="tag">${escapeHtml(run.feedLabel)}</span>
-    ${
-      config.feedMode === "sse" && config.runtimeRunKey
-        ? `<span class="tag">run ${escapeHtml(config.runtimeRunKey)}</span>`
-        : ""
-    }
-  `;
-}
-
-export function renderStatusStrip(run: RunViewState): string {
-  return `
-    <div class="chat-status-row">
-      ${renderStatusBadge(run.statusTone, run.stageLabel)}
-      <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
-      <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
-      ${run.streamWarning ? `<span class="tag warning">Reconnecting</span>` : ""}
-    </div>
-    <p class="chat-status-copy">${escapeHtml(run.stageDetail)}</p>
-  `;
-}
-
 export function renderDialogueFeed(
   state: AppState,
   run: RunViewState,
   report: ReportViewState,
 ): string {
-  const finalJudgment = report.sections.find(
-    (section) => section.key === "final_judgment",
-  );
   const queryLabel = state.run ? run.queryLabel : state.composerText.trim();
-  const swarmCopy =
-    finalJudgment?.content ||
-    run.stageDetail ||
-    "Runtime accepted the query and is preparing the multi-agent workbench.";
-  const failureCopy =
-    report.degradedMessage && !finalJudgment?.content
-      ? `
-        <div class="chat-message assistant warning">
-          <div class="chat-avatar">!</div>
-          <div class="chat-bubble">
-            <p>${escapeHtml(report.degradedMessage)}</p>
-          </div>
-        </div>
-      `
-      : "";
-  const streamWarningCopy = run.streamWarning
-    ? `
-      <div class="chat-message assistant warning">
-        <div class="chat-avatar">!</div>
-        <div class="chat-bubble">
-          <p>${escapeHtml(run.streamWarning)}</p>
-        </div>
-      </div>
-    `
-    : "";
 
-  return `
-    <div class="chat-message assistant">
-      <div class="chat-avatar">D</div>
-      <div class="chat-bubble">
-        <p>${escapeHtml(state.infoMessage ?? "Ask a stock question to start a live multi-agent research run.")}</p>
-      </div>
-    </div>
-
-    ${
-      queryLabel
-        ? `
-          <div class="chat-message user">
-            <div class="chat-bubble">
-              <p>${escapeHtml(queryLabel)}</p>
-            </div>
-          </div>
-        `
-        : ""
-    }
-
-    <div class="chat-message assistant">
-      <div class="chat-avatar">D</div>
-      <div class="chat-bubble">
-        <p>${escapeHtml(swarmCopy)}</p>
-        <div class="dialogue-metrics">
-          <span class="dialogue-chip ${run.statusTone}">${escapeHtml(run.stageLabel)}</span>
-          <span class="dialogue-chip">${run.completedAgentCount}/${run.totalAgentCount} settled</span>
-          <span class="dialogue-chip">${escapeHtml(run.feedLabel)}</span>
-        </div>
-      </div>
-    </div>
-
-    ${failureCopy}
-    ${streamWarningCopy}
-  `;
-}
-
-export function renderDegradedBanner(report: ReportViewState): string {
-  if (!report.degradedMessage) {
+  if (!queryLabel) {
     return "";
   }
 
-  return `<div class="degraded-banner">${escapeHtml(report.degradedMessage)}</div>`;
+  const parts: string[] = [];
+
+  parts.push(`
+    <div class="chat-message user">
+      <div class="chat-bubble">
+        <p>${escapeHtml(queryLabel)}</p>
+      </div>
+    </div>
+  `);
+
+  if (state.receivedEvents.length > 0 || state.connectionStatus === "creating") {
+    parts.push(`
+      <div class="chat-message assistant">
+        <div class="chat-avatar">D</div>
+        <div class="chat-bubble response-stream" data-role="response-stream">
+          ${renderStreamingResponse(state, run, report)}
+        </div>
+      </div>
+    `);
+  }
+
+  return parts.join("");
 }
 
-export function renderReportGrid(report: ReportViewState): string {
-  return report.sections.map(renderReportSection).join("");
-}
+function renderStreamingResponse(
+  state: AppState,
+  run: RunViewState,
+  report: ReportViewState,
+): string {
+  const parts: string[] = [];
 
-export function renderTimelineList(timeline: TimelineItemViewState[]): string {
-  return timeline.map(renderTimelineItem).join("");
+  if (run.statusTone === "running" || run.statusTone === "idle") {
+    parts.push(`
+      <div class="inline-status" data-role="inline-status">
+        <span class="dot ${run.statusTone}"></span>
+        <span>${escapeHtml(run.stageLabel)}</span>
+        <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} agents</span>
+      </div>
+    `);
+  }
+
+  if (report.degradedMessage) {
+    parts.push(`<div class="inline-warning">${escapeHtml(report.degradedMessage)}</div>`);
+  }
+
+  if (run.streamWarning) {
+    parts.push(`<div class="inline-warning">${escapeHtml(run.streamWarning)}</div>`);
+  }
+
+  const judgment = report.sections.find((s) => s.key === "final_judgment");
+  if (judgment?.content) {
+    parts.push(`
+      <div class="res-section primary" data-section="final_judgment">
+        <div class="res-content">${renderMarkdown(judgment.content)}</div>
+      </div>
+    `);
+  } else if (run.statusTone === "running") {
+    parts.push(`<div class="typing-indicator"><span></span><span></span><span></span></div>`);
+  }
+
+  for (const s of report.sections) {
+    if (s.key === "final_judgment" || !s.content) continue;
+    parts.push(`
+      <div class="res-section" data-section="${escapeHtml(s.key)}">
+        <h3 class="res-heading">${escapeHtml(s.title)}</h3>
+        <div class="res-content">${renderMarkdown(s.content)}</div>
+        ${
+          s.citations.length
+            ? `<div class="res-citations">${s.citations.map((c) => `<span class="cite">${escapeHtml(c)}</span>`).join("")}</div>`
+            : ""
+        }
+      </div>
+    `);
+  }
+
+  return parts.join("");
 }
 
 export function renderTerminalLines(lines: TerminalLineState[]): string {
@@ -294,40 +201,6 @@ export function renderTerminalLine(line: TerminalLineState): string {
       <span class="terminal-prefix">${escapeHtml(line.prefix)}</span>
       <span class="terminal-line-text">${escapeHtml(line.text)}</span>
     </div>
-  `;
-}
-
-function renderReportSection(section: ReportViewState["sections"][number]): string {
-  return `
-    <article class="panel-section report-card ${section.highlight ? "highlight" : ""}">
-      <header class="report-card-header">
-        <h3>${escapeHtml(section.title)}</h3>
-        <span class="status-chip ${section.status}">
-          ${escapeHtml(section.status)}
-        </span>
-      </header>
-      <p class="report-copy ${section.isSkeleton ? "skeleton" : section.content ? "" : "placeholder"}">
-        ${
-          section.content
-            ? escapeHtml(section.content)
-            : section.isSkeleton
-              ? "Loading..."
-              : "No content available yet."
-        }
-      </p>
-      <div class="citations">
-        ${
-          section.citations.length > 0
-            ? section.citations
-                .map(
-                  (citation) =>
-                    `<span class="citation-pill">${escapeHtml(truncateMiddle(citation, 28))}</span>`,
-                )
-                .join("")
-            : `<span class="citation-pill">No citations yet</span>`
-        }
-      </div>
-    </article>
   `;
 }
 
@@ -414,18 +287,6 @@ function renderAgentCard(card: AgentCardState): string {
   `;
 }
 
-function renderTimelineItem(item: TimelineItemViewState): string {
-  return `
-    <article class="timeline-item compact">
-      <span class="timeline-time">${escapeHtml(item.timestampLabel)}</span>
-      <div class="timeline-copy">
-        <strong>${escapeHtml(item.agentLabel)}</strong>
-        <span>${escapeHtml(item.title)}</span>
-      </div>
-    </article>
-  `;
-}
-
 function renderCollapsedRail(
   agentCards: AgentCardState[],
   statusTone: "idle" | "running" | "completed" | "degraded" | "failed",
@@ -460,6 +321,16 @@ function renderStatusBadge(
       ${escapeHtml(label)}
     </span>
   `;
+}
+
+function renderMarkdown(text: string): string {
+  let html = escapeHtml(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  html = html.replace(/`(.+?)`/g, "<code>$1</code>");
+  html = html.replace(/\n\n+/g, "</p><p>");
+  html = `<p>${html}</p>`;
+  return html;
 }
 
 function statusColor(status: AgentCardState["status"]): string {
@@ -503,16 +374,6 @@ function agentGlyph(agent: AgentCardState["agent"]): string {
     default:
       return "•";
   }
-}
-
-function truncateMiddle(value: string, limit: number): string {
-  if (value.length <= limit) {
-    return value;
-  }
-
-  const head = Math.floor((limit - 3) / 2);
-  const tail = Math.ceil((limit - 3) / 2);
-  return `${value.slice(0, head)}...${value.slice(-tail)}`;
 }
 
 function escapeHtml(value: string): string {

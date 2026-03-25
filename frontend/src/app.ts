@@ -11,13 +11,8 @@ import {
 import {
   renderDialogueFeed,
   renderApp,
-  renderDegradedBanner,
-  renderRailMeta,
-  renderReportGrid,
-  renderStatusStrip,
   renderTerminalLine,
   renderTerminalLines,
-  renderTimelineList,
 } from "./render.js";
 import {
   agentKeys,
@@ -32,7 +27,6 @@ import {
   selectAgentCardStates,
   selectReportViewState,
   selectRunViewState,
-  selectTimelineState,
   toggleCanvas,
   updateComposerText,
   type AppState,
@@ -332,7 +326,6 @@ export class DelphiFrontendApp {
       run: selectRunViewState(this.state),
       report: selectReportViewState(this.state),
       agentCards: selectAgentCardStates(this.state),
-      timeline: selectTimelineState(this.state),
     });
     this.syncView({
       forceTerminalRefresh: true,
@@ -346,17 +339,10 @@ export class DelphiFrontendApp {
     const run = selectRunViewState(this.state);
     const report = selectReportViewState(this.state);
     const agentCards = selectAgentCardStates(this.state);
-    const timeline = selectTimelineState(this.state);
-
-    const railMeta = this.root.querySelector<HTMLElement>('[data-role="rail-meta"]');
-    if (railMeta) {
-      railMeta.innerHTML = renderRailMeta(run, this.config);
-    }
 
     const composerNote = this.root.querySelector<HTMLElement>('[data-role="composer-note"]');
     if (composerNote) {
-      composerNote.textContent =
-        this.state.errorMessage ?? run.streamWarning ?? this.state.infoMessage ?? "";
+      composerNote.textContent = this.state.errorMessage ?? "";
     }
 
     const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
@@ -373,26 +359,6 @@ export class DelphiFrontendApp {
     const queryInput = this.root.querySelector<HTMLTextAreaElement>("#query-input");
     if (queryInput) {
       queryInput.disabled = this.state.connectionStatus === "creating";
-    }
-
-    const statusStrip = this.root.querySelector<HTMLElement>('[data-role="status-strip"]');
-    if (statusStrip) {
-      statusStrip.innerHTML = renderStatusStrip(run);
-    }
-
-    const degradedSlot = this.root.querySelector<HTMLElement>('[data-role="degraded-banner-slot"]');
-    if (degradedSlot) {
-      degradedSlot.innerHTML = renderDegradedBanner(report);
-    }
-
-    const reportGrid = this.root.querySelector<HTMLElement>('[data-role="report-grid"]');
-    if (reportGrid) {
-      reportGrid.innerHTML = renderReportGrid(report);
-    }
-
-    const timelineList = this.root.querySelector<HTMLElement>('[data-role="timeline-list"]');
-    if (timelineList) {
-      timelineList.innerHTML = renderTimelineList(timeline);
     }
 
     this.syncAgentCards(agentCards, options);
