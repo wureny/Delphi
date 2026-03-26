@@ -871,7 +871,7 @@ function resolveSectionKeyFromNodeId(
 
 function resizeComposerInput(textarea: HTMLTextAreaElement): void {
   textarea.style.height = "0px";
-  textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
 }
 
 function buildFeedInfoMessage(config: DelphiAppConfig): string {

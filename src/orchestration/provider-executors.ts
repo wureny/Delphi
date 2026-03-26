@@ -39,6 +39,7 @@ import {
   buildMarketSignalStablePatch,
   buildStableObjectRef,
   buildThesisStablePatch,
+  collectDataDegradedReasons,
   collectEvidenceCandidates,
   createFinding,
   publishToolEvent,
@@ -235,6 +236,7 @@ async function runProviderThesisAnalysis(
   });
 
   const evidenceCandidates = collectEvidenceCandidates(context, ["company", "news"]);
+  const degradedReasons = collectDataDegradedReasons(context, ["company", "news"]);
   const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
   const plan = await provider.generateObject<ProviderFindingPlan<ThesisObjectKey>>({
     schemaName: "delphi_thesis_findings",
@@ -271,8 +273,12 @@ async function runProviderThesisAnalysis(
     }));
 
   return {
-    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    ...createEmptyAgentExecutionResult(
+      degradedReasons.length > 0 ? "degraded" : "done",
+      plan.output.summary,
+    ),
     findings,
+    degradedReasons,
     graphPatches: [
       ...(evidenceCandidates.length > 0
         ? [
@@ -310,6 +316,7 @@ async function runProviderLiquidityAnalysis(
   });
 
   const evidenceCandidates = collectEvidenceCandidates(context, ["macro"]);
+  const degradedReasons = collectDataDegradedReasons(context, ["macro"]);
   const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
   const plan = await provider.generateObject<ProviderFindingPlan<LiquidityObjectKey>>({
     schemaName: "delphi_liquidity_findings",
@@ -350,8 +357,12 @@ async function runProviderLiquidityAnalysis(
     }));
 
   return {
-    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    ...createEmptyAgentExecutionResult(
+      degradedReasons.length > 0 ? "degraded" : "done",
+      plan.output.summary,
+    ),
     findings,
+    degradedReasons,
     graphPatches: [
       ...(evidenceCandidates.length > 0
         ? [
@@ -389,6 +400,7 @@ async function runProviderMarketSignalAnalysis(
   });
 
   const evidenceCandidates = collectEvidenceCandidates(context, ["market"]);
+  const degradedReasons = collectDataDegradedReasons(context, ["market"]);
   const evidenceRefs = evidenceCandidates.map((candidate) => buildEvidenceRef(context.run.caseId, candidate));
   const plan = await provider.generateObject<ProviderFindingPlan<MarketObjectKey>>({
     schemaName: "delphi_market_signal_findings",
@@ -423,8 +435,12 @@ async function runProviderMarketSignalAnalysis(
     }));
 
   return {
-    ...createEmptyAgentExecutionResult("done", plan.output.summary),
+    ...createEmptyAgentExecutionResult(
+      degradedReasons.length > 0 ? "degraded" : "done",
+      plan.output.summary,
+    ),
     findings,
+    degradedReasons,
     graphPatches: [
       ...(evidenceCandidates.length > 0
         ? [

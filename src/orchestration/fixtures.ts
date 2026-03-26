@@ -1072,6 +1072,33 @@ export function collectEvidenceCandidates(
   });
 }
 
+export function collectDataDegradedReasons(
+  context: AgentExecutionContext,
+  kinds: Array<keyof Omit<RuntimeDataArtifacts, "runId">>,
+): string[] {
+  if (!isInspectableRuntimeDataAdapter(context.dataAdapter)) {
+    return [];
+  }
+
+  const artifacts = context.dataAdapter.getArtifacts(context.run.runId);
+
+  if (!artifacts) {
+    return [];
+  }
+
+  const reasons = new Set<string>();
+
+  for (const kind of kinds) {
+    for (const reason of artifacts[kind]?.degradedReasons ?? []) {
+      if (reason.trim().length > 0) {
+        reasons.add(reason);
+      }
+    }
+  }
+
+  return [...reasons];
+}
+
 function buildSectionContents(
   findings: readonly FindingRecord[],
   decisionSummary: string,

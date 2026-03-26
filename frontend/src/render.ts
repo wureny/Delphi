@@ -32,7 +32,7 @@ export function renderApp(options: {
       <div class="app-frame">
         <div class="workspace-shell">
           <section class="left-panel ${leftPanelState}">
-            <div class="chat-shell panel-section conversation-main">
+            <div class="chat-shell conversation-main">
               ${
                 hasRunActivity
                   ? `
@@ -44,25 +44,27 @@ export function renderApp(options: {
               }
               <section class="answer-composer-shell">
                 <form class="chat-composer" data-role="query-form">
-                  <label class="sr-only" for="query-input">Research question</label>
-                  <textarea
-                    id="query-input"
-                    class="chat-input"
-                    name="question"
-                    placeholder="Ask about any US stock..."
-                    ${state.connectionStatus === "creating" ? "disabled" : ""}
-                  >${escapeHtml(state.composerText)}</textarea>
+                  <div class="chat-composer-inner">
+                    <label class="sr-only" for="query-input">Research question</label>
+                    <textarea
+                      id="query-input"
+                      class="chat-input"
+                      name="question"
+                      placeholder="Ask about any US stock..."
+                      ${state.connectionStatus === "creating" ? "disabled" : ""}
+                    >${escapeHtml(state.composerText)}</textarea>
+                    <button
+                      class="send-btn"
+                      data-role="submit-button"
+                      type="submit"
+                      ${state.connectionStatus === "creating" ? "disabled" : ""}
+                    >
+                      ${renderComposerButtonLabel(state)}
+                    </button>
+                  </div>
                   <p class="composer-note" data-role="composer-note">${escapeHtml(
-                      state.errorMessage ?? state.infoMessage ?? "",
-                    )}</p>
-                  <button
-                    class="send-btn"
-                    data-role="submit-button"
-                    type="submit"
-                    ${state.connectionStatus === "creating" ? "disabled" : ""}
-                  >
-                    ${renderComposerButtonLabel(state)}
-                  </button>
+                    state.errorMessage ?? state.infoMessage ?? "",
+                  )}</p>
                 </form>
               </section>
             </div>
@@ -181,7 +183,7 @@ export function renderDialogueFeed(
             showReasoningMap
               ? `
                 <section class="answer-map-inline">
-                  <h3 class="res-heading">Why this call hangs together</h3>
+                  <h3 class="answer-map-heading">How Delphi got there</h3>
                   <p class="answer-map-summary">${escapeHtml(researchMap.summary)}</p>
                   ${renderResearchMap(researchMap)}
                 </section>
@@ -311,11 +313,7 @@ export function renderTerminalLine(line: TerminalLineState): string {
 
 export function renderReportSection(section: ReportViewState["sections"][number]): string {
   const linkageLabel =
-    section.citations.length > 0
-      ? `${section.citations.length} linked signals`
-      : section.status === "ready"
-        ? "No linked signals"
-        : "";
+    section.citations.length > 0 ? `${section.citations.length} linked signals` : "";
 
   return `
     <article
@@ -332,7 +330,7 @@ export function renderReportSection(section: ReportViewState["sections"][number]
         <div class="answer-section-title-wrap">
           ${
             section.key === "final_judgment"
-              ? `<span class="answer-section-kicker">Current call</span>`
+              ? `<span class="answer-section-kicker">Short answer</span>`
               : `<h3 class="res-heading">${escapeHtml(section.title)}</h3>`
           }
         </div>
@@ -658,7 +656,7 @@ function renderInlineRunStatus(run: RunViewState): string {
         <span class="inline-status-dot ${run.statusTone}"></span>
         <span>${escapeHtml(run.stageLabel)}</span>
         <span class="inline-status-sep">·</span>
-        <span>${run.completedAgentCount}/${run.totalAgentCount} lanes</span>
+        <span>${run.completedAgentCount}/${run.totalAgentCount} specialists</span>
         ${run.streamWarning ? `<span class="inline-status-warning">Reconnecting</span>` : ""}
       </div>
       <p class="inline-status-copy">${escapeHtml(run.stageDetail)}</p>
@@ -669,8 +667,8 @@ function renderInlineRunStatus(run: RunViewState): string {
 function renderAnswerLead(run: RunViewState): string {
   return `
     <div class="answer-lead">
-      <span class="answer-lead-tag">Investment memo</span>
-      <span class="answer-lead-meta">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} horizon</span>
+      <span class="answer-lead-tag">Delphi</span>
+      <span class="answer-lead-meta">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
     </div>
   `;
 }

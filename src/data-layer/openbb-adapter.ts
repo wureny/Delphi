@@ -131,7 +131,25 @@ export class OpenBBRuntimeDataAdapter
           provider: this.client.providers.companyNews,
           limit: 6,
         };
-        const news = await this.client.query("news/company", params);
+        let news;
+
+        try {
+          news = await this.client.query("news/company", params);
+        } catch (error) {
+          return {
+            snapshot: {
+              ticker,
+              observedAt: fetchedAt,
+              items: [],
+            },
+            rawSnapshots: [],
+            evidenceCandidates: [],
+            degradedReasons: [
+              `Company news fetch failed: ${toErrorMessage(error)}`,
+            ],
+            cacheStatus,
+          };
+        }
 
         return normalizeNewsBundle({
           runId,
@@ -170,30 +188,57 @@ export class OpenBBRuntimeDataAdapter
           limit: 30,
         };
 
-        const [quote, historical] = await Promise.all([
+        const [quote, historical] = await Promise.allSettled([
           this.client.query("equity/price/quote", quoteParams),
           this.client.query("equity/price/historical", historicalParams),
         ]);
 
-        return normalizeMarketBundle({
+        if (quote.status !== "fulfilled" && historical.status !== "fulfilled") {
+          throw new Error(
+            [
+              `Market quote fetch failed: ${toErrorMessage(quote.reason)}`,
+              `Market history fetch failed: ${toErrorMessage(historical.reason)}`,
+            ].join(" | "),
+          );
+        }
+
+        const bundle = normalizeMarketBundle({
           runId,
           ticker,
           cacheStatus,
           quote: makeSourceRecord(
             "market_quote",
-            quote.provider,
+            quote.status === "fulfilled"
+              ? quote.value.provider
+              : this.client.providers.marketQuote,
             quoteParams,
-            quote.rawPayload,
+            quote.status === "fulfilled" ? quote.value.rawPayload : {},
             fetchedAt,
           ),
           historical: makeSourceRecord(
             "market_historical",
-            historical.provider,
+            historical.status === "fulfilled"
+              ? historical.value.provider
+              : this.client.providers.marketHistorical,
             historicalParams,
-            historical.rawPayload,
+            historical.status === "fulfilled" ? historical.value.rawPayload : [],
             fetchedAt,
           ),
         });
+
+        if (quote.status !== "fulfilled") {
+          bundle.degradedReasons.push(
+            `Market quote fetch failed: ${toErrorMessage(quote.reason)}`,
+          );
+        }
+
+        if (historical.status !== "fulfilled") {
+          bundle.degradedReasons.push(
+            `Market history fetch failed: ${toErrorMessage(historical.reason)}`,
+          );
+        }
+
+        return bundle;
       },
       runId,
     );
@@ -323,5 +368,5 @@ function toErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return String(error);
+  return typeof error === "string" ? error : "Unknown provider failure.";
 }
