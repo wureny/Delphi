@@ -40,6 +40,7 @@ export interface AppState {
   feedMode: FeedMode;
   feedLabel: string;
   composerText: string;
+  pendingSubmittedQuestion: string | null;
   canvasCollapsed: boolean;
   activeOutputPanel: "report" | "research_map";
   activeCanvasPanel: "terminals" | "graph";
@@ -191,6 +192,7 @@ export function createInitialState(
     feedMode,
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
+    pendingSubmittedQuestion: null,
     canvasCollapsed: false,
     activeOutputPanel: "report",
     activeCanvasPanel: "terminals",
@@ -221,6 +223,7 @@ export function createRestartState(
   return {
     ...createInitialState(previous.feedMode, infoMessage),
     composerText: previous.composerText,
+    pendingSubmittedQuestion: null,
     canvasCollapsed: previous.canvasCollapsed,
     activeOutputPanel: previous.activeOutputPanel,
     activeCanvasPanel: previous.activeCanvasPanel,
@@ -249,6 +252,7 @@ export function reduceFeedMessage(
           state.connectionStatus,
           state.streamWarnings,
         ),
+        pendingSubmittedQuestion: null,
         run: message.run,
         reportSections: message.reportSections.length
           ? message.reportSections
@@ -373,23 +377,23 @@ export function selectRunViewState(state: AppState): RunViewState {
   let statusTone: RunViewState["statusTone"] = "idle";
 
   if (state.connectionStatus === "creating") {
-    stageLabel = "Creating Run";
-    stageDetail = "Submitting your question and preparing report + terminal hydration.";
+    stageLabel = "Getting Started";
+    stageDetail = "Sending your question and opening the research workspace.";
     statusTone = "running";
   } else if (state.connectionStatus === "error") {
     stageLabel = "Connection Error";
     stageDetail = state.errorMessage ?? "The feed could not be established.";
     statusTone = "failed";
   } else if (state.connectionStatus === "interrupted") {
-    stageLabel = "Stream Reconnecting";
+    stageLabel = "Reconnecting";
     stageDetail =
       streamWarning ??
-      "Live transport dropped temporarily. The latest report snapshot stays on screen while the browser reconnects.";
+      "The live stream dropped for a moment. Your latest answer stays on screen while Delphi reconnects.";
     statusTone = "degraded";
   } else if (state.connectionStatus === "connecting" && state.run) {
-    stageLabel = "Hydrating Run";
+    stageLabel = "Loading Context";
     stageDetail =
-      "Fetching the latest report snapshot and terminal transcript before live streaming continues.";
+      "Loading the latest answer snapshot and specialist activity before live updates continue.";
     statusTone = "running";
   } else if (runStatus === "failed") {
     stageLabel = degradedReasons.length > 0 ? "Run Failed" : "Runtime Failed";
@@ -398,36 +402,39 @@ export function selectRunViewState(state: AppState): RunViewState {
       "The runtime failed before a usable structured report was produced.";
     statusTone = "failed";
   } else if (runStatus === "completed" || runStatus === "degraded" || hasReportReady) {
-    stageLabel = degradedReasons.length > 0 ? "Degraded Result" : "Completed";
+    stageLabel = degradedReasons.length > 0 ? "Partial Result" : "Answer Ready";
     stageDetail =
       degradedReasons.length > 0
-        ? "The report rendered, but some evidence or validation steps were incomplete."
-        : "Judge assembled the fixed six-section report.";
+        ? "The answer is usable, but some evidence or validation steps were incomplete."
+        : "The final answer has been assembled and linked back to its supporting structure.";
     statusTone = degradedReasons.length > 0 ? "degraded" : "completed";
   } else if (hasJudgeStarted) {
-    stageLabel = "Synthesizing";
+    stageLabel = "Writing Answer";
     stageDetail = hasReportSectionReady
-      ? "Judge is publishing report sections incrementally."
-      : "Judge is consolidating upstream findings into the final report.";
+      ? "The answer is being published section by section."
+      : "Delphi is turning the specialists' findings into one coherent answer.";
     statusTone = "running";
   } else if (activeCards.length > 0) {
-    stageLabel = "Agent Research";
-    stageDetail = `${activeCards.map((card) => card.label).join(", ")} are actively updating the run.`;
+    stageLabel = "Gathering Evidence";
+    stageDetail = `${activeCards.map((card) => card.label).join(", ")} are actively updating the current view.`;
     statusTone = "running";
   } else if (hasPlan) {
-    stageLabel = "Planning";
-    stageDetail = "Planner has assigned the fixed four-agent research lanes.";
+    stageLabel = "Breaking Down The Question";
+    stageDetail = "Delphi has split the question into company, liquidity, market, and synthesis work.";
     statusTone = "running";
   } else if (state.receivedEvents.length > 0) {
-    stageLabel = "Run Created";
-    stageDetail = "The runtime accepted the query and opened a new run scope.";
+    stageLabel = "Question Received";
+    stageDetail = "The research run is open and the first steps are now being prepared.";
     statusTone = "running";
   }
 
   return {
     ticker: state.run?.query.ticker ?? "AAPL",
     horizon: state.run?.query.timeHorizon ?? "3m",
-    queryLabel: state.run?.query.userQuestion ?? state.composerText,
+    queryLabel:
+      state.run?.query.userQuestion ??
+      state.pendingSubmittedQuestion ??
+      state.composerText,
     stageLabel,
     stageDetail,
     statusTone,

@@ -24,7 +24,12 @@ export function renderApp(options: {
   timeline: TimelineItemViewState[];
 }): string {
   const { state, config, run, report, researchMap, graphSnapshot, agentCards, timeline } = options;
-  const hasRunActivity = Boolean(state.run || state.receivedEvents.length > 0);
+  const hasRunActivity = Boolean(
+    state.run ||
+      state.receivedEvents.length > 0 ||
+      state.pendingSubmittedQuestion ||
+      state.connectionStatus === "creating",
+  );
   const leftPanelState = hasRunActivity ? "running" : "idle";
 
   return `
@@ -87,18 +92,20 @@ export function renderApp(options: {
                     <div class="canvas-header">
                       <div class="canvas-header-copy">
                         <span class="eyebrow">Delphi Workspace</span>
-                        <h2>Research Workspace</h2>
-                        <p class="canvas-subcopy">Follow the specialist lanes live, or inspect how the current call is connected.</p>
+                        <h2>Live Analysis</h2>
+                        <p class="canvas-subcopy">Follow the specialists as they build the answer, or inspect the structure behind the current call.</p>
                       </div>
                       <span class="tag">${escapeHtml(renderWorkspaceTag(run))}</span>
                     </div>
                     <div class="canvas-tabs" data-role="canvas-tabs">
-                      ${renderCanvasTab("terminals", "Agent Terminals", state.activeCanvasPanel === "terminals")}
-                      ${renderCanvasTab("graph", "Research Structure", state.activeCanvasPanel === "graph")}
+                      ${renderCanvasTab("terminals", "Specialists", state.activeCanvasPanel === "terminals")}
+                      ${renderCanvasTab("graph", "Case Map", state.activeCanvasPanel === "graph")}
                     </div>
                     <section class="canvas-panel-body" data-role="canvas-panel-body" data-panel="${escapeHtml(state.activeCanvasPanel)}">
                       ${
-                        state.activeCanvasPanel === "graph"
+                        !hasRunActivity
+                          ? renderIdleWorkspacePreview()
+                          : state.activeCanvasPanel === "graph"
                           ? renderGraphSnapshot(graphSnapshot)
                           : `<div class="agent-grid">${agentCards.map(renderAgentCard).join("")}</div>`
                       }
@@ -125,7 +132,7 @@ export function renderRailMeta(
   return `
     ${renderStatusBadge(run.statusTone, `${run.stageLabel}`)}
     <span class="tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)}</span>
-    <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} lanes</span>
+    <span class="tag">${run.completedAgentCount}/${run.totalAgentCount} specialists</span>
   `;
 }
 
@@ -147,7 +154,7 @@ export function renderDialogueFeed(
   report: ReportViewState,
   researchMap: ResearchMapViewState,
 ): string {
-  const queryLabel = state.run ? run.queryLabel : state.composerText.trim();
+  const queryLabel = run.queryLabel.trim();
   const showReasoningMap =
     researchMap.cards.some((card) => card.status !== "waiting") ||
     researchMap.evidenceTrail.length > 0;
@@ -183,7 +190,7 @@ export function renderDialogueFeed(
             showReasoningMap
               ? `
                 <section class="answer-map-inline">
-                  <h3 class="answer-map-heading">How Delphi got there</h3>
+                  <h3 class="answer-map-heading">Why Delphi leans this way</h3>
                   <p class="answer-map-summary">${escapeHtml(researchMap.summary)}</p>
                   ${renderResearchMap(researchMap)}
                 </section>
@@ -197,14 +204,31 @@ export function renderDialogueFeed(
 }
 
 function renderIdleConversation(state: AppState): string {
+  const examples = [
+    "Is AAPL a buy over the next 3 months?",
+    "What would change the view on NVDA?",
+    "How fragile is TSLA if liquidity tightens again?",
+  ];
+
   return `
     <div class="idle-conversation">
       <p class="idle-kicker">Ask about any US stock</p>
       <p class="idle-helper">${escapeHtml(state.infoMessage ?? "Ask one stock question and Delphi will turn it into a structured investment case.")}</p>
       <div class="idle-examples">
-        <span class="idle-example">Is AAPL a buy over the next 3 months?</span>
-        <span class="idle-example">What would change the view on NVDA?</span>
-        <span class="idle-example">How fragile is TSLA if liquidity tightens again?</span>
+        ${examples
+          .map(
+            (example) => `
+              <button
+                class="idle-example"
+                type="button"
+                data-action="apply-example-query"
+                data-example-query="${escapeHtml(example)}"
+              >
+                ${escapeHtml(example)}
+              </button>
+            `,
+          )
+          .join("")}
       </div>
     </div>
   `;
@@ -227,7 +251,7 @@ export function renderResearchMap(map: ResearchMapViewState): string {
     <div class="research-map">
       <header class="research-map-hero">
         <div>
-          <span class="research-map-kicker">Why Delphi Thinks This</span>
+          <span class="research-map-kicker">Why the answer holds together</span>
           <h3>${escapeHtml(map.headline)}</h3>
         </div>
         ${map.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(map.updatedAtLabel)}</span>` : ""}
@@ -260,7 +284,7 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
     <div class="graph-view">
       <header class="graph-view-header">
         <div>
-          <span class="research-map-kicker">Research Structure</span>
+          <span class="research-map-kicker">Case Map</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
           <p class="graph-header-copy">Each point represents a part of the current case, and each link shows how Delphi connected it into the answer.</p>
         </div>
@@ -268,9 +292,11 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
           <span class="tag">${snapshot.nodeCount} points</span>
           <span class="tag">${snapshot.edgeCount} links</span>
           ${snapshot.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(snapshot.updatedAtLabel)}</span>` : ""}
+          <button class="ghost-button graph-reset-button" type="button" data-action="center-graph">Center map</button>
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
+      <p class="graph-view-helper">Drag to explore the structure.</p>
       <div class="graph-stage">
         <svg class="graph-svg" viewBox="0 0 1280 760" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
           ${snapshot.edges.map(renderGraphEdge).join("")}
@@ -407,6 +433,49 @@ function renderCanvasTab(
   `;
 }
 
+function renderIdleWorkspacePreview(): string {
+  const lanes = [
+    {
+      label: "Thesis",
+      summary: "Builds the core case around business quality, catalysts, and execution signals.",
+    },
+    {
+      label: "Liquidity",
+      summary: "Reads the rates and macro backdrop to judge whether the environment helps or hurts the case.",
+    },
+    {
+      label: "Market Signal",
+      summary: "Checks what price action and positioning imply about what the market already expects.",
+    },
+    {
+      label: "Judge",
+      summary: "Turns the upstream work into a clear call, the key risks, and what would change the view.",
+    },
+  ];
+
+  return `
+    <div class="workspace-preview">
+      <div class="workspace-preview-copy">
+        <span class="workspace-preview-kicker">Workspace preview</span>
+        <h3>One stock question becomes four specialist views and one final call.</h3>
+        <p>After you submit a query, the terminals start streaming, the answer unfolds section by section, and the case map shows how the final view is connected.</p>
+      </div>
+      <div class="workspace-preview-grid">
+        ${lanes
+          .map(
+            (lane) => `
+              <article class="workspace-preview-card">
+                <span class="workspace-preview-label">${escapeHtml(lane.label)}</span>
+                <p>${escapeHtml(lane.summary)}</p>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderGraphNode(node: GraphSnapshotViewState["nodes"][number]): string {
   return `
     <g
@@ -483,7 +552,7 @@ function renderAgentCard(card: AgentCardState): string {
             <span class="dot" style="color:${statusColor(card.status)}"></span>
             <strong data-field="status-label">${escapeHtml(card.status)}</strong>
           </span>
-          <span class="tag" data-field="event-count">${card.eventCount} events</span>
+          <span class="tag" data-field="event-count">${card.eventCount} updates</span>
         </div>
 
         <div class="terminal-taskline terminal-commandline">
@@ -493,7 +562,7 @@ function renderAgentCard(card: AgentCardState): string {
 
         <div class="terminal-screen ${card.isLive ? "live" : ""}" data-field="terminal-screen">
           <div class="terminal-screen-header">
-            <span class="terminal-screen-title">runtime transcript</span>
+            <span class="terminal-screen-title">analysis log</span>
             <span class="terminal-screen-meta" data-field="screen-meta">${escapeHtml(card.phaseLabel)}</span>
           </div>
           <div class="terminal-lines" data-role="terminal-scroll" data-agent="${card.agent}">
@@ -650,6 +719,10 @@ function renderResponseSections(report: ReportViewState, run: RunViewState): str
 }
 
 function renderInlineRunStatus(run: RunViewState): string {
+  if (run.statusTone !== "running" && !run.streamWarning) {
+    return "";
+  }
+
   return `
     <div class="inline-status-block">
       <div class="inline-status">
@@ -665,21 +738,24 @@ function renderInlineRunStatus(run: RunViewState): string {
 }
 
 function renderAnswerLead(run: RunViewState): string {
+  if (run.statusTone === "running") {
+    return "";
+  }
+
   return `
     <div class="answer-lead">
-      <span class="answer-lead-tag">Delphi</span>
-      <span class="answer-lead-meta">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
+      <span class="answer-lead-tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
     </div>
   `;
 }
 
 function renderWorkspaceTag(run: RunViewState): string {
   if (run.statusTone === "completed") {
-    return "Answer assembled";
+    return "Answer ready";
   }
 
   if (run.statusTone === "degraded") {
-    return "Partial result";
+    return "Partial picture";
   }
 
   if (run.statusTone === "failed") {
@@ -687,7 +763,7 @@ function renderWorkspaceTag(run: RunViewState): string {
   }
 
   if (run.statusTone === "running") {
-    return `${run.completedAgentCount}/${run.totalAgentCount} lanes moving`;
+    return `${run.completedAgentCount}/${run.totalAgentCount} specialists moving`;
   }
 
   return "Ready for a question";

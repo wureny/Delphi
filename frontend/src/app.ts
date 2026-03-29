@@ -69,6 +69,18 @@ export class DelphiFrontendApp {
   private pauseDialogueAutoscroll = false;
   private lastInsightScrollTarget: string | null = null;
   private lastGraphFocusTarget: string | null = null;
+  private graphPanState:
+    | {
+        stage: HTMLElement;
+        pointerId: number;
+        startX: number;
+        startY: number;
+        startLeft: number;
+        startTop: number;
+        moved: boolean;
+      }
+    | null = null;
+  private ignoreGraphClickUntil = 0;
 
   constructor(config: DelphiAppConfig) {
     this.config = config;
@@ -81,6 +93,10 @@ export class DelphiFrontendApp {
     this.handleClick = this.handleClick.bind(this);
     this.handleInput = this.handleInput.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.handlePointerDown = this.handlePointerDown.bind(this);
+    this.handlePointerMove = this.handlePointerMove.bind(this);
+    this.handlePointerUp = this.handlePointerUp.bind(this);
   }
 
   mount(): void {
@@ -88,6 +104,11 @@ export class DelphiFrontendApp {
     this.root.addEventListener("click", this.handleClick);
     this.root.addEventListener("input", this.handleInput);
     this.root.addEventListener("scroll", this.handleScroll, true);
+    this.root.addEventListener("keydown", this.handleKeyDown);
+    this.root.addEventListener("pointerdown", this.handlePointerDown);
+    this.root.addEventListener("pointermove", this.handlePointerMove);
+    this.root.addEventListener("pointerup", this.handlePointerUp);
+    this.root.addEventListener("pointercancel", this.handlePointerUp);
     this.renderShell();
 
     if (this.shouldAutoStartFeed()) {
@@ -211,9 +232,29 @@ export class DelphiFrontendApp {
       return;
     }
 
+    if (
+      Date.now() < this.ignoreGraphClickUntil &&
+      actionNode.closest(".graph-stage")
+    ) {
+      return;
+    }
+
     if (actionNode.dataset.action === "toggle-canvas") {
       this.state = toggleCanvas(this.state);
       this.renderShell();
+      return;
+    }
+
+    if (actionNode.dataset.action === "apply-example-query") {
+      const exampleQuery = actionNode.dataset.exampleQuery;
+
+      if (!exampleQuery) {
+        return;
+      }
+
+      this.state = updateComposerText(this.state, exampleQuery);
+      this.renderShell();
+      this.root.querySelector<HTMLTextAreaElement>("#query-input")?.focus();
       return;
     }
 
@@ -238,6 +279,17 @@ export class DelphiFrontendApp {
 
       this.state = toggleCanvasPanel(this.state, panel);
       this.renderShell();
+      return;
+    }
+
+    if (actionNode.dataset.action === "center-graph") {
+      const graphStage = this.root.querySelector<HTMLElement>(".graph-stage");
+
+      if (!graphStage) {
+        return;
+      }
+
+      this.centerGraphStage(graphStage);
       return;
     }
 
@@ -341,6 +393,31 @@ export class DelphiFrontendApp {
 
   }
 
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement) && !(target instanceof SVGElement)) {
+      return;
+    }
+
+    const actionNode = target.closest("[data-action]");
+
+    if (!(actionNode instanceof HTMLElement) && !(actionNode instanceof SVGElement)) {
+      return;
+    }
+
+    event.preventDefault();
+    actionNode.dispatchEvent(
+      new MouseEvent("click", {
+        bubbles: true,
+      }),
+    );
+  }
+
   private shouldAutoStartFeed(): boolean {
     return this.config.feedMode === "recorded" || Boolean(this.config.sseEventsUrl);
   }
@@ -374,6 +451,8 @@ export class DelphiFrontendApp {
         this.state,
         `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
       ),
+      composerText: "",
+      pendingSubmittedQuestion: userQuestion,
       connectionStatus: "creating",
     };
     this.renderShell();
@@ -419,6 +498,8 @@ export class DelphiFrontendApp {
     } catch (error) {
       this.state = {
         ...this.state,
+        composerText: userQuestion,
+        pendingSubmittedQuestion: null,
         connectionStatus: "error",
         errorMessage:
           error instanceof Error
@@ -426,6 +507,72 @@ export class DelphiFrontendApp {
             : "Live run submission failed.",
       };
       this.syncView();
+    }
+  }
+
+  private handlePointerDown(event: PointerEvent): void {
+    if (event.button !== 0) {
+      return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    const stage = target.closest<HTMLElement>(".graph-stage");
+
+    if (!stage) {
+      return;
+    }
+
+    this.graphPanState = {
+      stage,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startLeft: stage.scrollLeft,
+      startTop: stage.scrollTop,
+      moved: false,
+    };
+    stage.classList.add("is-panning");
+    stage.setPointerCapture(event.pointerId);
+  }
+
+  private handlePointerMove(event: PointerEvent): void {
+    if (!this.graphPanState || this.graphPanState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const dx = event.clientX - this.graphPanState.startX;
+    const dy = event.clientY - this.graphPanState.startY;
+
+    if (!this.graphPanState.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      this.graphPanState.moved = true;
+    }
+
+    this.graphPanState.stage.scrollLeft = this.graphPanState.startLeft - dx;
+    this.graphPanState.stage.scrollTop = this.graphPanState.startTop - dy;
+  }
+
+  private handlePointerUp(event: PointerEvent): void {
+    if (!this.graphPanState || this.graphPanState.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const { stage, moved } = this.graphPanState;
+
+    stage.classList.remove("is-panning");
+
+    if (stage.hasPointerCapture(event.pointerId)) {
+      stage.releasePointerCapture(event.pointerId);
+    }
+
+    this.graphPanState = null;
+
+    if (moved) {
+      this.ignoreGraphClickUntil = Date.now() + 160;
     }
   }
 
@@ -464,8 +611,17 @@ export class DelphiFrontendApp {
 
     const composerNote = this.root.querySelector<HTMLElement>('[data-role="composer-note"]');
     if (composerNote) {
-      composerNote.textContent =
+      const noteText =
         this.state.errorMessage ?? run.streamWarning ?? this.state.infoMessage ?? "";
+
+      composerNote.textContent = noteText;
+      composerNote.dataset.tone = this.state.errorMessage
+        ? "error"
+        : run.streamWarning
+          ? "warning"
+          : noteText
+            ? "info"
+            : "idle";
     }
 
     const dialogueFeed = this.root.querySelector<HTMLElement>('[data-role="dialogue-feed"]');
@@ -496,6 +652,9 @@ export class DelphiFrontendApp {
     const queryInput = this.root.querySelector<HTMLTextAreaElement>("#query-input");
     if (queryInput) {
       queryInput.disabled = this.state.connectionStatus === "creating";
+      if (queryInput.value !== this.state.composerText) {
+        queryInput.value = this.state.composerText;
+      }
       resizeComposerInput(queryInput);
     }
 
@@ -514,7 +673,18 @@ export class DelphiFrontendApp {
       }
 
       if (panel === "graph") {
+        const previousStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
+        const previousScrollLeft = previousStage?.scrollLeft ?? 0;
+        const previousScrollTop = previousStage?.scrollTop ?? 0;
+
         canvasPanelBody.innerHTML = renderGraphSnapshot(graphSnapshot);
+        const nextStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
+
+        if (nextStage) {
+          nextStage.scrollLeft = previousScrollLeft;
+          nextStage.scrollTop = previousScrollTop;
+        }
+
         this.syncGraphViewport(canvasPanelBody);
       }
     }
@@ -623,6 +793,23 @@ export class DelphiFrontendApp {
     });
   }
 
+  private centerGraphStage(graphStage: HTMLElement): void {
+    const svg = graphStage.querySelector<SVGElement>(".graph-svg");
+
+    if (!svg) {
+      return;
+    }
+
+    const nextLeft = Math.max((svg.clientWidth - graphStage.clientWidth) / 2, 0);
+    const nextTop = Math.max((svg.clientHeight - graphStage.clientHeight) / 2, 0);
+
+    graphStage.scrollTo({
+      left: nextLeft,
+      top: nextTop,
+      behavior: "smooth",
+    });
+  }
+
   private syncAgentCards(
     agentCards: ReturnType<typeof selectAgentCardStates>,
     options?: {
@@ -667,7 +854,7 @@ export class DelphiFrontendApp {
 
       const eventCount = cardElement.querySelector<HTMLElement>('[data-field="event-count"]');
       if (eventCount) {
-        eventCount.textContent = `${card.eventCount} events`;
+        eventCount.textContent = `${card.eventCount} updates`;
       }
 
       const currentTask = cardElement.querySelector<HTMLElement>('[data-field="current-task"]');

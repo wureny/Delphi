@@ -70,14 +70,22 @@ export class OpenAIChatCompletionsProvider implements StructuredModelProvider {
   async generateObject<TOutput>(
     request: StructuredGenerationRequest,
   ): Promise<StructuredGenerationResult<TOutput>> {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(buildRequestBody(this.modelName, request)),
-    });
+    const endpoint = `${this.baseUrl}/chat/completions`;
+    let response: Response;
+
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(buildRequestBody(this.modelName, request)),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`OpenAI request failed for ${endpoint}: ${message}`);
+    }
 
     const payload = (await response.json()) as OpenAIChatCompletionsResponse;
 
@@ -106,14 +114,22 @@ export class OpenAIChatCompletionsProvider implements StructuredModelProvider {
     request: StructuredGenerationRequest,
     callbacks: StreamingCallbacks,
   ): Promise<StructuredGenerationResult<TOutput>> {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(buildRequestBody(this.modelName, request, true)),
-    });
+    const endpoint = `${this.baseUrl}/chat/completions`;
+    let response: Response;
+
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(buildRequestBody(this.modelName, request, true)),
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`OpenAI request failed for ${endpoint}: ${message}`);
+    }
 
     if (!response.ok) {
       const payload = (await response.json()) as OpenAIChatCompletionsResponse;

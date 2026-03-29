@@ -1,9 +1,12 @@
 import { spawn } from "node:child_process";
 
+const tsxLoader = "./node_modules/tsx/dist/loader.mjs";
+const suppressWarnings = "./node_modules/tsx/dist/suppress-warnings.cjs";
+
 const processes = [
   spawn(
     "node",
-    ["--import", "tsx", "./scripts/serve-runtime-api.ts"],
+    ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-runtime-api.ts"],
     {
       cwd: process.cwd(),
       stdio: "inherit",
@@ -12,7 +15,7 @@ const processes = [
   ),
   spawn(
     "node",
-    ["--import", "tsx", "./scripts/serve-frontend.ts"],
+    ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-frontend.ts"],
     {
       cwd: process.cwd(),
       stdio: "inherit",
