@@ -1783,6 +1783,27 @@ button.idle-example {
   font-size: 0.74rem;
 }
 
+.graph-lanes {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.graph-lane-label {
+  display: inline-flex;
+  justify-content: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(155, 141, 126, 0.14);
+  background: rgba(255, 248, 232, 0.02);
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
 .graph-meta {
   display: inline-flex;
   flex-wrap: wrap;
@@ -2599,7 +2620,8 @@ button.idle-example {
   }
 
   .developing-view-grid,
-  .research-map-grid {
+  .research-map-grid,
+  .graph-lanes {
     grid-template-columns: 1fr;
   }
 

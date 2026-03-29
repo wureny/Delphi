@@ -306,7 +306,7 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         <div>
           <span class="research-map-kicker">Case structure</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
-          <p class="graph-header-copy">Each point is part of the current investment case. The links show how Delphi connected them into the final answer.</p>
+          <p class="graph-header-copy">This is the structured case graph behind the answer: the question, the answer sections, the supporting claims, the stable investment objects, and the evidence trail tying them together.</p>
         </div>
         <div class="graph-meta">
           <span class="tag">${snapshot.nodeCount} points</span>
@@ -320,6 +320,13 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         <span class="graph-legend-pill">Answer</span>
         <span class="graph-legend-pill">Supporting claims</span>
         <span class="graph-legend-pill">Persistent thesis, risk, liquidity, and signal objects</span>
+      </div>
+      <div class="graph-lanes" aria-label="Case structure lanes">
+        <span class="graph-lane-label">Question</span>
+        <span class="graph-lane-label">Answer sections</span>
+        <span class="graph-lane-label">Claims</span>
+        <span class="graph-lane-label">Stable objects</span>
+        <span class="graph-lane-label">Evidence</span>
       </div>
       <p class="graph-view-helper">Drag left or right to explore how the answer connects back to structured claims, evidence, and stable investment objects.</p>
       <div class="graph-stage">
