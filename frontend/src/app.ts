@@ -81,6 +81,7 @@ export class DelphiFrontendApp {
       }
     | null = null;
   private ignoreGraphClickUntil = 0;
+  private lastManualGraphPanAt = 0;
 
   constructor(config: DelphiAppConfig) {
     this.config = config;
@@ -449,7 +450,7 @@ export class DelphiFrontendApp {
     this.state = {
       ...createRestartState(
         this.state,
-        `Submitting live query to ${this.config.runtimeApiBaseUrl} via POST /runs.`,
+        "Starting a fresh live analysis.",
       ),
       composerText: "",
       pendingSubmittedQuestion: userQuestion,
@@ -572,6 +573,7 @@ export class DelphiFrontendApp {
     this.graphPanState = null;
 
     if (moved) {
+      this.lastManualGraphPanAt = Date.now();
       this.ignoreGraphClickUntil = Date.now() + 160;
     }
   }
@@ -673,6 +675,10 @@ export class DelphiFrontendApp {
       }
 
       if (panel === "graph") {
+        if (this.graphPanState) {
+          return;
+        }
+
         const previousStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
         const previousScrollLeft = previousStage?.scrollLeft ?? 0;
         const previousScrollTop = previousStage?.scrollTop ?? 0;
@@ -714,7 +720,23 @@ export class DelphiFrontendApp {
       return true;
     }
 
-    answerSections.insertAdjacentHTML("beforeend", sectionMarkup);
+    const nextSectionIndex = report.sections.findIndex((section) => section.key === sectionKey);
+    const followingSection = report.sections
+      .slice(nextSectionIndex + 1)
+      .find((section) => answerSections.querySelector<HTMLElement>(`[data-section="${section.key}"]`));
+
+    if (followingSection) {
+      const anchor = answerSections.querySelector<HTMLElement>(`[data-section="${followingSection.key}"]`);
+
+      if (anchor) {
+        anchor.insertAdjacentHTML("beforebegin", sectionMarkup);
+      } else {
+        answerSections.insertAdjacentHTML("beforeend", sectionMarkup);
+      }
+    } else {
+      answerSections.insertAdjacentHTML("beforeend", sectionMarkup);
+    }
+
     const pending = dialogueFeed.querySelector<HTMLElement>(".answer-pending");
     pending?.remove();
     return true;
@@ -737,6 +759,10 @@ export class DelphiFrontendApp {
     );
 
     if (!targetSection) {
+      return;
+    }
+
+    if (this.pauseDialogueAutoscroll && this.state.selectedInsight?.kind !== "report_section") {
       return;
     }
 
@@ -770,6 +796,10 @@ export class DelphiFrontendApp {
       selectedNode.getAttribute("id");
 
     if (!targetNodeId || this.lastGraphFocusTarget === targetNodeId) {
+      return;
+    }
+
+    if (Date.now() - this.lastManualGraphPanAt < 1200) {
       return;
     }
 
@@ -1064,19 +1094,15 @@ function resizeComposerInput(textarea: HTMLTextAreaElement): void {
 function buildFeedInfoMessage(config: DelphiAppConfig): string {
   if (config.feedMode === "sse") {
     const runKey = config.runtimeRunKey ?? inferRunKeyFromUrl(config.sseEventsUrl);
-    const runtimeBase =
-      config.runtimeApiBaseUrl ??
-      inferRuntimeBase(config.sseEventsUrl) ??
-      "http://127.0.0.1:8787";
 
     if (runKey) {
-      return `Live mode uses POST /runs for new submissions and is currently replaying run "${runKey}" from ${runtimeBase}, including report, events, and controlled terminal transport.`;
+      return "Showing the latest live analysis.";
     }
 
-    return `Live mode submits your question to ${runtimeBase} via POST /runs, then hydrates report + terminal snapshots and streams both events and terminal lines.`;
+    return "Ask one stock question and Delphi will stream the answer, the analyst notes, and the case structure.";
   }
 
-  return "Recorded mode replays the committed AAPL demo fixture. This is explicit demo input, not a live backend run.";
+  return "Recorded mode replays a saved AAPL case so you can inspect the product without starting a live run.";
 }
 
 function inferRunKeyFromUrl(url: string | undefined): string | null {

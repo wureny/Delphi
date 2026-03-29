@@ -92,14 +92,14 @@ export function renderApp(options: {
                     <div class="canvas-header">
                       <div class="canvas-header-copy">
                         <span class="eyebrow">Delphi Workspace</span>
-                        <h2>Live Analysis</h2>
-                        <p class="canvas-subcopy">Follow the specialists as they build the answer, or inspect the structure behind the current call.</p>
+                        <h2>Live Desk</h2>
+                        <p class="canvas-subcopy">Watch the analysts build the case in real time, or inspect the structure behind the current call.</p>
                       </div>
                       <span class="tag">${escapeHtml(renderWorkspaceTag(run))}</span>
                     </div>
                     <div class="canvas-tabs" data-role="canvas-tabs">
-                      ${renderCanvasTab("terminals", "Specialists", state.activeCanvasPanel === "terminals")}
-                      ${renderCanvasTab("graph", "Case Map", state.activeCanvasPanel === "graph")}
+                      ${renderCanvasTab("terminals", "Analysts", state.activeCanvasPanel === "terminals")}
+                      ${renderCanvasTab("graph", "Case Structure", state.activeCanvasPanel === "graph")}
                     </div>
                     <section class="canvas-panel-body" data-role="canvas-panel-body" data-panel="${escapeHtml(state.activeCanvasPanel)}">
                       ${
@@ -184,13 +184,13 @@ export function renderDialogueFeed(
               : ""
           }
           <section class="answer-sections">
-            ${renderResponseSections(report, run)}
+            ${renderResponseSections(report, run, researchMap)}
           </section>
           ${
             showReasoningMap
               ? `
                 <section class="answer-map-inline">
-                  <h3 class="answer-map-heading">Why Delphi leans this way</h3>
+                  <h3 class="answer-map-heading">How Delphi got there</h3>
                   <p class="answer-map-summary">${escapeHtml(researchMap.summary)}</p>
                   ${renderResearchMap(researchMap)}
                 </section>
@@ -251,7 +251,7 @@ export function renderResearchMap(map: ResearchMapViewState): string {
     <div class="research-map">
       <header class="research-map-hero">
         <div>
-          <span class="research-map-kicker">Why the answer holds together</span>
+          <span class="research-map-kicker">Case at a glance</span>
           <h3>${escapeHtml(map.headline)}</h3>
         </div>
         ${map.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(map.updatedAtLabel)}</span>` : ""}
@@ -261,14 +261,14 @@ export function renderResearchMap(map: ResearchMapViewState): string {
         ${map.cards.map(renderResearchMapCard).join("")}
       </div>
       <footer class="research-map-footer">
-        <span class="research-map-footer-label">Evidence Trail</span>
+        <span class="research-map-footer-label">Linked trail</span>
         <div class="citations">
           ${
             map.evidenceTrail.length > 0
               ? map.evidenceTrail
                   .map(
                     (citation) =>
-                      `<span class="citation-pill">${escapeHtml(truncateMiddle(citation, 28))}</span>`,
+                      `<span class="citation-pill">${escapeHtml(displayEvidenceTrailRef(citation))}</span>`,
                   )
                   .join("")
               : `<span class="citation-pill">Evidence refs will appear here as the run settles.</span>`
@@ -284,15 +284,15 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
     <div class="graph-view">
       <header class="graph-view-header">
         <div>
-          <span class="research-map-kicker">Case Map</span>
+          <span class="research-map-kicker">Case structure</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
-          <p class="graph-header-copy">Each point represents a part of the current case, and each link shows how Delphi connected it into the answer.</p>
+          <p class="graph-header-copy">Each point is part of the current investment case. The links show how Delphi connected them into the final answer.</p>
         </div>
         <div class="graph-meta">
           <span class="tag">${snapshot.nodeCount} points</span>
           <span class="tag">${snapshot.edgeCount} links</span>
           ${snapshot.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(snapshot.updatedAtLabel)}</span>` : ""}
-          <button class="ghost-button graph-reset-button" type="button" data-action="center-graph">Center map</button>
+          <button class="ghost-button graph-reset-button" type="button" data-action="center-graph">Re-center</button>
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
@@ -316,7 +316,7 @@ export function renderTerminalLines(lines: TerminalLineState[]): string {
     return `
       <div class="terminal-line neutral terminal-placeholder" data-role="terminal-placeholder">
         <span class="terminal-prefix">idle&gt;</span>
-        <span class="terminal-line-text">awaiting controlled runtime output</span>
+        <span class="terminal-line-text">waiting for live notes</span>
       </div>
     `;
   }
@@ -340,6 +340,7 @@ export function renderTerminalLine(line: TerminalLineState): string {
 export function renderReportSection(section: ReportViewState["sections"][number]): string {
   const linkageLabel =
     section.citations.length > 0 ? `${section.citations.length} linked signals` : "";
+  const title = displaySectionTitle(section.key, section.title);
 
   return `
     <article
@@ -356,8 +357,8 @@ export function renderReportSection(section: ReportViewState["sections"][number]
         <div class="answer-section-title-wrap">
           ${
             section.key === "final_judgment"
-              ? `<span class="answer-section-kicker">Short answer</span>`
-              : `<h3 class="res-heading">${escapeHtml(section.title)}</h3>`
+              ? `<span class="answer-section-kicker">Delphi's call</span>`
+              : `<h3 class="res-heading">${escapeHtml(title)}</h3>`
           }
         </div>
         ${
@@ -406,7 +407,7 @@ function renderResearchMapCard(
       <header class="research-card-header">
         <div>
           <span class="research-card-label">${escapeHtml(card.label)}</span>
-          <span class="status-chip ${card.status}">${escapeHtml(card.status)}</span>
+          <span class="status-chip ${card.status}">${escapeHtml(displayResearchMapStatus(card.status))}</span>
         </div>
         <span class="research-card-meta">${escapeHtml(card.meta)}</span>
       </header>
@@ -489,7 +490,7 @@ function renderGraphNode(node: GraphSnapshotViewState["nodes"][number]): string 
       aria-pressed="${node.focus === "selected" ? "true" : "false"}"
     >
       <rect rx="18" ry="18" width="${node.width}" height="${node.height}"></rect>
-      <text class="graph-node-label" x="16" y="24">${escapeHtml(node.label)}</text>
+      <text class="graph-node-label" x="16" y="24">${escapeHtml(displayGraphNodeLabel(node.label, node.summary))}</text>
       <foreignObject x="16" y="32" width="${Math.max(node.width - 32, 40)}" height="${Math.max(node.height - 42, 28)}">
         <div xmlns="http://www.w3.org/1999/xhtml" class="graph-node-copy">${escapeHtml(node.summary)}</div>
       </foreignObject>
@@ -503,7 +504,7 @@ function renderGraphEdge(edge: GraphSnapshotViewState["edges"][number]): string 
   return `
     <g class="graph-edge focus-${edge.focus}">
       <path d="M ${edge.fromX} ${edge.fromY} C ${controlX} ${edge.fromY}, ${controlX} ${edge.toY}, ${edge.toX} ${edge.toY}"></path>
-      <text class="graph-edge-label" x="${controlX}" y="${(edge.fromY + edge.toY) / 2 - 6}">${escapeHtml(edge.label)}</text>
+      <text class="graph-edge-label" x="${controlX}" y="${(edge.fromY + edge.toY) / 2 - 6}">${escapeHtml(displayGraphEdgeLabel(edge.label))}</text>
     </g>
   `;
 }
@@ -531,7 +532,7 @@ function renderAgentCard(card: AgentCardState): string {
               data-field="live-indicator"
             >
               <span class="terminal-live-dot"></span>
-              ${card.isLive ? "Live" : "Idle"}
+              ${card.isLive ? "Working" : "Ready"}
             </span>
             <span class="terminal-phase" data-field="phase-label">${escapeHtml(card.phaseLabel)}</span>
           </div>
@@ -556,13 +557,13 @@ function renderAgentCard(card: AgentCardState): string {
         </div>
 
         <div class="terminal-taskline terminal-commandline">
-          <span class="terminal-shell-prompt">root@swarm:~$</span>
+          <span class="terminal-shell-prompt">focus</span>
           <p class="terminal-value mono" data-field="current-task">${escapeHtml(card.currentTask)}</p>
         </div>
 
         <div class="terminal-screen ${card.isLive ? "live" : ""}" data-field="terminal-screen">
           <div class="terminal-screen-header">
-            <span class="terminal-screen-title">analysis log</span>
+            <span class="terminal-screen-title">working notes</span>
             <span class="terminal-screen-meta" data-field="screen-meta">${escapeHtml(card.phaseLabel)}</span>
           </div>
           <div class="terminal-lines" data-role="terminal-scroll" data-agent="${card.agent}">
@@ -585,11 +586,11 @@ function renderAgentCard(card: AgentCardState): string {
 
         <div class="terminal-summary-grid compact">
           <div class="terminal-summary-cell">
-            <span class="terminal-label">Recent Action</span>
+            <span class="terminal-label">Current read</span>
             <p class="terminal-value mono" data-field="recent-action">${escapeHtml(card.recentAction)}</p>
           </div>
           <div class="terminal-summary-cell">
-            <span class="terminal-label">Latest Finding</span>
+            <span class="terminal-label">Latest takeaway</span>
             <p class="terminal-value" data-field="latest-finding">${escapeHtml(card.latestFinding)}</p>
           </div>
           <p class="sr-only" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
@@ -701,23 +702,6 @@ function truncateMiddle(value: string, limit: number): string {
   return `${value.slice(0, head)}...${value.slice(-tail)}`;
 }
 
-function renderResponseSections(report: ReportViewState, run: RunViewState): string {
-  const sections = report.sections.filter(
-    (section) => section.content.trim().length > 0 || section.isSkeleton,
-  );
-
-  if (sections.length === 0) {
-    return `
-      <section class="answer-pending">
-        <p>${escapeHtml(run.stageDetail)}</p>
-        ${run.statusTone === "running" ? renderTypingIndicator() : ""}
-      </section>
-    `;
-  }
-
-  return sections.map(renderReportSection).join("");
-}
-
 function renderInlineRunStatus(run: RunViewState): string {
   if (run.statusTone !== "running" && !run.streamWarning) {
     return "";
@@ -744,7 +728,7 @@ function renderAnswerLead(run: RunViewState): string {
 
   return `
     <div class="answer-lead">
-      <span class="answer-lead-tag">${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
+      <span class="answer-lead-tag">Delphi · ${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
     </div>
   `;
 }
@@ -767,6 +751,208 @@ function renderWorkspaceTag(run: RunViewState): string {
   }
 
   return "Ready for a question";
+}
+
+function renderResponseSections(
+  report: ReportViewState,
+  run: RunViewState,
+  researchMap: ResearchMapViewState,
+): string {
+  const visibleSections = report.sections.filter(
+    (section) => section.content.trim().length > 0 || section.isSkeleton,
+  );
+  const finalJudgment = visibleSections.find((section) => section.key === "final_judgment");
+  const rationaleSections = visibleSections.filter((section) =>
+    section.key === "core_thesis" ||
+    section.key === "supporting_evidence" ||
+    section.key === "liquidity_context"
+  );
+  const watchSections = visibleSections.filter((section) =>
+    section.key === "key_risks" ||
+    section.key === "what_changes_the_view"
+  );
+  const parts: string[] = [];
+
+  if (!finalJudgment && rationaleSections.length === 0 && watchSections.length === 0) {
+    const developingView = renderDevelopingView(researchMap, run);
+
+    if (developingView) {
+      return developingView;
+    }
+
+    return `
+      <section class="answer-pending">
+        <p>${escapeHtml(run.stageDetail)}</p>
+        ${run.statusTone === "running" ? renderTypingIndicator() : ""}
+      </section>
+    `;
+  }
+
+  if (finalJudgment) {
+    parts.push(renderReportSection(finalJudgment));
+  } else {
+    const developingView = renderDevelopingView(researchMap, run);
+
+    if (developingView) {
+      parts.push(developingView);
+    }
+  }
+
+  if (rationaleSections.length > 0) {
+    parts.push(`
+      <section class="answer-group">
+        <h3 class="answer-group-title">Why Delphi leans this way</h3>
+        <div class="answer-group-stack">
+          ${rationaleSections.map(renderReportSection).join("")}
+        </div>
+      </section>
+    `);
+  }
+
+  if (watchSections.length > 0) {
+    parts.push(`
+      <section class="answer-group">
+        <h3 class="answer-group-title">What to watch</h3>
+        <div class="answer-group-stack">
+          ${watchSections.map(renderReportSection).join("")}
+        </div>
+      </section>
+    `);
+  }
+
+  return parts.join("");
+}
+
+function renderDevelopingView(
+  researchMap: ResearchMapViewState,
+  run: RunViewState,
+): string {
+  const liveCards = researchMap.cards.filter((card) =>
+    (card.cardId === "core_thesis" ||
+      card.cardId === "liquidity_context" ||
+      card.cardId === "market_signal") &&
+    card.status !== "waiting"
+  );
+
+  if (liveCards.length === 0) {
+    return "";
+  }
+
+  return `
+    <section class="developing-view">
+      <div class="developing-view-header">
+        <span class="answer-section-kicker">Delphi is building the answer</span>
+        <p>${escapeHtml(run.stageDetail)}</p>
+      </div>
+      <div class="developing-view-grid">
+        ${liveCards
+          .map(
+            (card) => `
+              <article class="developing-note tone-${card.tone}">
+                <span class="developing-note-label">${escapeHtml(card.label)}</span>
+                <p>${escapeHtml(card.summary)}</p>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+      ${run.statusTone === "running" ? renderTypingIndicator() : ""}
+    </section>
+  `;
+}
+
+function displaySectionTitle(
+  sectionKey: ReportViewState["sections"][number]["key"],
+  fallback: string,
+): string {
+  switch (sectionKey) {
+    case "core_thesis":
+      return "Core thesis";
+    case "supporting_evidence":
+      return "Why";
+    case "liquidity_context":
+      return "Macro backdrop";
+    case "key_risks":
+      return "Key risks";
+    case "what_changes_the_view":
+      return "What would change the view";
+    default:
+      return fallback;
+  }
+}
+
+function displayResearchMapStatus(
+  status: ResearchMapViewState["cards"][number]["status"],
+): string {
+  switch (status) {
+    case "partial":
+      return "live";
+    case "waiting":
+      return "pending";
+    default:
+      return status;
+  }
+}
+
+function displayGraphNodeLabel(label: string, summary: string): string {
+  if (label !== "Research Finding") {
+    return label;
+  }
+
+  const trimmed = summary.trim();
+
+  if (!trimmed) {
+    return label;
+  }
+
+  const sentenceEnd = trimmed.search(/[.!?](?:\s|$)/);
+  const lead = sentenceEnd > 0 ? trimmed.slice(0, sentenceEnd + 1).trim() : trimmed;
+  return lead.length > 34 ? `${lead.slice(0, 31).trim()}…` : lead;
+}
+
+function displayGraphEdgeLabel(label: string): string {
+  switch (label) {
+    case "cites":
+      return "supports";
+    case "tracks":
+      return "connects";
+    case "section":
+      return "part of";
+    default:
+      return label;
+  }
+}
+
+function displayEvidenceTrailRef(ref: string): string {
+  if (ref.startsWith("finding:")) {
+    return "Research finding";
+  }
+
+  if (ref.startsWith("thesis:")) {
+    return "Core thesis";
+  }
+
+  if (ref.startsWith("risk:")) {
+    return "Key risk";
+  }
+
+  if (ref.startsWith("marketsignal:")) {
+    return "Market signal";
+  }
+
+  if (ref.startsWith("liquidityregime:")) {
+    return "Liquidity regime";
+  }
+
+  if (ref.startsWith("liquidityfactor:")) {
+    return "Liquidity factor";
+  }
+
+  if (ref.startsWith("macroactoraction:")) {
+    return "Macro driver";
+  }
+
+  return truncateMiddle(ref, 28);
 }
 
 function renderTypingIndicator(): string {

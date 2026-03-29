@@ -732,8 +732,42 @@ function normalizeTicker(value: string | null): string | null {
 }
 
 function inferTickerFromQuestion(question: string): string | null {
-  const match = question.toUpperCase().match(/\b[A-Z]{1,5}\b/);
-  return match?.[0] ?? null;
+  const matches = question.toUpperCase().match(/\b[A-Z]{1,5}\b/g);
+
+  if (!matches) {
+    return null;
+  }
+
+  const commonWords = new Set([
+    "A",
+    "AN",
+    "AND",
+    "ARE",
+    "BUY",
+    "CAN",
+    "DO",
+    "FOR",
+    "HOW",
+    "IF",
+    "IS",
+    "IT",
+    "NEXT",
+    "OF",
+    "OR",
+    "SELL",
+    "THE",
+    "TO",
+    "VIEW",
+    "WHAT",
+    "WHY",
+    "WILL",
+  ]);
+
+  const candidate =
+    matches.find((token) => token.length >= 3 && !commonWords.has(token)) ??
+    matches.find((token) => !commonWords.has(token));
+
+  return candidate ?? null;
 }
 
 function inferTimeHorizonFromQuestion(question: string): string {
@@ -969,10 +1003,10 @@ function buildResearchMapSnapshot(
     runId: snapshot.run.runId,
     caseId: snapshot.run.caseId,
     status: snapshot.run.status,
-    headline:
-      finalJudgment.content.trim() ||
-      supportingEvidence.content.trim() ||
+    headline: summarizeLeadText(
+      finalJudgment.content.trim() || supportingEvidence.content.trim(),
       "Delphi is still assembling the current view.",
+    ),
     summary: buildResearchMapSummary(snapshot.run, latestFindings),
     updatedAt: snapshot.run.updatedAt,
     cards: [
@@ -980,53 +1014,46 @@ function buildResearchMapSnapshot(
         cardId: "current_view",
         label: "Current View",
         tone: "primary",
+        runStatus: snapshot.run.status,
         section: finalJudgment,
+        fallbackEvent: latestFindings.thesis ?? latestFindings.market_signal ?? latestFindings.liquidity,
       }),
       buildResearchMapCard({
         cardId: "core_thesis",
         label: "Core Thesis",
         tone: "supporting",
+        runStatus: snapshot.run.status,
         section: coreThesis,
+        fallbackEvent: latestFindings.thesis,
       }),
       buildResearchMapCard({
         cardId: "market_signal",
         label: "Market Signal",
         tone: "signal",
-        section: {
-          title: "Market Signal",
-          content:
-            readEventString(marketSignalFinding, "claim") ??
-            "Market signal lane is still updating its latest read.",
-          citationFindingRefs: readEventString(marketSignalFinding, "findingId")
-            ? [readEventString(marketSignalFinding, "findingId") as string]
-            : [],
-          citationEvidenceRefs: readEventStringArray(
-            marketSignalFinding,
-            "evidenceRefs",
-          ),
-          citationObjectRefs: readEventStringArray(
-            marketSignalFinding,
-            "objectRefs",
-          ),
-          status: marketSignalFinding ? "ready" : "empty",
-        },
+        runStatus: snapshot.run.status,
+        section: createEmptyResearchMapSection("Market Signal"),
+        fallbackEvent: marketSignalFinding,
       }),
       buildResearchMapCard({
         cardId: "liquidity_context",
         label: "Liquidity Context",
         tone: "supporting",
+        runStatus: snapshot.run.status,
         section: liquidityContext,
+        fallbackEvent: latestFindings.liquidity,
       }),
       buildResearchMapCard({
         cardId: "key_risks",
         label: "Key Risks",
         tone: "caution",
+        runStatus: snapshot.run.status,
         section: keyRisks,
       }),
       buildResearchMapCard({
         cardId: "watchpoints",
         label: "What Would Change the View",
         tone: "watch",
+        runStatus: snapshot.run.status,
         section: watchpoints,
       }),
     ],
@@ -1138,11 +1165,12 @@ function buildGraphSnapshot(
     runId: snapshot.run.runId,
     caseId: snapshot.run.caseId,
     status: snapshot.run.status,
-    headline:
-      finalJudgment.content.trim() ||
+    headline: summarizeLeadText(
+      finalJudgment.content.trim(),
       "This structure updates as Delphi connects the current investment case.",
+    ),
     summary:
-      "This view shows how Delphi links the case, the live report sections, the key findings, and the supporting evidence behind the current answer.",
+      "This view links the case, the live report sections, the findings, and the supporting evidence behind the current answer.",
     updatedAt: snapshot.run.updatedAt,
     nodes: [...nodes.values()],
     edges: [...edges.values()],
@@ -1161,13 +1189,13 @@ function buildResearchMapSummary(
 
   if (run.status === "completed" || run.status === "degraded") {
     return activeLanes.length > 0
-      ? `This view is anchored by ${activeLanes.join(", ")} inputs and the current evidence trail.`
-      : "This view is anchored by the current report sections and evidence trail.";
+      ? `Current view: ${activeLanes.join(", ")} inputs and the evidence trail.`
+      : "Current view: report sections and the evidence trail.";
   }
 
   return activeLanes.length > 0
-    ? `Delphi is still connecting ${activeLanes.join(", ")} inputs into one investment view.`
-    : "Delphi is still building the structured investment map.";
+    ? `Delphi is connecting ${activeLanes.join(", ")} inputs into one view.`
+    : "Delphi is still building the structured map.";
 }
 
 function findFindingEvent(
@@ -1271,6 +1299,7 @@ function buildResearchMapCard(input: {
   cardId: string;
   label: string;
   tone: ResearchMapTone;
+  runStatus: RunRecord["status"];
   section: Pick<
     ReportSectionRecord,
     | "title"
@@ -1280,23 +1309,67 @@ function buildResearchMapCard(input: {
     | "citationObjectRefs"
     | "status"
   >;
+  fallbackEvent?: RunEvent | undefined;
 }): ResearchMapCard {
   const content = input.section.content.trim();
+  const isSettledRun =
+    input.runStatus === "completed" || input.runStatus === "degraded";
+  const fallbackContent = readEventString(input.fallbackEvent, "claim")?.trim() ?? "";
+  const summary = content || fallbackContent || `${input.label} is still being assembled.`;
+  const isReady =
+    input.section.status === "ready" ||
+    (isSettledRun && (content.length > 0 || fallbackContent.length > 0));
+  const findingId = readEventString(input.fallbackEvent, "findingId");
+  const findingRefs =
+    input.section.citationFindingRefs.length > 0
+      ? input.section.citationFindingRefs
+      : findingId
+        ? [findingId]
+        : [];
+  const evidenceRefs =
+    input.section.citationEvidenceRefs.length > 0
+      ? input.section.citationEvidenceRefs
+      : readEventStringArray(input.fallbackEvent, "evidenceRefs");
+  const objectRefs =
+    input.section.citationObjectRefs.length > 0
+      ? input.section.citationObjectRefs
+      : readEventStringArray(input.fallbackEvent, "objectRefs");
 
   return {
     cardId: input.cardId,
     label: input.label,
     tone: input.tone,
     status:
-      input.section.status === "ready"
+      isReady
         ? "ready"
-        : content.length > 0
+        : content.length > 0 || fallbackContent.length > 0
           ? "partial"
           : "waiting",
-    summary: content || `${input.label} is still being assembled.`,
-    findingRefs: input.section.citationFindingRefs,
-    evidenceRefs: input.section.citationEvidenceRefs,
-    objectRefs: input.section.citationObjectRefs,
+    summary,
+    findingRefs,
+    evidenceRefs,
+    objectRefs,
+  };
+}
+
+function createEmptyResearchMapSection(
+  title: string,
+): Pick<
+  ReportSectionRecord,
+  | "title"
+  | "content"
+  | "citationFindingRefs"
+  | "citationEvidenceRefs"
+  | "citationObjectRefs"
+  | "status"
+> {
+  return {
+    title,
+    content: "",
+    citationFindingRefs: [],
+    citationEvidenceRefs: [],
+    citationObjectRefs: [],
+    status: "empty",
   };
 }
 
@@ -1322,6 +1395,23 @@ function collectLatestFindingEvents(
   }
 
   return latest;
+}
+
+function summarizeLeadText(value: string, fallback: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return fallback;
+  }
+
+  const normalized = trimmed.replace(/^Verdict:\s*/i, "").trim();
+  const sentenceEnd = normalized.search(/[.!?](?:\s|$)/);
+
+  if (sentenceEnd > 0 && sentenceEnd < 180) {
+    return normalized.slice(0, sentenceEnd + 1).trim();
+  }
+
+  return normalized.length > 180 ? `${normalized.slice(0, 177).trim()}…` : normalized;
 }
 
 function readSection(

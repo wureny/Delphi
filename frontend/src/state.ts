@@ -623,19 +623,20 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
         card.currentTask = stringPayload(event, "goal") ?? card.currentTask;
         card.phaseLabel = agent === "judge" ? "Waiting" : "Assigned";
         card.status = agent === "judge" ? "blocked" : "idle";
-        card.recentAction = event.title;
+        card.recentAction = stringPayload(event, "goal") ?? event.title;
         break;
       case "tool_started":
         card.status = "running";
         card.phaseLabel = "Running";
-        card.recentAction = event.title;
-        card.latestTool =
-          stringPayload(event, "capability") ?? "Tool execution started.";
+        card.recentAction = `Starting ${humanizeCapability(stringPayload(event, "capability") ?? "the next step")}.`;
+        card.latestTool = humanizeCapability(
+          stringPayload(event, "capability") ?? "the next step",
+        );
         break;
       case "tool_finished":
         card.status = "running";
         card.phaseLabel = "Processing";
-        card.recentAction = event.title;
+        card.recentAction = summarizeToolResult(event);
         card.latestTool = summarizeToolResult(event);
         break;
       case "finding_created":
@@ -650,8 +651,8 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
           card.status = "running";
           card.phaseLabel = "Validating";
         }
-        card.recentAction = "Runtime validation accepted the latest graph patch.";
-        card.latestPatch = "Accepted";
+        card.recentAction = "Saved structured update.";
+        card.latestPatch = "Saved";
         card.patchTone = "clean";
         break;
       case "patch_rejected":
@@ -665,13 +666,13 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
       case "judge_synthesis_started":
         card.status = "running";
         card.phaseLabel = "Synthesizing";
-        card.recentAction = event.title;
+        card.recentAction = "Weighing the specialist views.";
         break;
       case "report_section_ready":
         card.status = "running";
         card.phaseLabel = "Publishing";
         card.recentAction = summarizeReportSection(event) ?? event.title;
-        card.latestPatch = `Section ${reportSectionLabelFromEvent(event)} published.`;
+        card.latestPatch = `${reportSectionLabelFromEvent(event)} ready`;
         card.patchTone = "clean";
         break;
       case "agent_completed":
@@ -702,7 +703,7 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
       case "report_ready":
         card.status = "done";
         card.phaseLabel = "Report Ready";
-        card.recentAction = "Judge published the final structured report.";
+        card.recentAction = "Final report ready.";
         break;
       default:
         break;
@@ -1147,18 +1148,21 @@ function reportSectionLabel(
 }
 
 function summarizeToolResult(event: RunEvent): string {
-  const parts = [
-    stringPayload(event, "capability"),
-    typeof event.payload.newsCount === "number"
-      ? `${event.payload.newsCount} news items`
-      : null,
-    typeof event.payload.latestPrice === "number"
-      ? `price ${event.payload.latestPrice}`
-      : null,
-    stringPayload(event, "regimeLabel"),
-  ].filter((value): value is string => Boolean(value));
+  const capability = stringPayload(event, "capability") ?? "the next step";
 
-  return parts.length > 0 ? parts.join(" · ") : "Tool execution finished.";
+  if (typeof event.payload.newsCount === "number") {
+    return `Reviewed ${event.payload.newsCount} news items.`;
+  }
+
+  if (typeof event.payload.latestPrice === "number") {
+    return `Latest price read: ${event.payload.latestPrice.toFixed(2)}.`;
+  }
+
+  if (typeof stringPayload(event, "regimeLabel") === "string") {
+    return `Read the regime as ${stringPayload(event, "regimeLabel")}.`;
+  }
+
+  return `Finished ${humanizeCapability(capability)}.`;
 }
 
 function summarizeReasons(event: RunEvent): string | null {
@@ -1182,12 +1186,13 @@ function summarizeTimelineEvent(event: RunEvent): string {
     case "task_assigned":
       return stringPayload(event, "goal") ?? "Task assigned.";
     case "tool_started":
+      return `Starting ${humanizeCapability(stringPayload(event, "capability") ?? "the next step")}.`;
     case "tool_finished":
       return summarizeToolResult(event);
     case "finding_created":
       return stringPayload(event, "claim") ?? "Finding created.";
     case "patch_accepted":
-      return "Runtime validation accepted the latest graph patch.";
+      return "Saved the latest structured update.";
     case "patch_rejected":
       return "A graph patch was rejected. The run remained available in degraded mode.";
     case "agent_completed":
@@ -1236,7 +1241,7 @@ function summarizeTranscriptEvent(event: RunEvent): string {
     case "patch_rejected":
       return "graph validation rejected; degraded mode engaged";
     case "judge_synthesis_started":
-      return "collecting upstream findings for fixed six-section report";
+      return "Synthesizing the answer from the specialist findings.";
     case "agent_completed":
       return stringPayload(event, "summary") ?? "agent completed";
     case "agent_failed":
@@ -1250,10 +1255,30 @@ function summarizeTranscriptEvent(event: RunEvent): string {
     case "report_section_ready":
       return summarizeReportSection(event) ?? "report section ready";
     case "report_ready":
-      return `final report ready · ${truncateLong(stringPayload(event, "reportId") ?? "report", 28)}`;
+      return "Final report ready.";
     default:
       return event.title;
   }
+}
+
+function humanizeCapability(value: string): string {
+  switch (value) {
+    case "graph_context_retrieval":
+      return "prior case context";
+    case "thesis_analysis":
+      return "company signals";
+    case "liquidity_analysis":
+      return "the liquidity backdrop";
+    case "market_signal_analysis":
+      return "price action and positioning";
+    default:
+      break;
+  }
+
+  return value
+    .replaceAll("_", " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function terminalPrefix(event: RunEvent): string {
@@ -1400,42 +1425,34 @@ function deriveResearchMapSnapshot(
     runId: run?.runId ?? "run:pending",
     caseId: run?.caseId ?? "case:pending",
     status: run?.status ?? "created",
-    headline:
-      finalJudgment.content.trim() ||
-      supportingEvidence.content.trim() ||
+    headline: summarizeLeadText(
+      finalJudgment.content.trim() || supportingEvidence.content.trim(),
       "Delphi is still assembling the current view.",
+    ),
     summary:
       run?.status === "completed" || run?.status === "degraded"
-        ? "This map shows how Delphi connected the main thesis, risks, liquidity, and market signal before publishing the report."
+        ? "Current view: thesis, market signal, liquidity, and the evidence trail."
         : "This map updates as each research lane contributes to the final view.",
     updatedAt: run?.updatedAt ?? "",
     cards: [
-      createResearchMapCard("current_view", "Current View", "primary", finalJudgment),
-      createResearchMapCard("core_thesis", "Core Thesis", "supporting", coreThesis),
-      {
-        cardId: "market_signal",
-        label: "Market Signal",
-        tone: "signal",
-        status: latestFindings.market_signal ? "ready" : "waiting",
-        summary:
-          latestFindings.market_signal?.claim ??
-          "Market signal lane is still updating its latest read.",
-        findingRefs: latestFindings.market_signal?.findingRefs ?? [],
-        evidenceRefs: latestFindings.market_signal?.evidenceRefs ?? [],
-        objectRefs: latestFindings.market_signal?.objectRefs ?? [],
-      },
+      createResearchMapCard("current_view", "Current View", "primary", finalJudgment, run?.status, latestFindings.thesis ?? latestFindings.market_signal ?? latestFindings.liquidity),
+      createResearchMapCard("core_thesis", "Core Thesis", "supporting", coreThesis, run?.status, latestFindings.thesis),
+      createResearchMapCard("market_signal", "Market Signal", "signal", createEmptyResearchMapSection("Market Signal"), run?.status, latestFindings.market_signal),
       createResearchMapCard(
         "liquidity_context",
         "Liquidity Context",
         "supporting",
         liquidityContext,
+        run?.status,
+        latestFindings.liquidity,
       ),
-      createResearchMapCard("key_risks", "Key Risks", "caution", keyRisks),
+      createResearchMapCard("key_risks", "Key Risks", "caution", keyRisks, run?.status),
       createResearchMapCard(
         "watchpoints",
         "What Would Change the View",
         "watch",
         watchpoints,
+        run?.status,
       ),
     ],
     evidenceTrail: [
@@ -1729,23 +1746,44 @@ function createResearchMapCard(
   label: string,
   tone: ResearchMapTone,
   section: ReportSectionRecord,
+  runStatus?: RunRecord["status"],
+  fallback?: {
+    claim: string;
+    findingRefs: string[];
+    evidenceRefs: string[];
+    objectRefs: string[];
+  },
 ): ResearchMapCard {
   const summary = section.content.trim();
+  const fallbackSummary = fallback?.claim.trim() ?? "";
+  const isSettledRun = runStatus === "completed" || runStatus === "degraded";
+  const isReady =
+    section.status === "ready" ||
+    (isSettledRun && (summary.length > 0 || fallbackSummary.length > 0));
 
   return {
     cardId,
     label,
     tone,
-    status:
-      section.status === "ready"
-        ? "ready"
-        : summary.length > 0
-          ? "partial"
-          : "waiting",
-    summary: summary || `${label} is still being assembled.`,
-    findingRefs: section.citationFindingRefs,
-    evidenceRefs: section.citationEvidenceRefs,
-    objectRefs: section.citationObjectRefs,
+    status: isReady ? "ready" : summary.length > 0 || fallbackSummary.length > 0 ? "partial" : "waiting",
+    summary: summary || fallbackSummary || `${label} is still being assembled.`,
+    findingRefs: section.citationFindingRefs.length > 0 ? section.citationFindingRefs : fallback?.findingRefs ?? [],
+    evidenceRefs: section.citationEvidenceRefs.length > 0 ? section.citationEvidenceRefs : fallback?.evidenceRefs ?? [],
+    objectRefs: section.citationObjectRefs.length > 0 ? section.citationObjectRefs : fallback?.objectRefs ?? [],
+  };
+}
+
+function createEmptyResearchMapSection(title: string): ReportSectionRecord {
+  return {
+    sectionId: `section:pending:${title.toLowerCase().replace(/\s+/g, "_")}`,
+    runId: "run:pending",
+    sectionKey: "supporting_evidence",
+    title,
+    content: "",
+    citationFindingRefs: [],
+    citationEvidenceRefs: [],
+    citationObjectRefs: [],
+    status: "empty",
   };
 }
 
@@ -1804,12 +1842,29 @@ function findSection(
 
 function summarizeResearchMapCardMeta(card: ResearchMapCard): string {
   const parts = [
-    card.findingRefs.length > 0 ? `${card.findingRefs.length} finding` : null,
-    card.evidenceRefs.length > 0 ? `${card.evidenceRefs.length} evidence` : null,
-    card.objectRefs.length > 0 ? `${card.objectRefs.length} objects` : null,
+    card.findingRefs.length > 0 ? `${card.findingRefs.length} signal` : null,
+    card.evidenceRefs.length > 0 ? `${card.evidenceRefs.length} source` : null,
+    card.objectRefs.length > 0 ? `${card.objectRefs.length} linked view` : null,
   ].filter((value): value is string => Boolean(value));
 
-  return parts.length > 0 ? parts.join(" · ") : "Structured view";
+  return parts.length > 0 ? parts.join(" · ") : "Live view";
+}
+
+function summarizeLeadText(value: string, fallback: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return fallback;
+  }
+
+  const normalized = trimmed.replace(/^Verdict:\s*/i, "").trim();
+  const sentenceEnd = normalized.search(/[.!?](?:\s|$)/);
+
+  if (sentenceEnd > 0 && sentenceEnd < 180) {
+    return normalized.slice(0, sentenceEnd + 1).trim();
+  }
+
+  return normalized.length > 180 ? `${normalized.slice(0, 177).trim()}…` : normalized;
 }
 
 function deriveReportSectionEmphasis(

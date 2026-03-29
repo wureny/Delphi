@@ -190,6 +190,14 @@ export function createSseFeedSource(options: {
 
         const snapshot = await loadSnapshot(options.snapshotUrl, handlers);
 
+        if (options.researchMapUrl) {
+          await loadResearchMapSnapshot(options.researchMapUrl, handlers);
+        }
+
+        if (options.graphSnapshotUrl) {
+          await loadGraphSnapshot(options.graphSnapshotUrl, handlers);
+        }
+
         if (isSettledRunStatus(snapshot.run.status)) {
           stopSnapshotPolling();
         }
@@ -279,6 +287,7 @@ export function createSseFeedSource(options: {
 
               if (
                 (event.eventType === "patch_accepted" ||
+                  event.eventType === "finding_created" ||
                   event.eventType === "report_section_ready" ||
                   event.eventType === "report_ready") &&
                 options.researchMapUrl

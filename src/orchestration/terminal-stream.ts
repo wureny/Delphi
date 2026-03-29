@@ -104,31 +104,31 @@ function summarizeTerminalEvent(event: RunEvent): string | null {
     case "task_assigned":
       return stringPayload(event, "goal") ?? event.title;
     case "tool_started":
-      return `start ${stringPayload(event, "capability") ?? "tool capability"}`;
+      return `Starting ${humanizeCapability(stringPayload(event, "capability") ?? "the next step")}`;
     case "tool_finished":
       return summarizeToolResult(event);
     case "finding_created":
       return stringPayload(event, "claim") ?? "finding emitted";
     case "patch_accepted":
-      return "graph patch accepted";
+      return "Saved structured update";
     case "patch_rejected":
-      return "graph patch rejected; degraded mode may apply";
+      return "Structured update needs revision";
     case "judge_synthesis_started":
-      return "collecting upstream findings for fixed six-section report";
+      return "Synthesizing the answer from the specialist findings";
     case "report_section_ready":
       return summarizeReportSection(event);
     case "agent_completed":
-      return stringPayload(event, "summary") ?? "agent completed";
+      return stringPayload(event, "summary") ?? "Step completed";
     case "agent_failed":
       return (
         stringPayload(event, "error") ??
         stringPayload(event, "summary") ??
-        "agent failed"
+        "Step failed"
       );
     case "degraded_mode_entered":
-      return summarizeReasons(event) ?? "degraded mode entered";
+      return summarizeReasons(event) ?? "Running in degraded mode";
     case "report_ready":
-      return `final report ready · ${truncateLong(stringPayload(event, "reportId") ?? "report", 28)}`;
+      return "Final report ready";
     default:
       return null;
   }
@@ -141,18 +141,18 @@ function summarizeToolResult(event: RunEvent): string {
   const latestPrice = numberPayload(event, "latestPrice");
 
   if (typeof newsCount === "number") {
-    return `done ${capability} · ${newsCount} news items`;
+    return `Reviewed ${newsCount} news items`;
   }
 
   if (regimeLabel) {
-    return `done ${capability} · regime ${regimeLabel}`;
+    return `Read the regime as ${regimeLabel}`;
   }
 
   if (typeof latestPrice === "number") {
-    return `done ${capability} · price ${latestPrice.toFixed(2)}`;
+    return `Latest price read: ${latestPrice.toFixed(2)}`;
   }
 
-  return `done ${capability}`;
+  return `Finished ${humanizeCapability(capability)}`;
 }
 
 function summarizeReasons(event: RunEvent): string | null {
@@ -248,14 +248,34 @@ function summarizeReportSection(event: RunEvent): string {
   const sectionKey = stringPayload(event, "sectionKey");
 
   if (title) {
-    return `section ready · ${title}`;
+    return `Wrote ${title}`;
   }
 
   if (sectionKey) {
-    return `section ready · ${sectionKey}`;
+    return `Wrote ${sectionKey.replaceAll("_", " ")}`;
   }
 
-  return "section ready";
+  return "Section written";
+}
+
+function humanizeCapability(value: string): string {
+  switch (value) {
+    case "graph_context_retrieval":
+      return "prior case context";
+    case "thesis_analysis":
+      return "company signals";
+    case "liquidity_analysis":
+      return "the liquidity backdrop";
+    case "market_signal_analysis":
+      return "price action and positioning";
+    default:
+      break;
+  }
+
+  return value
+    .replaceAll("_", " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function stringPayload(event: RunEvent, key: string): string | null {
