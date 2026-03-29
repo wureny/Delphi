@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "npm run start:runtime",
-    "start:runtime": "node ./scripts/run-with-env.mjs ./scripts/serve-runtime-api.ts",
+    "start:runtime": "tsx ./scripts/serve-runtime-api.ts",
     "neo4j:bootstrap": "node ./scripts/run-with-env.mjs ./scripts/bootstrap-research-graph.ts",
     "check:research-graph": "node ./scripts/run-with-env.mjs ./src/research-graph/index.ts",
     "neo4j:smoke-write": "node ./scripts/run-with-env.mjs ./scripts/run-neo4j-smoke-write.ts",

@@ -2,11 +2,27 @@ import { spawn } from "node:child_process";
 
 const tsxLoader = "./node_modules/tsx/dist/loader.mjs";
 const suppressWarnings = "./node_modules/tsx/dist/suppress-warnings.cjs";
+const tsxImportTarget = "tsx";
+
+const [major, minor] = process.versions.node
+  .split(".")
+  .slice(0, 2)
+  .map((part) => Number.parseInt(part, 10));
+const supportsImport =
+  major > 20 ||
+  (major === 20 && minor >= 6) ||
+  (major === 18 && minor >= 19);
+const runtimeArgs = supportsImport
+  ? ["--require", suppressWarnings, "--import", tsxImportTarget, "./scripts/serve-runtime-api.ts"]
+  : ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-runtime-api.ts"];
+const frontendArgs = supportsImport
+  ? ["--require", suppressWarnings, "--import", tsxImportTarget, "./scripts/serve-frontend.ts"]
+  : ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-frontend.ts"];
 
 const processes = [
   spawn(
     "node",
-    ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-runtime-api.ts"],
+    runtimeArgs,
     {
       cwd: process.cwd(),
       stdio: "inherit",
@@ -15,7 +31,7 @@ const processes = [
   ),
   spawn(
     "node",
-    ["--require", suppressWarnings, "--loader", tsxLoader, "./scripts/serve-frontend.ts"],
+    frontendArgs,
     {
       cwd: process.cwd(),
       stdio: "inherit",

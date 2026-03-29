@@ -62,8 +62,21 @@ const suppressWarnings = path.resolve(
   "dist",
   "suppress-warnings.cjs",
 );
+const tsxImportTarget = "tsx";
 
-const child = spawn(process.execPath, ["--require", suppressWarnings, "--loader", tsxLoader, entry, ...args], {
+const [major, minor] = process.versions.node
+  .split(".")
+  .slice(0, 2)
+  .map((part) => Number.parseInt(part, 10));
+const supportsImport =
+  major > 20 ||
+  (major === 20 && minor >= 6) ||
+  (major === 18 && minor >= 19);
+const nodeArgs = supportsImport
+  ? ["--require", suppressWarnings, "--import", tsxImportTarget, entry, ...args]
+  : ["--require", suppressWarnings, "--loader", tsxLoader, entry, ...args];
+
+const child = spawn(process.execPath, nodeArgs, {
   stdio: "inherit",
   env,
 });
