@@ -31,11 +31,23 @@ export function renderApp(options: {
       state.connectionStatus === "creating",
   );
   const leftPanelState = hasRunActivity ? "running" : "idle";
+  const workspaceStyle = state.canvasCollapsed
+    ? ""
+    : ` style="--workspace-left:${Math.round(state.workspaceSplitRatio * 1000) / 10}%;"`;
 
   return `
     <div class="app-shell ${state.canvasCollapsed ? "canvas-collapsed" : ""}">
+      ${
+        state.canvasCollapsed
+          ? `
+            <button class="workspace-float-toggle" data-action="toggle-canvas" type="button">
+              Open Live Desk
+            </button>
+          `
+          : ""
+      }
       <div class="app-frame">
-        <div class="workspace-shell">
+        <div class="workspace-shell"${workspaceStyle}>
           <section class="left-panel ${leftPanelState}">
             <div class="chat-shell conversation-main">
               ${
@@ -75,25 +87,34 @@ export function renderApp(options: {
             </div>
           </section>
 
-          <div class="shell-layout">
-            ${
-              state.canvasCollapsed
-                ? renderCollapsedRail(agentCards, run.statusTone)
-                : `
+          ${
+            state.canvasCollapsed
+              ? ""
+              : `
+                <div
+                  class="workspace-divider"
+                  data-role="workspace-divider"
+                  role="separator"
+                  aria-orientation="vertical"
+                  aria-label="Resize answer and live desk panels"
+                >
+                  <span class="workspace-divider-handle"></span>
+                </div>
+                <div class="shell-layout">
                   <aside class="right-panel">
                     <div class="canvas-toolbar">
                       <div class="rail-meta" data-role="rail-meta">
                         ${renderRailMeta(run, config)}
                       </div>
                       <button class="toggle-button" data-action="toggle-canvas" type="button">
-                        ${state.canvasCollapsed ? "Expand Canvas" : "Collapse Canvas"}
+                        Focus Answer
                       </button>
                     </div>
                     <div class="canvas-header">
                       <div class="canvas-header-copy">
                         <span class="eyebrow">Delphi Workspace</span>
                         <h2>Live Desk</h2>
-                        <p class="canvas-subcopy">Watch the analysts build the case in real time, or inspect the structure behind the current call.</p>
+                        <p class="canvas-subcopy">Watch the analysts build the case in real time, then inspect the structured case graph behind the current call.</p>
                       </div>
                       <span class="tag">${escapeHtml(renderWorkspaceTag(run))}</span>
                     </div>
@@ -111,10 +132,9 @@ export function renderApp(options: {
                       }
                     </section>
                   </aside>
-                  <aside class="canvas-rail" aria-hidden="true"></aside>
-                `
-            }
-          </div>
+                </div>
+              `
+          }
         </div>
       </div>
     </div>
@@ -296,9 +316,14 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
-      <p class="graph-view-helper">Drag to explore the structure.</p>
+      <div class="graph-legend" aria-label="Case structure legend">
+        <span class="graph-legend-pill">Answer</span>
+        <span class="graph-legend-pill">Supporting claims</span>
+        <span class="graph-legend-pill">Persistent thesis, risk, liquidity, and signal objects</span>
+      </div>
+      <p class="graph-view-helper">Drag left or right to explore how the answer connects back to structured claims, evidence, and stable investment objects.</p>
       <div class="graph-stage">
-        <svg class="graph-svg" viewBox="0 0 1280 760" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
+        <svg class="graph-svg" viewBox="0 0 1680 840" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
           ${snapshot.edges.map(renderGraphEdge).join("")}
           ${snapshot.nodes.map(renderGraphNode).join("")}
         </svg>
@@ -613,30 +638,6 @@ function renderTimelineItem(item: TimelineItemViewState): string {
   `;
 }
 
-function renderCollapsedRail(
-  agentCards: AgentCardState[],
-  statusTone: "idle" | "running" | "completed" | "degraded" | "failed",
-): string {
-  return `
-    <aside class="canvas-rail">
-      <div class="rail-top">
-        <button class="toggle-button" data-action="toggle-canvas" type="button">Open</button>
-        <span class="rail-badge">${escapeHtml(statusTone)}</span>
-      </div>
-      <div class="rail-bottom">
-        <div class="rail-status-stack">
-          ${agentCards
-            .map(
-              (card) =>
-                `<span class="rail-agent-dot" title="${escapeHtml(card.label)}" style="background:${statusColor(card.status)}"></span>`,
-            )
-            .join("")}
-        </div>
-      </div>
-    </aside>
-    `;
-}
-
 function renderStatusBadge(
   tone: "idle" | "running" | "completed" | "degraded" | "failed",
   label: string,
@@ -759,7 +760,7 @@ function renderResponseSections(
   researchMap: ResearchMapViewState,
 ): string {
   const visibleSections = report.sections.filter(
-    (section) => section.content.trim().length > 0 || section.isSkeleton,
+    (section) => section.content.trim().length > 0,
   );
   const finalJudgment = visibleSections.find((section) => section.key === "final_judgment");
   const rationaleSections = visibleSections.filter((section) =>

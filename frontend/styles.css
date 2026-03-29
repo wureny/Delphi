@@ -77,6 +77,7 @@ a {
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
+  position: relative;
 }
 
 .command-header {
@@ -178,8 +179,8 @@ a {
 
 .workspace-shell {
   display: grid;
-  grid-template-columns: minmax(420px, 0.5fr) minmax(0, 0.5fr);
-  gap: 18px;
+  grid-template-columns: minmax(420px, var(--workspace-left, 50%)) 12px minmax(360px, 1fr);
+  gap: 0;
   min-height: 100vh;
   height: 100vh;
   width: 100%;
@@ -188,11 +189,77 @@ a {
   overflow: hidden;
 }
 
+.app-shell.canvas-collapsed .workspace-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .shell-layout {
   display: flex;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  padding-left: 18px;
+}
+
+.workspace-divider {
+  position: relative;
+  min-width: 12px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+}
+
+.workspace-divider::before {
+  content: "";
+  position: absolute;
+  inset: 18px 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(176, 151, 113, 0.14), rgba(176, 151, 113, 0.04));
+}
+
+.workspace-divider-handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 56px;
+  border-radius: 999px;
+  background: rgba(221, 191, 141, 0.26);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(25, 23, 21, 0.24);
+}
+
+.workspace-divider:hover::before,
+.workspace-divider.is-dragging::before {
+  background: linear-gradient(180deg, rgba(221, 191, 141, 0.28), rgba(176, 151, 113, 0.12));
+}
+
+.workspace-divider:hover .workspace-divider-handle,
+.workspace-divider.is-dragging .workspace-divider-handle {
+  background: rgba(236, 228, 215, 0.54);
+}
+
+.workspace-float-toggle {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  z-index: 40;
+  border-radius: 999px;
+  padding: 10px 14px;
+  border: 1px solid rgba(155, 141, 126, 0.26);
+  background: rgba(24, 22, 20, 0.86);
+  color: var(--text-soft);
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.workspace-float-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(176, 151, 113, 0.32);
 }
 
 .left-panel,
@@ -1692,10 +1759,28 @@ button.idle-example {
 }
 
 .graph-view-helper {
-  margin: -6px 0 0;
+  margin: -2px 0 0;
   color: var(--text-dim);
   font-size: 0.76rem;
   line-height: 1.45;
+}
+
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.graph-legend-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(155, 141, 126, 0.18);
+  background: rgba(255, 248, 232, 0.03);
+  color: var(--text-soft);
+  font-size: 0.74rem;
 }
 
 .graph-meta {
@@ -1728,6 +1813,7 @@ button.idle-example {
   user-select: none;
   touch-action: none;
   scrollbar-gutter: stable both-edges;
+  padding: 0 6px 10px 0;
 }
 
 .graph-stage.is-panning {
@@ -1735,8 +1821,9 @@ button.idle-example {
 }
 
 .graph-svg {
-  width: 1280px;
-  height: 760px;
+  width: 1680px;
+  min-width: 1680px;
+  height: 840px;
   display: block;
 }
 
@@ -2480,6 +2567,11 @@ button.idle-example {
   .app-shell.canvas-collapsed .workspace-shell {
     grid-template-columns: 1fr;
     padding: 16px;
+  }
+
+  .workspace-divider,
+  .workspace-float-toggle {
+    display: none;
   }
 
   .right-panel,

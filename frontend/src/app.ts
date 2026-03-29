@@ -36,6 +36,7 @@ import {
   selectReportViewState,
   selectRunViewState,
   selectTimelineState,
+  setWorkspaceSplitRatio,
   toggleCanvas,
   toggleCanvasPanel,
   toggleInsightFocus,
@@ -78,6 +79,15 @@ export class DelphiFrontendApp {
         startLeft: number;
         startTop: number;
         moved: boolean;
+      }
+    | null = null;
+  private dividerResizeState:
+    | {
+        shell: HTMLElement;
+        divider: HTMLElement;
+        pointerId: number;
+        startX: number;
+        startRatio: number;
       }
     | null = null;
   private ignoreGraphClickUntil = 0;
@@ -522,6 +532,27 @@ export class DelphiFrontendApp {
       return;
     }
 
+    const divider = target.closest<HTMLElement>('[data-role="workspace-divider"]');
+
+    if (divider) {
+      const shell = divider.closest<HTMLElement>(".workspace-shell");
+
+      if (!shell) {
+        return;
+      }
+
+      this.dividerResizeState = {
+        shell,
+        divider,
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startRatio: this.state.workspaceSplitRatio,
+      };
+      divider.classList.add("is-dragging");
+      divider.setPointerCapture(event.pointerId);
+      return;
+    }
+
     const stage = target.closest<HTMLElement>(".graph-stage");
 
     if (!stage) {
@@ -542,6 +573,17 @@ export class DelphiFrontendApp {
   }
 
   private handlePointerMove(event: PointerEvent): void {
+    if (this.dividerResizeState && this.dividerResizeState.pointerId === event.pointerId) {
+      const { shell, startX, startRatio } = this.dividerResizeState;
+      const shellRect = shell.getBoundingClientRect();
+      const nextRatio = clampWorkspaceSplit(
+        startRatio + (event.clientX - startX) / shellRect.width,
+      );
+
+      shell.style.setProperty("--workspace-left", `${Math.round(nextRatio * 1000) / 10}%`);
+      return;
+    }
+
     if (!this.graphPanState || this.graphPanState.pointerId !== event.pointerId) {
       return;
     }
@@ -558,6 +600,24 @@ export class DelphiFrontendApp {
   }
 
   private handlePointerUp(event: PointerEvent): void {
+    if (this.dividerResizeState && this.dividerResizeState.pointerId === event.pointerId) {
+      const { shell, divider } = this.dividerResizeState;
+      const workspaceLeft = shell.style.getPropertyValue("--workspace-left").trim();
+      const nextRatio = workspaceLeft.endsWith("%")
+        ? clampWorkspaceSplit(Number.parseFloat(workspaceLeft) / 100)
+        : this.state.workspaceSplitRatio;
+
+      divider.classList.remove("is-dragging");
+
+      if (divider.hasPointerCapture(event.pointerId)) {
+        divider.releasePointerCapture(event.pointerId);
+      }
+
+      this.dividerResizeState = null;
+      this.state = setWorkspaceSplitRatio(this.state, nextRatio);
+      return;
+    }
+
     if (!this.graphPanState || this.graphPanState.pointerId !== event.pointerId) {
       return;
     }
@@ -635,7 +695,11 @@ export class DelphiFrontendApp {
       ) {
         // Keep existing DOM and only patch the changed section.
       } else {
-        dialogueFeed.innerHTML = renderDialogueFeed(this.state, run, report, researchMap);
+        const nextDialogue = renderDialogueFeed(this.state, run, report, researchMap);
+
+        if (dialogueFeed.innerHTML !== nextDialogue) {
+          dialogueFeed.innerHTML = nextDialogue;
+        }
       }
 
       if (!this.pauseDialogueAutoscroll) {
@@ -1138,6 +1202,10 @@ function syncLiveLocation(runtimeApiBaseUrl: string, runKey: string): void {
   url.searchParams.delete("terminals");
   url.searchParams.delete("terminalStream");
   window.history.replaceState(null, "", url);
+}
+
+function clampWorkspaceSplit(value: number): number {
+  return Math.min(Math.max(value, 0.36), 0.64);
 }
 
 function patchClass(tone: "clean" | "warning" | "error"): string {

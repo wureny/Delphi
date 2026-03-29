@@ -42,6 +42,7 @@ export interface AppState {
   composerText: string;
   pendingSubmittedQuestion: string | null;
   canvasCollapsed: boolean;
+  workspaceSplitRatio: number;
   activeOutputPanel: "report" | "research_map";
   activeCanvasPanel: "terminals" | "graph";
   selectedInsight:
@@ -194,6 +195,7 @@ export function createInitialState(
     composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
     pendingSubmittedQuestion: null,
     canvasCollapsed: false,
+    workspaceSplitRatio: 0.5,
     activeOutputPanel: "report",
     activeCanvasPanel: "terminals",
     selectedInsight: null,
@@ -225,6 +227,7 @@ export function createRestartState(
     composerText: previous.composerText,
     pendingSubmittedQuestion: null,
     canvasCollapsed: previous.canvasCollapsed,
+    workspaceSplitRatio: previous.workspaceSplitRatio,
     activeOutputPanel: previous.activeOutputPanel,
     activeCanvasPanel: previous.activeCanvasPanel,
     selectedInsight: null,
@@ -750,6 +753,16 @@ export function toggleCanvas(state: AppState): AppState {
   return {
     ...state,
     canvasCollapsed: !state.canvasCollapsed,
+  };
+}
+
+export function setWorkspaceSplitRatio(
+  state: AppState,
+  ratio: number,
+): AppState {
+  return {
+    ...state,
+    workspaceSplitRatio: ratio,
   };
 }
 
@@ -1668,18 +1681,18 @@ function layoutGraph(
     "evidence",
   ];
   const xByLane: Record<GraphSnapshotNode["kind"], number> = {
-    case: 110,
-    section: 360,
-    finding: 610,
-    object: 860,
-    evidence: 1110,
+    case: 140,
+    section: 450,
+    finding: 790,
+    object: 1130,
+    evidence: 1450,
   };
   const widthByLane: Record<GraphSnapshotNode["kind"], number> = {
-    case: 180,
-    section: 190,
-    finding: 190,
-    object: 170,
-    evidence: 150,
+    case: 210,
+    section: 220,
+    finding: 220,
+    object: 200,
+    evidence: 180,
   };
   const grouped = new Map<GraphSnapshotNode["kind"], GraphSnapshotNode[]>();
 
@@ -1697,14 +1710,14 @@ function layoutGraph(
     const laneNodes = grouped.get(lane) ?? [];
     laneNodes.forEach((node, index) => {
       const width = widthByLane[lane];
-      const height = lane === "case" ? 88 : 78;
+      const height = lane === "case" ? 92 : 82;
       laidOutNodes.push({
         nodeId: node.nodeId,
         label: node.label,
         kind: node.kind,
         summary: truncateLong(node.summary, lane === "case" ? 140 : 110),
         x: xByLane[lane],
-        y: 56 + index * 106,
+        y: 64 + index * 112,
         width,
         height,
         emphasis: node.emphasis,
