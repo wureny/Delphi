@@ -175,9 +175,13 @@ export function renderDialogueFeed(
   researchMap: ResearchMapViewState,
 ): string {
   const queryLabel = run.queryLabel.trim();
+  const hasVisibleReportSections = report.sections.some(
+    (section) => section.content.trim().length > 0,
+  );
   const showReasoningMap =
-    researchMap.cards.some((card) => card.status !== "waiting") ||
-    researchMap.evidenceTrail.length > 0;
+    hasVisibleReportSections &&
+    (researchMap.cards.some((card) => card.status !== "waiting") ||
+      researchMap.evidenceTrail.length > 0);
 
   return `
     ${

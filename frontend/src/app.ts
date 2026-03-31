@@ -135,7 +135,9 @@ export class DelphiFrontendApp {
     this.state = {
       ...createRestartState(
         this.state,
-        buildFeedInfoMessage(this.config),
+        this.config.feedMode === "sse"
+          ? "Opening the live analysis stream."
+          : buildFeedInfoMessage(this.config),
       ),
       pendingSubmittedQuestion,
       connectionStatus:

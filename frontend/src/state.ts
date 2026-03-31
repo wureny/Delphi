@@ -383,6 +383,11 @@ export function selectRunViewState(state: AppState): RunViewState {
     stageLabel = "Getting Started";
     stageDetail = "Sending your question and opening the research workspace.";
     statusTone = "running";
+  } else if (state.connectionStatus === "connecting" && state.pendingSubmittedQuestion) {
+    stageLabel = "Opening Live Desk";
+    stageDetail =
+      "Connecting to the live analysis stream and loading the first research snapshot.";
+    statusTone = "running";
   } else if (state.connectionStatus === "error") {
     stageLabel = "Connection Error";
     stageDetail = state.errorMessage ?? "The feed could not be established.";
