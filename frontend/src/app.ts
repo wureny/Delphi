@@ -131,10 +131,16 @@ export class DelphiFrontendApp {
     this.connection?.close();
     this.connection = null;
     this.resetTerminalUiState();
-    this.state = createRestartState(
-      this.state,
-      buildFeedInfoMessage(this.config),
-    );
+    const pendingSubmittedQuestion = this.state.pendingSubmittedQuestion;
+    this.state = {
+      ...createRestartState(
+        this.state,
+        buildFeedInfoMessage(this.config),
+      ),
+      pendingSubmittedQuestion,
+      connectionStatus:
+        this.config.feedMode === "sse" ? "connecting" : "idle",
+    };
     this.renderShell();
 
     const source = this.createFeedSource();
