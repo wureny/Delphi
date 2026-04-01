@@ -1841,13 +1841,6 @@ button.idle-example {
   cursor: grabbing;
 }
 
-.graph-svg {
-  width: 1680px;
-  min-width: 1680px;
-  height: 840px;
-  display: block;
-}
-
 .graph-edge path {
   fill: none;
   stroke: rgba(186, 201, 204, 0.22);
@@ -1874,16 +1867,6 @@ button.idle-example {
   fill: rgba(220, 233, 236, 0.86);
 }
 
-.graph-edge.focus-selected path {
-  stroke: rgba(176, 151, 113, 0.72);
-  stroke-width: 3;
-  filter: drop-shadow(0 0 8px rgba(176, 151, 113, 0.16));
-}
-
-.graph-edge.focus-selected .graph-edge-label {
-  fill: rgba(246, 249, 250, 0.98);
-}
-
 .graph-node rect {
   fill: rgba(28, 29, 31, 0.94);
   stroke: rgba(59, 73, 76, 0.22);
@@ -1897,21 +1880,6 @@ button.idle-example {
 
 .graph-node {
   cursor: pointer;
-}
-
-.graph-node.tone-primary rect {
-  fill: rgba(176, 151, 113, 0.08);
-  stroke: rgba(176, 151, 113, 0.28);
-}
-
-.graph-node.tone-supporting rect {
-  fill: rgba(123, 168, 156, 0.09);
-  stroke: rgba(123, 168, 156, 0.24);
-}
-
-.graph-node.tone-caution rect {
-  fill: rgba(215, 154, 113, 0.08);
-  stroke: rgba(215, 154, 113, 0.22);
 }
 
 .graph-node.focus-related rect {
@@ -1942,6 +1910,353 @@ button.idle-example {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+
+/* ── Graph node glyph ── */
+.graph-node-glyph {
+  fill: var(--text-dim);
+  font-size: 11px;
+  transition: fill 160ms var(--ease-out);
+}
+
+.graph-node.tone-primary .graph-node-glyph {
+  fill: #b0975f;
+}
+
+.graph-node.tone-supporting .graph-node-glyph {
+  fill: #7ba89c;
+}
+
+.graph-node.tone-caution .graph-node-glyph {
+  fill: #d79a71;
+}
+
+.graph-node.focus-selected .graph-node-glyph {
+  fill: var(--text);
+}
+
+/* ── Graph node gradient fills ── */
+.graph-node.tone-primary rect {
+  fill: url(#grad-primary) rgba(176, 151, 113, 0.1);
+  fill: rgba(176, 151, 113, 0.1);
+  stroke: rgba(176, 151, 113, 0.32);
+}
+
+.graph-node.tone-supporting rect {
+  fill: rgba(123, 168, 156, 0.1);
+  stroke: rgba(123, 168, 156, 0.28);
+}
+
+.graph-node.tone-caution rect {
+  fill: rgba(215, 154, 113, 0.1);
+  stroke: rgba(215, 154, 113, 0.26);
+}
+
+/* ── Graph lane guide lines ── */
+.graph-lane-guide {
+  fill: rgba(59, 73, 76, 0.04);
+  stroke: none;
+}
+
+/* ── Graph edge animation on focus ── */
+.graph-edge.focus-selected path {
+  stroke: rgba(176, 151, 113, 0.72);
+  stroke-width: 3;
+  stroke-dasharray: 8 4;
+  animation: edge-flow 1s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(176, 151, 113, 0.16));
+}
+
+@keyframes edge-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -12; }
+}
+
+/* ── Zoom controls ── */
+.graph-zoom-controls {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.graph-zoom-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 0;
+  min-width: 32px;
+  border: none;
+  border-right: 1px solid var(--border);
+}
+
+.graph-zoom-btn:last-child {
+  border-right: none;
+}
+
+.graph-zoom-btn:hover {
+  background: rgba(176, 151, 113, 0.12);
+}
+
+/* ── Lane icon in headers ── */
+.lane-icon {
+  opacity: 0.5;
+  margin-right: 4px;
+}
+
+/* ── Legend glyphs ── */
+.legend-glyph {
+  margin-right: 3px;
+  opacity: 0.7;
+}
+
+.legend-case .legend-glyph { color: var(--text-dim); }
+.legend-section .legend-glyph { color: #b0975f; }
+.legend-finding .legend-glyph { color: #7ba89c; }
+.legend-object .legend-glyph { color: #d79a71; }
+.legend-evidence .legend-glyph { color: var(--text-dim); }
+
+/* ── Graph detail panel (node inspector) ── */
+.graph-detail-panel {
+  margin-top: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(28, 29, 31, 0.98), rgba(22, 22, 24, 0.98));
+  animation: detailSlideIn 200ms var(--ease-out);
+}
+
+.graph-detail-panel.tone-primary {
+  border-color: rgba(176, 151, 113, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(176, 151, 113, 0.06), transparent 40%),
+    linear-gradient(135deg, rgba(28, 29, 31, 0.98), rgba(22, 22, 24, 0.98));
+}
+
+.graph-detail-panel.tone-supporting {
+  border-color: rgba(123, 168, 156, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(123, 168, 156, 0.06), transparent 40%),
+    linear-gradient(135deg, rgba(28, 29, 31, 0.98), rgba(22, 22, 24, 0.98));
+}
+
+.graph-detail-panel.tone-caution {
+  border-color: rgba(215, 154, 113, 0.28);
+  background:
+    radial-gradient(circle at top left, rgba(215, 154, 113, 0.06), transparent 40%),
+    linear-gradient(135deg, rgba(28, 29, 31, 0.98), rgba(22, 22, 24, 0.98));
+}
+
+@keyframes detailSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.graph-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.graph-detail-kind {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.graph-detail-glyph {
+  margin-right: 3px;
+}
+
+.graph-detail-emphasis {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.graph-detail-emphasis.emphasis-primary {
+  color: #b0975f;
+  background: rgba(176, 151, 113, 0.12);
+}
+
+.graph-detail-emphasis.emphasis-supporting {
+  color: #7ba89c;
+  background: rgba(123, 168, 156, 0.1);
+}
+
+.graph-detail-emphasis.emphasis-caution {
+  color: #d79a71;
+  background: rgba(215, 154, 113, 0.1);
+}
+
+.graph-detail-emphasis.emphasis-neutral {
+  color: var(--text-dim);
+  background: rgba(59, 73, 76, 0.16);
+}
+
+.graph-detail-label {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.graph-detail-summary {
+  margin: 0 0 12px;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.graph-detail-connections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.graph-detail-edge-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.graph-detail-edge-label {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+
+.graph-detail-edge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(59, 73, 76, 0.14);
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.graph-detail-edge-pill .edge-rel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.graph-detail-edge-pill .edge-from,
+.graph-detail-edge-pill .edge-to {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── Graph SVG dynamic sizing ── */
+.graph-svg {
+  width: auto;
+  min-width: 1680px;
+  height: auto;
+  min-height: 600px;
+  display: block;
+  transition: transform 120ms var(--ease-out);
+}
+
+/* ── Graph empty state ── */
+.graph-empty {
+  align-items: center;
+  justify-content: center;
+}
+
+.graph-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+  max-width: 420px;
+}
+
+.graph-empty-icon {
+  font-size: 2rem;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  animation: gentlePulse 3s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+.graph-empty-state h3 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.graph-empty-state p {
+  margin: 0 0 20px;
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.graph-empty-lanes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.graph-empty-lane {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(28, 29, 31, 0.6);
+}
+
+.graph-empty-lane-arrow {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
+
+/* ── Canvas tab badge ── */
+.canvas-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: rgba(176, 151, 113, 0.18);
+  color: #b0975f;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  margin-left: 6px;
 }
 
 .terminal-card {

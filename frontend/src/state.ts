@@ -51,6 +51,7 @@ export interface AppState {
     | { kind: "graph_node"; nodeId: string }
     | null;
   expandedTerminalAgent: AgentKey | null;
+  graphZoom: number;
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
   infoMessage: string | null;
@@ -141,6 +142,16 @@ export interface GraphEdgeViewState {
   focus: "none" | "selected" | "related";
 }
 
+export interface GraphNodeDetail {
+  nodeId: string;
+  label: string;
+  kind: GraphSnapshotNode["kind"];
+  emphasis: GraphSnapshotNode["emphasis"];
+  summary: string;
+  incomingEdges: { fromLabel: string; edgeLabel: string }[];
+  outgoingEdges: { toLabel: string; edgeLabel: string }[];
+}
+
 export interface GraphSnapshotViewState {
   headline: string;
   summary: string;
@@ -149,6 +160,9 @@ export interface GraphSnapshotViewState {
   edgeCount: number;
   nodes: GraphNodeViewState[];
   edges: GraphEdgeViewState[];
+  selectedNodeDetail: GraphNodeDetail | null;
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
 export interface AgentCardState {
@@ -200,6 +214,7 @@ export function createInitialState(
     activeCanvasPanel: "terminals",
     selectedInsight: null,
     expandedTerminalAgent: null,
+    graphZoom: 1,
     connectionStatus: "idle",
     errorMessage: null,
     infoMessage:
@@ -554,6 +569,47 @@ export function selectGraphSnapshotViewState(state: AppState): GraphSnapshotView
   }));
   const nodeFocusById = new Map(nodes.map((node) => [node.nodeId, node.focus]));
 
+  const edges: GraphEdgeViewState[] = layout.edges.map((edge) => ({
+    ...edge,
+    focus:
+      nodeFocusById.get(edge.fromNodeId) === "selected" ||
+      nodeFocusById.get(edge.toNodeId) === "selected"
+        ? ("selected" as const)
+        : nodeFocusById.get(edge.fromNodeId) === "related" ||
+            nodeFocusById.get(edge.toNodeId) === "related"
+          ? ("related" as const)
+          : ("none" as const),
+  }));
+
+  let selectedNodeDetail: GraphNodeDetail | null = null;
+  if (
+    state.selectedInsight?.kind === "graph_node"
+  ) {
+    const selectedId = state.selectedInsight.nodeId;
+    const selectedRawNode = snapshot.nodes.find((n) => n.nodeId === selectedId);
+    if (selectedRawNode) {
+      const nodeLabels = new Map(snapshot.nodes.map((n) => [n.nodeId, n.label]));
+      selectedNodeDetail = {
+        nodeId: selectedRawNode.nodeId,
+        label: selectedRawNode.label,
+        kind: selectedRawNode.kind,
+        emphasis: selectedRawNode.emphasis,
+        summary: selectedRawNode.summary,
+        incomingEdges: snapshot.edges
+          .filter((e) => e.to === selectedId)
+          .map((e) => ({ fromLabel: nodeLabels.get(e.from) ?? e.from, edgeLabel: e.label })),
+        outgoingEdges: snapshot.edges
+          .filter((e) => e.from === selectedId)
+          .map((e) => ({ toLabel: nodeLabels.get(e.to) ?? e.to, edgeLabel: e.label })),
+      };
+    }
+  }
+
+  const maxY = nodes.reduce((max, n) => Math.max(max, n.y + n.height), 0);
+  const maxX = nodes.reduce((max, n) => Math.max(max, n.x + n.width), 0);
+  const canvasWidth = Math.max(maxX + 80, 1680);
+  const canvasHeight = Math.max(maxY + 80, 600);
+
   return {
     headline: snapshot.headline,
     summary: snapshot.summary,
@@ -561,17 +617,10 @@ export function selectGraphSnapshotViewState(state: AppState): GraphSnapshotView
     nodeCount: snapshot.nodes.length,
     edgeCount: snapshot.edges.length,
     nodes,
-    edges: layout.edges.map((edge) => ({
-      ...edge,
-      focus:
-        nodeFocusById.get(edge.fromNodeId) === "selected" ||
-        nodeFocusById.get(edge.toNodeId) === "selected"
-          ? "selected"
-          : nodeFocusById.get(edge.fromNodeId) === "related" ||
-              nodeFocusById.get(edge.toNodeId) === "related"
-            ? "related"
-            : "none",
-    })),
+    edges,
+    selectedNodeDetail,
+    canvasWidth,
+    canvasHeight,
   };
 }
 
@@ -820,6 +869,13 @@ export function toggleTerminalExpansion(
     ...state,
     expandedTerminalAgent:
       state.expandedTerminalAgent === agent ? null : agent,
+  };
+}
+
+export function setGraphZoom(state: AppState, zoom: number): AppState {
+  return {
+    ...state,
+    graphZoom: Math.max(0.4, Math.min(2.0, zoom)),
   };
 }
 
@@ -1687,17 +1743,17 @@ function layoutGraph(
   ];
   const xByLane: Record<GraphSnapshotNode["kind"], number> = {
     case: 140,
-    section: 450,
-    finding: 790,
-    object: 1130,
-    evidence: 1450,
+    section: 430,
+    finding: 770,
+    object: 1110,
+    evidence: 1430,
   };
   const widthByLane: Record<GraphSnapshotNode["kind"], number> = {
-    case: 210,
-    section: 220,
-    finding: 220,
-    object: 200,
-    evidence: 180,
+    case: 240,
+    section: 250,
+    finding: 250,
+    object: 230,
+    evidence: 210,
   };
   const grouped = new Map<GraphSnapshotNode["kind"], GraphSnapshotNode[]>();
 
@@ -1715,14 +1771,14 @@ function layoutGraph(
     const laneNodes = grouped.get(lane) ?? [];
     laneNodes.forEach((node, index) => {
       const width = widthByLane[lane];
-      const height = lane === "case" ? 92 : 82;
+      const height = lane === "case" ? 100 : 92;
       laidOutNodes.push({
         nodeId: node.nodeId,
         label: node.label,
         kind: node.kind,
-        summary: truncateLong(node.summary, lane === "case" ? 140 : 110),
+        summary: truncateLong(node.summary, lane === "case" ? 160 : 130),
         x: xByLane[lane],
-        y: 64 + index * 112,
+        y: 64 + index * 120,
         width,
         height,
         emphasis: node.emphasis,

@@ -17,6 +17,10 @@ import {
   renderTerminalLine,
   renderTerminalLines,
   renderTimelineList,
+  renderAnswerLead,
+  renderInlineRunStatus,
+  renderResearchMap,
+  escapeHtml,
 } from "./render.js";
 import {
   agentKeys,
@@ -36,6 +40,7 @@ import {
   selectReportViewState,
   selectRunViewState,
   selectTimelineState,
+  setGraphZoom,
   setWorkspaceSplitRatio,
   toggleCanvas,
   toggleCanvasPanel,
@@ -43,6 +48,8 @@ import {
   toggleTerminalExpansion,
   updateComposerText,
   type AppState,
+  type RunViewState,
+  type ResearchMapViewState,
   type TerminalLineState,
 } from "./state.js";
 
@@ -108,6 +115,7 @@ export class DelphiFrontendApp {
     this.handlePointerDown = this.handlePointerDown.bind(this);
     this.handlePointerMove = this.handlePointerMove.bind(this);
     this.handlePointerUp = this.handlePointerUp.bind(this);
+    this.handleWheel = this.handleWheel.bind(this);
   }
 
   mount(): void {
@@ -120,6 +128,7 @@ export class DelphiFrontendApp {
     this.root.addEventListener("pointermove", this.handlePointerMove);
     this.root.addEventListener("pointerup", this.handlePointerUp);
     this.root.addEventListener("pointercancel", this.handlePointerUp);
+    this.root.addEventListener("wheel", this.handleWheel, { passive: false });
     this.renderShell();
 
     if (this.shouldAutoStartFeed()) {
@@ -309,6 +318,24 @@ export class DelphiFrontendApp {
       }
 
       this.centerGraphStage(graphStage);
+      return;
+    }
+
+    if (actionNode.dataset.action === "graph-zoom-in") {
+      this.state = setGraphZoom(this.state, this.state.graphZoom + 0.15);
+      this.applyGraphZoom();
+      return;
+    }
+
+    if (actionNode.dataset.action === "graph-zoom-out") {
+      this.state = setGraphZoom(this.state, this.state.graphZoom - 0.15);
+      this.applyGraphZoom();
+      return;
+    }
+
+    if (actionNode.dataset.action === "graph-zoom-reset") {
+      this.state = setGraphZoom(this.state, 1);
+      this.applyGraphZoom();
       return;
     }
 
@@ -702,6 +729,9 @@ export class DelphiFrontendApp {
         this.patchReportSection(dialogueFeed, report, options.reportSectionKey)
       ) {
         // Keep existing DOM and only patch the changed section.
+        this.patchDialogueDynamicSections(dialogueFeed, run, researchMap);
+      } else if (this.patchDialogueDynamicSections(dialogueFeed, run, researchMap)) {
+        // Patched dynamic sections in place — no full re-render needed.
       } else {
         const nextDialogue = renderDialogueFeed(this.state, run, report, researchMap);
 
@@ -763,6 +793,7 @@ export class DelphiFrontendApp {
           nextStage.scrollTop = previousScrollTop;
         }
 
+        this.applyGraphZoom();
         this.syncGraphViewport(canvasPanelBody);
       }
     }
@@ -811,6 +842,55 @@ export class DelphiFrontendApp {
 
     const pending = dialogueFeed.querySelector<HTMLElement>(".answer-pending");
     pending?.remove();
+    return true;
+  }
+
+  private patchDialogueDynamicSections(
+    dialogueFeed: HTMLElement,
+    run: RunViewState,
+    researchMap: ResearchMapViewState,
+  ): boolean {
+    const answerLead = dialogueFeed.querySelector<HTMLElement>('[data-role="answer-lead"]');
+    const inlineStatus = dialogueFeed.querySelector<HTMLElement>('[data-role="inline-run-status"]');
+    const researchMapSection = dialogueFeed.querySelector<HTMLElement>('[data-role="research-map-section"]');
+
+    if (!answerLead || !inlineStatus || !researchMapSection) {
+      return false;
+    }
+
+    const nextLead = renderAnswerLead(run);
+    if (answerLead.innerHTML !== nextLead) {
+      answerLead.innerHTML = nextLead;
+    }
+
+    const nextStatus = renderInlineRunStatus(run);
+    if (inlineStatus.innerHTML !== nextStatus) {
+      inlineStatus.innerHTML = nextStatus;
+    }
+
+    const hasVisibleReportSections = this.state.reportSections.some(
+      (section) => section.content.trim().length > 0,
+    );
+    const showReasoningMap =
+      hasVisibleReportSections &&
+      (researchMap.cards.some((card) => card.status !== "waiting") ||
+        researchMap.evidenceTrail.length > 0);
+
+    if (showReasoningMap) {
+      const nextMap = `
+        <section class="answer-map-inline">
+          <h3 class="answer-map-heading">How Delphi got there</h3>
+          <p class="answer-map-summary">${escapeHtml(researchMap.summary)}</p>
+          ${renderResearchMap(researchMap)}
+        </section>
+      `;
+      if (researchMapSection.innerHTML !== nextMap) {
+        researchMapSection.innerHTML = nextMap;
+      }
+    } else if (researchMapSection.innerHTML !== "") {
+      researchMapSection.innerHTML = "";
+    }
+
     return true;
   }
 
@@ -910,6 +990,28 @@ export class DelphiFrontendApp {
       top: nextTop,
       behavior: "smooth",
     });
+  }
+
+  private handleWheel(event: WheelEvent): void {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const graphStage = target.closest<HTMLElement>(".graph-stage");
+    if (!graphStage) return;
+
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -0.08 : 0.08;
+      this.state = setGraphZoom(this.state, this.state.graphZoom + delta);
+      this.applyGraphZoom();
+    }
+  }
+
+  private applyGraphZoom(): void {
+    const svg = this.root.querySelector<SVGElement>(".graph-svg");
+    if (!svg) return;
+    svg.style.transform = `scale(${this.state.graphZoom})`;
+    svg.style.transformOrigin = "0 0";
   }
 
   private syncAgentCards(

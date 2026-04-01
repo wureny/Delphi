@@ -1,5 +1,6 @@
 import type {
   AgentCardState,
+  GraphNodeDetail,
   GraphSnapshotViewState,
   ReportViewState,
   ResearchMapViewState,
@@ -120,7 +121,7 @@ export function renderApp(options: {
                     </div>
                     <div class="canvas-tabs" data-role="canvas-tabs">
                       ${renderCanvasTab("terminals", "Analysts", state.activeCanvasPanel === "terminals")}
-                      ${renderCanvasTab("graph", "Case Structure", state.activeCanvasPanel === "graph")}
+                      ${renderCanvasTab("graph", "Case Structure", state.activeCanvasPanel === "graph", graphSnapshot.nodeCount)}
                     </div>
                     <section class="canvas-panel-body" data-role="canvas-panel-body" data-panel="${escapeHtml(state.activeCanvasPanel)}">
                       ${
@@ -200,8 +201,8 @@ export function renderDialogueFeed(
       <div class="chat-avatar">D</div>
       <div class="chat-bubble answer-bubble">
         <div class="answer-stream">
-          ${renderAnswerLead(run)}
-          ${renderInlineRunStatus(run)}
+          <div data-role="answer-lead">${renderAnswerLead(run)}</div>
+          <div data-role="inline-run-status">${renderInlineRunStatus(run)}</div>
           ${
             report.degradedMessage
               ? `<div class="inline-alert">${escapeHtml(report.degradedMessage)}</div>`
@@ -210,6 +211,7 @@ export function renderDialogueFeed(
           <section class="answer-sections">
             ${renderResponseSections(report, run, researchMap)}
           </section>
+          <div data-role="research-map-section">
           ${
             showReasoningMap
               ? `
@@ -221,6 +223,7 @@ export function renderDialogueFeed(
               `
               : ""
           }
+          </div>
         </div>
       </div>
     </div>
@@ -304,41 +307,136 @@ export function renderResearchMap(map: ResearchMapViewState): string {
 }
 
 export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
+  if (snapshot.nodeCount === 0) {
+    return `
+      <div class="graph-view graph-empty">
+        <div class="graph-empty-state">
+          <div class="graph-empty-icon">◆</div>
+          <h3>Building the case structure</h3>
+          <p>The structured case graph will appear here as the analysts submit their findings. Each claim, evidence, and thesis will be connected into an interactive knowledge graph.</p>
+          <div class="graph-empty-lanes">
+            <span class="graph-empty-lane">Question</span>
+            <span class="graph-empty-lane-arrow">→</span>
+            <span class="graph-empty-lane">Sections</span>
+            <span class="graph-empty-lane-arrow">→</span>
+            <span class="graph-empty-lane">Claims</span>
+            <span class="graph-empty-lane-arrow">→</span>
+            <span class="graph-empty-lane">Objects</span>
+            <span class="graph-empty-lane-arrow">→</span>
+            <span class="graph-empty-lane">Evidence</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   return `
     <div class="graph-view">
       <header class="graph-view-header">
         <div>
           <span class="research-map-kicker">Case structure</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
-          <p class="graph-header-copy">This is the structured case graph behind the answer: the question, the answer sections, the supporting claims, the stable investment objects, and the evidence trail tying them together.</p>
+          <p class="graph-header-copy">Interactive knowledge graph — click any node to inspect it, drag to pan, scroll to zoom.</p>
         </div>
         <div class="graph-meta">
-          <span class="tag">${snapshot.nodeCount} points</span>
+          <span class="tag">${snapshot.nodeCount} nodes</span>
           <span class="tag">${snapshot.edgeCount} links</span>
           ${snapshot.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(snapshot.updatedAtLabel)}</span>` : ""}
+          <div class="graph-zoom-controls">
+            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-out" title="Zoom out">−</button>
+            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-reset" title="Reset zoom">1:1</button>
+            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-in" title="Zoom in">+</button>
+          </div>
           <button class="ghost-button graph-reset-button" type="button" data-action="center-graph">Re-center</button>
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
       <div class="graph-legend" aria-label="Case structure legend">
-        <span class="graph-legend-pill">Answer</span>
-        <span class="graph-legend-pill">Supporting claims</span>
-        <span class="graph-legend-pill">Persistent thesis, risk, liquidity, and signal objects</span>
+        <span class="graph-legend-pill legend-case"><span class="legend-glyph">◆</span> Case</span>
+        <span class="graph-legend-pill legend-section"><span class="legend-glyph">§</span> Sections</span>
+        <span class="graph-legend-pill legend-finding"><span class="legend-glyph">▸</span> Claims</span>
+        <span class="graph-legend-pill legend-object"><span class="legend-glyph">◎</span> Objects</span>
+        <span class="graph-legend-pill legend-evidence"><span class="legend-glyph">⧫</span> Evidence</span>
       </div>
       <div class="graph-lanes" aria-label="Case structure lanes">
-        <span class="graph-lane-label">Question</span>
-        <span class="graph-lane-label">Answer sections</span>
-        <span class="graph-lane-label">Claims</span>
-        <span class="graph-lane-label">Stable objects</span>
-        <span class="graph-lane-label">Evidence</span>
+        <span class="graph-lane-label"><span class="lane-icon">◆</span> Question</span>
+        <span class="graph-lane-label"><span class="lane-icon">§</span> Answer sections</span>
+        <span class="graph-lane-label"><span class="lane-icon">▸</span> Claims</span>
+        <span class="graph-lane-label"><span class="lane-icon">◎</span> Stable objects</span>
+        <span class="graph-lane-label"><span class="lane-icon">⧫</span> Evidence</span>
       </div>
-      <p class="graph-view-helper">Drag left or right to explore how the answer connects back to structured claims, evidence, and stable investment objects.</p>
-      <div class="graph-stage">
-        <svg class="graph-svg" viewBox="0 0 1680 840" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
+      <div class="graph-stage" data-role="graph-stage">
+        <svg class="graph-svg" viewBox="0 0 ${snapshot.canvasWidth} ${snapshot.canvasHeight}" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
+          ${renderGraphLaneGuides(snapshot)}
           ${snapshot.edges.map(renderGraphEdge).join("")}
           ${snapshot.nodes.map(renderGraphNode).join("")}
         </svg>
       </div>
+      ${snapshot.selectedNodeDetail ? renderGraphDetailPanel(snapshot.selectedNodeDetail) : ""}
+    </div>
+  `;
+}
+
+function renderGraphLaneGuides(snapshot: GraphSnapshotViewState): string {
+  const laneXPositions = [140, 450, 790, 1130, 1450];
+  const laneWidths = [240, 250, 250, 230, 210];
+  return laneXPositions.map((x, i) => `
+    <rect
+      class="graph-lane-guide"
+      x="${x - 15}"
+      y="0"
+      width="${laneWidths[i]}"
+      height="${snapshot.canvasHeight}"
+      rx="8"
+    />
+  `).join("");
+}
+
+function renderGraphDetailPanel(detail: GraphNodeDetail): string {
+  const kindGlyphs: Record<string, string> = {
+    case: "◆",
+    section: "§",
+    finding: "▸",
+    object: "◎",
+    evidence: "⧫",
+  };
+  const glyph = kindGlyphs[detail.kind] ?? "•";
+  const kindLabel = detail.kind.charAt(0).toUpperCase() + detail.kind.slice(1);
+
+  return `
+    <div class="graph-detail-panel tone-${detail.emphasis}">
+      <div class="graph-detail-header">
+        <span class="graph-detail-kind"><span class="graph-detail-glyph">${glyph}</span> ${escapeHtml(kindLabel)}</span>
+        <span class="graph-detail-emphasis emphasis-${detail.emphasis}">${escapeHtml(detail.emphasis)}</span>
+      </div>
+      <h4 class="graph-detail-label">${escapeHtml(detail.label)}</h4>
+      <p class="graph-detail-summary">${escapeHtml(detail.summary)}</p>
+      ${detail.incomingEdges.length > 0 || detail.outgoingEdges.length > 0 ? `
+        <div class="graph-detail-connections">
+          ${detail.incomingEdges.length > 0 ? `
+            <div class="graph-detail-edge-group">
+              <span class="graph-detail-edge-label">Incoming</span>
+              ${detail.incomingEdges.map((e) => `
+                <span class="graph-detail-edge-pill">
+                  <span class="edge-from">${escapeHtml(e.fromLabel)}</span>
+                  <span class="edge-rel">${escapeHtml(e.edgeLabel)}</span>
+                </span>
+              `).join("")}
+            </div>
+          ` : ""}
+          ${detail.outgoingEdges.length > 0 ? `
+            <div class="graph-detail-edge-group">
+              <span class="graph-detail-edge-label">Outgoing</span>
+              ${detail.outgoingEdges.map((e) => `
+                <span class="graph-detail-edge-pill">
+                  <span class="edge-rel">${escapeHtml(e.edgeLabel)}</span>
+                  <span class="edge-to">${escapeHtml(e.toLabel)}</span>
+                </span>
+              `).join("")}
+            </div>
+          ` : ""}
+        </div>
+      ` : ""}
     </div>
   `;
 }
@@ -456,6 +554,7 @@ function renderCanvasTab(
   panel: "terminals" | "graph",
   label: string,
   active: boolean,
+  badge?: number,
 ): string {
   return `
     <button
@@ -465,7 +564,7 @@ function renderCanvasTab(
       data-panel="${escapeHtml(panel)}"
       aria-pressed="${active ? "true" : "false"}"
     >
-      ${escapeHtml(label)}
+      ${escapeHtml(label)}${badge && badge > 0 ? `<span class="canvas-tab-badge">${badge}</span>` : ""}
     </button>
   `;
 }
@@ -514,6 +613,15 @@ function renderIdleWorkspacePreview(): string {
 }
 
 function renderGraphNode(node: GraphSnapshotViewState["nodes"][number]): string {
+  const kindGlyphs: Record<string, string> = {
+    case: "\u25C6",
+    section: "\u00A7",
+    finding: "\u25B8",
+    object: "\u25CE",
+    evidence: "\u29EB",
+  };
+  const glyph = kindGlyphs[node.kind] ?? "\u2022";
+
   return `
     <g
       class="graph-node tone-${node.emphasis} kind-${node.kind} focus-${node.focus}"
@@ -525,9 +633,10 @@ function renderGraphNode(node: GraphSnapshotViewState["nodes"][number]): string 
       role="button"
       aria-pressed="${node.focus === "selected" ? "true" : "false"}"
     >
-      <rect rx="18" ry="18" width="${node.width}" height="${node.height}"></rect>
-      <text class="graph-node-label" x="16" y="24">${escapeHtml(displayGraphNodeLabel(node.label, node.summary))}</text>
-      <foreignObject x="16" y="32" width="${Math.max(node.width - 32, 40)}" height="${Math.max(node.height - 42, 28)}">
+      <rect rx="14" ry="14" width="${node.width}" height="${node.height}"></rect>
+      <text class="graph-node-glyph" x="14" y="22">${glyph}</text>
+      <text class="graph-node-label" x="28" y="22">${escapeHtml(displayGraphNodeLabel(node.label, node.summary))}</text>
+      <foreignObject x="14" y="32" width="${Math.max(node.width - 28, 40)}" height="${Math.max(node.height - 42, 28)}">
         <div xmlns="http://www.w3.org/1999/xhtml" class="graph-node-copy">${escapeHtml(node.summary)}</div>
       </foreignObject>
     </g>
@@ -714,7 +823,7 @@ function truncateMiddle(value: string, limit: number): string {
   return `${value.slice(0, head)}...${value.slice(-tail)}`;
 }
 
-function renderInlineRunStatus(run: RunViewState): string {
+export function renderInlineRunStatus(run: RunViewState): string {
   if (run.statusTone !== "running" && !run.streamWarning) {
     return "";
   }
@@ -733,7 +842,7 @@ function renderInlineRunStatus(run: RunViewState): string {
   `;
 }
 
-function renderAnswerLead(run: RunViewState): string {
+export function renderAnswerLead(run: RunViewState): string {
   if (run.statusTone === "running") {
     return "";
   }
@@ -975,7 +1084,7 @@ function renderTypingIndicator(): string {
   `;
 }
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
