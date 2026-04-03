@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck-build-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RUNTIME_SMOKE_BASE_URL: http://127.0.0.1:8787
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build frontend
+        run: npm run frontend:build
+
+      - name: Start runtime API
+        run: |
+          npm run runtime:serve > runtime.log 2>&1 &
+          echo $! > runtime.pid
+
+      - name: Wait for runtime health
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl -fsS "$RUNTIME_SMOKE_BASE_URL/healthz" > /tmp/runtime-health.json; then
+              cat /tmp/runtime-health.json
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Runtime API did not become healthy in time."
+          cat runtime.log
+          exit 1
+
+      - name: Runtime smoke gold
+        run: npm run runtime:smoke:gold
+
+      - name: Runtime smoke terminal
+        run: npm run runtime:smoke:terminal
+
+      - name: Stop runtime API
+        if: always()
+        run: |
+          if [ -f runtime.pid ]; then
+            kill "$(cat runtime.pid)" || true
+          fi
+
+      - name: Upload runtime log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-log
+          path: runtime.log

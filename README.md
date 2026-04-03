@@ -63,6 +63,25 @@ Frontend shell:
   - when `NEXT_PUBLIC_RUNTIME_API_BASE_URL` is present, the deployed shell defaults to live mode
   - append `?source=recorded` if you want to force the recorded demo fixture
 
+CI baseline:
+
+- GitHub Actions workflow:
+  - `.github/workflows/ci.yml`
+- What CI checks on pull requests and `main` pushes:
+  - `npm ci`
+  - `npm run typecheck`
+  - `npm run frontend:build`
+  - local fixture-mode runtime boot via `npm run runtime:serve`
+  - local smoke verification via `npm run runtime:smoke:gold` and `npm run runtime:smoke:terminal`
+- What CI intentionally does not claim to cover:
+  - real OpenBB health
+  - real Neo4j Aura write health
+  - staging / production deployment correctness
+- Use deploy-time or staging smoke checks for:
+  - `npm run openbb:smoke`
+  - `npm run neo4j:smoke-write`
+  - remote `runtime:smoke:*` checks against Railway
+
 OpenBB local setup:
 
 - [openbb-local-setup.md](/Users/wurenyu/workspace/Delphi/docs/03-engineering/openbb-local-setup.md)
