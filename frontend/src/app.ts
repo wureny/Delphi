@@ -592,7 +592,7 @@ export class DelphiFrontendApp {
 
     const stage = target.closest<HTMLElement>(".graph-stage");
 
-    if (!stage) {
+    if (!stage || target.closest(".graph-zoom-overlay")) {
       return;
     }
 
