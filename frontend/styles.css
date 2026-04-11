@@ -1832,6 +1832,7 @@ button.idle-example {
 }
 
 .graph-stage {
+  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   border: 1px solid rgba(59, 73, 76, 0.16);
@@ -1839,16 +1840,51 @@ button.idle-example {
   background:
     radial-gradient(circle at 12% 12%, rgba(176, 151, 113, 0.07), transparent 24%),
     linear-gradient(180deg, rgba(19, 19, 20, 0.98), rgba(14, 14, 15, 0.98));
-  overflow: auto;
+  overflow: hidden;
   cursor: grab;
   user-select: none;
   touch-action: none;
-  scrollbar-gutter: stable both-edges;
-  padding: 0 6px 10px 0;
 }
 
 .graph-stage.is-panning {
   cursor: grabbing;
+}
+
+.graph-zoom-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+}
+
+.graph-zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(186, 201, 204, 0.2);
+  border-radius: 8px;
+  background: rgba(19, 19, 20, 0.9);
+  color: var(--text-soft);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.graph-zoom-btn:hover {
+  background: rgba(40, 40, 42, 0.95);
+  border-color: rgba(186, 201, 204, 0.35);
+  color: var(--text);
+}
+
+.graph-zoom-btn--reset {
+  font-size: 1rem;
 }
 
 .graph-edge path {
@@ -1983,32 +2019,6 @@ button.idle-example {
 }
 
 /* ── Zoom controls ── */
-.graph-zoom-controls {
-  display: inline-flex;
-  gap: 2px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.graph-zoom-btn {
-  padding: 4px 10px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 0;
-  min-width: 32px;
-  border: none;
-  border-right: 1px solid var(--border);
-}
-
-.graph-zoom-btn:last-child {
-  border-right: none;
-}
-
-.graph-zoom-btn:hover {
-  background: rgba(176, 151, 113, 0.12);
-}
-
 /* ── Lane icon in headers ── */
 .lane-icon {
   opacity: 0.5;

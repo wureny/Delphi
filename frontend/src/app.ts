@@ -41,6 +41,8 @@ import {
   selectRunViewState,
   selectTimelineState,
   setGraphZoom,
+  setGraphPan,
+  resetGraphTransform,
   setWorkspaceSplitRatio,
   toggleCanvas,
   toggleCanvasPanel,
@@ -83,8 +85,8 @@ export class DelphiFrontendApp {
         pointerId: number;
         startX: number;
         startY: number;
-        startLeft: number;
-        startTop: number;
+        startPanX: number;
+        startPanY: number;
         moved: boolean;
       }
     | null = null;
@@ -323,19 +325,19 @@ export class DelphiFrontendApp {
 
     if (actionNode.dataset.action === "graph-zoom-in") {
       this.state = setGraphZoom(this.state, this.state.graphZoom + 0.15);
-      this.applyGraphZoom();
+      this.applyGraphTransform();
       return;
     }
 
     if (actionNode.dataset.action === "graph-zoom-out") {
       this.state = setGraphZoom(this.state, this.state.graphZoom - 0.15);
-      this.applyGraphZoom();
+      this.applyGraphTransform();
       return;
     }
 
     if (actionNode.dataset.action === "graph-zoom-reset") {
-      this.state = setGraphZoom(this.state, 1);
-      this.applyGraphZoom();
+      this.state = resetGraphTransform(this.state);
+      this.applyGraphTransform();
       return;
     }
 
@@ -599,8 +601,8 @@ export class DelphiFrontendApp {
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
-      startLeft: stage.scrollLeft,
-      startTop: stage.scrollTop,
+      startPanX: this.state.graphPanX,
+      startPanY: this.state.graphPanY,
       moved: false,
     };
     stage.classList.add("is-panning");
@@ -630,8 +632,12 @@ export class DelphiFrontendApp {
       this.graphPanState.moved = true;
     }
 
-    this.graphPanState.stage.scrollLeft = this.graphPanState.startLeft - dx;
-    this.graphPanState.stage.scrollTop = this.graphPanState.startTop - dy;
+    this.state = setGraphPan(
+      this.state,
+      this.graphPanState.startPanX + dx,
+      this.graphPanState.startPanY + dy,
+    );
+    this.applyGraphTransform();
   }
 
   private handlePointerUp(event: PointerEvent): void {
@@ -781,19 +787,9 @@ export class DelphiFrontendApp {
           return;
         }
 
-        const previousStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
-        const previousScrollLeft = previousStage?.scrollLeft ?? 0;
-        const previousScrollTop = previousStage?.scrollTop ?? 0;
-
         canvasPanelBody.innerHTML = renderGraphSnapshot(graphSnapshot);
-        const nextStage = canvasPanelBody.querySelector<HTMLElement>(".graph-stage");
 
-        if (nextStage) {
-          nextStage.scrollLeft = previousScrollLeft;
-          nextStage.scrollTop = previousScrollTop;
-        }
-
-        this.applyGraphZoom();
+        this.applyGraphTransform();
         this.syncGraphViewport(canvasPanelBody);
       }
     }
@@ -975,21 +971,9 @@ export class DelphiFrontendApp {
     });
   }
 
-  private centerGraphStage(graphStage: HTMLElement): void {
-    const svg = graphStage.querySelector<SVGElement>(".graph-svg");
-
-    if (!svg) {
-      return;
-    }
-
-    const nextLeft = Math.max((svg.clientWidth - graphStage.clientWidth) / 2, 0);
-    const nextTop = Math.max((svg.clientHeight - graphStage.clientHeight) / 2, 0);
-
-    graphStage.scrollTo({
-      left: nextLeft,
-      top: nextTop,
-      behavior: "smooth",
-    });
+  private centerGraphStage(_graphStage: HTMLElement): void {
+    this.state = resetGraphTransform(this.state);
+    this.applyGraphTransform();
   }
 
   private handleWheel(event: WheelEvent): void {
@@ -999,18 +983,29 @@ export class DelphiFrontendApp {
     const graphStage = target.closest<HTMLElement>(".graph-stage");
     if (!graphStage) return;
 
+    event.preventDefault();
+
     if (event.ctrlKey || event.metaKey) {
-      event.preventDefault();
+      // Zoom
       const delta = event.deltaY > 0 ? -0.08 : 0.08;
       this.state = setGraphZoom(this.state, this.state.graphZoom + delta);
-      this.applyGraphZoom();
+    } else {
+      // Pan
+      this.state = setGraphPan(
+        this.state,
+        this.state.graphPanX - event.deltaX,
+        this.state.graphPanY - event.deltaY,
+      );
     }
+
+    this.applyGraphTransform();
   }
 
-  private applyGraphZoom(): void {
+  private applyGraphTransform(): void {
     const svg = this.root.querySelector<SVGElement>(".graph-svg");
     if (!svg) return;
-    svg.style.transform = `scale(${this.state.graphZoom})`;
+    const { graphZoom, graphPanX, graphPanY } = this.state;
+    svg.style.transform = `translate(${graphPanX}px, ${graphPanY}px) scale(${graphZoom})`;
     svg.style.transformOrigin = "0 0";
   }
 
