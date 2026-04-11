@@ -1852,39 +1852,46 @@ button.idle-example {
 
 .graph-zoom-overlay {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  z-index: 10;
+  gap: 6px;
+  z-index: 20;
+  pointer-events: auto;
 }
 
 .graph-zoom-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid rgba(186, 201, 204, 0.2);
-  border-radius: 8px;
-  background: rgba(19, 19, 20, 0.9);
-  color: var(--text-soft);
-  font-size: 1.1rem;
-  font-weight: 600;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid rgba(186, 201, 204, 0.45);
+  border-radius: 10px;
+  background: rgba(35, 35, 38, 0.95);
+  color: #e0e0e0;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background 120ms ease, border-color 120ms ease;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
 }
 
 .graph-zoom-btn:hover {
-  background: rgba(40, 40, 42, 0.95);
-  border-color: rgba(186, 201, 204, 0.35);
-  color: var(--text);
+  background: rgba(55, 55, 60, 0.98);
+  border-color: rgba(186, 201, 204, 0.6);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.graph-zoom-btn:active {
+  transform: scale(0.95);
 }
 
 .graph-zoom-btn--reset {
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
 .graph-edge path {
