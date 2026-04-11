@@ -111,14 +111,6 @@ export function renderApp(options: {
                         Focus Answer
                       </button>
                     </div>
-                    <div class="canvas-header">
-                      <div class="canvas-header-copy">
-                        <span class="eyebrow">Delphi Workspace</span>
-                        <h2>Live Desk</h2>
-                        <p class="canvas-subcopy">Watch the analysts build the case in real time, then inspect the structured case graph behind the current call.</p>
-                      </div>
-                      <span class="tag">${escapeHtml(renderWorkspaceTag(run))}</span>
-                    </div>
                     <div class="canvas-tabs" data-role="canvas-tabs">
                       ${renderCanvasTab("terminals", "Analysts", state.activeCanvasPanel === "terminals")}
                       ${renderCanvasTab("graph", "Case Structure", state.activeCanvasPanel === "graph", graphSnapshot.nodeCount)}
@@ -726,18 +718,10 @@ function renderAgentCard(card: AgentCardState): string {
           </div>
         </div>
 
-        <div class="terminal-summary-grid compact">
-          <div class="terminal-summary-cell">
-            <span class="terminal-label">Current read</span>
-            <p class="terminal-value mono" data-field="recent-action">${escapeHtml(card.recentAction)}</p>
-          </div>
-          <div class="terminal-summary-cell">
-            <span class="terminal-label">Latest takeaway</span>
-            <p class="terminal-value" data-field="latest-finding">${escapeHtml(card.latestFinding)}</p>
-          </div>
-          <p class="sr-only" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
-          <p class="sr-only ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</p>
-        </div>
+        <p class="sr-only" data-field="recent-action">${escapeHtml(card.recentAction)}</p>
+        <p class="sr-only" data-field="latest-finding">${escapeHtml(card.latestFinding)}</p>
+        <p class="sr-only" data-field="latest-tool">${escapeHtml(card.latestTool)}</p>
+        <p class="sr-only ${patchClass(card.patchTone)}" data-field="latest-patch">${escapeHtml(card.latestPatch)}</p>
       </div>
     </article>
   `;
@@ -849,26 +833,6 @@ export function renderAnswerLead(run: RunViewState): string {
       <span class="answer-lead-tag">Delphi · ${escapeHtml(run.ticker)} · ${escapeHtml(run.horizon)} view</span>
     </div>
   `;
-}
-
-function renderWorkspaceTag(run: RunViewState): string {
-  if (run.statusTone === "completed") {
-    return "Answer ready";
-  }
-
-  if (run.statusTone === "degraded") {
-    return "Partial picture";
-  }
-
-  if (run.statusTone === "failed") {
-    return "Needs another pass";
-  }
-
-  if (run.statusTone === "running") {
-    return `${run.completedAgentCount}/${run.totalAgentCount} specialists moving`;
-  }
-
-  return "Ready for a question";
 }
 
 function renderResponseSections(

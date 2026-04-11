@@ -86,6 +86,8 @@ interface LoadedGraphContext {
 }
 
 const graphContextInstructions = [
+  "Language requirement: ALWAYS respond in English regardless of the language of the user question. All claims, impact statements, revision reasons, and report sections must be written in English.",
+  "",
   "Graph context handling (MANDATORY):",
   "- If graph context is provided, you MUST address it in your findings.",
   "- For each finding, set priorAlignment to one of: consistent, revised, contradicted, new.",
@@ -531,7 +533,7 @@ async function runProviderJudgeSynthesis(
     schemaDescription: "Structured decision and six fixed report sections for one run.",
     schema: providerJudgeSchema(),
     developerPrompt: buildSkillGuidedPrompt(
-      "You are Delphi judge. Use only the supplied findings to produce one decision summary and seven fixed report sections. Write memo-style sections with concrete reasoning and explicit conflicts or tradeoffs when they exist. Do not invent evidence or findings. Every section must be present.\n\nIMPORTANT: The judgment_evolution section is critical. If graph context contains prior judgments, you MUST compare your current stance against the most recent prior judgment — describe the change in stance and confidence, explain what evidence shifted, and note if upstream agents revised or contradicted prior views (check priorAlignment fields in findings). If no prior judgment exists, explicitly state this is the first analysis for this ticker.",
+      "You are Delphi judge. ALWAYS respond in English regardless of the language of the user question. Use only the supplied findings to produce one decision summary and seven fixed report sections. Write memo-style sections with concrete reasoning and explicit conflicts or tradeoffs when they exist. Do not invent evidence or findings. Every section must be present.\n\nIMPORTANT: The judgment_evolution section is critical. If graph context contains prior judgments, you MUST compare your current stance against the most recent prior judgment — describe the change in stance and confidence, explain what evidence shifted, and note if upstream agents revised or contradicted prior views (check priorAlignment fields in findings). If no prior judgment exists, explicitly state this is the first analysis for this ticker.",
       skill,
     ),
     userPrompt: [
