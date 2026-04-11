@@ -52,6 +52,8 @@ export interface AppState {
     | null;
   expandedTerminalAgent: AgentKey | null;
   graphZoom: number;
+  graphPanX: number;
+  graphPanY: number;
   connectionStatus: ConnectionStatus;
   errorMessage: string | null;
   infoMessage: string | null;
@@ -215,6 +217,8 @@ export function createInitialState(
     selectedInsight: null,
     expandedTerminalAgent: null,
     graphZoom: 1,
+    graphPanX: 0,
+    graphPanY: 0,
     connectionStatus: "idle",
     errorMessage: null,
     infoMessage:
@@ -878,7 +882,24 @@ export function toggleTerminalExpansion(
 export function setGraphZoom(state: AppState, zoom: number): AppState {
   return {
     ...state,
-    graphZoom: Math.max(0.4, Math.min(2.0, zoom)),
+    graphZoom: Math.max(0.25, Math.min(3.0, zoom)),
+  };
+}
+
+export function setGraphPan(state: AppState, panX: number, panY: number): AppState {
+  return {
+    ...state,
+    graphPanX: panX,
+    graphPanY: panY,
+  };
+}
+
+export function resetGraphTransform(state: AppState): AppState {
+  return {
+    ...state,
+    graphZoom: 1,
+    graphPanX: 0,
+    graphPanY: 0,
   };
 }
 

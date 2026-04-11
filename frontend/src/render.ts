@@ -332,12 +332,6 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
           <span class="tag">${snapshot.nodeCount} nodes</span>
           <span class="tag">${snapshot.edgeCount} links</span>
           ${snapshot.updatedAtLabel ? `<span class="tag">Updated ${escapeHtml(snapshot.updatedAtLabel)}</span>` : ""}
-          <div class="graph-zoom-controls">
-            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-out" title="Zoom out">−</button>
-            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-reset" title="Reset zoom">1:1</button>
-            <button class="ghost-button graph-zoom-btn" type="button" data-action="graph-zoom-in" title="Zoom in">+</button>
-          </div>
-          <button class="ghost-button graph-reset-button" type="button" data-action="center-graph">Re-center</button>
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
@@ -359,6 +353,11 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
           ${snapshot.edges.map(renderGraphEdge).join("")}
           ${snapshot.nodes.map(renderGraphNode).join("")}
         </svg>
+        <div class="graph-zoom-overlay">
+          <button class="graph-zoom-btn" type="button" data-action="graph-zoom-in" title="Zoom in">+</button>
+          <button class="graph-zoom-btn" type="button" data-action="graph-zoom-out" title="Zoom out">−</button>
+          <button class="graph-zoom-btn graph-zoom-btn--reset" type="button" data-action="graph-zoom-reset" title="Reset view">⟲</button>
+        </div>
       </div>
       ${snapshot.selectedNodeDetail ? renderGraphDetailPanel(snapshot.selectedNodeDetail) : ""}
     </div>
