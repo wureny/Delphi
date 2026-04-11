@@ -1065,68 +1065,142 @@ function buildGraphSnapshot(
   snapshot: RunSnapshot,
   events: readonly RunEvent[],
 ): GraphSnapshot {
-  const nodes = new Map<string, GraphSnapshotNode>();
-  const edges = new Map<string, GraphSnapshotEdge>();
+  const nodes: GraphSnapshotNode[] = [];
+  const edges: GraphSnapshotEdge[] = [];
+  const seenNodeIds = new Set<string>();
+  const caseId = snapshot.run.caseId;
 
   const putNode = (node: GraphSnapshotNode): void => {
-    if (!nodes.has(node.nodeId)) {
-      nodes.set(node.nodeId, node);
+    if (!seenNodeIds.has(node.nodeId)) {
+      seenNodeIds.add(node.nodeId);
+      nodes.push(node);
     }
   };
 
-  const putEdge = (edge: GraphSnapshotEdge): void => {
-    if (!edges.has(edge.edgeId)) {
-      edges.set(edge.edgeId, edge);
-    }
-  };
-
+  // Tier 1: Case question
   putNode({
-    nodeId: snapshot.run.caseId,
+    nodeId: caseId,
     label: `${snapshot.run.query.ticker} · ${snapshot.run.query.timeHorizon}`,
     kind: "case",
     summary: snapshot.run.query.userQuestion,
     emphasis: "primary",
   });
 
-  for (const section of snapshot.reportSections) {
-    if (section.content.trim().length === 0 && section.status === "empty") {
-      continue;
+  // Collect findings from events, grouped by agent
+  const findingsByAgent = new Map<string, Array<{
+    findingId: string;
+    claim: string;
+    agentType: string;
+    impact: string;
+    priorAlignment: string;
+  }>>();
+
+  for (const event of events) {
+    if (event.eventType !== "finding_created") continue;
+    const findingId = readEventString(event, "findingId");
+    const claim = readEventString(event, "claim");
+    const agentType = readEventString(event, "agentType") ?? "agent";
+    if (!findingId || !claim) continue;
+
+    if (!findingsByAgent.has(agentType)) {
+      findingsByAgent.set(agentType, []);
     }
+
+    findingsByAgent.get(agentType)!.push({
+      findingId,
+      claim,
+      agentType,
+      impact: readEventString(event, "impact") ?? "neutral",
+      priorAlignment: readEventString(event, "priorAlignment") ?? "new",
+    });
+  }
+
+  // Tier 2: Agent groups + findings
+  const agentOrder = ["thesis", "liquidity", "market_signal"] as const;
+
+  for (const agentType of agentOrder) {
+    const findings = findingsByAgent.get(agentType) ?? [];
+    if (findings.length === 0) continue;
+
+    const agentNodeId = `agent:${caseId}:${agentType}`;
+    const agentLabel =
+      agentType === "thesis" ? "Thesis Analysis" :
+      agentType === "liquidity" ? "Liquidity Analysis" :
+      "Market Signal";
 
     putNode({
-      nodeId: section.sectionId,
-      label: section.title,
+      nodeId: agentNodeId,
+      label: agentLabel,
       kind: "section",
-      summary: section.content.trim() || `${section.title} is still being assembled.`,
-      emphasis: section.sectionKey === "final_judgment" ? "primary" : "supporting",
+      summary: `${findings.length} finding(s) from ${agentLabel.toLowerCase()}`,
+      emphasis: "supporting",
     });
-    putEdge({
-      edgeId: `edge:${snapshot.run.caseId}:${section.sectionId}:section`,
-      from: snapshot.run.caseId,
-      to: section.sectionId,
-      label: "section",
+    edges.push({
+      edgeId: `edge:${caseId}:${agentNodeId}:analyzes`,
+      from: caseId,
+      to: agentNodeId,
+      label: "analyzes",
     });
 
-    for (const findingRef of section.citationFindingRefs) {
-      const findingEvent = findFindingEvent(events, findingRef);
+    for (const finding of findings) {
+      const claimTrimmed = finding.claim.trim();
+      const label = claimTrimmed.length <= 40
+        ? claimTrimmed
+        : claimTrimmed.slice(0, 37) + "...";
+      const alignmentTag = finding.priorAlignment !== "new"
+        ? ` [${finding.priorAlignment}]`
+        : "";
+
       putNode({
-        nodeId: findingRef,
-        label: findingEvent ? formatFindingLabel(findingEvent) : "Research Finding",
+        nodeId: finding.findingId,
+        label,
         kind: "finding",
-        summary:
-          readEventString(findingEvent, "claim") ??
-          "A structured research point feeding the current answer.",
-        emphasis: "supporting",
+        summary: `${finding.claim}${alignmentTag}`,
+        emphasis: finding.impact === "negative" || finding.impact === "mixed" ? "caution" : "supporting",
       });
-      putEdge({
-        edgeId: `edge:${section.sectionId}:${findingRef}:finding`,
-        from: section.sectionId,
-        to: findingRef,
-        label: "cites",
+      edges.push({
+        edgeId: `edge:${agentNodeId}:${finding.findingId}:produces`,
+        from: agentNodeId,
+        to: finding.findingId,
+        label: finding.impact === "negative" ? "warns" : "supports",
       });
     }
+  }
 
-    for (const objectRef of section.citationObjectRefs) {
+  // Tier 3: Judgment + stable objects
+  const finalJudgment = readSection(snapshot.reportSections, "final_judgment");
+  const judgmentContent = finalJudgment.content.trim();
+
+  if (judgmentContent) {
+    const judgmentNodeId = `judgment:${caseId}:final`;
+    putNode({
+      nodeId: judgmentNodeId,
+      label: "Final Judgment",
+      kind: "case",
+      summary: judgmentContent,
+      emphasis: "primary",
+    });
+
+    for (const agentType of agentOrder) {
+      const agentNodeId = `agent:${caseId}:${agentType}`;
+      if (seenNodeIds.has(agentNodeId)) {
+        edges.push({
+          edgeId: `edge:${agentNodeId}:${judgmentNodeId}:informs`,
+          from: agentNodeId,
+          to: judgmentNodeId,
+          label: "informs",
+        });
+      }
+    }
+
+    const stableObjectRefs = new Set<string>();
+    for (const section of snapshot.reportSections) {
+      for (const ref of section.citationObjectRefs) {
+        stableObjectRefs.add(ref);
+      }
+    }
+
+    for (const objectRef of stableObjectRefs) {
       putNode({
         nodeId: objectRef,
         label: formatObjectLabel(objectRef),
@@ -1134,43 +1208,25 @@ function buildGraphSnapshot(
         summary: summarizeObjectRef(objectRef),
         emphasis: objectRef.startsWith("risk:") ? "caution" : "supporting",
       });
-      putEdge({
-        edgeId: `edge:${section.sectionId}:${objectRef}:object`,
-        from: section.sectionId,
+      edges.push({
+        edgeId: `edge:${judgmentNodeId}:${objectRef}:updates`,
+        from: judgmentNodeId,
         to: objectRef,
-        label: "tracks",
-      });
-    }
-
-    for (const evidenceRef of section.citationEvidenceRefs) {
-      putNode({
-        nodeId: evidenceRef,
-        label: "Supporting Evidence",
-        kind: "evidence",
-        summary: summarizeEvidenceRef(evidenceRef),
-        emphasis: "neutral",
-      });
-      putEdge({
-        edgeId: `edge:${section.sectionId}:${evidenceRef}:evidence`,
-        from: section.sectionId,
-        to: evidenceRef,
-        label: "grounds",
+        label: "updates",
       });
     }
   }
-
-  const finalJudgment = readSection(snapshot.reportSections, "final_judgment");
 
   return {
     runId: snapshot.run.runId,
     caseId: snapshot.run.caseId,
     status: snapshot.run.status,
     headline: summarizeLeadText(
-      finalJudgment.content.trim(),
-      "This structure updates as Delphi connects the current investment case.",
+      judgmentContent,
+      "This structure updates as Delphi builds the investment case.",
     ),
     summary:
-      "This view links the case, the live report sections, the findings, and the supporting evidence behind the current answer.",
+      "Decision flow: how each research lane feeds the final judgment and updates the persistent knowledge graph.",
     updatedAt: snapshot.run.updatedAt,
     nodes: [...nodes.values()],
     edges: [...edges.values()],
@@ -1196,35 +1252,6 @@ function buildResearchMapSummary(
   return activeLanes.length > 0
     ? `Delphi is connecting ${activeLanes.join(", ")} inputs into one view.`
     : "Delphi is still building the structured map.";
-}
-
-function findFindingEvent(
-  events: readonly RunEvent[],
-  findingRef: string,
-): RunEvent | null {
-  for (let index = events.length - 1; index >= 0; index -= 1) {
-    const event = events[index];
-
-    if (
-      event &&
-      event.eventType === "finding_created" &&
-      readEventString(event, "findingId") === findingRef
-    ) {
-      return event;
-    }
-  }
-
-  return null;
-}
-
-function formatFindingLabel(event: RunEvent): string {
-  const agentType = readEventString(event, "agentType");
-
-  if (agentType === "thesis") return "Core Thesis";
-  if (agentType === "liquidity") return "Liquidity Read";
-  if (agentType === "market_signal") return "Market Signal";
-  if (agentType === "judge") return "Judge Synthesis";
-  return "Research Finding";
 }
 
 function formatObjectLabel(objectRef: string): string {
@@ -1289,10 +1316,6 @@ function summarizeObjectRef(objectRef: string): string {
   }
 
   return "A structured research object linked to this run.";
-}
-
-function summarizeEvidenceRef(_evidenceRef: string): string {
-  return "An evidence reference captured during the run and linked back to the answer.";
 }
 
 function buildResearchMapCard(input: {

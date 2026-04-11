@@ -317,13 +317,11 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
           <div class="graph-empty-lanes">
             <span class="graph-empty-lane">Question</span>
             <span class="graph-empty-lane-arrow">→</span>
-            <span class="graph-empty-lane">Sections</span>
+            <span class="graph-empty-lane">Research Lanes</span>
             <span class="graph-empty-lane-arrow">→</span>
-            <span class="graph-empty-lane">Claims</span>
+            <span class="graph-empty-lane">Key Findings</span>
             <span class="graph-empty-lane-arrow">→</span>
-            <span class="graph-empty-lane">Objects</span>
-            <span class="graph-empty-lane-arrow">→</span>
-            <span class="graph-empty-lane">Evidence</span>
+            <span class="graph-empty-lane">Judgment</span>
           </div>
         </div>
       </div>
@@ -334,9 +332,9 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
     <div class="graph-view">
       <header class="graph-view-header">
         <div>
-          <span class="research-map-kicker">Case structure</span>
+          <span class="research-map-kicker">Decision flow</span>
           <h3>${escapeHtml(snapshot.headline)}</h3>
-          <p class="graph-header-copy">Interactive knowledge graph — click any node to inspect it, drag to pan, scroll to zoom.</p>
+          <p class="graph-header-copy">How each research lane feeds the final judgment — click any node to inspect.</p>
         </div>
         <div class="graph-meta">
           <span class="tag">${snapshot.nodeCount} nodes</span>
@@ -351,19 +349,17 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         </div>
       </header>
       <p class="graph-view-summary">${escapeHtml(snapshot.summary)}</p>
-      <div class="graph-legend" aria-label="Case structure legend">
-        <span class="graph-legend-pill legend-case"><span class="legend-glyph">◆</span> Case</span>
-        <span class="graph-legend-pill legend-section"><span class="legend-glyph">§</span> Sections</span>
-        <span class="graph-legend-pill legend-finding"><span class="legend-glyph">▸</span> Claims</span>
-        <span class="graph-legend-pill legend-object"><span class="legend-glyph">◎</span> Objects</span>
-        <span class="graph-legend-pill legend-evidence"><span class="legend-glyph">⧫</span> Evidence</span>
+      <div class="graph-legend" aria-label="Decision flow legend">
+        <span class="graph-legend-pill legend-case"><span class="legend-glyph">◆</span> Case / Judgment</span>
+        <span class="graph-legend-pill legend-section"><span class="legend-glyph">§</span> Agent Lane</span>
+        <span class="graph-legend-pill legend-finding"><span class="legend-glyph">▸</span> Finding</span>
+        <span class="graph-legend-pill legend-object"><span class="legend-glyph">◎</span> Persistent Object</span>
       </div>
-      <div class="graph-lanes" aria-label="Case structure lanes">
+      <div class="graph-lanes" aria-label="Decision flow">
         <span class="graph-lane-label"><span class="lane-icon">◆</span> Question</span>
-        <span class="graph-lane-label"><span class="lane-icon">§</span> Answer sections</span>
-        <span class="graph-lane-label"><span class="lane-icon">▸</span> Claims</span>
-        <span class="graph-lane-label"><span class="lane-icon">◎</span> Stable objects</span>
-        <span class="graph-lane-label"><span class="lane-icon">⧫</span> Evidence</span>
+        <span class="graph-lane-label"><span class="lane-icon">§</span> Research lanes</span>
+        <span class="graph-lane-label"><span class="lane-icon">▸</span> Key findings</span>
+        <span class="graph-lane-label"><span class="lane-icon">◆</span> Judgment + Objects</span>
       </div>
       <div class="graph-stage" data-role="graph-stage">
         <svg class="graph-svg" viewBox="0 0 ${snapshot.canvasWidth} ${snapshot.canvasHeight}" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
@@ -378,8 +374,9 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
 }
 
 function renderGraphLaneGuides(snapshot: GraphSnapshotViewState): string {
-  const laneXPositions = [140, 450, 790, 1130, 1450];
-  const laneWidths = [240, 250, 250, 230, 210];
+  // Dynamic lane guides based on actual node positions
+  const laneXPositions = [60, 420, 740, 1080];
+  const laneWidths = [280, 280, 260, 280];
   return laneXPositions.map((x, i) => `
     <rect
       class="graph-lane-guide"
@@ -1047,6 +1044,17 @@ function displayGraphNodeLabel(label: string, summary: string): string {
 
 function displayGraphEdgeLabel(label: string): string {
   switch (label) {
+    case "analyzes":
+      return "analyzes";
+    case "produces":
+    case "supports":
+      return "supports";
+    case "warns":
+      return "warns";
+    case "informs":
+      return "informs";
+    case "updates":
+      return "updates";
     case "cites":
       return "supports";
     case "tracks":
