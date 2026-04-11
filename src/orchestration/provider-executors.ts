@@ -63,8 +63,8 @@ interface ProviderFindingPlan<TObjectKey extends string> {
     evidenceIndexes: number[];
     objectKeys: TObjectKey[];
     priorAlignment: PriorAlignment;
-    priorRef?: string;
-    revisionReason?: string;
+    priorRef: string | null;
+    revisionReason: string | null;
   }>;
 }
 
@@ -306,8 +306,8 @@ async function runProviderThesisAnalysis(
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => thesisObjectRef(context, key)),
       priorAlignment: finding.priorAlignment,
-      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
-      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
+      ...(finding.priorRef ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -393,8 +393,8 @@ async function runProviderLiquidityAnalysis(
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => liquidityObjectRef(context, key)),
       priorAlignment: finding.priorAlignment,
-      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
-      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
+      ...(finding.priorRef ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -474,8 +474,8 @@ async function runProviderMarketSignalAnalysis(
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => marketObjectRef(context, key)),
       priorAlignment: finding.priorAlignment,
-      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
-      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
+      ...(finding.priorRef ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -746,7 +746,7 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["claim", "impact", "confidence", "evidenceIndexes", "objectKeys", "priorAlignment"],
+          required: ["claim", "impact", "confidence", "evidenceIndexes", "objectKeys", "priorAlignment", "priorRef", "revisionReason"],
           properties: {
             claim: { type: "string" },
             impact: {
@@ -778,10 +778,10 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
               enum: ["consistent", "revised", "contradicted", "new"],
             },
             priorRef: {
-              type: "string",
+              type: ["string", "null"],
             },
             revisionReason: {
-              type: "string",
+              type: ["string", "null"],
             },
           },
         },

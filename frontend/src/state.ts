@@ -1545,69 +1545,141 @@ function deriveGraphSnapshot(
   reportSections: readonly ReportSectionRecord[],
   events: readonly RunEvent[],
 ): GraphSnapshot {
-  const nodes = new Map<string, GraphSnapshotNode>();
-  const edges = new Map<string, GraphSnapshotEdge>();
+  const nodes: GraphSnapshotNode[] = [];
+  const edges: GraphSnapshotEdge[] = [];
   const caseId = run?.caseId ?? "case:pending";
   const finalJudgment = findSection(reportSections, "final_judgment");
+  const seenNodeIds = new Set<string>();
 
   const putNode = (node: GraphSnapshotNode): void => {
-    if (!nodes.has(node.nodeId)) {
-      nodes.set(node.nodeId, node);
+    if (!seenNodeIds.has(node.nodeId)) {
+      seenNodeIds.add(node.nodeId);
+      nodes.push(node);
     }
   };
 
   const putEdge = (edge: GraphSnapshotEdge): void => {
-    if (!edges.has(edge.edgeId)) {
-      edges.set(edge.edgeId, edge);
-    }
+    edges.push(edge);
   };
 
-    putNode({
-      nodeId: caseId,
-      label: run ? `${run.query.ticker} · ${run.query.timeHorizon}` : "Current Case",
-      kind: "case",
-      summary: run?.query.userQuestion ?? "Waiting for a live run.",
+  // Tier 1: Case question node
+  putNode({
+    nodeId: caseId,
+    label: run ? `${run.query.ticker} · ${run.query.timeHorizon}` : "Current Case",
+    kind: "case",
+    summary: run?.query.userQuestion ?? "Waiting for a live run.",
     emphasis: "primary",
   });
 
-  for (const section of reportSections) {
-    if (section.content.trim().length === 0 && section.status === "empty") {
-      continue;
+  // Collect all findings from events, grouped by agent
+  const findingsByAgent = new Map<string, Array<{
+    findingId: string;
+    claim: string;
+    agentType: string;
+    impact: string;
+    confidence: number;
+    priorAlignment: string;
+  }>>();
+
+  for (const event of events) {
+    if (event.eventType !== "finding_created") continue;
+    const findingId = stringPayload(event, "findingId");
+    const claim = stringPayload(event, "claim");
+    const agentType = stringPayload(event, "agentType") ?? "agent";
+    if (!findingId || !claim) continue;
+
+    if (!findingsByAgent.has(agentType)) {
+      findingsByAgent.set(agentType, []);
     }
 
+    findingsByAgent.get(agentType)!.push({
+      findingId,
+      claim,
+      agentType,
+      impact: stringPayload(event, "impact") ?? "neutral",
+      confidence: Number(event.payload.confidence ?? 0.5),
+      priorAlignment: stringPayload(event, "priorAlignment") ?? "new",
+    });
+  }
+
+  // Tier 2: Agent finding nodes — one per finding, grouped by agent
+  const agentOrder = ["thesis", "liquidity", "market_signal"] as const;
+
+  for (const agentType of agentOrder) {
+    const findings = findingsByAgent.get(agentType) ?? [];
+    if (findings.length === 0) continue;
+
+    // Create agent group node
+    const agentNodeId = `agent:${caseId}:${agentType}`;
     putNode({
-      nodeId: section.sectionId,
-      label: section.title,
+      nodeId: agentNodeId,
+      label: formatGraphAgentLabel(agentType),
       kind: "section",
-      summary: section.content.trim() || `${section.title} is still being assembled.`,
-      emphasis: section.sectionKey === "final_judgment" ? "primary" : "supporting",
+      summary: `${findings.length} finding(s) from ${formatGraphAgentLabel(agentType).toLowerCase()}`,
+      emphasis: "supporting",
     });
     putEdge({
-      edgeId: `edge:${caseId}:${section.sectionId}:section`,
+      edgeId: `edge:${caseId}:${agentNodeId}:analyzes`,
       from: caseId,
-      to: section.sectionId,
-      label: "section",
+      to: agentNodeId,
+      label: "analyzes",
     });
 
-    for (const findingRef of section.citationFindingRefs) {
-      const finding = findFindingById(events, findingRef);
+    // Create finding nodes under this agent
+    for (const finding of findings) {
+      const alignmentLabel = finding.priorAlignment !== "new"
+        ? ` [${finding.priorAlignment}]`
+        : "";
       putNode({
-        nodeId: findingRef,
-        label: formatGraphFindingLabel(finding?.agentType),
+        nodeId: finding.findingId,
+        label: truncateGraphClaim(finding.claim),
         kind: "finding",
-        summary:
-          finding?.claim ?? "A structured research point feeding the current answer.",
-        emphasis: "supporting",
+        summary: `${finding.claim}${alignmentLabel}`,
+        emphasis: finding.impact === "negative" || finding.impact === "mixed" ? "caution" : "supporting",
       });
       putEdge({
-        edgeId: `edge:${section.sectionId}:${findingRef}:finding`,
-        from: section.sectionId,
-        to: findingRef,
-        label: "cites",
+        edgeId: `edge:${agentNodeId}:${finding.findingId}:produces`,
+        from: agentNodeId,
+        to: finding.findingId,
+        label: finding.impact === "negative" ? "warns" : "supports",
       });
     }
+  }
 
-    for (const objectRef of section.citationObjectRefs) {
+  // Tier 3: Judgment node
+  const judgmentContent = finalJudgment.content.trim();
+  if (judgmentContent) {
+    const judgmentNodeId = `judgment:${caseId}:final`;
+    putNode({
+      nodeId: judgmentNodeId,
+      label: "Final Judgment",
+      kind: "case",
+      summary: judgmentContent,
+      emphasis: "primary",
+    });
+
+    // Connect all agent group nodes to judgment
+    for (const agentType of agentOrder) {
+      const agentNodeId = `agent:${caseId}:${agentType}`;
+      if (seenNodeIds.has(agentNodeId)) {
+        putEdge({
+          edgeId: `edge:${agentNodeId}:${judgmentNodeId}:informs`,
+          from: agentNodeId,
+          to: judgmentNodeId,
+          label: "informs",
+        });
+      }
+    }
+
+    // Stable objects connected to judgment
+    const stableObjectRefs = new Set<string>();
+    for (const section of reportSections) {
+      for (const ref of section.citationObjectRefs) {
+        stableObjectRefs.add(ref);
+      }
+    }
+
+    for (const objectRef of stableObjectRefs) {
       putNode({
         nodeId: objectRef,
         label: formatGraphObjectLabel(objectRef),
@@ -1616,26 +1688,10 @@ function deriveGraphSnapshot(
         emphasis: objectRef.startsWith("risk:") ? "caution" : "supporting",
       });
       putEdge({
-        edgeId: `edge:${section.sectionId}:${objectRef}:object`,
-        from: section.sectionId,
+        edgeId: `edge:${judgmentNodeId}:${objectRef}:updates`,
+        from: judgmentNodeId,
         to: objectRef,
-        label: "tracks",
-      });
-    }
-
-    for (const evidenceRef of section.citationEvidenceRefs) {
-      putNode({
-        nodeId: evidenceRef,
-        label: "Supporting Evidence",
-        kind: "evidence",
-        summary: "Evidence captured during the run and linked back to the answer.",
-        emphasis: "neutral",
-      });
-      putEdge({
-        edgeId: `edge:${section.sectionId}:${evidenceRef}:evidence`,
-        from: section.sectionId,
-        to: evidenceRef,
-        label: "grounds",
+        label: "updates",
       });
     }
   }
@@ -1645,47 +1701,34 @@ function deriveGraphSnapshot(
     caseId,
     status: run?.status ?? "created",
     headline:
-      finalJudgment.content.trim() ||
-      "This structure updates as Delphi connects the current investment case.",
+      judgmentContent ||
+      "This structure updates as Delphi builds the investment case.",
     summary:
-      "This view shows how Delphi links the case, the live report sections, the key findings, and the supporting evidence behind the current answer.",
+      "Decision flow: how each research lane feeds the final judgment and updates the persistent knowledge graph.",
     updatedAt: run?.updatedAt ?? "",
-    nodes: [...nodes.values()],
-    edges: [...edges.values()],
+    nodes,
+    edges,
   };
 }
 
-function formatGraphFindingLabel(agentType?: string): string {
-  if (agentType === "thesis") return "Core Thesis";
-  if (agentType === "liquidity") return "Liquidity Read";
-  if (agentType === "market_signal") return "Market Signal";
-  if (agentType === "judge") return "Judge Synthesis";
-  return "Research Finding";
-}
-
-function findFindingById(
-  events: readonly RunEvent[],
-  findingId: string,
-): { claim: string; agentType: string } | null {
-  for (let index = events.length - 1; index >= 0; index -= 1) {
-    const event = events[index];
-
-    if (!event || event.eventType !== "finding_created") {
-      continue;
-    }
-
-    if (stringPayload(event, "findingId") !== findingId) {
-      continue;
-    }
-
-    return {
-      claim: stringPayload(event, "claim") ?? findingId,
-      agentType: stringPayload(event, "agentType") ?? "agent",
-    };
+function formatGraphAgentLabel(agentType: string): string {
+  switch (agentType) {
+    case "thesis": return "Thesis Analysis";
+    case "liquidity": return "Liquidity Analysis";
+    case "market_signal": return "Market Signal";
+    case "judge": return "Judge Synthesis";
+    default: return "Analysis";
   }
-
-  return null;
 }
+
+function truncateGraphClaim(claim: string): string {
+  const trimmed = claim.trim();
+  if (trimmed.length <= 40) return trimmed;
+  const sentenceEnd = trimmed.search(/[.!?](?:\s|$)/);
+  const lead = sentenceEnd > 0 && sentenceEnd <= 50 ? trimmed.slice(0, sentenceEnd + 1) : trimmed.slice(0, 37) + "...";
+  return lead;
+}
+
 
 function formatGraphObjectLabel(objectRef: string): string {
   if (objectRef.startsWith("thesis:")) return "Core Thesis";
@@ -1737,59 +1780,162 @@ function layoutGraph(
   nodes: GraphNodeViewState[];
   edges: GraphEdgeViewState[];
 } {
-  const laneOrder: GraphSnapshotNode["kind"][] = [
-    "case",
-    "section",
-    "finding",
-    "object",
-    "evidence",
-  ];
-  const xByLane: Record<GraphSnapshotNode["kind"], number> = {
-    case: 140,
-    section: 430,
-    finding: 770,
-    object: 1110,
-    evidence: 1430,
-  };
-  const widthByLane: Record<GraphSnapshotNode["kind"], number> = {
-    case: 240,
-    section: 250,
-    finding: 250,
-    object: 230,
-    evidence: 210,
-  };
-  const grouped = new Map<GraphSnapshotNode["kind"], GraphSnapshotNode[]>();
-
-  for (const lane of laneOrder) {
-    grouped.set(lane, []);
-  }
-
-  for (const node of nodes) {
-    grouped.get(node.kind)?.push(node);
-  }
+  // 3-tier layout: Case → Agent groups + Findings → Judgment + Objects
+  const caseNodes = nodes.filter((n) => n.kind === "case" && !n.nodeId.startsWith("judgment:"));
+  const agentNodes = nodes.filter((n) => n.kind === "section");
+  const findingNodes = nodes.filter((n) => n.kind === "finding");
+  const judgmentNodes = nodes.filter((n) => n.kind === "case" && n.nodeId.startsWith("judgment:"));
+  const objectNodes = nodes.filter((n) => n.kind === "object");
 
   const laidOutNodes: GraphNodeViewState[] = [];
+  const nodeWidth = 260;
+  const findingWidth = 240;
+  const objectWidth = 200;
+  const rowGap = 108;
+  const colGap = 100;
 
-  for (const lane of laneOrder) {
-    const laneNodes = grouped.get(lane) ?? [];
-    laneNodes.forEach((node, index) => {
-      const width = widthByLane[lane];
-      const height = lane === "case" ? 100 : 92;
-      laidOutNodes.push({
-        nodeId: node.nodeId,
-        label: node.label,
-        kind: node.kind,
-        summary: truncateLong(node.summary, lane === "case" ? 160 : 130),
-        x: xByLane[lane],
-        y: 64 + index * 120,
-        width,
-        height,
-        emphasis: node.emphasis,
-        focus: "none",
-      });
+  // Tier 1: Case node (left)
+  const tier1X = 60;
+  const totalMiddleHeight = Math.max(
+    agentNodes.length * (92 + rowGap),
+    findingNodes.length * (80 + 12),
+    400,
+  );
+  const caseY = Math.max(64, totalMiddleHeight / 2 - 50);
+
+  for (const node of caseNodes) {
+    laidOutNodes.push({
+      nodeId: node.nodeId,
+      label: node.label,
+      kind: node.kind,
+      summary: truncateLong(node.summary, 140),
+      x: tier1X,
+      y: caseY,
+      width: nodeWidth,
+      height: 100,
+      emphasis: node.emphasis,
+      focus: "none",
     });
   }
 
+  // Tier 2a: Agent group nodes (center-left)
+  const tier2X = tier1X + nodeWidth + colGap;
+  const agentStartY = 64;
+
+  // Build a map from agent node to its findings
+  const agentToFindings = new Map<string, GraphSnapshotNode[]>();
+  const findingParent = new Map<string, string>();
+  for (const edge of edges) {
+    if (edge.label === "produces" || edge.label === "supports" || edge.label === "warns") {
+      const agentNode = agentNodes.find((n) => n.nodeId === edge.from);
+      const findingNode = findingNodes.find((n) => n.nodeId === edge.to);
+      if (agentNode && findingNode) {
+        if (!agentToFindings.has(agentNode.nodeId)) {
+          agentToFindings.set(agentNode.nodeId, []);
+        }
+        agentToFindings.get(agentNode.nodeId)!.push(findingNode);
+        findingParent.set(findingNode.nodeId, agentNode.nodeId);
+      }
+    }
+  }
+
+  // Tier 2b: Position agent groups and their findings together
+  const tier2bX = tier2X + nodeWidth + colGap - 20;
+  let currentY = agentStartY;
+
+  for (const agentNode of agentNodes) {
+    const findings = agentToFindings.get(agentNode.nodeId) ?? [];
+    const clusterHeight = Math.max(92, findings.length * 88);
+    const agentY = currentY + (clusterHeight - 92) / 2;
+
+    laidOutNodes.push({
+      nodeId: agentNode.nodeId,
+      label: agentNode.label,
+      kind: agentNode.kind,
+      summary: truncateLong(agentNode.summary, 100),
+      x: tier2X,
+      y: agentY,
+      width: nodeWidth,
+      height: 92,
+      emphasis: agentNode.emphasis,
+      focus: "none",
+    });
+
+    // Findings for this agent
+    findings.forEach((finding, fi) => {
+      laidOutNodes.push({
+        nodeId: finding.nodeId,
+        label: finding.label,
+        kind: finding.kind,
+        summary: truncateLong(finding.summary, 120),
+        x: tier2bX,
+        y: currentY + fi * 88,
+        width: findingWidth,
+        height: 76,
+        emphasis: finding.emphasis,
+        focus: "none",
+      });
+    });
+
+    currentY += clusterHeight + 28;
+  }
+
+  // Orphan findings (not connected to any agent)
+  for (const finding of findingNodes) {
+    if (!findingParent.has(finding.nodeId)) {
+      laidOutNodes.push({
+        nodeId: finding.nodeId,
+        label: finding.label,
+        kind: finding.kind,
+        summary: truncateLong(finding.summary, 120),
+        x: tier2bX,
+        y: currentY,
+        width: findingWidth,
+        height: 76,
+        emphasis: finding.emphasis,
+        focus: "none",
+      });
+      currentY += 88;
+    }
+  }
+
+  // Tier 3: Judgment + stable objects (right)
+  const tier3X = tier2bX + findingWidth + colGap;
+  let tier3Y = 64;
+
+  for (const node of judgmentNodes) {
+    laidOutNodes.push({
+      nodeId: node.nodeId,
+      label: node.label,
+      kind: node.kind,
+      summary: truncateLong(node.summary, 160),
+      x: tier3X,
+      y: tier3Y,
+      width: nodeWidth,
+      height: 110,
+      emphasis: node.emphasis,
+      focus: "none",
+    });
+    tier3Y += 130;
+  }
+
+  for (const node of objectNodes) {
+    laidOutNodes.push({
+      nodeId: node.nodeId,
+      label: node.label,
+      kind: node.kind,
+      summary: truncateLong(node.summary, 90),
+      x: tier3X + 20,
+      y: tier3Y,
+      width: objectWidth,
+      height: 68,
+      emphasis: node.emphasis,
+      focus: "none",
+    });
+    tier3Y += 80;
+  }
+
+  // Layout edges
   const nodeById = new Map(laidOutNodes.map((node) => [node.nodeId, node]));
   const laidOutEdges: GraphEdgeViewState[] = edges.flatMap((edge) => {
     const from = nodeById.get(edge.from);
@@ -1799,13 +1945,18 @@ function layoutGraph(
       return [];
     }
 
+    // Determine connection points based on relative positions
+    const fromRight = from.x + from.width;
+    const toLeft = to.x;
+    const goesRight = toLeft >= fromRight - 20;
+
     return [{
       edgeId: edge.edgeId,
       fromNodeId: edge.from,
       toNodeId: edge.to,
-      fromX: from.x + from.width,
+      fromX: goesRight ? fromRight : from.x + from.width / 2,
       fromY: from.y + from.height / 2,
-      toX: to.x,
+      toX: goesRight ? toLeft : to.x + to.width / 2,
       toY: to.y + to.height / 2,
       label: edge.label,
       focus: "none",
