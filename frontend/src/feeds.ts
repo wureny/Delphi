@@ -165,6 +165,7 @@ export function createSseFeedSource(options: {
   return {
     connect(handlers) {
       let closed = false;
+      let settled = false;
       let eventSource: EventSource | null = null;
       let terminalSource: EventSource | null = null;
       let hydrated = false;
@@ -173,6 +174,15 @@ export function createSseFeedSource(options: {
       let eventStreamInterrupted = false;
       let terminalStreamInterrupted = false;
       let snapshotPollId: number | null = null;
+
+      const closeStreams = (): void => {
+        settled = true;
+        stopSnapshotPolling();
+        eventSource?.close();
+        eventSource = null;
+        terminalSource?.close();
+        terminalSource = null;
+      };
 
       const stopSnapshotPolling = (): void => {
         if (snapshotPollId === null) {
@@ -199,7 +209,7 @@ export function createSseFeedSource(options: {
         }
 
         if (isSettledRunStatus(snapshot.run.status)) {
-          stopSnapshotPolling();
+          closeStreams();
         }
       };
 
@@ -317,7 +327,7 @@ export function createSseFeedSource(options: {
           };
 
           eventSource.onerror = () => {
-            if (closed) {
+            if (closed || settled) {
               return;
             }
 
@@ -376,7 +386,7 @@ export function createSseFeedSource(options: {
             };
 
             terminalSource.onerror = () => {
-              if (closed) {
+              if (closed || settled) {
                 return;
               }
 

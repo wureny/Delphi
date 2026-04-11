@@ -362,7 +362,7 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         <span class="graph-lane-label"><span class="lane-icon">◆</span> Judgment + Objects</span>
       </div>
       <div class="graph-stage" data-role="graph-stage">
-        <svg class="graph-svg" viewBox="0 0 ${snapshot.canvasWidth} ${snapshot.canvasHeight}" preserveAspectRatio="xMinYMin meet" aria-label="Structured graph snapshot">
+        <svg class="graph-svg" width="${snapshot.canvasWidth}" height="${snapshot.canvasHeight}" aria-label="Structured graph snapshot">
           ${renderGraphLaneGuides(snapshot)}
           ${snapshot.edges.map(renderGraphEdge).join("")}
           ${snapshot.nodes.map(renderGraphNode).join("")}
