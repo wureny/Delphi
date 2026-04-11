@@ -2176,10 +2176,6 @@ button.idle-example {
 
 /* ── Graph SVG dynamic sizing ── */
 .graph-svg {
-  width: auto;
-  min-width: 1680px;
-  height: auto;
-  min-height: 600px;
   display: block;
   transition: transform 120ms var(--ease-out);
 }
