@@ -892,6 +892,7 @@ function renderResponseSections(
     section.key === "key_risks" ||
     section.key === "what_changes_the_view"
   );
+  const evolutionSection = visibleSections.find((section) => section.key === "judgment_evolution");
   const parts: string[] = [];
 
   if (!finalJudgment && rationaleSections.length === 0 && watchSections.length === 0) {
@@ -936,6 +937,17 @@ function renderResponseSections(
         <h3 class="answer-group-title">What to watch</h3>
         <div class="answer-group-stack">
           ${watchSections.map(renderReportSection).join("")}
+        </div>
+      </section>
+    `);
+  }
+
+  if (evolutionSection) {
+    parts.push(`
+      <section class="answer-group answer-group--evolution">
+        <h3 class="answer-group-title">How the view has changed</h3>
+        <div class="answer-group-stack">
+          ${renderReportSection(evolutionSection)}
         </div>
       </section>
     `);
@@ -997,6 +1009,8 @@ function displaySectionTitle(
       return "Key risks";
     case "what_changes_the_view":
       return "What would change the view";
+    case "judgment_evolution":
+      return "How the view has changed";
     default:
       return fallback;
   }

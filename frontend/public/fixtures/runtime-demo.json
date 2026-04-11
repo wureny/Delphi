@@ -155,6 +155,17 @@
         "risk:case:AAPL:buy_decision:3m:execution"
       ],
       "status": "ready"
+    },
+    {
+      "sectionId": "section:run_0d7bf330-9866-4727-9eeb-111fa673b741:judgment_evolution",
+      "runId": "run_0d7bf330-9866-4727-9eeb-111fa673b741",
+      "sectionKey": "judgment_evolution",
+      "title": "Judgment Evolution",
+      "content": "First analysis for AAPL — no prior judgment on record. This run establishes the baseline thesis and judgment for future comparison.",
+      "citationFindingRefs": [],
+      "citationEvidenceRefs": [],
+      "citationObjectRefs": [],
+      "status": "ready"
     }
   ],
   "finalReport": {
@@ -169,6 +180,7 @@
     "keyRisks": "Recent news flow on AAPL is constructive but not strong enough to remove execution risk. Updated objects: Thesis(thesis:case:AAPL:buy_decision:3m:core), Risk(risk:case:AAPL:buy_decision:3m:execution).",
     "liquidityContext": "Rates pressure is manageable and liquidity conditions are not actively tightening. Liquidity backdrop is stable. This does not contradict the long case for AAPL. Updated objects: MacroActorAction(macroactoraction:case:AAPL:buy_decision:3m:policy_rates), LiquidityFactor(liquidityfactor:case:AAPL:buy_decision:3m:rates_pressure), LiquidityRegime(liquidityregime:case:AAPL:buy_decision:3m:primary).",
     "whatChangesTheView": "The view would weaken if execution deteriorates, liquidity turns restrictive, or market positioning becomes obviously crowded.",
+    "judgmentEvolution": "First analysis for AAPL — no prior judgment on record. This run establishes the baseline thesis and judgment for future comparison.",
     "sectionCitations": {
       "final_judgment": [
         "finding:run_0d7bf330-9866-4727-9eeb-111fa673b741:ef8f70d2-f1f1-46a4-ae55-d17b2472836c",
@@ -213,7 +225,8 @@
         "finding:run_0d7bf330-9866-4727-9eeb-111fa673b741:372855e7-b10f-4ee6-add8-f9ed214e3dfa",
         "evidence:case:AAPL:buy_decision:3m:candidate:run_0d7bf330-9866-4727-9eeb-111fa673b741:market_quote:Price trend is construct",
         "evidence:case:AAPL:buy_decision:3m:candidate:run_0d7bf330-9866-4727-9eeb-111fa673b741:market_historical:Positioning looks suppor"
-      ]
+      ],
+      "judgment_evolution": []
     },
     "updatedObjectRefs": [
       "thesis:case:AAPL:buy_decision:3m:core",
@@ -254,7 +267,8 @@
       "what_changes_the_view": [
         "thesis:case:AAPL:buy_decision:3m:core",
         "risk:case:AAPL:buy_decision:3m:execution"
-      ]
+      ],
+      "judgment_evolution": []
     },
     "updatedObjectTypes": [
       "Thesis",

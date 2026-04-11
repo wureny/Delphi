@@ -324,8 +324,8 @@ function assertSmokeScenario(
 
   const sectionKeys = report.reportSections.map((section) => section.sectionKey);
 
-  if (report.reportSections.length !== 6) {
-    throw new Error(`Expected 6 report sections, received ${report.reportSections.length}.`);
+  if (report.reportSections.length !== 7) {
+    throw new Error(`Expected 7 report sections, received ${report.reportSections.length}.`);
   }
 
   for (const requiredKey of [
@@ -335,6 +335,7 @@ function assertSmokeScenario(
     "key_risks",
     "liquidity_context",
     "what_changes_the_view",
+    "judgment_evolution",
   ]) {
     if (!sectionKeys.includes(requiredKey)) {
       throw new Error(`Missing report section ${requiredKey}.`);

@@ -364,6 +364,12 @@ export class RuntimeOrchestrator {
             taskId: task.taskId,
             findingId: finding.findingId,
             claim: finding.claim,
+            agentType: finding.agentType,
+            impact: finding.impact,
+            confidence: finding.confidence,
+            priorAlignment: finding.priorAlignment,
+            ...(finding.priorRef ? { priorRef: finding.priorRef } : {}),
+            ...(finding.revisionReason ? { revisionReason: finding.revisionReason } : {}),
           },
           agentId,
         );

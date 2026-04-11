@@ -11,6 +11,7 @@ import type {
   FinalReportSectionKey,
   FindingImpact,
   FindingRecord,
+  PriorAlignment,
   ReportSectionRecord,
   ReportSectionStatus,
 } from "./contracts.ts";
@@ -61,6 +62,9 @@ interface ProviderFindingPlan<TObjectKey extends string> {
     confidence: number;
     evidenceIndexes: number[];
     objectKeys: TObjectKey[];
+    priorAlignment: PriorAlignment;
+    priorRef?: string;
+    revisionReason?: string;
   }>;
 }
 
@@ -81,12 +85,30 @@ interface LoadedGraphContext {
   refs: string[];
 }
 
+const graphContextInstructions = [
+  "Graph context handling (MANDATORY):",
+  "- If graph context is provided, you MUST address it in your findings.",
+  "- For each finding, set priorAlignment to one of: consistent, revised, contradicted, new.",
+  '  - "consistent": your finding agrees with a prior analysis on record.',
+  '  - "revised": your finding updates or modifies a prior view, and you MUST explain why in revisionReason.',
+  '  - "contradicted": your finding directly contradicts a prior view, and you MUST explain why in revisionReason.',
+  '  - "new": no prior analysis exists on this point (first-time analysis).',
+  "- If a prior judgment or thesis is referenced, set priorRef to the ref string from graph context.",
+  "- If no graph context is provided, set all findings to priorAlignment: \"new\".",
+].join("\n");
+
 const thesisCoverageContract = [
   "Coverage requirements:",
   "- Include at least one finding on business durability or core thesis quality.",
   "- Include at least one finding on recent execution, guidance, or management signaling.",
   "- Include at least one finding on why the stock is or is not attractive over the stated time horizon.",
   "- Avoid repeating the same point in slightly different words.",
+  "",
+  "Prior thesis handling:",
+  "- If prior thesis data exists in graph context, you MUST state whether you maintain, revise, or overturn it.",
+  "- Explain what changed in the evidence or environment that justifies your current stance.",
+  "",
+  graphContextInstructions,
 ].join("\n");
 
 const liquidityCoverageContract = [
@@ -95,6 +117,12 @@ const liquidityCoverageContract = [
   "- Include one finding on how rates or funding conditions affect valuation support or downside risk.",
   "- Include one finding on the practical portfolio implication for owning this stock now.",
   "- Avoid generic macro commentary that does not change the case.",
+  "",
+  "Prior liquidity regime handling:",
+  "- If a prior liquidity regime is recorded in graph context, you MUST state whether the regime has switched or persisted.",
+  "- If switched, explain the transition and its investment implication.",
+  "",
+  graphContextInstructions,
 ].join("\n");
 
 const marketSignalCoverageContract = [
@@ -103,6 +131,12 @@ const marketSignalCoverageContract = [
   "- Include one finding on crowding, positioning, or sentiment saturation.",
   "- Include one finding on the practical trading stance: buyable, holdable, crowded, or avoid-for-now.",
   "- Avoid pure tape description without a decision implication.",
+  "",
+  "Prior signal handling:",
+  "- If prior market signals exist in graph context, you MUST compare current signals against the historical direction.",
+  "- Note any reversals, continuations, or divergences.",
+  "",
+  graphContextInstructions,
 ].join("\n");
 
 const judgeSectionContract = [
@@ -113,6 +147,7 @@ const judgeSectionContract = [
   '- key_risks: name the specific risks that could make this decision wrong or low-payoff.',
   '- liquidity_context: explain how macro/liquidity changes support, limit, or threaten the thesis.',
   '- what_changes_the_view: give explicit triggers that would make you more bullish or more cautious.',
+  '- judgment_evolution: compare this judgment against prior judgments from graph context. If prior judgments exist, describe the stance change (e.g., "shifted from bullish 75% to neutral 55%"), explain what drove the change, and note which evidence shifted. If this is the first analysis, state "First analysis for this ticker — no prior judgment on record." This section makes the longitudinal value of the system visible.',
   "Write every section like a short investment memo paragraph, not like a schema placeholder.",
 ].join("\n");
 
@@ -243,7 +278,7 @@ async function runProviderThesisAnalysis(
     schemaDescription: "Structured thesis findings for one investment research run.",
     schema: providerFindingSchema(["thesis_core", "risk_execution"]),
     developerPrompt: buildSkillGuidedPrompt(
-      "You are Delphi thesis agent. Produce 2-4 substantial findings grounded only in the supplied company and news snapshots. Each finding should capture a decisive investment point rather than a generic summary. Do not invent evidence. Use the allowed object keys only.",
+      "You are Delphi thesis agent. Produce 2-4 substantial findings grounded only in the supplied company and news snapshots. Each finding should capture a decisive investment point rather than a generic summary. Do not invent evidence. Use the allowed object keys only.\n\nIMPORTANT: If graph context contains prior thesis or judgment data for this ticker, you MUST explicitly address it. State whether your current thesis maintains, revises, or overturns the prior view, and explain what evidence drove any change. Set priorAlignment accordingly for each finding.",
       skill,
     ),
     userPrompt: [
@@ -270,6 +305,9 @@ async function runProviderThesisAnalysis(
       confidence: normalizeConfidence(finding.confidence),
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => thesisObjectRef(context, key)),
+      priorAlignment: finding.priorAlignment,
+      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -327,7 +365,7 @@ async function runProviderLiquidityAnalysis(
       "liquidity_regime_primary",
     ]),
     developerPrompt: buildSkillGuidedPrompt(
-      "You are Delphi liquidity agent. Produce 2-4 substantial findings grounded only in the supplied macro and liquidity snapshot. Each finding should state the regime implication for the investment case, not generic macro commentary. Do not invent evidence. Use the allowed object keys only.",
+      "You are Delphi liquidity agent. Produce 2-4 substantial findings grounded only in the supplied macro and liquidity snapshot. Each finding should state the regime implication for the investment case, not generic macro commentary. Do not invent evidence. Use the allowed object keys only.\n\nIMPORTANT: If graph context contains a prior liquidity regime, you MUST state whether the regime has persisted or switched since the last analysis. Explain the transition drivers and investment implications. Set priorAlignment accordingly.",
       skill,
     ),
     userPrompt: [
@@ -354,6 +392,9 @@ async function runProviderLiquidityAnalysis(
       confidence: normalizeConfidence(finding.confidence),
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => liquidityObjectRef(context, key)),
+      priorAlignment: finding.priorAlignment,
+      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -407,7 +448,7 @@ async function runProviderMarketSignalAnalysis(
     schemaDescription: "Structured market signal findings for one investment research run.",
     schema: providerFindingSchema(["market_signal_price_positioning"]),
     developerPrompt: buildSkillGuidedPrompt(
-      "You are Delphi market signal agent. Produce 2-4 substantial findings grounded only in the supplied market snapshot. Focus on positioning, crowding, and practical risk posture rather than generic tape reading. Do not invent evidence. Use the allowed object key only.",
+      "You are Delphi market signal agent. Produce 2-4 substantial findings grounded only in the supplied market snapshot. Focus on positioning, crowding, and practical risk posture rather than generic tape reading. Do not invent evidence. Use the allowed object key only.\n\nIMPORTANT: If graph context contains prior market signals, you MUST compare current signals against historical direction. Note any reversals, continuations, or divergences and set priorAlignment accordingly.",
       skill,
     ),
     userPrompt: [
@@ -432,6 +473,9 @@ async function runProviderMarketSignalAnalysis(
       confidence: normalizeConfidence(finding.confidence),
       evidenceRefs: pickEvidenceRefs(evidenceRefs, finding.evidenceIndexes),
       objectRefs: finding.objectKeys.map((key) => marketObjectRef(context, key)),
+      priorAlignment: finding.priorAlignment,
+      ...(finding.priorRef != null ? { priorRef: finding.priorRef } : {}),
+      ...(finding.revisionReason != null ? { revisionReason: finding.revisionReason } : {}),
     }));
 
   return {
@@ -487,7 +531,7 @@ async function runProviderJudgeSynthesis(
     schemaDescription: "Structured decision and six fixed report sections for one run.",
     schema: providerJudgeSchema(),
     developerPrompt: buildSkillGuidedPrompt(
-      "You are Delphi judge. Use only the supplied findings to produce one decision summary and six fixed report sections. Write memo-style sections with concrete reasoning and explicit conflicts or tradeoffs when they exist. Do not invent evidence or findings. Every section must be present.",
+      "You are Delphi judge. Use only the supplied findings to produce one decision summary and seven fixed report sections. Write memo-style sections with concrete reasoning and explicit conflicts or tradeoffs when they exist. Do not invent evidence or findings. Every section must be present.\n\nIMPORTANT: The judgment_evolution section is critical. If graph context contains prior judgments, you MUST compare your current stance against the most recent prior judgment — describe the change in stance and confidence, explain what evidence shifted, and note if upstream agents revised or contradicted prior views (check priorAlignment fields in findings). If no prior judgment exists, explicitly state this is the first analysis for this ticker.",
       skill,
     ),
     userPrompt: [
@@ -610,7 +654,7 @@ async function loadGraphContext(
   );
 
   const contradictionClaim = buildContradictionClaim(context);
-  const [runContext, caseContext, priorJudgments, contradictions] = await Promise.all([
+  const [runContext, caseContext, priorJudgments, contradictions, thesisEvolution] = await Promise.all([
     context.graphContextReader.getRunContext(context.run.runId),
     context.graphContextReader.getCaseContext(context.run.caseId),
     context.graphContextReader.getPriorJudgments
@@ -622,6 +666,9 @@ async function loadGraphContext(
           contradictionClaim,
         )
       : Promise.resolve(null),
+    context.graphContextReader.getThesisEvolution
+      ? context.graphContextReader.getThesisEvolution(context.run.caseId)
+      : Promise.resolve(null),
   ]);
 
   const refs = unique([
@@ -629,12 +676,16 @@ async function loadGraphContext(
     ...caseContext.refs,
     ...(priorJudgments?.refs ?? []),
     ...(contradictions?.refs ?? []),
+    ...(thesisEvolution?.refs ?? []),
   ]);
   const summaryParts = [
     runContext.refs.length > 0 ? `Run context:\n${runContext.summary}` : null,
     caseContext.refs.length > 0 ? `Case context:\n${caseContext.summary}` : null,
     priorJudgments && priorJudgments.refs.length > 0
       ? `Prior judgments:\n${priorJudgments.summary}`
+      : null,
+    thesisEvolution && thesisEvolution.refs.length > 0
+      ? `Thesis evolution:\n${thesisEvolution.summary}`
       : null,
     contradictions && contradictions.refs.length > 0
       ? `Contradictions:\n${contradictions.summary}`
@@ -653,6 +704,7 @@ async function loadGraphContext(
         runContextRefs: runContext.refs.length,
         caseContextRefs: caseContext.refs.length,
         priorJudgmentRefs: priorJudgments?.refs.length ?? 0,
+        thesisEvolutionRefs: thesisEvolution?.refs.length ?? 0,
         contradictionRefs: contradictions?.refs.length ?? 0,
         totalRefs: refs.length,
       },
@@ -694,7 +746,7 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["claim", "impact", "confidence", "evidenceIndexes", "objectKeys"],
+          required: ["claim", "impact", "confidence", "evidenceIndexes", "objectKeys", "priorAlignment"],
           properties: {
             claim: { type: "string" },
             impact: {
@@ -720,6 +772,16 @@ function providerFindingSchema(objectKeys: readonly string[]): Record<string, un
                 type: "string",
                 enum: [...objectKeys],
               },
+            },
+            priorAlignment: {
+              type: "string",
+              enum: ["consistent", "revised", "contradicted", "new"],
+            },
+            priorRef: {
+              type: "string",
+            },
+            revisionReason: {
+              type: "string",
             },
           },
         },
@@ -779,6 +841,7 @@ function providerJudgeSchema(): Record<string, unknown> {
           "key_risks",
           "liquidity_context",
           "what_changes_the_view",
+          "judgment_evolution",
         ],
         properties: {
           final_judgment: sectionSchema,
@@ -787,6 +850,7 @@ function providerJudgeSchema(): Record<string, unknown> {
           key_risks: sectionSchema,
           liquidity_context: sectionSchema,
           what_changes_the_view: sectionSchema,
+          judgment_evolution: sectionSchema,
         },
       },
     },

@@ -696,13 +696,16 @@ export function selectAgentCardStates(state: AppState): AgentCardState[] {
         card.recentAction = summarizeToolResult(event);
         card.latestTool = summarizeToolResult(event);
         break;
-      case "finding_created":
+      case "finding_created": {
         card.status = "running";
         card.phaseLabel = "Writing Findings";
         card.recentAction = event.title;
-        card.latestFinding =
-          stringPayload(event, "claim") ?? "A finding was emitted.";
+        const claim = stringPayload(event, "claim") ?? "A finding was emitted.";
+        const alignment = stringPayload(event, "priorAlignment");
+        const alignmentTag = alignment && alignment !== "new" ? ` [${alignment}]` : "";
+        card.latestFinding = `${claim}${alignmentTag}`;
         break;
+      }
       case "patch_accepted":
         if (card.status !== "done") {
           card.status = "running";

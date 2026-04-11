@@ -76,6 +76,15 @@ export const findingImpacts = [
 
 export type FindingImpact = (typeof findingImpacts)[number];
 
+export const priorAlignments = [
+  "consistent",
+  "revised",
+  "contradicted",
+  "new",
+] as const;
+
+export type PriorAlignment = (typeof priorAlignments)[number];
+
 export interface FindingRecord {
   findingId: string;
   runId: string;
@@ -86,6 +95,9 @@ export interface FindingRecord {
   objectRefs: string[];
   confidence: number;
   impact: FindingImpact;
+  priorAlignment: PriorAlignment;
+  priorRef?: string;
+  revisionReason?: string;
   timestamp: string;
 }
 
@@ -106,6 +118,7 @@ export const finalReportSectionKeys = [
   "key_risks",
   "liquidity_context",
   "what_changes_the_view",
+  "judgment_evolution",
 ] as const;
 
 export type FinalReportSectionKey = (typeof finalReportSectionKeys)[number];
@@ -142,6 +155,7 @@ export interface FinalReport {
   keyRisks: string;
   liquidityContext: string;
   whatChangesTheView: string;
+  judgmentEvolution: string;
   sectionCitations: SectionCitationMap;
   updatedObjectRefs: string[];
   sectionObjectRefs: {

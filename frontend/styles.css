@@ -518,6 +518,16 @@ button.idle-example {
   gap: 18px;
 }
 
+.answer-group--evolution {
+  border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+  padding-top: 18px;
+  margin-top: 4px;
+}
+
+.answer-group--evolution .answer-group-title {
+  color: var(--accent-secondary, #7eb8da);
+}
+
 .developing-view {
   display: flex;
   flex-direction: column;
