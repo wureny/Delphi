@@ -16,6 +16,7 @@ export const reportSectionTitles: Record<FinalReportSectionKey, string> = {
   key_risks: "Key Risks",
   liquidity_context: "Liquidity Context",
   what_changes_the_view: "What Changes The View",
+  judgment_evolution: "Judgment Evolution",
 };
 
 export function createReportSectionId(runId: string, sectionKey: FinalReportSectionKey): string {
@@ -90,6 +91,7 @@ export function buildFinalReport(options: BuildFinalReportOptions): FinalReport 
     keyRisks: getSectionContent(normalizedSections, "key_risks"),
     liquidityContext: getSectionContent(normalizedSections, "liquidity_context"),
     whatChangesTheView: getSectionContent(normalizedSections, "what_changes_the_view"),
+    judgmentEvolution: getSectionContent(normalizedSections, "judgment_evolution"),
     sectionCitations: buildSectionCitationMap(normalizedSections),
     updatedObjectRefs: collectUpdatedObjectRefs(normalizedSections),
     sectionObjectRefs: buildSectionObjectRefMap(normalizedSections),
@@ -115,6 +117,7 @@ function buildSectionCitationMap(
     key_risks: collectCitations(sections, "key_risks"),
     liquidity_context: collectCitations(sections, "liquidity_context"),
     what_changes_the_view: collectCitations(sections, "what_changes_the_view"),
+    judgment_evolution: collectCitations(sections, "judgment_evolution"),
   };
 }
 
@@ -141,6 +144,7 @@ function buildSectionObjectRefMap(
     key_risks: collectObjectRefs(sections, "key_risks"),
     liquidity_context: collectObjectRefs(sections, "liquidity_context"),
     what_changes_the_view: collectObjectRefs(sections, "what_changes_the_view"),
+    judgment_evolution: collectObjectRefs(sections, "judgment_evolution"),
   };
 }
 

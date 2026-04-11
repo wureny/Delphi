@@ -14,6 +14,7 @@ export const reportSectionKeys = [
   "key_risks",
   "liquidity_context",
   "what_changes_the_view",
+  "judgment_evolution",
 ] as const;
 
 export type ReportSectionKey = (typeof reportSectionKeys)[number];
@@ -86,6 +87,7 @@ export interface FinalReport {
   keyRisks: string;
   liquidityContext: string;
   whatChangesTheView: string;
+  judgmentEvolution: string;
   sectionCitations: Record<ReportSectionKey, string[]>;
   updatedObjectRefs: string[];
   sectionObjectRefs: Record<ReportSectionKey, string[]>;
@@ -228,4 +230,5 @@ export const reportSectionTitles: Record<ReportSectionKey, string> = {
   key_risks: "Key Risks",
   liquidity_context: "Liquidity Context",
   what_changes_the_view: "What Changes The View",
+  judgment_evolution: "Judgment Evolution",
 };

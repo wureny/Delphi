@@ -34,6 +34,7 @@ import type {
   FindingImpact,
   FindingRecord,
   FinalReportSectionKey,
+  PriorAlignment,
   ReportSectionRecord,
   ReportSectionStatus,
 } from "./contracts.ts";
@@ -264,6 +265,13 @@ export class FixtureGraphContextReader implements GraphContextReader {
   async getContradictions(caseId: string, claim: string) {
     return {
       summary: `No contradiction retrieval is available for fixture-backed case ${caseId}. Claim: ${claim}`,
+      refs: [],
+    };
+  }
+
+  async getThesisEvolution(caseId: string) {
+    return {
+      summary: `No thesis history is available for fixture-backed case ${caseId}. This is the first analysis.`,
       refs: [],
     };
   }
@@ -585,7 +593,7 @@ async function runFixtureJudgeSynthesis(
   }
 
   return {
-    ...createEmptyAgentExecutionResult("done", "Synthesized fixture findings into one decision and six report sections."),
+    ...createEmptyAgentExecutionResult("done", "Synthesized fixture findings into one decision and seven report sections."),
     decision,
     reportSections,
     finalReport,
@@ -704,9 +712,12 @@ export function createFinding(
     confidence: number;
     evidenceRefs?: string[];
     objectRefs?: string[];
+    priorAlignment?: PriorAlignment;
+    priorRef?: string;
+    revisionReason?: string;
   },
 ): FindingRecord {
-  return {
+  const record: FindingRecord = {
     findingId: `finding:${context.run.runId}:${randomUUID()}`,
     runId: context.run.runId,
     taskId: context.task.taskId,
@@ -716,8 +727,19 @@ export function createFinding(
     objectRefs: input.objectRefs ?? [context.run.caseId],
     confidence: input.confidence,
     impact: input.impact,
+    priorAlignment: input.priorAlignment ?? "new",
     timestamp: new Date().toISOString(),
   };
+
+  if (input.priorRef) {
+    record.priorRef = input.priorRef;
+  }
+
+  if (input.revisionReason) {
+    record.revisionReason = input.revisionReason;
+  }
+
+  return record;
 }
 
 function buildSkillRef(
@@ -1130,6 +1152,8 @@ function buildSectionContents(
     ),
     what_changes_the_view:
       "The view would weaken if execution deteriorates, liquidity turns restrictive, or market positioning becomes obviously crowded.",
+    judgment_evolution:
+      "First analysis for this ticker — no prior judgment on record. This run establishes the baseline for future comparison.",
   };
 }
 
@@ -1178,6 +1202,10 @@ function pickCitationEvidenceRefs(
       );
     case "what_changes_the_view":
       return uniqueEvidenceRefs(findings.slice(-2));
+    case "judgment_evolution":
+      return uniqueEvidenceRefs(
+        findings.filter((finding) => finding.priorAlignment !== "new"),
+      );
     default:
       return [];
   }
@@ -1236,6 +1264,10 @@ function pickCitationFindingRefs(
         .map((finding) => finding.findingId);
     case "what_changes_the_view":
       return findings.slice(-2).map((finding) => finding.findingId);
+    case "judgment_evolution":
+      return findings
+        .filter((finding) => finding.priorAlignment !== "new")
+        .map((finding) => finding.findingId);
     default:
       return [];
   }
