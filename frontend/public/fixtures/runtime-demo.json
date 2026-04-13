@@ -9,7 +9,7 @@
     "caseId": "case:AAPL:buy_decision:3m",
     "query": {
       "queryId": "query:demo:aapl",
-      "userQuestion": "AAPL 未来三个月值不值得买？",
+      "userQuestion": "Is AAPL a buy over the next 3 months?",
       "ticker": "AAPL",
       "timeHorizon": "3m",
       "caseType": "buy_decision",
