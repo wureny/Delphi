@@ -208,7 +208,7 @@ export function createInitialState(
   return {
     feedMode,
     feedLabel: feedMode === "recorded" ? "Recorded Demo Feed" : "Live SSE Feed",
-    composerText: feedMode === "recorded" ? "AAPL 未来三个月值不值得买？" : "",
+    composerText: feedMode === "recorded" ? "Is AAPL a buy over the next 3 months?" : "",
     pendingSubmittedQuestion: null,
     canvasCollapsed: false,
     workspaceSplitRatio: 0.5,

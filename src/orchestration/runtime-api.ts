@@ -579,7 +579,7 @@ function startSession(
 function buildDefaultQuery(runKey: string, createdAt: string): ResearchQuery {
   return {
     queryId: `query:${runKey}:${randomUUID()}`,
-    userQuestion: process.env.RUNTIME_DEMO_QUESTION ?? "AAPL 未来三个月值不值得买？",
+    userQuestion: process.env.RUNTIME_DEMO_QUESTION ?? "Is AAPL a buy over the next 3 months?",
     ticker: process.env.RUNTIME_DEMO_TICKER ?? "AAPL",
     timeHorizon: process.env.RUNTIME_DEMO_HORIZON ?? "3m",
     caseType: "buy_decision",
