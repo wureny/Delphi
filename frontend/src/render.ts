@@ -347,12 +347,14 @@ export function renderGraphSnapshot(snapshot: GraphSnapshotViewState): string {
         <span class="graph-lane-label"><span class="lane-icon">▸</span> Key findings</span>
         <span class="graph-lane-label"><span class="lane-icon">◆</span> Judgment + Objects</span>
       </div>
-      <div class="graph-stage" data-role="graph-stage">
-        <svg class="graph-svg" width="${snapshot.canvasWidth}" height="${snapshot.canvasHeight}" aria-label="Structured graph snapshot">
-          ${renderGraphLaneGuides(snapshot)}
-          ${snapshot.edges.map(renderGraphEdge).join("")}
-          ${snapshot.nodes.map(renderGraphNode).join("")}
-        </svg>
+      <div class="graph-stage-wrapper">
+        <div class="graph-stage" data-role="graph-stage">
+          <svg class="graph-svg" width="${snapshot.canvasWidth}" height="${snapshot.canvasHeight}" aria-label="Structured graph snapshot">
+            ${renderGraphLaneGuides(snapshot)}
+            ${snapshot.edges.map(renderGraphEdge).join("")}
+            ${snapshot.nodes.map(renderGraphNode).join("")}
+          </svg>
+        </div>
         <div class="graph-zoom-overlay">
           <button class="graph-zoom-btn" type="button" data-action="graph-zoom-in" title="Zoom in">+</button>
           <button class="graph-zoom-btn" type="button" data-action="graph-zoom-out" title="Zoom out">−</button>

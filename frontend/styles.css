@@ -1831,10 +1831,16 @@ button.idle-example {
   line-height: 1.55;
 }
 
-.graph-stage {
+.graph-stage-wrapper {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
+}
+
+.graph-stage {
+  position: absolute;
+  inset: 0;
   border: 1px solid rgba(59, 73, 76, 0.16);
   border-radius: 14px;
   background:
@@ -1853,9 +1859,9 @@ button.idle-example {
 .graph-zoom-overlay {
   position: absolute;
   top: 12px;
-  right: 12px;
+  left: 12px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 6px;
   z-index: 20;
   pointer-events: auto;
