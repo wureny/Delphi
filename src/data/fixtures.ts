@@ -1,0 +1,376 @@
+import { convictionBand } from "../domain/selectors";
+import type { WorkspaceData } from "../domain/types";
+
+export const NOW = "2026-06-19T09:00:00.000Z";
+
+function daysAgo(days: number): string {
+  return new Date(new Date(NOW).getTime() - days * 86_400_000).toISOString();
+}
+
+function daysFromNow(days: number): string {
+  return new Date(new Date(NOW).getTime() + days * 86_400_000).toISOString();
+}
+
+export const initialWorkspace: WorkspaceData = {
+  now: NOW,
+  user: { name: "A. Mercer", role: "PM - concentrated public-equity book" },
+  assets: [
+    { id: "ngsc", name: "NovaGrid Semiconductors", ticker: "NGSC", kind: "equity" },
+    { id: "retl", name: "RetailCo", ticker: "RETL", kind: "equity" },
+    { id: "bcon", name: "Beacon Observability", ticker: "BCON", kind: "equity" },
+    { id: "mdsr", name: "Meridian Search", ticker: "MDSR", kind: "equity" },
+  ],
+  theses: [
+    {
+      id: "th_ngsc",
+      assetId: "ngsc",
+      title: "AI infrastructure capex keeps accelerator demand supply-constrained",
+      summary:
+        "Hyperscale customers keep expanding accelerator clusters, while networking and software attach sustain NovaGrid's pricing power.",
+      conviction: 78,
+      convictionBand: convictionBand(78),
+      timeHorizon: "18-24 months",
+      lastReviewed: daysAgo(2),
+      pendingChanges: 3,
+      unresolved: 2,
+      staleThresholdDays: 21,
+      bull: "Cluster demand remains supply-constrained and the full-stack platform keeps switching costs high.",
+      bear: "Custom silicon availability and inference cost compression could pressure share and margin faster than expected.",
+      assumptions: [
+        {
+          id: "a_ngsc_1",
+          text: "Top cloud buyers grow AI capex above 25% YoY through FY2027",
+          status: "holding",
+          critical: true,
+          note: "Falsifier: two consecutive quarters of guided capex cuts from top buyers.",
+        },
+        {
+          id: "a_ngsc_2",
+          text: "NovaGrid retains above 80% of training accelerator share",
+          status: "weakening",
+          critical: true,
+          note: "Pressured by new external custom-accelerator availability.",
+        },
+        {
+          id: "a_ngsc_3",
+          text: "Gross margin holds above 70%",
+          status: "holding",
+          critical: false,
+          note: "",
+        },
+      ],
+      risks: [
+        { id: "r_ngsc_1", text: "Export-control expansion to more regions", severity: "medium" },
+        { id: "r_ngsc_2", text: "Inference shifts to cheaper custom ASICs", severity: "high" },
+      ],
+      catalysts: [
+        { id: "c_ngsc_1", text: "Q2 earnings", date: daysFromNow(21), kind: "earnings" },
+        { id: "c_ngsc_2", text: "Cloud buyer capex updates", date: daysFromNow(9), kind: "print" },
+      ],
+    },
+    {
+      id: "th_retl",
+      assetId: "retl",
+      title: "RetailCo turns store modernisation into durable margin expansion",
+      summary:
+        "Inventory automation and membership growth support higher throughput per store while private-label mix expands gross margin.",
+      conviction: 54,
+      convictionBand: convictionBand(54),
+      timeHorizon: "12 months",
+      lastReviewed: daysAgo(11),
+      pendingChanges: 4,
+      unresolved: 3,
+      staleThresholdDays: 21,
+      bull: "Store automation lowers shrink and labour intensity; membership engagement raises repeat purchase frequency.",
+      bear: "Execution issues in automated fulfilment and weakening traffic could pressure the margin expansion narrative.",
+      assumptions: [
+        {
+          id: "a_retl_1",
+          text: "Automated fulfilment downtime stays below 2% in any rolling quarter",
+          status: "broken",
+          critical: true,
+          note: "Falsified by the February regional outage.",
+        },
+        {
+          id: "a_retl_2",
+          text: "Membership-driven comparable sales grow above 4% YoY",
+          status: "holding",
+          critical: true,
+          note: "",
+        },
+        {
+          id: "a_retl_3",
+          text: "Reported traffic gains are organic, not promotion-driven",
+          status: "uncertain",
+          critical: false,
+          note: "Foot-traffic data quality is contested; flagged uncertain rather than forced.",
+        },
+      ],
+      risks: [
+        { id: "r_retl_1", text: "Fulfilment outage recurrence", severity: "high" },
+        { id: "r_retl_2", text: "Promotion-heavy traffic masking weak demand", severity: "medium" },
+      ],
+      catalysts: [{ id: "c_retl_1", text: "Automation rollout update", date: daysFromNow(30), kind: "company update" }],
+    },
+    {
+      id: "th_bcon",
+      assetId: "bcon",
+      title: "Beacon cross-sells observability modules into durable 25% growth",
+      summary:
+        "Observability land-and-expand plus security and AI products lift net revenue retention back above 115%.",
+      conviction: 61,
+      convictionBand: convictionBand(61),
+      timeHorizon: "12-18 months",
+      lastReviewed: daysAgo(38),
+      pendingChanges: 1,
+      unresolved: 1,
+      staleThresholdDays: 21,
+      bull: "Multi-product adoption deepens; AI-driven log volume is a tailwind.",
+      bear: "Customer cost-optimization caps usage-based upside; NRR has been drifting down.",
+      assumptions: [
+        {
+          id: "a_bcon_1",
+          text: "Net revenue retention re-accelerates above 115%",
+          status: "weakening",
+          critical: true,
+          note: "",
+        },
+        {
+          id: "a_bcon_2",
+          text: "6+ product adoption keeps rising among top accounts",
+          status: "holding",
+          critical: false,
+          note: "",
+        },
+      ],
+      risks: [{ id: "r_bcon_1", text: "Usage optimization by large customers", severity: "medium" }],
+      catalysts: [{ id: "c_bcon_1", text: "Q2 earnings", date: daysFromNow(26), kind: "earnings" }],
+    },
+  ],
+  evidence: [
+    {
+      id: "ev_capex",
+      status: "new",
+      receivedAt: daysAgo(0),
+      headline: "Cloud buyer reiterates FY27 AI capex will increase materially YoY",
+      excerpt:
+        "Management said capital expenditures should increase sequentially and year-over-year, driven by demand for AI and cloud services.",
+      source: { name: "Cloud buyer earnings call transcript", quality: "high", url: "#source-capex", publishedAt: daysAgo(0) },
+      classification: {
+        assetId: "ngsc",
+        thesisId: "th_ngsc",
+        assumptionId: "a_ngsc_1",
+        impact: "supports",
+        confidence: "high",
+        source: "ai",
+        rationale: "A top cloud buyer guiding capex up YoY directly supports the capex-growth assumption.",
+      },
+      citation: { label: "Cloud buyer call", url: "#source-capex" },
+      uncertain: false,
+    },
+    {
+      id: "ev_membership",
+      status: "new",
+      receivedAt: daysAgo(1),
+      headline: "RetailCo membership comparable sales up 5.2% YoY",
+      excerpt: "Company channel data showed membership-linked comparable sales increased 5.2% year-over-year.",
+      source: { name: "Company sales update", quality: "medium", url: "#source-sales", publishedAt: daysAgo(1) },
+      classification: {
+        assetId: "retl",
+        thesisId: "th_retl",
+        assumptionId: "a_retl_2",
+        impact: "supports",
+        confidence: "medium",
+        source: "ai",
+        rationale: "5.2% YoY clears the threshold in the membership comparable-sales assumption.",
+      },
+      citation: { label: "Company sales update", url: "#source-sales" },
+      uncertain: false,
+    },
+    {
+      id: "ev_custom_accel",
+      status: "new",
+      receivedAt: daysAgo(1),
+      headline: "Major cloud provider opens custom accelerator access to external customers",
+      excerpt:
+        "The cloud provider will make its latest custom accelerators available to external customers via rental and appliance offerings.",
+      source: { name: "Tier-1 technology press", quality: "high", url: "#source-accel", publishedAt: daysAgo(1) },
+      classification: {
+        assetId: "ngsc",
+        thesisId: "th_ngsc",
+        assumptionId: "a_ngsc_2",
+        impact: "contradicts",
+        confidence: "medium",
+        source: "ai",
+        rationale: "External custom-accelerator availability is a direct share threat to the training-share assumption.",
+      },
+      citation: { label: "Tech press report", url: "#source-accel" },
+      uncertain: false,
+    },
+    {
+      id: "ev_pricebait",
+      status: "new",
+      receivedAt: daysAgo(1),
+      headline: "Influencer thread: RETL doubles by year-end",
+      excerpt: "Viral thread argues RETL shares will double, with no primary data and a price-target framing.",
+      source: { name: "Social post", quality: "low", url: "#source-social", publishedAt: daysAgo(1) },
+      classification: {
+        assetId: "retl",
+        thesisId: null,
+        assumptionId: null,
+        impact: "unclear",
+        confidence: "low",
+        source: "ai",
+        rationale:
+          "Opinion and price-target content has no verifiable source, so it is not attached to a thesis. Delphi does not act on price targets.",
+      },
+      citation: null,
+      uncertain: true,
+    },
+    {
+      id: "ev_outage",
+      status: "accepted",
+      receivedAt: daysAgo(9),
+      headline: "RetailCo automated fulfilment outage disrupted two regions for five hours",
+      excerpt: "Operations post-mortem said automated fulfilment downtime lasted roughly five hours across two regions.",
+      source: { name: "Company operations post-mortem", quality: "high", url: "#source-outage", publishedAt: daysAgo(9) },
+      classification: {
+        assetId: "retl",
+        thesisId: "th_retl",
+        assumptionId: "a_retl_1",
+        impact: "contradicts",
+        confidence: "high",
+        source: "user",
+        rationale: "A regional fulfilment outage directly falsifies the downtime threshold assumption.",
+      },
+      citation: { label: "Ops post-mortem", url: "#source-outage" },
+      uncertain: false,
+    },
+    {
+      id: "ev_irrelevant",
+      status: "new",
+      receivedAt: daysAgo(1),
+      headline: "Industrial components distributor raises FY guide",
+      excerpt: "A passive-components distributor raised its annual revenue guide on broad industrial demand.",
+      source: { name: "Newswire", quality: "medium", url: "#source-wire", publishedAt: daysAgo(1) },
+      classification: {
+        assetId: null,
+        thesisId: null,
+        assumptionId: null,
+        impact: "unclear",
+        confidence: "low",
+        source: "ai",
+        rationale:
+          "Mentions semiconductors but the issuer is outside the tracked universe, so it is surfaced for confirmation rather than attached.",
+      },
+      citation: null,
+      uncertain: true,
+    },
+    {
+      id: "ev_stale_article",
+      status: "new",
+      receivedAt: daysAgo(0),
+      headline: "Nine-month-old note recirculates Beacon customer expansion claim",
+      excerpt: "An old note about Beacon's customer expansion was reposted as if it were new.",
+      source: { name: "Archived industry note", quality: "medium", url: "#source-stale", publishedAt: daysAgo(270) },
+      classification: {
+        assetId: "bcon",
+        thesisId: "th_bcon",
+        assumptionId: null,
+        impact: "unclear",
+        confidence: "low",
+        source: "ai",
+        rationale: "The source is stale and should not be treated as fresh evidence for the current thesis.",
+      },
+      citation: null,
+      uncertain: true,
+      stale: true,
+    },
+  ],
+  whatChanged: {
+    th_ngsc: {
+      thesisId: "th_ngsc",
+      since: daysAgo(2),
+      summary: [
+        { text: "Capex durability assumption was reinforced by a cloud buyer guiding spend up YoY.", evidenceId: "ev_capex" },
+        { text: "Training-share assumption is now contested by external custom-accelerator availability.", evidenceId: "ev_custom_accel" },
+      ],
+      events: [
+        { kind: "evidence_added", evidenceId: "ev_capex", impact: "supports", assumptionId: "a_ngsc_1" },
+        { kind: "evidence_added", evidenceId: "ev_custom_accel", impact: "contradicts", assumptionId: "a_ngsc_2" },
+        { kind: "assumption_status", assumptionId: "a_ngsc_2", from: "holding", to: "weakening" },
+      ],
+      convictionPrompt: {
+        direction: "review",
+        text: "One assumption strengthened and one critical assumption weakened. Re-examine; Delphi will not change conviction for you.",
+        uncertain: true,
+      },
+    },
+    th_retl: {
+      thesisId: "th_retl",
+      since: daysAgo(11),
+      summary: [
+        { text: "Fulfilment reliability assumption was falsified by a multi-hour outage.", evidenceId: "ev_outage" },
+        { text: "Membership comparable-sales assumption strengthened with 5.2% YoY growth.", evidenceId: "ev_membership" },
+      ],
+      events: [
+        { kind: "assumption_status", assumptionId: "a_retl_1", from: "holding", to: "broken" },
+        { kind: "evidence_added", evidenceId: "ev_outage", impact: "contradicts", assumptionId: "a_retl_1" },
+        { kind: "evidence_added", evidenceId: "ev_membership", impact: "supports", assumptionId: "a_retl_2" },
+      ],
+      convictionPrompt: {
+        direction: "down",
+        text: "A critical reliability assumption is now broken. Consider whether conviction still reflects that.",
+        uncertain: false,
+      },
+    },
+    th_bcon: {
+      thesisId: "th_bcon",
+      since: daysAgo(38),
+      summary: [{ text: "No material new evidence in 38 days; this thesis is stale and overdue for review.", evidenceId: null }],
+      events: [],
+      convictionPrompt: {
+        direction: "review",
+        text: "Stale: last reviewed 38 days ago. Re-confirm or revise before relying on it.",
+        uncertain: true,
+      },
+    },
+  },
+  decisionTraces: {
+    th_ngsc: [
+      {
+        id: "d_ngsc_1",
+        at: daysAgo(2),
+        actor: "A. Mercer",
+        decision: "Hold position",
+        priorConviction: 80,
+        newConviction: 78,
+        evidenceIds: ["ev_custom_accel"],
+        changedAssumptions: ["a_ngsc_2"],
+        rationale:
+          "External custom accelerator access is a real share risk but not yet visible in buyer budgets. Trimming conviction slightly and revisiting after capex updates.",
+        sources: ["Tech press report"],
+        followUp: "Re-check accelerator-share assumption after cloud buyer capex updates.",
+        unresolved: ["Will external custom accelerators ship at volume or remain a signal?"],
+      },
+    ],
+    th_retl: [
+      {
+        id: "d_retl_1",
+        at: daysAgo(9),
+        actor: "A. Mercer",
+        decision: "Downgrade conviction",
+        priorConviction: 66,
+        newConviction: 54,
+        evidenceIds: ["ev_outage"],
+        changedAssumptions: ["a_retl_1"],
+        rationale:
+          "The outage breaks the reliability assumption behind the margin-expansion thesis. Cutting conviction, but not exiting because membership sales are still improving.",
+        sources: ["Ops post-mortem"],
+        followUp: "Watch the next automation rollout update for reliability improvement.",
+        unresolved: ["Is the outage one-off or structural?"],
+      },
+    ],
+    th_bcon: [],
+  },
+};
