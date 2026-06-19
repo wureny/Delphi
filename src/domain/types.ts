@@ -5,6 +5,7 @@ export type ClassificationSource = "ai" | "user";
 export type AssumptionStatus = "holding" | "weakening" | "broken" | "uncertain";
 export type ConvictionBand = "low" | "medium" | "high";
 export type EvidenceStatus = "new" | "accepted" | "dismissed";
+export type EvidenceFilter = "new" | "contradicts" | "uncertain" | "accepted" | "all";
 export type ViewKey = "dashboard" | "inbox" | "thesis" | "changed";
 export type DemoState = "normal" | "loading" | "empty" | "error";
 

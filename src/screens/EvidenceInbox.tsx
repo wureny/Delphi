@@ -1,10 +1,10 @@
-import type { DemoState, Evidence, WorkspaceData } from "../domain/types";
+import type { DemoState, Evidence, EvidenceFilter, WorkspaceData } from "../domain/types";
 import { filterEvidence } from "../domain/selectors";
 import { Banner, Chip, CitationOrUncertainty, ImpactChip, SkeletonGrid, StateBlock } from "../components/ui";
 
-export type InboxFilter = "new" | "contradicts" | "uncertain" | "accepted" | "all";
+export type InboxFilter = EvidenceFilter;
 
-const filters: Array<[InboxFilter, string]> = [
+const filters: Array<[EvidenceFilter, string]> = [
   ["new", "New"],
   ["contradicts", "Counter-evidence"],
   ["uncertain", "Needs a human"],

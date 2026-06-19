@@ -2,6 +2,7 @@ import type {
   AssumptionStatus,
   ConvictionBand,
   Evidence,
+  EvidenceFilter,
   EvidenceStatus,
   Impact,
   Thesis,
@@ -29,7 +30,7 @@ export function freshness(nowIso: string, thesis: Thesis): { days: number; stale
   };
 }
 
-export function filterEvidence(evidence: Evidence[], filter: "new" | "contradicts" | "uncertain" | "accepted" | "all"): Evidence[] {
+export function filterEvidence(evidence: Evidence[], filter: EvidenceFilter): Evidence[] {
   switch (filter) {
     case "new":
       return evidence.filter((item) => item.status === "new");

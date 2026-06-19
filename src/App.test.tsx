@@ -10,7 +10,7 @@ describe("Delphi living thesis workspace", () => {
 
     expect(screen.getByRole("heading", { name: "Thesis Dashboard" })).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: /chat/i })).not.toBeInTheDocument();
-    expect(screen.getByText(/new counter-evidence item/)).toBeInTheDocument();
+    expect(await screen.findByText(/new counter-evidence item/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Review" }));
     expect(screen.getByRole("heading", { name: "Evidence Inbox" })).toBeInTheDocument();
@@ -21,7 +21,7 @@ describe("Delphi living thesis workspace", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /Evidence Inbox/ }));
+    await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
 
     expect(screen.getByText("Cloud buyer call")).toBeInTheDocument();
     expect(screen.getAllByText("uncertain - no firm source").length).toBeGreaterThan(0);
@@ -32,7 +32,7 @@ describe("Delphi living thesis workspace", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /Evidence Inbox/ }));
+    await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
     const firstCorrect = screen.getAllByRole("button", { name: "Correct classification" })[0];
     await user.click(firstCorrect);
     await user.type(screen.getByLabelText("Note"), "Confirmed after reading the source.");
@@ -45,7 +45,7 @@ describe("Delphi living thesis workspace", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /Asset \/ Thesis/ }));
+    await user.click(await screen.findByRole("button", { name: /Asset \/ Thesis/ }));
     await user.click(screen.getByRole("button", { name: "Record decision" }));
     const modal = screen.getByRole("dialog", { name: /Record decision/ });
     await user.click(within(modal).getByRole("button", { name: "Record decision" }));
@@ -57,7 +57,7 @@ describe("Delphi living thesis workspace", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /What Changed/ }));
+    await user.click(await screen.findByRole("button", { name: /What Changed/ }));
 
     expect(screen.getByText(/No material new evidence in 38 days/)).toBeInTheDocument();
     expect(screen.getByText("no new evidence")).toBeInTheDocument();
@@ -68,6 +68,7 @@ describe("Delphi living thesis workspace", () => {
     const user = userEvent.setup();
     render(<App />);
 
+    await screen.findByLabelText("View state");
     await user.selectOptions(screen.getByLabelText("View state"), "loading");
     expect(screen.getByLabelText("Loading")).toBeInTheDocument();
 

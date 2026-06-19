@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CorrectionModal, type CorrectionDraft } from "./components/CorrectionModal";
 import { DecisionModal, type DecisionDraft } from "./components/DecisionModal";
-import { initialWorkspace } from "./data/fixtures";
-import { assembleDecisionTrace } from "./domain/aiBehaviors";
-import { convictionBand } from "./domain/selectors";
+import { FixtureWorkspaceRepository } from "./repositories/fixtureWorkspaceRepository";
+import type { EvidenceCorrectionInput } from "./repositories/workspaceRepository";
+import { WorkspaceService } from "./services/workspaceService";
 import type { DemoState, Evidence, Thesis, ViewKey, WorkspaceData } from "./domain/types";
 import { Dashboard } from "./screens/Dashboard";
 import { EvidenceInbox, type InboxFilter } from "./screens/EvidenceInbox";
@@ -17,14 +17,11 @@ const viewLabels: Record<ViewKey, string> = {
   changed: "What Changed",
 };
 
-function cloneWorkspace(): WorkspaceData {
-  return JSON.parse(JSON.stringify(initialWorkspace)) as WorkspaceData;
-}
-
 export function App() {
-  const [data, setData] = useState<WorkspaceData>(() => cloneWorkspace());
+  const service = useMemo(() => new WorkspaceService(new FixtureWorkspaceRepository()), []);
+  const [data, setData] = useState<WorkspaceData | null>(null);
   const [view, setView] = useState<ViewKey>("dashboard");
-  const [selectedThesisId, setSelectedThesisId] = useState(data.theses[0].id);
+  const [selectedThesisId, setSelectedThesisId] = useState<string | null>(null);
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("new");
   const [demoStates, setDemoStates] = useState<Record<ViewKey, DemoState>>({
     dashboard: "normal",
@@ -35,48 +32,44 @@ export function App() {
   const [correcting, setCorrecting] = useState<Evidence | null>(null);
   const [deciding, setDeciding] = useState<Thesis | null>(null);
 
-  const newCount = useMemo(() => data.evidence.filter((item) => item.status === "new").length, [data.evidence]);
+  const newCount = useMemo(() => data?.evidence.filter((item) => item.status === "new").length ?? 0, [data?.evidence]);
+
+  const refreshWorkspace = useCallback(async () => {
+    const workspace = await service.getWorkspace();
+    setData(workspace);
+    setSelectedThesisId((current) => current ?? workspace.theses[0]?.id ?? null);
+  }, [service]);
+
+  useEffect(() => {
+    void refreshWorkspace();
+  }, [refreshWorkspace]);
 
   function navigate(nextView: ViewKey) {
     setView(nextView);
   }
 
-  function acceptEvidence(evidenceId: string) {
-    setData((current) => ({
-      ...current,
-      evidence: current.evidence.map((item) => (item.id === evidenceId ? { ...item, status: "accepted" } : item)),
-    }));
+  async function acceptEvidence(evidenceId: string) {
+    await service.acceptEvidence(evidenceId);
+    await refreshWorkspace();
   }
 
-  function dismissEvidence(evidenceId: string) {
-    setData((current) => ({
-      ...current,
-      evidence: current.evidence.map((item) => (item.id === evidenceId ? { ...item, status: "dismissed" } : item)),
-    }));
+  async function dismissEvidence(evidenceId: string) {
+    await service.dismissEvidence(evidenceId);
+    await refreshWorkspace();
   }
 
-  function saveCorrection(draft: CorrectionDraft) {
-    setData((current) => ({
-      ...current,
-      evidence: current.evidence.map((item) => {
-        if (item.id !== draft.evidenceId) return item;
-        const thesis = current.theses.find((candidate) => candidate.id === draft.thesisId);
-        return {
-          ...item,
-          classification: {
-            ...item.classification,
-            impact: draft.impact,
-            thesisId: draft.thesisId,
-            assumptionId: draft.assumptionId,
-            confidence: draft.confidence,
-            assetId: thesis ? thesis.assetId : null,
-            source: "user",
-            rationale: draft.note.trim() || `${item.classification.rationale} Reclassified by the user.`,
-          },
-        };
-      }),
-    }));
+  async function saveCorrection(draft: CorrectionDraft) {
+    const input: EvidenceCorrectionInput = {
+      evidenceId: draft.evidenceId,
+      impact: draft.impact,
+      thesisId: draft.thesisId,
+      assumptionId: draft.assumptionId,
+      confidence: draft.confidence,
+      rationaleSummary: draft.note,
+    };
+    await service.correctEvidence(input);
     setCorrecting(null);
+    await refreshWorkspace();
   }
 
   function saveDecision(draft: DecisionDraft): string | null {
@@ -84,57 +77,32 @@ export function App() {
       return "Delphi will not record a decision without a human rationale.";
     }
 
-    setData((current) => {
-      const thesis = current.theses.find((candidate) => candidate.id === draft.thesisId);
-      if (!thesis) return current;
-
-      const linkedEvidence = current.evidence.filter(
-        (item) => item.status === "accepted" && item.classification.thesisId === draft.thesisId,
-      );
-      const trace = assembleDecisionTrace(
-        {
-          actor: current.user.name,
-          decision: draft.decision,
-          priorConviction: thesis.conviction,
-          newConviction: draft.newConviction,
-          evidenceIds: linkedEvidence.map((item) => item.id),
-          changedAssumptions: thesis.assumptions.filter((assumption) => assumption.status !== "holding").map((assumption) => assumption.id),
-          rationale: draft.rationale,
-          sources: linkedEvidence.flatMap((item) => (item.citation ? [item.citation.label] : [])),
-          followUp: draft.followUp,
-          unresolved: [],
-        },
-        current.now,
-      );
-
-      return {
-        ...current,
-        theses: current.theses.map((item) =>
-          item.id === draft.thesisId
-            ? {
-                ...item,
-                conviction: draft.newConviction,
-                convictionBand: convictionBand(draft.newConviction),
-                lastReviewed: current.now,
-                pendingChanges: 0,
-              }
-            : item,
-        ),
-        decisionTraces: {
-          ...current.decisionTraces,
-          [draft.thesisId]: [trace, ...(current.decisionTraces[draft.thesisId] ?? [])],
-        },
-      };
-    });
+    void service
+      .recordDecision(draft)
+      .then(refreshWorkspace)
+      .catch(() => undefined);
     return null;
   }
 
   const pageDescription: Record<ViewKey, string> = {
-    dashboard: `The state of your beliefs. ${data.theses.length} active theses and ${newCount} new evidence items.`,
+    dashboard: `The state of your beliefs. ${data?.theses.length ?? 0} active theses and ${newCount} new evidence items.`,
     inbox: "New information, classified and waiting for your confirmation. The AI proposes; you decide.",
     thesis: "Work one belief in depth: assumptions, evidence map, risks, catalysts, and decision trace.",
     changed: "Material change since each last review, mapped to assumptions and cited evidence.",
   };
+
+  if (!data || !selectedThesisId) {
+    return (
+      <div className="app-shell">
+        <main className="main">
+          <header className="page-head">
+            <h1>Thesis Dashboard</h1>
+            <p>Loading workspace.</p>
+          </header>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
@@ -197,9 +165,9 @@ export function App() {
             data={data}
             demoState={demoStates.inbox}
             filter={inboxFilter}
-            onAccept={acceptEvidence}
+            onAccept={(evidenceId) => void acceptEvidence(evidenceId)}
             onCorrect={setCorrecting}
-            onDismiss={dismissEvidence}
+            onDismiss={(evidenceId) => void dismissEvidence(evidenceId)}
             onFilterChange={setInboxFilter}
           />
         ) : null}
