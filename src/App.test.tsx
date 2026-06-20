@@ -28,6 +28,19 @@ describe("Delphi living thesis workspace", () => {
     expect(screen.getAllByRole("button", { name: "Correct classification" }).length).toBeGreaterThan(0);
   });
 
+  it("refreshes financial data into reviewable evidence candidates", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
+    await user.click(screen.getByRole("button", { name: "Refresh financial data" }));
+
+    expect(await screen.findByText(/financial data candidates added/i)).toBeInTheDocument();
+    expect(screen.getByText(/Gross margin crossed gross margin above 70%/)).toBeInTheDocument();
+    expect(screen.getAllByText("Company fundamentals feed").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Correct classification" }).length).toBeGreaterThan(0);
+  });
+
   it("records correction source as user", async () => {
     const user = userEvent.setup();
     render(<App />);

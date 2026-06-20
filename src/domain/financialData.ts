@@ -79,6 +79,8 @@ export interface FinancialContext {
   summary: string;
   status: ProviderDataStatus;
   stale: boolean;
+  observedAt: string;
+  receivedAt: string;
   citation: Citation | null;
   uncertain: boolean;
 }

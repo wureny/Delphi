@@ -38,7 +38,7 @@ describe("research context boundary", () => {
     expect(context.kind).toBe("price_snapshot");
     expect(context.summary).toMatch(/one-day change -5%/);
     expect("impact" in context).toBe(false);
-    expect(context.citation?.label).toBe("Mock price provider");
+    expect(context.citation?.label).toBe("Market data feed");
   });
 
   it("creates evidence proposals only when fundamental metrics cross tracked thresholds", async () => {
@@ -49,7 +49,7 @@ describe("research context boundary", () => {
     expect(proposals).toHaveLength(2);
     expect(proposals.map((proposal) => proposal.impact)).toEqual(["contradicts", "supports"]);
     expect(proposals[0].assumptionId).toBe("a_ngsc_3");
-    expect(proposals[0].citation?.label).toBe("Mock fundamentals provider");
+    expect(proposals[0].citation?.label).toBe("Company fundamentals feed");
     expect(proposals[0].rationale).toMatch(/proposal, not an automatic thesis change/);
   });
 

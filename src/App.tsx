@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CorrectionModal, type CorrectionDraft } from "./components/CorrectionModal";
 import { DecisionModal, type DecisionDraft } from "./components/DecisionModal";
+import { MockFinancialDataProvider } from "./data/mockFinancialDataProvider";
+import { defaultMetricThresholds } from "./data/providerRules";
 import { FixtureWorkspaceRepository } from "./repositories/fixtureWorkspaceRepository";
 import type { EvidenceCorrectionInput } from "./repositories/workspaceRepository";
+import { ProviderEvidenceService, type ProviderEvidenceRefreshResult } from "./services/providerEvidenceService";
 import { WorkspaceService } from "./services/workspaceService";
 import type { DemoState, Evidence, Thesis, ViewKey, WorkspaceData } from "./domain/types";
 import { Dashboard } from "./screens/Dashboard";
@@ -18,11 +21,21 @@ const viewLabels: Record<ViewKey, string> = {
 };
 
 export function App() {
-  const service = useMemo(() => new WorkspaceService(new FixtureWorkspaceRepository()), []);
+  const services = useMemo(() => {
+    const repository = new FixtureWorkspaceRepository();
+    return {
+      workspace: new WorkspaceService(repository),
+      providerEvidence: new ProviderEvidenceService(repository, new MockFinancialDataProvider(), defaultMetricThresholds),
+    };
+  }, []);
   const [data, setData] = useState<WorkspaceData | null>(null);
   const [view, setView] = useState<ViewKey>("dashboard");
   const [selectedThesisId, setSelectedThesisId] = useState<string | null>(null);
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("new");
+  const [providerRefresh, setProviderRefresh] = useState<{ loading: boolean; result: ProviderEvidenceRefreshResult | null }>({
+    loading: false,
+    result: null,
+  });
   const [demoStates, setDemoStates] = useState<Record<ViewKey, DemoState>>({
     dashboard: "normal",
     inbox: "normal",
@@ -35,10 +48,10 @@ export function App() {
   const newCount = useMemo(() => data?.evidence.filter((item) => item.status === "new").length ?? 0, [data?.evidence]);
 
   const refreshWorkspace = useCallback(async () => {
-    const workspace = await service.getWorkspace();
+    const workspace = await services.workspace.getWorkspace();
     setData(workspace);
     setSelectedThesisId((current) => current ?? workspace.theses[0]?.id ?? null);
-  }, [service]);
+  }, [services.workspace]);
 
   useEffect(() => {
     void refreshWorkspace();
@@ -49,12 +62,12 @@ export function App() {
   }
 
   async function acceptEvidence(evidenceId: string) {
-    await service.acceptEvidence(evidenceId);
+    await services.workspace.acceptEvidence(evidenceId);
     await refreshWorkspace();
   }
 
   async function dismissEvidence(evidenceId: string) {
-    await service.dismissEvidence(evidenceId);
+    await services.workspace.dismissEvidence(evidenceId);
     await refreshWorkspace();
   }
 
@@ -67,7 +80,7 @@ export function App() {
       confidence: draft.confidence,
       rationaleSummary: draft.note,
     };
-    await service.correctEvidence(input);
+    await services.workspace.correctEvidence(input);
     setCorrecting(null);
     await refreshWorkspace();
   }
@@ -77,11 +90,18 @@ export function App() {
       return "Delphi will not record a decision without a human rationale.";
     }
 
-    void service
+    void services.workspace
       .recordDecision(draft)
       .then(refreshWorkspace)
       .catch(() => undefined);
     return null;
+  }
+
+  async function refreshProviderEvidence() {
+    setProviderRefresh((current) => ({ loading: true, result: current.result }));
+    const result = await services.providerEvidence.refreshEvidence();
+    setProviderRefresh({ loading: false, result });
+    await refreshWorkspace();
   }
 
   const pageDescription: Record<ViewKey, string> = {
@@ -169,6 +189,8 @@ export function App() {
             onCorrect={setCorrecting}
             onDismiss={(evidenceId) => void dismissEvidence(evidenceId)}
             onFilterChange={setInboxFilter}
+            onRefreshProviderEvidence={() => void refreshProviderEvidence()}
+            providerRefresh={providerRefresh}
           />
         ) : null}
 

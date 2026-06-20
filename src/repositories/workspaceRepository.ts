@@ -38,6 +38,7 @@ export interface WorkspaceRepository {
   listEvidence(filter: EvidenceFilter): Promise<Evidence[]>;
   getThesisWorkspace(thesisId: string): Promise<ThesisWorkspace>;
   getWhatChanged(): Promise<ChangeSummary[]>;
+  appendEvidenceCandidates(candidates: Evidence[]): Promise<Evidence[]>;
   acceptEvidence(evidenceId: string): Promise<Evidence>;
   dismissEvidence(evidenceId: string): Promise<Evidence>;
   correctEvidence(input: EvidenceCorrectionInput): Promise<Evidence>;

@@ -36,6 +36,19 @@ export class FixtureWorkspaceRepository implements WorkspaceRepository {
     return clone(Object.values(this.workspace.whatChanged));
   }
 
+  async appendEvidenceCandidates(candidates: Evidence[]): Promise<Evidence[]> {
+    const existingIds = new Set(this.workspace.evidence.map((item) => item.id));
+    const appendable = candidates.filter((candidate) => !existingIds.has(candidate.id));
+    if (appendable.length === 0) return [];
+
+    this.workspace = {
+      ...this.workspace,
+      evidence: [...appendable, ...this.workspace.evidence],
+    };
+
+    return clone(appendable);
+  }
+
   async acceptEvidence(evidenceId: string): Promise<Evidence> {
     return this.updateEvidenceStatus(evidenceId, "accepted");
   }

@@ -130,25 +130,25 @@ export class MockFinancialDataProvider implements FinancialDataProvider {
     const normalized = symbol.toUpperCase();
     const profile = profiles[normalized];
     if (!profile) {
-      return unavailable("Mock profile provider", `No asset profile available for ${normalized}.`);
+      return unavailable("Company profile feed", `No asset profile available for ${normalized}.`);
     }
-    return { status: "available", data: profile, provenance: provenance("Mock profile provider") };
+    return { status: "available", data: profile, provenance: provenance("Company profile feed") };
   }
 
   async getPriceSnapshot(symbol: string): Promise<ProviderResult<PriceSnapshot>> {
     const normalized = symbol.toUpperCase();
     const price = prices[normalized];
     if (!price) {
-      return unavailable("Mock price provider", `No price snapshot available for ${normalized}.`);
+      return unavailable("Market data feed", `No price snapshot available for ${normalized}.`);
     }
-    return { status: "available", data: price, provenance: provenance("Mock price provider") };
+    return { status: "available", data: price, provenance: provenance("Market data feed") };
   }
 
   async getFundamentals(symbol: string, period: Period): Promise<ProviderResult<FundamentalSnapshot>> {
     const normalized = symbol.toUpperCase();
     const snapshot = fundamentals[normalized];
     if (!snapshot) {
-      return unavailable("Mock fundamentals provider", `No fundamentals available for ${normalized}.`);
+      return unavailable("Company fundamentals feed", `No fundamentals available for ${normalized}.`);
     }
     return {
       status: normalized === "NGSC" ? "available" : "stale",
@@ -156,7 +156,7 @@ export class MockFinancialDataProvider implements FinancialDataProvider {
         ...snapshot,
         metrics: snapshot.metrics.filter((metric) => metric.period === period),
       },
-      provenance: provenance("Mock fundamentals provider", normalized === "NGSC" ? daysAgo(2) : daysAgo(120)),
+      provenance: provenance("Company fundamentals feed", normalized === "NGSC" ? daysAgo(2) : daysAgo(120)),
     };
   }
 
@@ -165,7 +165,7 @@ export class MockFinancialDataProvider implements FinancialDataProvider {
     return {
       status: "available",
       data: events[normalized] ?? [],
-      provenance: provenance("Mock event provider"),
+      provenance: provenance("Company event feed"),
     };
   }
 
@@ -177,7 +177,7 @@ export class MockFinancialDataProvider implements FinancialDataProvider {
     return {
       status: "available",
       data: matches,
-      provenance: provenance("Mock asset search provider"),
+      provenance: provenance("Asset search feed"),
     };
   }
 }

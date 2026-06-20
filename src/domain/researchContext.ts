@@ -22,6 +22,8 @@ export function priceSnapshotToContext(result: ProviderResult<PriceSnapshot>): F
     summary: `${price.symbol} last traded at ${price.lastPrice}; one-day change ${price.changePercent}%.`,
     status: result.status,
     stale: result.status === "stale",
+    observedAt: result.provenance.observedAt,
+    receivedAt: result.provenance.receivedAt,
     citation: {
       label: result.provenance.sourceName,
       url: result.provenance.sourceUrl ?? "#",
@@ -50,6 +52,8 @@ export function fundamentalSnapshotToEvidenceProposals(
         summary: `${metric.label} was ${formatMetric(metric)}, crossing the tracked threshold ${threshold.operator} ${threshold.threshold}.`,
         status: result.status,
         stale,
+        observedAt: result.provenance.observedAt,
+        receivedAt: result.provenance.receivedAt,
         citation: stale
           ? null
           : {
@@ -108,6 +112,8 @@ function unavailableContext(kind: FinancialContext["kind"], symbol: string, mess
     summary: message,
     status: "unavailable",
     stale: false,
+    observedAt: "",
+    receivedAt: "",
     citation: null,
     uncertain: true,
   };

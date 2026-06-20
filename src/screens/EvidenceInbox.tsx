@@ -1,5 +1,6 @@
 import type { DemoState, Evidence, EvidenceFilter, WorkspaceData } from "../domain/types";
 import { filterEvidence } from "../domain/selectors";
+import type { ProviderEvidenceRefreshResult } from "../services/providerEvidenceService";
 import { Banner, Chip, CitationOrUncertainty, ImpactChip, SkeletonGrid, StateBlock } from "../components/ui";
 
 export type InboxFilter = EvidenceFilter;
@@ -20,6 +21,8 @@ export function EvidenceInbox({
   onAccept,
   onDismiss,
   onCorrect,
+  onRefreshProviderEvidence,
+  providerRefresh,
 }: {
   data: WorkspaceData;
   demoState: DemoState;
@@ -28,6 +31,8 @@ export function EvidenceInbox({
   onAccept: (evidenceId: string) => void;
   onDismiss: (evidenceId: string) => void;
   onCorrect: (evidence: Evidence) => void;
+  onRefreshProviderEvidence: () => void;
+  providerRefresh: { loading: boolean; result: ProviderEvidenceRefreshResult | null };
 }) {
   if (demoState === "loading") return <SkeletonGrid />;
   if (demoState === "error") {
@@ -45,6 +50,18 @@ export function EvidenceInbox({
 
   return (
     <>
+      <div className="toolbar-row">
+        <div>
+          <strong>Evidence proposals</strong>
+          <p className="muted">Refresh financial data to surface threshold-crossing facts for human review.</p>
+        </div>
+        <button className="button small" disabled={providerRefresh.loading} onClick={onRefreshProviderEvidence} type="button">
+          {providerRefresh.loading ? "Refreshing..." : "Refresh financial data"}
+        </button>
+      </div>
+
+      {providerRefresh.result ? <ProviderRefreshBanner result={providerRefresh.result} /> : null}
+
       <div className="filter-bar">
         {filters.map(([id, label]) => (
           <button className={filter === id ? "filter active" : "filter"} key={id} onClick={() => onFilterChange(id)} type="button">
@@ -105,5 +122,28 @@ export function EvidenceInbox({
         );
       })}
     </>
+  );
+}
+
+function ProviderRefreshBanner({ result }: { result: ProviderEvidenceRefreshResult }) {
+  const unavailableCount = result.rejected.filter((item) => item.reason === "unavailable").length;
+  if (result.added.length === 0 && result.rejected.length === 0) {
+    return <Banner tone="partial">Financial data refreshed. No tracked assumption thresholds were crossed.</Banner>;
+  }
+
+  if (result.added.length === 0) {
+    return (
+      <Banner tone="partial">
+        <strong>No new evidence candidates.</strong>
+        {unavailableCount > 0 ? <span>{unavailableCount} asset data request{unavailableCount === 1 ? "" : "s"} unavailable.</span> : null}
+      </Banner>
+    );
+  }
+
+  return (
+    <Banner tone={result.added.some((item) => item.classification.impact === "contradicts") ? "counter" : "partial"}>
+      <strong>{result.added.length} financial data candidate{result.added.length === 1 ? "" : "s"} added.</strong>
+      <span>Review before attaching to a thesis.</span>
+    </Banner>
   );
 }
