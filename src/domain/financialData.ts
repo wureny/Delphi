@@ -3,6 +3,15 @@ import type { Citation, Confidence, Impact } from "./types";
 export type FinancialProviderName = "mock" | "openbb";
 export type FinancialDataKind = "asset_profile" | "price_snapshot" | "fundamental_snapshot" | "market_event";
 export type ProviderDataStatus = "available" | "unavailable" | "stale";
+export type ProviderEntitlement = "allowed" | "denied" | "unknown";
+export type ProviderErrorCode =
+  | "entitlement_denied"
+  | "timeout"
+  | "rate_limited"
+  | "not_found"
+  | "malformed_response"
+  | "provider_unavailable"
+  | "unknown";
 export type Period = "annual" | "quarterly" | "ttm";
 
 export interface ProviderProvenance {
@@ -17,6 +26,9 @@ export interface ProviderResult<T> {
   status: ProviderDataStatus;
   data: T | null;
   provenance: ProviderProvenance;
+  entitlement?: ProviderEntitlement;
+  latencyMs?: number;
+  errorCode?: ProviderErrorCode;
   message?: string;
 }
 
