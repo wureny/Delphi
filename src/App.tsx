@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FixtureWorkspaceApiRuntime } from "./api/fixtureWorkspaceApiRuntime";
 import { CorrectionModal, type CorrectionDraft } from "./components/CorrectionModal";
 import { DecisionModal, type DecisionDraft } from "./components/DecisionModal";
-import { MockFinancialDataProvider } from "./data/mockFinancialDataProvider";
-import { defaultMetricThresholds } from "./data/providerRules";
-import { FixtureWorkspaceRepository } from "./repositories/fixtureWorkspaceRepository";
+import { ApiWorkspaceRepository } from "./repositories/apiWorkspaceRepository";
 import type { EvidenceCorrectionInput } from "./repositories/workspaceRepository";
-import { ProviderEvidenceService, type ProviderEvidenceRefreshResult } from "./services/providerEvidenceService";
+import { ProviderEvidenceApiService } from "./services/providerEvidenceApiService";
+import type { ProviderEvidenceRefreshResult } from "./services/providerEvidenceService";
 import { WorkspaceService } from "./services/workspaceService";
 import type { DemoState, Evidence, Thesis, ViewKey, WorkspaceData } from "./domain/types";
 import { Dashboard } from "./screens/Dashboard";
@@ -22,10 +22,11 @@ const viewLabels: Record<ViewKey, string> = {
 
 export function App() {
   const services = useMemo(() => {
-    const repository = new FixtureWorkspaceRepository();
+    const runtime = new FixtureWorkspaceApiRuntime();
+    const repository = new ApiWorkspaceRepository(runtime);
     return {
       workspace: new WorkspaceService(repository),
-      providerEvidence: new ProviderEvidenceService(repository, new MockFinancialDataProvider(), defaultMetricThresholds),
+      providerEvidence: new ProviderEvidenceApiService(runtime),
     };
   }, []);
   const [data, setData] = useState<WorkspaceData | null>(null);
