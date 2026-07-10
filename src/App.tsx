@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FixtureWorkspaceApiRuntime } from "./api/fixtureWorkspaceApiRuntime";
+import { HttpWorkspaceApiClient } from "./api/workspaceHttpApi";
 import { CorrectionModal, type CorrectionDraft } from "./components/CorrectionModal";
 import { DecisionModal, type DecisionDraft } from "./components/DecisionModal";
 import { ApiWorkspaceRepository } from "./repositories/apiWorkspaceRepository";
@@ -12,6 +12,7 @@ import { Dashboard } from "./screens/Dashboard";
 import { EvidenceInbox, type InboxFilter } from "./screens/EvidenceInbox";
 import { ThesisPage } from "./screens/ThesisPage";
 import { WhatChanged } from "./screens/WhatChanged";
+import { createServerComposition } from "./server/createServerComposition";
 
 const viewLabels: Record<ViewKey, string> = {
   dashboard: "Thesis Dashboard",
@@ -22,11 +23,12 @@ const viewLabels: Record<ViewKey, string> = {
 
 export function App() {
   const services = useMemo(() => {
-    const runtime = new FixtureWorkspaceApiRuntime();
-    const repository = new ApiWorkspaceRepository(runtime);
+    const server = createServerComposition();
+    const client = new HttpWorkspaceApiClient(server.handler);
+    const repository = new ApiWorkspaceRepository(client);
     return {
       workspace: new WorkspaceService(repository),
-      providerEvidence: new ProviderEvidenceApiService(runtime),
+      providerEvidence: new ProviderEvidenceApiService(client),
     };
   }, []);
   const [data, setData] = useState<WorkspaceData | null>(null);
