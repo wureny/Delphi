@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { HttpWorkspaceApiClient } from "./api/workspaceHttpApi";
+import type { WorkspaceApiRuntime } from "./api/workspaceApiTypes";
+import { createBrowserWorkspaceRuntime } from "./client/createBrowserWorkspaceRuntime";
 import { CorrectionModal, type CorrectionDraft } from "./components/CorrectionModal";
 import { DecisionModal, type DecisionDraft } from "./components/DecisionModal";
 import { ApiWorkspaceRepository } from "./repositories/apiWorkspaceRepository";
@@ -12,7 +13,6 @@ import { Dashboard } from "./screens/Dashboard";
 import { EvidenceInbox, type InboxFilter } from "./screens/EvidenceInbox";
 import { ThesisPage } from "./screens/ThesisPage";
 import { WhatChanged } from "./screens/WhatChanged";
-import { createServerComposition } from "./server/createServerComposition";
 
 const viewLabels: Record<ViewKey, string> = {
   dashboard: "Thesis Dashboard",
@@ -21,24 +21,29 @@ const viewLabels: Record<ViewKey, string> = {
   changed: "What Changed",
 };
 
-export function App() {
+export interface AppProps {
+  runtime?: WorkspaceApiRuntime;
+}
+
+export function App({ runtime }: AppProps = {}) {
   const services = useMemo(() => {
-    const server = createServerComposition();
-    const client = new HttpWorkspaceApiClient(server.handler);
+    const client = runtime ?? createBrowserWorkspaceRuntime();
     const repository = new ApiWorkspaceRepository(client);
     return {
       workspace: new WorkspaceService(repository),
       providerEvidence: new ProviderEvidenceApiService(client),
     };
-  }, []);
+  }, [runtime]);
   const [data, setData] = useState<WorkspaceData | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [view, setView] = useState<ViewKey>("dashboard");
   const [selectedThesisId, setSelectedThesisId] = useState<string | null>(null);
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("new");
-  const [providerRefresh, setProviderRefresh] = useState<{ loading: boolean; result: ProviderEvidenceRefreshResult | null }>({
-    loading: false,
-    result: null,
-  });
+  const [providerRefresh, setProviderRefresh] = useState<{
+    loading: boolean;
+    result: ProviderEvidenceRefreshResult | null;
+    error: string | null;
+  }>({ loading: false, result: null, error: null });
   const [demoStates, setDemoStates] = useState<Record<ViewKey, DemoState>>({
     dashboard: "normal",
     inbox: "normal",
@@ -51,9 +56,14 @@ export function App() {
   const newCount = useMemo(() => data?.evidence.filter((item) => item.status === "new").length ?? 0, [data?.evidence]);
 
   const refreshWorkspace = useCallback(async () => {
-    const workspace = await services.workspace.getWorkspace();
-    setData(workspace);
-    setSelectedThesisId((current) => current ?? workspace.theses[0]?.id ?? null);
+    try {
+      const workspace = await services.workspace.getWorkspace();
+      setData(workspace);
+      setLoadError(null);
+      setSelectedThesisId((current) => current ?? workspace.theses[0]?.id ?? null);
+    } catch {
+      setLoadError("Delphi workspace service is unavailable.");
+    }
   }, [services.workspace]);
 
   useEffect(() => {
@@ -101,10 +111,18 @@ export function App() {
   }
 
   async function refreshProviderEvidence() {
-    setProviderRefresh((current) => ({ loading: true, result: current.result }));
-    const result = await services.providerEvidence.refreshEvidence();
-    setProviderRefresh({ loading: false, result });
-    await refreshWorkspace();
+    setProviderRefresh((current) => ({ loading: true, result: current.result, error: null }));
+    try {
+      const result = await services.providerEvidence.refreshEvidence();
+      setProviderRefresh({ loading: false, result, error: null });
+      await refreshWorkspace();
+    } catch {
+      setProviderRefresh({
+        loading: false,
+        result: null,
+        error: "Financial data refresh is unavailable. Existing evidence is unaffected.",
+      });
+    }
   }
 
   const pageDescription: Record<ViewKey, string> = {
@@ -113,6 +131,29 @@ export function App() {
     thesis: "Work one belief in depth: assumptions, evidence map, risks, catalysts, and decision trace.",
     changed: "Material change since each last review, mapped to assumptions and cited evidence.",
   };
+
+  if (loadError && !data) {
+    return (
+      <div className="app-shell">
+        <main className="main">
+          <header className="page-head">
+            <h1>Thesis Dashboard</h1>
+            <p>{loadError}</p>
+            <button
+              className="button primary"
+              onClick={() => {
+                setLoadError(null);
+                void refreshWorkspace();
+              }}
+              type="button"
+            >
+              Retry
+            </button>
+          </header>
+        </main>
+      </div>
+    );
+  }
 
   if (!data || !selectedThesisId) {
     return (

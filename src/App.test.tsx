@@ -1,12 +1,32 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { HttpWorkspaceApiClient } from "./api/workspaceHttpApi";
+import { apiFailure } from "./api/workspaceApiMappers";
 import { App } from "./App";
+import { createServerComposition } from "./server/createServerComposition";
+
+function renderApp() {
+  const runtime = new HttpWorkspaceApiClient(createServerComposition().handler);
+  return render(<App runtime={runtime} />);
+}
 
 describe("Delphi living thesis workspace", () => {
+  it("shows a retryable error when the server is unavailable", async () => {
+    const runtime = new HttpWorkspaceApiClient(async () => ({
+      status: 503,
+      body: apiFailure("runtime_unavailable", "Delphi workspace service is unavailable."),
+    }));
+
+    render(<App runtime={runtime} />);
+
+    expect(await screen.findByText("Delphi workspace service is unavailable.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+  });
+
   it("opens on thesis state and promotes counter-evidence", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     expect(screen.getByRole("heading", { name: "Thesis Dashboard" })).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: /chat/i })).not.toBeInTheDocument();
@@ -19,7 +39,7 @@ describe("Delphi living thesis workspace", () => {
 
   it("shows citation or uncertainty before inbox actions", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
 
@@ -30,7 +50,7 @@ describe("Delphi living thesis workspace", () => {
 
   it("refreshes financial data into reviewable evidence candidates", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
     await user.click(screen.getByRole("button", { name: "Refresh financial data" }));
@@ -41,9 +61,26 @@ describe("Delphi living thesis workspace", () => {
     expect(screen.getAllByRole("button", { name: "Correct classification" }).length).toBeGreaterThan(0);
   });
 
+  it("shows a provider refresh error without discarding existing evidence", async () => {
+    const user = userEvent.setup();
+    const runtime = new HttpWorkspaceApiClient(createServerComposition().handler);
+    runtime.refreshProviderEvidence = async () => ({
+      ok: false,
+      error: { code: "provider_unavailable", message: "Financial data provider is unavailable." },
+    });
+
+    render(<App runtime={runtime} />);
+    await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
+    await user.click(screen.getByRole("button", { name: "Refresh financial data" }));
+
+    expect(await screen.findByText(/Financial data refresh is unavailable/)).toBeInTheDocument();
+    expect(screen.getByText(/custom accelerator access/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refresh financial data" })).toBeEnabled();
+  });
+
   it("records correction source as user", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(await screen.findByRole("button", { name: /Evidence Inbox/ }));
     const firstCorrect = screen.getAllByRole("button", { name: "Correct classification" })[0];
@@ -56,7 +93,7 @@ describe("Delphi living thesis workspace", () => {
 
   it("rejects decision saves without human rationale", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(await screen.findByRole("button", { name: /Asset \/ Thesis/ }));
     await user.click(screen.getByRole("button", { name: "Record decision" }));
@@ -68,7 +105,7 @@ describe("Delphi living thesis workspace", () => {
 
   it("keeps What Changed grounded and avoids fabricated stale changes", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await user.click(await screen.findByRole("button", { name: /What Changed/ }));
 
@@ -79,7 +116,7 @@ describe("Delphi living thesis workspace", () => {
 
   it("renders loading, error, empty, partial, and stale states", async () => {
     const user = userEvent.setup();
-    render(<App />);
+    renderApp();
 
     await screen.findByLabelText("View state");
     await user.selectOptions(screen.getByLabelText("View state"), "loading");

@@ -32,7 +32,11 @@ export function EvidenceInbox({
   onDismiss: (evidenceId: string) => void;
   onCorrect: (evidence: Evidence) => void;
   onRefreshProviderEvidence: () => void;
-  providerRefresh: { loading: boolean; result: ProviderEvidenceRefreshResult | null };
+  providerRefresh: {
+    loading: boolean;
+    result: ProviderEvidenceRefreshResult | null;
+    error: string | null;
+  };
 }) {
   if (demoState === "loading") return <SkeletonGrid />;
   if (demoState === "error") {
@@ -60,6 +64,7 @@ export function EvidenceInbox({
         </button>
       </div>
 
+      {providerRefresh.error ? <Banner tone="error">{providerRefresh.error}</Banner> : null}
       {providerRefresh.result ? <ProviderRefreshBanner result={providerRefresh.result} /> : null}
 
       <div className="filter-bar">
