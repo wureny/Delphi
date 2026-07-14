@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/*
+ * Delphi institutional dark theme.
+ * Deep neutral canvas, layered panels, crisp borders, restrained accent.
+ * Status is always icon+label — color is reinforcement, never the only signal.
+ */
+@theme {
+  --color-canvas: #0a0d13;
+  --color-panel: #0f141d;
+  --color-panel-2: #141b27;
+  --color-inset: #0c1017;
+  --color-line: #1e2634;
+  --color-line-strong: #2b3547;
+
+  --color-ink: #e7ebf3;
+  --color-ink-2: #9aa4b8;
+  --color-ink-3: #6a7590;
+
+  --color-accent: #7aa5f8;
+  --color-accent-dim: #2c4370;
+
+  --color-ok: #4cbd8b;
+  --color-ok-dim: #16382c;
+  --color-warn: #d9a03f;
+  --color-warn-dim: #3d2f14;
+  --color-bad: #e07a7a;
+  --color-bad-dim: #3f2020;
+  --color-esc: #b195f5;
+  --color-esc-dim: #2f2547;
+  --color-info: #6fb5d8;
+  --color-info-dim: #16323f;
+  --color-neutral: #8b95ab;
+  --color-neutral-dim: #232a38;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-feature-settings: "ss01";
+}
+
+/* Numeric alignment for tables, versions, timestamps. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-accent-dim);
+}
+
+/* Visible keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+/* Thin scrollbars appropriate to density. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes delphi-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-event-in {
+  animation: delphi-fade-in 220ms ease-out both;
+}
+
+@keyframes delphi-row-flash {
+  0% {
+    background-color: var(--color-accent-dim);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-row-flash {
+  animation: delphi-row-flash 1.4s ease-out both;
+}

@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "sourceDocument": {
+    "sourceId": "source_release_q2",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Archetype Systems FY2026 Q2 Shareholder Letter",
+    "sourceType": "earnings_release",
+    "issuerEntityId": "entity_arct",
+    "uri": "fixture://arct/fy26-q2/release",
+    "publishedAt": "2026-07-09T20:05:00Z",
+    "observedAt": "2026-07-09T20:05:12Z",
+    "classification": "synthetic",
+    "contentHash": "sha256:synthetic-release-q2",
+    "version": 1,
+    "accessPolicyId": "policy_demo",
+    "status": "available"
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_release_revenue_01",
+      "sourceId": "source_release_q2",
+      "locator": {
+        "section": "Q2 Results",
+        "paragraph": 2
+      },
+      "text": "Revenue was $526 million, up 31% year over year.",
+      "numericValues": [
+        {
+          "label": "Revenue",
+          "value": 526,
+          "unit": "million",
+          "currency": "USD",
+          "period": "FY2026 Q2",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_release_revenue_01"
+        }
+      ],
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-release-revenue-01"
+    },
+    {
+      "excerptId": "excerpt_release_nrr_02",
+      "sourceId": "source_release_q2",
+      "locator": {
+        "section": "Operating Metrics",
+        "paragraph": 1
+      },
+      "text": "Net revenue retention was 114%, reflecting slower expansion among mid-market customers.",
+      "numericValues": [
+        {
+          "label": "Net revenue retention",
+          "value": 114,
+          "unit": "percent",
+          "period": "FY2026 Q2",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_release_nrr_02"
+        }
+      ],
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-release-nrr-02"
+    },
+    {
+      "excerptId": "excerpt_release_gm_03",
+      "sourceId": "source_release_q2",
+      "locator": {
+        "section": "Q2 Results",
+        "paragraph": 4
+      },
+      "text": "Non-GAAP gross margin reached 75.6%, benefiting from infrastructure efficiency and enterprise mix.",
+      "numericValues": [
+        {
+          "label": "Non-GAAP gross margin",
+          "value": 75.6,
+          "unit": "percent",
+          "period": "FY2026 Q2",
+          "basis": "adjusted",
+          "sourceExcerptId": "excerpt_release_gm_03"
+        }
+      ],
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-release-gm-03"
+    },
+    {
+      "excerptId": "excerpt_release_guidance_04",
+      "sourceId": "source_release_q2",
+      "locator": {
+        "section": "Outlook",
+        "paragraph": 1
+      },
+      "text": "For FY2026 Q3, Archetype expects revenue of $548 million to $554 million.",
+      "numericValues": [
+        {
+          "label": "Revenue guidance low",
+          "value": 548,
+          "unit": "million",
+          "currency": "USD",
+          "period": "FY2026 Q3",
+          "basis": "guidance",
+          "sourceExcerptId": "excerpt_release_guidance_04"
+        },
+        {
+          "label": "Revenue guidance high",
+          "value": 554,
+          "unit": "million",
+          "currency": "USD",
+          "period": "FY2026 Q3",
+          "basis": "guidance",
+          "sourceExcerptId": "excerpt_release_guidance_04"
+        }
+      ],
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-release-guidance-04"
+    }
+  ]
+}

@@ -1,0 +1,309 @@
+{
+  "package": "Delphi Prototype & EFL Application Pack",
+  "version": "v0.2",
+  "generated_at": "2026-07-14T00:52:34+00:00",
+  "file_count_excluding_manifest": 50,
+  "total_bytes_excluding_manifest": 2805068,
+  "entries": [
+    {
+      "path": "00_README.md",
+      "category": "documentation",
+      "size_bytes": 9347,
+      "sha256": "53d8e8118918cc5de0105fc828d8daae3a5e62e80a4e20b2f1b15dffee6e22cc"
+    },
+    {
+      "path": "01_INTERNAL_STRATEGY_ZH.md",
+      "category": "documentation",
+      "size_bytes": 12859,
+      "sha256": "b7ff47e78b6f0cdc3daff6bc8639a370e1236262d90b09078613d6878bcb59ba"
+    },
+    {
+      "path": "02_PROTOTYPE_PRD_ZH.md",
+      "category": "documentation",
+      "size_bytes": 10552,
+      "sha256": "2bab0fa40af54b6f544f26cd0232c6cb92e7c0b28988699092b021531c80f6fb"
+    },
+    {
+      "path": "03_UX_AND_INTERACTION_SPEC_ZH.md",
+      "category": "documentation",
+      "size_bytes": 11032,
+      "sha256": "4740e018639ddae3d60a5d6b19871a23562388ef8ee583c759e54ed54c52fbc9"
+    },
+    {
+      "path": "04_SYSTEM_ARCHITECTURE.md",
+      "category": "documentation",
+      "size_bytes": 15872,
+      "sha256": "6cc30279bf0cd3dcc2ad9f42322afb9cceb2c5f0970e66cd7cdb5fd05c250cf5"
+    },
+    {
+      "path": "05_DOMAIN_MODEL_AND_API_CONTRACTS.md",
+      "category": "documentation",
+      "size_bytes": 15763,
+      "sha256": "4f286d484a23d161ac2cc1758dc34bd9ea7114a54f1a7fc035651821968c8d5c"
+    },
+    {
+      "path": "06_AGENT_WORKFLOW_AND_EVALS.md",
+      "category": "documentation",
+      "size_bytes": 10289,
+      "sha256": "11b3dbc3157a2bcfa66c9a1adfcfb0e90f41217f0e98e734f51a746fdc026d06"
+    },
+    {
+      "path": "07_SECURITY_PRIVACY_TRUST.md",
+      "category": "documentation",
+      "size_bytes": 11234,
+      "sha256": "cca2dd9f78830ca0a90304b5841716aee18f249ead2058ee4065513d7dad5a62"
+    },
+    {
+      "path": "08_INVESTOR_INCUBATOR_MEMO_EN.md",
+      "category": "documentation",
+      "size_bytes": 15141,
+      "sha256": "e5cae19418f579b84415b19bdd4bf1d4044d2fb9fcf38a8e53d73532db748f32"
+    },
+    {
+      "path": "09_EFL_APPLICATION_ANSWER_BANK_EN.md",
+      "category": "documentation",
+      "size_bytes": 19276,
+      "sha256": "0def8ff69cad1599ff6326b9b79eece9f7f564900b19736bbe1c431c1555ba9e"
+    },
+    {
+      "path": "10_CUSTOMER_OVERVIEW_EN.md",
+      "category": "documentation",
+      "size_bytes": 6773,
+      "sha256": "85260a47da0659ef3e169b83b7eb7e0fc2a9d3e17b85e2f3c681c2e269e86de4"
+    },
+    {
+      "path": "11_WEBSITE_COPY_EN.md",
+      "category": "documentation",
+      "size_bytes": 11100,
+      "sha256": "976cc63af9e539e7238ec6fbb56be1d69c20ad19598e058f586b2a143e7f043f"
+    },
+    {
+      "path": "12_BUILD_BRIEF_FOR_CLAUDE_CODE_CODEX.md",
+      "category": "documentation",
+      "size_bytes": 13000,
+      "sha256": "3dd141a15879ee3a1e379c424da8541c142b3da5ac324db2d92443cc080d589c"
+    },
+    {
+      "path": "13_DEMO_SCRIPT_AND_ACCEPTANCE.md",
+      "category": "documentation",
+      "size_bytes": 10550,
+      "sha256": "47b5ee63d6c34ec2115b000afda9e6931e1498a92156f935a50a96fb1a689d22"
+    },
+    {
+      "path": "14_COMPETITIVE_POSITIONING.md",
+      "category": "documentation",
+      "size_bytes": 8817,
+      "sha256": "be2f4d100ad10e5bfe8eaa6e8b4b17c906861c096ae9b8c2e84978737270f7d1"
+    },
+    {
+      "path": "15_ROADMAP_RISK_REGISTER_ZH.md",
+      "category": "documentation",
+      "size_bytes": 8655,
+      "sha256": "2cfa9beb5b236a44ec0e829f39f6ddc635f444ba86d9b2b1476dc3a16e24b303"
+    },
+    {
+      "path": "16_FOUNDER_INPUT_CHECKLIST.md",
+      "category": "documentation",
+      "size_bytes": 7215,
+      "sha256": "fdb08eabb82b414d7dcd1ecaa6cb1d8b1333c5180ed6031bc4907636d7634ae7"
+    },
+    {
+      "path": "17_SOURCES_AND_ASSUMPTIONS.md",
+      "category": "documentation",
+      "size_bytes": 7588,
+      "sha256": "6a618cf93ddad0fd210ee091ad07d2efd2279623ce9b837ced90b87843ffd82d"
+    },
+    {
+      "path": "18_FUND_CONTEXT_INGESTION_BOUNDARY.md",
+      "category": "documentation",
+      "size_bytes": 4807,
+      "sha256": "7971e1f61d167070fdfd30250683e04802e5daf5c292f314a08e11347128e562"
+    },
+    {
+      "path": "Delphi_Master_Context.md",
+      "category": "documentation",
+      "size_bytes": 95318,
+      "sha256": "6476c1325f1d8d57d099cbf54c523e81b20efb8713d6dd78abf64ee6f3e7e4d7"
+    },
+    {
+      "path": "QA_REPORT.md",
+      "category": "documentation",
+      "size_bytes": 4764,
+      "sha256": "04a7807cdd80bb063bfe0e383658e18d2345c7e0663157093d7ac93543422642"
+    },
+    {
+      "path": "diagrams/ARCHITECTURE_DIAGRAMS.mmd",
+      "category": "diagrams",
+      "size_bytes": 7393,
+      "sha256": "f75c22682cb50f9c28e7cbf9d8ca1b79297f6a7d7d601e1b26aac0ad3fb73d44"
+    },
+    {
+      "path": "fixtures/case.arct.json",
+      "category": "fixtures",
+      "size_bytes": 517,
+      "sha256": "e4ebcfaa8342ae5387064031c744ec17d0ec7b11651dda0a00425197fe731b1e"
+    },
+    {
+      "path": "fixtures/event.arct.fy26q2.json",
+      "category": "fixtures",
+      "size_bytes": 551,
+      "sha256": "32bb2a039c72ce833c7d607fa2eca6067fc86665d13ef549e50b22a354f402fd"
+    },
+    {
+      "path": "fixtures/expected/ledger-transition.json",
+      "category": "fixtures",
+      "size_bytes": 1477,
+      "sha256": "50ec9f14e9cc135f67623fa19edc66a23ac6171f1df4251b01ac8b3d0e17cdc7"
+    },
+    {
+      "path": "fixtures/expected/privacy-receipt.json",
+      "category": "fixtures",
+      "size_bytes": 787,
+      "sha256": "529c741e49b23e9c3cee36dc63e0db835c22691d8a86fdcd6c4e82399bb63c40"
+    },
+    {
+      "path": "fixtures/expected/thesis.arct.v13.json",
+      "category": "fixtures",
+      "size_bytes": 5762,
+      "sha256": "dbbbb83239a67d08e01383ff9e73171aa5c7640c3fb488174e731e182f777ccf"
+    },
+    {
+      "path": "fixtures/manifest.json",
+      "category": "fixtures",
+      "size_bytes": 734,
+      "sha256": "eff8440501cb8376cf4146c6b96d055b46554c8e626b5395776669fc1de2dfca"
+    },
+    {
+      "path": "fixtures/proposals/degraded-thesis-deltas.json",
+      "category": "fixtures",
+      "size_bytes": 3554,
+      "sha256": "eecdacd9b5a221863fb8f42a48316d1ac19e6282f026dcfa5888f82c5b1b6bc1"
+    },
+    {
+      "path": "fixtures/proposals/thesis-deltas.json",
+      "category": "fixtures",
+      "size_bytes": 6630,
+      "sha256": "f11c4645ecea7958b0a3f774dec712e0764aa6539dfc8c6b6cadeabf2bd09bf6"
+    },
+    {
+      "path": "fixtures/runs/degraded-run.json",
+      "category": "fixtures",
+      "size_bytes": 3733,
+      "sha256": "5e92b32ff517742b8112af6cb85ef20b0d567d0cdead0403e4feb6f577a83cdf"
+    },
+    {
+      "path": "fixtures/runs/successful-run.json",
+      "category": "fixtures",
+      "size_bytes": 6034,
+      "sha256": "abe9a50b8d8d6a8a4a99e621c80c1aeffcc505597cac591fdd0e4c05ae5b4c8f"
+    },
+    {
+      "path": "fixtures/sources/earnings-release.json",
+      "category": "fixtures",
+      "size_bytes": 3521,
+      "sha256": "f217445b4a91403e2689fa0ae6be5b46a917700a5b99f5efe32a43972017679c"
+    },
+    {
+      "path": "fixtures/sources/team-forecast.json",
+      "category": "fixtures",
+      "size_bytes": 2530,
+      "sha256": "c62bbe73ea0d8c968c5a850ae9892b40b0e75dd8797b0ed958f791cf9c20442a"
+    },
+    {
+      "path": "fixtures/sources/transcript.json",
+      "category": "fixtures",
+      "size_bytes": 2198,
+      "sha256": "dd35dab6d45434610a9f378a07be6edf8f9d305f97810adbe3cfc09dae29f4d7"
+    },
+    {
+      "path": "fixtures/thesis.arct.v12.json",
+      "category": "fixtures",
+      "size_bytes": 5402,
+      "sha256": "423a1db1ceda7340f1a26416e39b5eab63f5ff61b11aab51cff537f61486ee8f"
+    },
+    {
+      "path": "html/Delphi_Architecture_Board.html",
+      "category": "interactive-html",
+      "size_bytes": 16645,
+      "sha256": "dd6d8037e04a22575d40f1c47794640ca6e2ed03d4bd84d6facef679e26a9b30"
+    },
+    {
+      "path": "html/Delphi_Company_Website_Mockup.html",
+      "category": "interactive-html",
+      "size_bytes": 23480,
+      "sha256": "a4d28e3358a38c989522cac7dcea8daaaa1abd1cf5bb613320beeeeac9dedab4"
+    },
+    {
+      "path": "html/Delphi_Prototype_Wireframe.html",
+      "category": "interactive-html",
+      "size_bytes": 49507,
+      "sha256": "9cb8410c666156106f06c2adbf6ace9d5f2c9b79e9c3cd6b42edc3a98a6e3041"
+    },
+    {
+      "path": "html/index.html",
+      "category": "interactive-html",
+      "size_bytes": 20403,
+      "sha256": "99781dbcc5ef4390b53ddaa2dee3c5b822997b03cefbb4d6db956efa3b055245"
+    },
+    {
+      "path": "previews/architecture.png",
+      "category": "previews",
+      "size_bytes": 397787,
+      "sha256": "34d527a64296d5f52772ef0b759d6d9499a79686661b6d830b6811cf4edf3c8f"
+    },
+    {
+      "path": "previews/portal.png",
+      "category": "previews",
+      "size_bytes": 596247,
+      "sha256": "5ef5398f176ef8b5db25364a3a71a29e8a93d6c3edc4ee0c5382bcbc9383fab5"
+    },
+    {
+      "path": "previews/prototype-degraded.png",
+      "category": "previews",
+      "size_bytes": 173180,
+      "sha256": "81b7ad704a3b4b89beef97c5510737c8b4f6afe4452238127b1743846cc308ec"
+    },
+    {
+      "path": "previews/prototype-ledger.png",
+      "category": "previews",
+      "size_bytes": 278690,
+      "sha256": "19f751d3de8761de82ca078d7463b0b1bb8a5fe084d83bc94ba11f03aca47e7f"
+    },
+    {
+      "path": "previews/prototype.png",
+      "category": "previews",
+      "size_bytes": 224502,
+      "sha256": "5c25a39ca7600adfa2e5ab4b92875a2bfb6b296acc3cefd616805d380aa2cb47"
+    },
+    {
+      "path": "previews/website.png",
+      "category": "previews",
+      "size_bytes": 614786,
+      "sha256": "9b84e5a68df893ebdc3730be0efe58989c392ce30ec0d28fd4ce6d14d6f3a816"
+    },
+    {
+      "path": "schemas/domain-types.ts",
+      "category": "schemas",
+      "size_bytes": 8723,
+      "sha256": "87d59508e9d3074c0f641e868e8018af0994f5853b7a15a6865149fe4ee214fa"
+    },
+    {
+      "path": "schemas/domain.schema.json",
+      "category": "schemas",
+      "size_bytes": 29818,
+      "sha256": "4a437b24f35ea4a63cd904e5969fa987e6304ed1273734558e24db25eb04e385"
+    },
+    {
+      "path": "scripts/interaction_smoke_test.py",
+      "category": "validation-scripts",
+      "size_bytes": 3639,
+      "sha256": "e580e1dc7c7ce76fc6c7749a9b329d5ad00ac72a5bade9bb8c332aa520608463"
+    },
+    {
+      "path": "scripts/validate_package.py",
+      "category": "validation-scripts",
+      "size_bytes": 6886,
+      "sha256": "3e22861baa605a4b1767cd86143ac377d4f5687b1d01875b28874d70c40eb6db"
+    }
+  ]
+}

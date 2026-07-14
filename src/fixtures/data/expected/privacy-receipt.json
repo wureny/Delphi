@@ -1,0 +1,31 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "receiptId": "receipt_run_arct_success_001",
+  "runId": "run_arct_success_001",
+  "workflowVersion": "0.2.0",
+  "classification": "synthetic",
+  "executionLocation": "Local demo runtime",
+  "modelRoutes": [
+    {
+      "provider": "fixture",
+      "model": "deterministic-demo-v0.2",
+      "endpointOwner": "local",
+      "retentionPolicy": "zero",
+      "trainingUse": "disabled"
+    }
+  ],
+  "rawContentSentToDelphiCloud": false,
+  "externalWebAccess": false,
+  "toolNames": [
+    "fixtures.read",
+    "thesis.read",
+    "forecast.compare",
+    "validator.run"
+  ],
+  "canonicalWritesProposed": 4,
+  "canonicalWritesApproved": 3,
+  "supportAccess": "none",
+  "generatedAt": "2026-07-10T13:15:02Z"
+}

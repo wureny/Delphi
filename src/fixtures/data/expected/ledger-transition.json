@@ -1,0 +1,56 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "transitionId": "transition_arct_001",
+  "tenantId": "tenant_delphi_demo",
+  "caseId": "case_arct_001",
+  "proposalIds": [
+    "proposal_arct_enterprise_001",
+    "proposal_arct_forecast_003",
+    "proposal_arct_question_004"
+  ],
+  "reviewIds": [
+    "review_enterprise_accept",
+    "review_forecast_edit",
+    "review_question_accept"
+  ],
+  "runId": "run_arct_success_001",
+  "transitionType": "composite_review_batch",
+  "fromVersion": 12,
+  "toVersion": 13,
+  "sourceEventIds": [
+    "event_arct_fy26_q2"
+  ],
+  "evidenceRefs": [
+    "excerpt_release_revenue_01",
+    "excerpt_call_enterprise_01",
+    "excerpt_release_guidance_04",
+    "excerpt_team_forecast_01",
+    "excerpt_call_implementation_02",
+    "excerpt_call_duration_unknown_03"
+  ],
+  "requestedBy": "agent",
+  "approvedByUserId": "user_analyst_01",
+  "approvedAt": "2026-07-10T13:15:00Z",
+  "workflowVersion": "0.2.0",
+  "skillVersions": {
+    "facts_numbers": "0.2.0",
+    "thesis_impact": "0.2.0",
+    "risk_counterevidence": "0.2.0",
+    "judge_composer": "0.2.0"
+  },
+  "modelRoutes": [
+    {
+      "provider": "fixture",
+      "model": "deterministic-demo-v0.2",
+      "endpointOwner": "local",
+      "retentionPolicy": "zero",
+      "trainingUse": "disabled"
+    }
+  ],
+  "reversible": true,
+  "status": "applied",
+  "beforeSnapshotHash": "sha256:70faab28b40f92e317dff5582b0113250716bc9a3c377792b1c82f76bdfead1b",
+  "afterSnapshotHash": "sha256:2a579001930a207f19f467bdc0b6516f7ffcac593e071b1fbeabe84b576e2187"
+}

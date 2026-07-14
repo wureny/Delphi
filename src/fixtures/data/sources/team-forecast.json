@@ -1,0 +1,83 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "sourceDocument": {
+    "sourceId": "source_team_forecast_q2",
+    "tenantId": "tenant_delphi_demo",
+    "title": "ARCT Team Forecast Snapshot v12",
+    "sourceType": "financial_model",
+    "issuerEntityId": "entity_arct",
+    "uri": "fixture://arct/team-forecast/v12",
+    "observedAt": "2026-07-09T19:59:00Z",
+    "classification": "internal",
+    "contentHash": "sha256:synthetic-team-forecast-v12",
+    "version": 12,
+    "accessPolicyId": "policy_internal_research",
+    "status": "available"
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_team_forecast_01",
+      "sourceId": "source_team_forecast_q2",
+      "locator": {
+        "cellRange": "Forecast!B2:F8"
+      },
+      "text": "Team base case: Q2 revenue $512m; NRR 118%–122%; non-GAAP gross margin 74.0%; Q3 revenue midpoint $540m; FY26 free cash flow margin 18.0%.",
+      "numericValues": [
+        {
+          "label": "Revenue",
+          "value": 512,
+          "unit": "million",
+          "currency": "USD",
+          "period": "FY2026 Q2",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        },
+        {
+          "label": "NRR low",
+          "value": 118,
+          "unit": "percent",
+          "period": "FY2026 Q2",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        },
+        {
+          "label": "NRR high",
+          "value": 122,
+          "unit": "percent",
+          "period": "FY2026 Q2",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        },
+        {
+          "label": "Non-GAAP gross margin",
+          "value": 74.0,
+          "unit": "percent",
+          "period": "FY2026 Q2",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        },
+        {
+          "label": "Revenue guidance midpoint",
+          "value": 540,
+          "unit": "million",
+          "currency": "USD",
+          "period": "FY2026 Q3",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        },
+        {
+          "label": "Free cash flow margin",
+          "value": 18.0,
+          "unit": "percent",
+          "period": "FY2026",
+          "basis": "team_forecast",
+          "sourceExcerptId": "excerpt_team_forecast_01"
+        }
+      ],
+      "classification": "internal",
+      "contentHash": "sha256:excerpt-team-forecast-01"
+    }
+  ]
+}

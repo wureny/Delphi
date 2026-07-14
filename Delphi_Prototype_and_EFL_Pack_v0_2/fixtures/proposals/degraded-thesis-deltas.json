@@ -1,0 +1,89 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "proposals": [
+    {
+      "proposalId": "proposal_arct_revenue_degraded_001",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_degraded_001",
+      "fromThesisVersion": 12,
+      "deltaType": "open_question",
+      "targetObjectType": "open_question",
+      "headline": "Revenue beat is confirmed; attribution remains unresolved",
+      "whatChanged": "Reported FY2026 Q2 revenue was $526 million versus the team's $512 million forecast.",
+      "againstOurView": "The approved case expects durable enterprise demand, but the available release does not attribute the beat by customer segment.",
+      "whyItMatters": "The numeric beat is reliable evidence, while its implication for the enterprise-demand pillar remains uncertain without the transcript.",
+      "uncertainties": [
+        "Customer mix and the durability of the revenue beat cannot be verified from the available sources."
+      ],
+      "recommendedFollowUp": "Obtain the transcript and reconcile customer mix before changing pillar conviction.",
+      "evidenceRefs": [
+        "excerpt_release_revenue_01",
+        "excerpt_team_forecast_01"
+      ],
+      "findingRefs": [
+        "finding_revenue_beat_degraded"
+      ],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "add",
+          "path": "/openQuestions/-",
+          "value": {
+            "questionId": "question_revenue_beat_attribution",
+            "question": "What customer and product mix drove the FY2026 Q2 revenue beat?",
+            "ownerUserId": "user_analyst_01",
+            "status": "open",
+            "evidenceRefs": [
+              "excerpt_release_revenue_01",
+              "excerpt_team_forecast_01"
+            ]
+          }
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:10:38Z"
+    },
+    {
+      "proposalId": "proposal_arct_forecast_degraded_003",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_degraded_001",
+      "fromThesisVersion": 12,
+      "deltaType": "forecast_update",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_revenue_q3",
+      "headline": "Q3 revenue forecast requires upward review",
+      "whatChanged": "Management guided FY2026 Q3 revenue to $548 million–$554 million, a $551 million midpoint.",
+      "againstOurView": "The approved team forecast uses a $540 million Q3 revenue midpoint.",
+      "whyItMatters": "The gap is large enough to trigger a model review, but not an automatic forecast overwrite.",
+      "uncertainties": [
+        "The unavailable transcript prevents additional validation of guidance assumptions."
+      ],
+      "recommendedFollowUp": "Open the model and review Q3 revenue assumptions with the analyst owner after the transcript is available.",
+      "evidenceRefs": [
+        "excerpt_release_guidance_04",
+        "excerpt_team_forecast_01"
+      ],
+      "findingRefs": [
+        "finding_guidance_above_forecast_degraded"
+      ],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_revenue_q3/status",
+          "value": "review_required"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:10:40Z"
+    }
+  ]
+}

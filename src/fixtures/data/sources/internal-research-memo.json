@@ -1,0 +1,33 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "sourceDocument": {
+    "sourceId": "source_internal_memo_v7",
+    "tenantId": "tenant_delphi_demo",
+    "title": "ARCT Internal Research Memo — Pre-Earnings v7",
+    "sourceType": "research_memo",
+    "issuerEntityId": "entity_arct",
+    "uri": "fixture://customer-research/arct/pre-earnings-v7",
+    "publishedAt": "2026-07-08T14:00:00Z",
+    "observedAt": "2026-07-08T14:00:30Z",
+    "classification": "internal",
+    "contentHash": "sha256:synthetic-internal-memo-v7",
+    "version": 7,
+    "accessPolicyId": "policy_internal_research",
+    "status": "available"
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_internal_memo_enterprise_01",
+      "sourceId": "source_internal_memo_v7",
+      "locator": {
+        "section": "Enterprise demand",
+        "paragraph": 3
+      },
+      "text": "Synthetic team view before earnings: regulated-industry demand is constructive, but conversion timing and certification milestones remain the key confidence gates.",
+      "classification": "internal",
+      "contentHash": "sha256:excerpt-internal-memo-enterprise-01"
+    }
+  ]
+}

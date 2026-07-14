@@ -1,0 +1,1342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://delphi.example/schemas/domain.schema.json",
+  "title": "Delphi Prototype Domain Contracts v0.2",
+  "description": "Root schema for the deterministic Delphi Earnings-to-Thesis prototype fixtures.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/investmentCase"
+    },
+    {
+      "$ref": "#/$defs/thesisSnapshot"
+    },
+    {
+      "$ref": "#/$defs/domainEvent"
+    },
+    {
+      "$ref": "#/$defs/sourceBundle"
+    },
+    {
+      "$ref": "#/$defs/proposalBundle"
+    },
+    {
+      "$ref": "#/$defs/workflowRunBundle"
+    },
+    {
+      "$ref": "#/$defs/stateTransition"
+    },
+    {
+      "$ref": "#/$defs/privacyReceipt"
+    }
+  ],
+  "$defs": {
+    "envelope": {
+      "type": "object",
+      "required": [
+        "fixtureVersion",
+        "schemaVersion",
+        "synthetic"
+      ],
+      "properties": {
+        "fixtureVersion": {
+          "type": "string"
+        },
+        "schemaVersion": {
+          "type": "string"
+        },
+        "synthetic": {
+          "type": "boolean"
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "materiality": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "dataClassification": {
+      "enum": [
+        "public",
+        "licensed",
+        "internal",
+        "restricted",
+        "mnpi_like",
+        "synthetic"
+      ]
+    },
+    "modelRoute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "model",
+        "endpointOwner",
+        "retentionPolicy",
+        "trainingUse"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "endpointOwner": {
+          "type": "string"
+        },
+        "retentionPolicy": {
+          "type": "string"
+        },
+        "trainingUse": {
+          "type": "string"
+        }
+      }
+    },
+    "investmentCase": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "caseId",
+            "tenantId",
+            "entityId",
+            "ticker",
+            "companyName",
+            "strategyPack",
+            "sector",
+            "horizon",
+            "ownerUserId",
+            "status",
+            "approvedThesisVersion",
+            "createdAt",
+            "updatedAt"
+          ],
+          "properties": {
+            "caseId": {
+              "$ref": "#/$defs/id"
+            },
+            "tenantId": {
+              "$ref": "#/$defs/id"
+            },
+            "entityId": {
+              "$ref": "#/$defs/id"
+            },
+            "ticker": {
+              "type": "string"
+            },
+            "companyName": {
+              "type": "string"
+            },
+            "strategyPack": {
+              "const": "fundamental_equity"
+            },
+            "sector": {
+              "type": "string"
+            },
+            "horizon": {
+              "type": "string"
+            },
+            "ownerUserId": {
+              "$ref": "#/$defs/id"
+            },
+            "status": {
+              "enum": [
+                "active",
+                "archived"
+              ]
+            },
+            "approvedThesisVersion": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "createdAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "updatedAt": {
+              "$ref": "#/$defs/dateTime"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "thesisPillar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pillarId",
+        "title",
+        "statement",
+        "teamConviction",
+        "status",
+        "ownerUserId",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "pillarId": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "teamConviction": {
+          "$ref": "#/$defs/confidence"
+        },
+        "status": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "$ref": "#/$defs/id"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "forecast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forecastId",
+        "metric",
+        "period",
+        "scenario",
+        "unit",
+        "ownerUserId",
+        "status"
+      ],
+      "properties": {
+        "forecastId": {
+          "$ref": "#/$defs/id"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "minValue": {
+          "type": "number"
+        },
+        "maxValue": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "required": [
+            "minValue",
+            "maxValue"
+          ]
+        }
+      ]
+    },
+    "catalyst": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalystId",
+        "title",
+        "expectedAt",
+        "probability",
+        "expectedImpact",
+        "status"
+      ],
+      "properties": {
+        "catalystId": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "expectedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "probability": {
+          "$ref": "#/$defs/confidence"
+        },
+        "expectedImpact": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "riskId",
+        "title",
+        "description",
+        "severity",
+        "likelihood",
+        "status",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "riskId": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/materiality"
+        },
+        "likelihood": {
+          "$ref": "#/$defs/confidence"
+        },
+        "status": {
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "openQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questionId",
+        "question",
+        "ownerUserId",
+        "status",
+        "evidenceRefs"
+      ],
+      "properties": {
+        "questionId": {
+          "$ref": "#/$defs/id"
+        },
+        "question": {
+          "type": "string"
+        },
+        "ownerUserId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "thesisSnapshot": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "thesisId",
+            "caseId",
+            "version",
+            "status",
+            "summary",
+            "ownerUserId",
+            "approvedByUserId",
+            "approvedAt",
+            "validFrom",
+            "recordedAt",
+            "pillars",
+            "forecasts",
+            "catalysts",
+            "risks",
+            "openQuestions"
+          ],
+          "properties": {
+            "thesisId": {
+              "$ref": "#/$defs/id"
+            },
+            "caseId": {
+              "$ref": "#/$defs/id"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "status": {
+              "enum": [
+                "draft",
+                "approved",
+                "superseded",
+                "archived"
+              ]
+            },
+            "summary": {
+              "type": "string"
+            },
+            "ownerUserId": {
+              "$ref": "#/$defs/id"
+            },
+            "approvedByUserId": {
+              "$ref": "#/$defs/id"
+            },
+            "approvedAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "validFrom": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "recordedAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "pillars": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/thesisPillar"
+              }
+            },
+            "forecasts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/forecast"
+              }
+            },
+            "catalysts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/catalyst"
+              }
+            },
+            "risks": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/risk"
+              }
+            },
+            "openQuestions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/openQuestion"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "domainEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "domainEventId",
+            "tenantId",
+            "entityId",
+            "eventType",
+            "title",
+            "occurredAt",
+            "publishedAt",
+            "observedAt",
+            "sourceRefs",
+            "clusterId",
+            "status"
+          ],
+          "properties": {
+            "domainEventId": {
+              "$ref": "#/$defs/id"
+            },
+            "tenantId": {
+              "$ref": "#/$defs/id"
+            },
+            "entityId": {
+              "$ref": "#/$defs/id"
+            },
+            "eventType": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "occurredAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "publishedAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "observedAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "sourceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "clusterId": {
+              "$ref": "#/$defs/id"
+            },
+            "status": {
+              "enum": [
+                "queued",
+                "ready",
+                "processed",
+                "ignored"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sourceExcerpt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "excerptId",
+        "sourceId",
+        "locator",
+        "text",
+        "classification",
+        "contentHash"
+      ],
+      "properties": {
+        "excerptId": {
+          "$ref": "#/$defs/id"
+        },
+        "sourceId": {
+          "$ref": "#/$defs/id"
+        },
+        "locator": {
+          "$ref": "#/$defs/sourceLocator"
+        },
+        "text": {
+          "type": "string"
+        },
+        "numericValues": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/numericValue"
+          }
+        },
+        "classification": {
+          "$ref": "#/$defs/dataClassification"
+        },
+        "contentHash": {
+          "type": "string"
+        }
+      }
+    },
+    "sourceBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "sourceDocument",
+            "excerpts"
+          ],
+          "properties": {
+            "sourceDocument": {
+              "$ref": "#/$defs/sourceDocument"
+            },
+            "excerpts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/sourceExcerpt"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "patchOperation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "path",
+            "value"
+          ],
+          "properties": {
+            "op": {
+              "enum": [
+                "add",
+                "replace"
+              ]
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^/"
+            },
+            "value": {}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "op",
+            "path"
+          ],
+          "properties": {
+            "op": {
+              "const": "remove"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^/"
+            }
+          }
+        }
+      ]
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposalId",
+        "tenantId",
+        "caseId",
+        "runId",
+        "fromThesisVersion",
+        "deltaType",
+        "targetObjectType",
+        "headline",
+        "whatChanged",
+        "againstOurView",
+        "whyItMatters",
+        "uncertainties",
+        "recommendedFollowUp",
+        "evidenceRefs",
+        "findingRefs",
+        "confidence",
+        "materiality",
+        "requiredReviewerRole",
+        "proposedPatch",
+        "status",
+        "createdAt"
+      ],
+      "properties": {
+        "proposalId": {
+          "$ref": "#/$defs/id"
+        },
+        "tenantId": {
+          "$ref": "#/$defs/id"
+        },
+        "caseId": {
+          "$ref": "#/$defs/id"
+        },
+        "runId": {
+          "$ref": "#/$defs/id"
+        },
+        "fromThesisVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "deltaType": {
+          "type": "string"
+        },
+        "targetObjectType": {
+          "type": "string"
+        },
+        "targetObjectId": {
+          "$ref": "#/$defs/id"
+        },
+        "headline": {
+          "type": "string"
+        },
+        "whatChanged": {
+          "type": "string"
+        },
+        "againstOurView": {
+          "type": "string"
+        },
+        "whyItMatters": {
+          "type": "string"
+        },
+        "uncertainties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recommendedFollowUp": {
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "findingRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "materiality": {
+          "$ref": "#/$defs/materiality"
+        },
+        "requiredReviewerRole": {
+          "enum": [
+            "analyst",
+            "senior_analyst",
+            "pm",
+            "cio",
+            "compliance"
+          ]
+        },
+        "proposedPatch": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/patchOperation"
+          },
+          "minItems": 1
+        },
+        "status": {
+          "enum": [
+            "proposed",
+            "under_review",
+            "approved",
+            "rejected",
+            "superseded"
+          ]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/dateTime"
+        }
+      }
+    },
+    "proposalBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "proposals"
+          ],
+          "properties": {
+            "proposals": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/proposal"
+              },
+              "minItems": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "workflowRun": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "tenantId",
+        "caseId",
+        "domainEventId",
+        "workflowId",
+        "workflowVersion",
+        "status",
+        "mode",
+        "startedAt",
+        "modelRoutes",
+        "skillVersions",
+        "sourceRefs",
+        "degradedReasons",
+        "outputProposalIds"
+      ],
+      "properties": {
+        "runId": {
+          "$ref": "#/$defs/id"
+        },
+        "tenantId": {
+          "$ref": "#/$defs/id"
+        },
+        "caseId": {
+          "$ref": "#/$defs/id"
+        },
+        "domainEventId": {
+          "$ref": "#/$defs/id"
+        },
+        "workflowId": {
+          "type": "string"
+        },
+        "workflowVersion": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "completed",
+            "degraded",
+            "failed"
+          ]
+        },
+        "mode": {
+          "enum": [
+            "fixture",
+            "live",
+            "hybrid"
+          ]
+        },
+        "startedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "completedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "modelRoutes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/modelRoute"
+          },
+          "minItems": 1
+        },
+        "skillVersions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "sourceRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "degradedReasons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/degradedReason"
+          }
+        },
+        "outputProposalIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "runEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runEventId",
+        "runId",
+        "eventType",
+        "occurredAt",
+        "actorType",
+        "actorId",
+        "publicMessage",
+        "objectRefs"
+      ],
+      "properties": {
+        "runEventId": {
+          "$ref": "#/$defs/id"
+        },
+        "runId": {
+          "$ref": "#/$defs/id"
+        },
+        "eventType": {
+          "type": "string"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "actorType": {
+          "enum": [
+            "system",
+            "agent",
+            "user"
+          ]
+        },
+        "actorId": {
+          "$ref": "#/$defs/id"
+        },
+        "publicMessage": {
+          "type": "string"
+        },
+        "objectRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "workflowRunBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "workflowRun",
+            "events"
+          ],
+          "properties": {
+            "workflowRun": {
+              "$ref": "#/$defs/workflowRun"
+            },
+            "events": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/runEvent"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "stateTransition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "transitionId",
+            "tenantId",
+            "caseId",
+            "proposalIds",
+            "reviewIds",
+            "runId",
+            "transitionType",
+            "fromVersion",
+            "toVersion",
+            "sourceEventIds",
+            "evidenceRefs",
+            "requestedBy",
+            "approvedByUserId",
+            "approvedAt",
+            "workflowVersion",
+            "skillVersions",
+            "modelRoutes",
+            "reversible",
+            "status",
+            "beforeSnapshotHash",
+            "afterSnapshotHash"
+          ],
+          "properties": {
+            "transitionId": {
+              "$ref": "#/$defs/id"
+            },
+            "tenantId": {
+              "$ref": "#/$defs/id"
+            },
+            "caseId": {
+              "$ref": "#/$defs/id"
+            },
+            "proposalIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "reviewIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "runId": {
+              "$ref": "#/$defs/id"
+            },
+            "transitionType": {
+              "type": "string"
+            },
+            "fromVersion": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "toVersion": {
+              "type": "integer",
+              "minimum": 2
+            },
+            "sourceEventIds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "evidenceRefs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "requestedBy": {
+              "enum": [
+                "agent",
+                "user",
+                "system"
+              ]
+            },
+            "approvedByUserId": {
+              "$ref": "#/$defs/id"
+            },
+            "approvedAt": {
+              "$ref": "#/$defs/dateTime"
+            },
+            "workflowVersion": {
+              "type": "string"
+            },
+            "skillVersions": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "modelRoutes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/modelRoute"
+              },
+              "minItems": 1
+            },
+            "reversible": {
+              "type": "boolean"
+            },
+            "status": {
+              "enum": [
+                "applied",
+                "rolled_back",
+                "superseded"
+              ]
+            },
+            "beforeSnapshotHash": {
+              "type": "string"
+            },
+            "afterSnapshotHash": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "privacyReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "receiptId",
+            "runId",
+            "workflowVersion",
+            "classification",
+            "executionLocation",
+            "modelRoutes",
+            "rawContentSentToDelphiCloud",
+            "externalWebAccess",
+            "toolNames",
+            "canonicalWritesProposed",
+            "canonicalWritesApproved",
+            "supportAccess",
+            "generatedAt"
+          ],
+          "properties": {
+            "receiptId": {
+              "$ref": "#/$defs/id"
+            },
+            "runId": {
+              "$ref": "#/$defs/id"
+            },
+            "workflowVersion": {
+              "type": "string"
+            },
+            "classification": {
+              "$ref": "#/$defs/dataClassification"
+            },
+            "executionLocation": {
+              "type": "string"
+            },
+            "modelRoutes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/modelRoute"
+              },
+              "minItems": 1
+            },
+            "rawContentSentToDelphiCloud": {
+              "type": "boolean"
+            },
+            "externalWebAccess": {
+              "type": "boolean"
+            },
+            "toolNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "canonicalWritesProposed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "canonicalWritesApproved": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "supportAccess": {
+              "type": "string"
+            },
+            "generatedAt": {
+              "$ref": "#/$defs/dateTime"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "sourceDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "tenantId",
+        "title",
+        "sourceType",
+        "issuerEntityId",
+        "uri",
+        "observedAt",
+        "classification",
+        "contentHash",
+        "version",
+        "accessPolicyId",
+        "status"
+      ],
+      "properties": {
+        "sourceId": {
+          "$ref": "#/$defs/id"
+        },
+        "tenantId": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string"
+        },
+        "issuerEntityId": {
+          "$ref": "#/$defs/id"
+        },
+        "uri": {
+          "type": "string"
+        },
+        "publishedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "observedAt": {
+          "$ref": "#/$defs/dateTime"
+        },
+        "classification": {
+          "$ref": "#/$defs/dataClassification"
+        },
+        "contentHash": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accessPolicyId": {
+          "$ref": "#/$defs/id"
+        },
+        "status": {
+          "enum": [
+            "available",
+            "unavailable",
+            "superseded"
+          ]
+        }
+      }
+    },
+    "sourceLocator": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "section": {
+          "type": "string"
+        },
+        "paragraph": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestampSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cellRange": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "numericValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "value",
+        "unit",
+        "basis",
+        "sourceExcerptId"
+      ],
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "period": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string"
+        },
+        "sourceExcerptId": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "degradedReason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "affectedObjectRefs",
+        "recoverable"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "affectedObjectRefs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "uniqueItems": true
+        },
+        "recoverable": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

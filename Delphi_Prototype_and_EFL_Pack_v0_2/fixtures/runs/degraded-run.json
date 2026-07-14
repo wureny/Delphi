@@ -1,0 +1,124 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "workflowRun": {
+    "runId": "run_arct_degraded_001",
+    "tenantId": "tenant_delphi_demo",
+    "caseId": "case_arct_001",
+    "domainEventId": "event_arct_fy26_q2",
+    "workflowId": "earnings_to_thesis",
+    "workflowVersion": "0.2.0",
+    "status": "degraded",
+    "mode": "fixture",
+    "startedAt": "2026-07-09T22:10:00Z",
+    "completedAt": "2026-07-09T22:10:50Z",
+    "modelRoutes": [
+      {
+        "provider": "fixture",
+        "model": "deterministic-demo-v0.2",
+        "endpointOwner": "local",
+        "retentionPolicy": "zero",
+        "trainingUse": "disabled"
+      }
+    ],
+    "skillVersions": {
+      "facts_numbers": "0.2.0",
+      "thesis_impact": "0.2.0",
+      "risk_counterevidence": "0.2.0",
+      "judge_composer": "0.2.0"
+    },
+    "sourceRefs": [
+      "source_release_q2",
+      "source_team_forecast_q2"
+    ],
+    "degradedReasons": [
+      {
+        "code": "source_unavailable",
+        "message": "Earnings call transcript was unavailable. Management-duration interpretation is blocked.",
+        "affectedObjectRefs": [
+          "pillar_midmarket_demand",
+          "question_demand_vs_capacity"
+        ],
+        "recoverable": true
+      }
+    ],
+    "outputProposalIds": [
+      "proposal_arct_revenue_degraded_001",
+      "proposal_arct_forecast_degraded_003"
+    ]
+  },
+  "events": [
+    {
+      "runEventId": "event_degraded_01",
+      "runId": "run_arct_degraded_001",
+      "eventType": "run_created",
+      "occurredAt": "2026-07-09T22:10:00Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Runtime created for degraded fixture.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_degraded_02",
+      "runId": "run_arct_degraded_001",
+      "eventType": "source_unavailable",
+      "occurredAt": "2026-07-09T22:10:08Z",
+      "actorType": "system",
+      "actorId": "source_loader",
+      "publicMessage": "Earnings call transcript is unavailable.",
+      "objectRefs": [
+        "source_transcript_q2"
+      ]
+    },
+    {
+      "runEventId": "event_degraded_03",
+      "runId": "run_arct_degraded_001",
+      "eventType": "degraded_mode_entered",
+      "occurredAt": "2026-07-09T22:10:10Z",
+      "actorType": "system",
+      "actorId": "orchestrator",
+      "publicMessage": "Analysis will continue with explicit evidence limitations.",
+      "objectRefs": [
+        "pillar_midmarket_demand",
+        "question_demand_vs_capacity"
+      ]
+    },
+    {
+      "runEventId": "event_degraded_04",
+      "runId": "run_arct_degraded_001",
+      "eventType": "proposal_created",
+      "occurredAt": "2026-07-09T22:10:42Z",
+      "actorType": "agent",
+      "actorId": "judge_composer",
+      "publicMessage": "Two safe proposals created; two transcript-dependent proposals blocked.",
+      "objectRefs": [
+        "proposal_arct_revenue_degraded_001",
+        "proposal_arct_forecast_degraded_003"
+      ]
+    },
+    {
+      "runEventId": "event_degraded_05",
+      "runId": "run_arct_degraded_001",
+      "eventType": "review_required",
+      "occurredAt": "2026-07-09T22:10:48Z",
+      "actorType": "system",
+      "actorId": "policy",
+      "publicMessage": "Blocked proposals require a transcript retry or PM escalation.",
+      "objectRefs": [
+        "pillar_midmarket_demand",
+        "question_demand_vs_capacity"
+      ]
+    },
+    {
+      "runEventId": "event_degraded_06",
+      "runId": "run_arct_degraded_001",
+      "eventType": "run_completed",
+      "occurredAt": "2026-07-09T22:10:50Z",
+      "actorType": "system",
+      "actorId": "orchestrator",
+      "publicMessage": "Run completed with gaps.",
+      "objectRefs": []
+    }
+  ]
+}

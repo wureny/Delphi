@@ -1,0 +1,196 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "workflowRun": {
+    "runId": "run_arct_success_001",
+    "tenantId": "tenant_delphi_demo",
+    "caseId": "case_arct_001",
+    "domainEventId": "event_arct_fy26_q2",
+    "workflowId": "earnings_to_thesis",
+    "workflowVersion": "0.2.0",
+    "status": "completed",
+    "mode": "fixture",
+    "startedAt": "2026-07-09T22:05:10Z",
+    "completedAt": "2026-07-09T22:06:16Z",
+    "modelRoutes": [
+      {
+        "provider": "fixture",
+        "model": "deterministic-demo-v0.2",
+        "endpointOwner": "local",
+        "retentionPolicy": "zero",
+        "trainingUse": "disabled"
+      }
+    ],
+    "skillVersions": {
+      "facts_numbers": "0.2.0",
+      "thesis_impact": "0.2.0",
+      "risk_counterevidence": "0.2.0",
+      "judge_composer": "0.2.0"
+    },
+    "sourceRefs": [
+      "source_release_q2",
+      "source_transcript_q2",
+      "source_team_forecast_q2"
+    ],
+    "degradedReasons": [],
+    "outputProposalIds": [
+      "proposal_arct_enterprise_001",
+      "proposal_arct_midmarket_002",
+      "proposal_arct_forecast_003",
+      "proposal_arct_question_004"
+    ]
+  },
+  "events": [
+    {
+      "runEventId": "event_run_01",
+      "runId": "run_arct_success_001",
+      "eventType": "run_created",
+      "occurredAt": "2026-07-09T22:05:10Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Runtime created for ARCT-DEMO FY2026 Q2.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_02",
+      "runId": "run_arct_success_001",
+      "eventType": "source_loaded",
+      "occurredAt": "2026-07-09T22:05:14Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Loaded approved thesis v12 and three source bundles.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_03",
+      "runId": "run_arct_success_001",
+      "eventType": "task_assigned",
+      "occurredAt": "2026-07-09T22:05:18Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Assigned facts and numeric reconciliation task.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_04",
+      "runId": "run_arct_success_001",
+      "eventType": "agent_started",
+      "occurredAt": "2026-07-09T22:05:22Z",
+      "actorType": "agent",
+      "actorId": "facts_numbers",
+      "publicMessage": "Facts & Numbers Analyst started.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_05",
+      "runId": "run_arct_success_001",
+      "eventType": "finding_created",
+      "occurredAt": "2026-07-09T22:05:26Z",
+      "actorType": "agent",
+      "actorId": "facts_numbers",
+      "publicMessage": "Revenue beat and net-retention miss were reconciled.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_06",
+      "runId": "run_arct_success_001",
+      "eventType": "validation_passed",
+      "occurredAt": "2026-07-09T22:05:30Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Numeric and citation validation passed.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_07",
+      "runId": "run_arct_success_001",
+      "eventType": "agent_started",
+      "occurredAt": "2026-07-09T22:05:34Z",
+      "actorType": "agent",
+      "actorId": "thesis_impact",
+      "publicMessage": "Thesis Impact Analyst started.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_08",
+      "runId": "run_arct_success_001",
+      "eventType": "finding_created",
+      "occurredAt": "2026-07-09T22:05:38Z",
+      "actorType": "agent",
+      "actorId": "thesis_impact",
+      "publicMessage": "Two thesis pillars were mapped to the event.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_09",
+      "runId": "run_arct_success_001",
+      "eventType": "agent_started",
+      "occurredAt": "2026-07-09T22:05:42Z",
+      "actorType": "agent",
+      "actorId": "risk_counterevidence",
+      "publicMessage": "Risk & Counterevidence Analyst started.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_10",
+      "runId": "run_arct_success_001",
+      "eventType": "finding_created",
+      "occurredAt": "2026-07-09T22:05:46Z",
+      "actorType": "agent",
+      "actorId": "risk_counterevidence",
+      "publicMessage": "Implementation-duration uncertainty was preserved.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_11",
+      "runId": "run_arct_success_001",
+      "eventType": "agent_started",
+      "occurredAt": "2026-07-09T22:05:50Z",
+      "actorType": "agent",
+      "actorId": "judge_composer",
+      "publicMessage": "Judge / Delta Composer started.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_12",
+      "runId": "run_arct_success_001",
+      "eventType": "proposal_created",
+      "occurredAt": "2026-07-09T22:05:54Z",
+      "actorType": "agent",
+      "actorId": "judge_composer",
+      "publicMessage": "Four reviewable Thesis Delta Proposals created.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_13",
+      "runId": "run_arct_success_001",
+      "eventType": "validation_passed",
+      "occurredAt": "2026-07-09T22:05:58Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Proposal validation passed with one PM escalation requirement.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_14",
+      "runId": "run_arct_success_001",
+      "eventType": "review_required",
+      "occurredAt": "2026-07-09T22:06:12Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Human review required before any canonical state change.",
+      "objectRefs": []
+    },
+    {
+      "runEventId": "event_run_15",
+      "runId": "run_arct_success_001",
+      "eventType": "run_completed",
+      "occurredAt": "2026-07-09T22:06:16Z",
+      "actorType": "system",
+      "actorId": "system",
+      "publicMessage": "Run completed in fixture mode.",
+      "objectRefs": []
+    }
+  ]
+}

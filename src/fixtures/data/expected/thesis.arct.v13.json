@@ -1,0 +1,186 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "thesisId": "thesis_arct",
+  "caseId": "case_arct_001",
+  "version": 13,
+  "status": "approved",
+  "summary": "Archetype can compound durable growth by becoming the orchestration layer for enterprise AI infrastructure, provided expansion remains resilient and deployment efficiency improves.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-07-10T13:15:00Z",
+  "validFrom": "2026-07-10T13:15:00Z",
+  "recordedAt": "2026-07-10T13:15:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_enterprise_demand",
+      "title": "Enterprise demand remains durable",
+      "statement": "Large-enterprise demand for governed AI infrastructure remains durable despite budget scrutiny.",
+      "teamConviction": "high",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": [
+        "excerpt_prior_call_01",
+        "excerpt_customer_survey_01"
+      ]
+    },
+    {
+      "pillarId": "pillar_midmarket_demand",
+      "title": "Mid-market expansion remains resilient",
+      "statement": "Mid-market implementation velocity and expansion should keep net retention within the team's 118%–122% range.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": [
+        "excerpt_prior_call_02"
+      ]
+    },
+    {
+      "pillarId": "pillar_operating_leverage",
+      "title": "Gross-margin recovery funds operating leverage",
+      "statement": "Infrastructure efficiency should lift gross margin and allow operating leverage without reducing product investment.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": [
+        "excerpt_prior_release_03"
+      ]
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_revenue_q2",
+      "metric": "Revenue",
+      "period": "FY2026 Q2",
+      "scenario": "base",
+      "value": 512,
+      "unit": "million",
+      "currency": "USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_nrr_q2",
+      "metric": "Net revenue retention",
+      "period": "FY2026 Q2",
+      "scenario": "base",
+      "minValue": 118,
+      "maxValue": 122,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_gm_q2",
+      "metric": "Non-GAAP gross margin",
+      "period": "FY2026 Q2",
+      "scenario": "base",
+      "value": 74.0,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_revenue_q3",
+      "metric": "Revenue guidance midpoint",
+      "period": "FY2026 Q3",
+      "scenario": "base",
+      "value": 540,
+      "unit": "million",
+      "currency": "USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "review_required"
+    },
+    {
+      "forecastId": "forecast_fcf_fy26",
+      "metric": "Free cash flow margin",
+      "period": "FY2026",
+      "scenario": "base",
+      "value": 18.0,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_gm",
+      "title": "Gross margin exceeds 75%",
+      "expectedAt": "2026-12-31T23:59:59Z",
+      "probability": "medium",
+      "expectedImpact": "Supports operating leverage pillar",
+      "status": "open"
+    },
+    {
+      "catalystId": "catalyst_fedramp",
+      "title": "Regulated-industry product certification",
+      "expectedAt": "2026-11-30T23:59:59Z",
+      "probability": "medium",
+      "expectedImpact": "Expands addressable enterprise workload",
+      "status": "open"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_implementation",
+      "title": "Implementation capacity",
+      "description": "Customer deployment cycles may lengthen as workloads become more complex.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_hyperscaler",
+      "title": "Hyperscaler bundling",
+      "description": "Cloud providers may bundle competing orchestration capabilities.",
+      "severity": "high",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_gpu_cost",
+      "title": "Inference-cost volatility",
+      "description": "Customer usage economics may slow expansion if inference costs remain volatile.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_midmarket",
+      "question": "Is mid-market implementation time temporary or structural?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "questionId": "question_gm",
+      "question": "How much of gross-margin improvement is sustainable versus mix?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "questionId": "question_competition",
+      "question": "Are hyperscaler-native orchestration products affecting win rates?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "questionId": "question_demand_vs_capacity",
+      "question": "Is mid-market weakness caused by implementation capacity or lower underlying demand?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": [
+        "excerpt_call_implementation_02",
+        "excerpt_call_duration_unknown_03"
+      ]
+    }
+  ]
+}

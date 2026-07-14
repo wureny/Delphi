@@ -1,0 +1,62 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "sourceDocument": {
+    "sourceId": "source_transcript_q2",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Archetype Systems FY2026 Q2 Earnings Call",
+    "sourceType": "transcript",
+    "issuerEntityId": "entity_arct",
+    "uri": "fixture://arct/fy26-q2/transcript",
+    "publishedAt": "2026-07-09T22:00:00Z",
+    "observedAt": "2026-07-09T22:05:00Z",
+    "classification": "synthetic",
+    "contentHash": "sha256:synthetic-transcript-q2",
+    "version": 1,
+    "accessPolicyId": "policy_demo",
+    "status": "available"
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_call_enterprise_01",
+      "sourceId": "source_transcript_q2",
+      "locator": {
+        "timestampSeconds": 481
+      },
+      "text": "Large-enterprise demand remained strong, with regulated-industry pipeline reaching a record level.",
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-call-enterprise-01"
+    },
+    {
+      "excerptId": "excerpt_call_implementation_02",
+      "sourceId": "source_transcript_q2",
+      "locator": {
+        "timestampSeconds": 761
+      },
+      "text": "Mid-market customers are taking longer to move from pilot to scaled deployment as implementation requirements become more complex.",
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-call-implementation-02"
+    },
+    {
+      "excerptId": "excerpt_call_duration_unknown_03",
+      "sourceId": "source_transcript_q2",
+      "locator": {
+        "timestampSeconds": 822
+      },
+      "text": "We are not yet prepared to quantify how long the implementation-cycle effect will persist.",
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-call-duration-unknown-03"
+    },
+    {
+      "excerptId": "excerpt_call_gm_04",
+      "sourceId": "source_transcript_q2",
+      "locator": {
+        "timestampSeconds": 1020
+      },
+      "text": "Most of the gross-margin improvement came from durable infrastructure optimization, with a smaller contribution from enterprise mix.",
+      "classification": "synthetic",
+      "contentHash": "sha256:excerpt-call-gm-04"
+    }
+  ]
+}

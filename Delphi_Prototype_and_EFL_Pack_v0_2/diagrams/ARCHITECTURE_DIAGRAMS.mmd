@@ -1,0 +1,238 @@
+%% Delphi Architecture Diagrams v0.2
+%% Each block can be copied separately into Mermaid.
+
+%% -----------------------------------------------------------------
+%% 1. Product loop
+%% -----------------------------------------------------------------
+flowchart LR
+    E[Material Event] --> N[Normalize & Reconcile]
+    N --> S[Load Approved Thesis State]
+    S --> C[Compare Against Our View]
+    C --> P[Thesis Delta Proposals]
+    P --> H{Human Review}
+    H -->|Accept / Approved Edit| T[State Transition]
+    H -->|Reject / Escalate / Defer| R[Review History]
+    T --> L[Point-in-Time Decision Ledger]
+    L --> X[Follow-up / PM Brief / Later Outcome]
+
+%% -----------------------------------------------------------------
+%% 2. Prototype logical architecture
+%% -----------------------------------------------------------------
+flowchart TB
+    U[Analyst / PM Browser] --> UI[Next.js Product UI]
+    UI --> API[Typed Application Service]
+    API --> ORCH[Bounded Run Orchestrator]
+    ORCH --> FA[Fixture Adapter]
+    ORCH --> MA[Optional Model Adapter]
+    ORCH --> TOOLS[Controlled Tool Registry]
+    TOOLS --> SR[Source Repository]
+    TOOLS --> TS[Approved Thesis Snapshot]
+    ORCH --> AGENTS[Bounded Domain Agents]
+    AGENTS --> FIND[Structured Findings]
+    FIND --> VAL[Schema / Citation / Numeric / Policy Validators]
+    VAL --> PROP[Thesis Delta Proposals]
+    PROP --> REVIEW[Human Review Actions]
+    REVIEW --> GATE[State Transition Gateway]
+    GATE --> STORE[(Demo Ledger Store)]
+    ORCH --> EVENTS[Run Events / SSE]
+    EVENTS --> UI
+    STORE --> UI
+
+%% -----------------------------------------------------------------
+%% 3. Earnings-to-Thesis sequence
+%% -----------------------------------------------------------------
+sequenceDiagram
+    actor Analyst
+    participant UI as Delphi UI
+    participant O as Orchestrator
+    participant S as Source/Thesis Tools
+    participant A as Bounded Agents
+    participant V as Validators
+    participant R as Review Gateway
+    participant L as Decision Ledger
+
+    Analyst->>UI: Open earnings event
+    UI->>O: replayRun(caseId, eventId)
+    O->>S: load approved thesis v12
+    O->>S: load earnings sources
+    S-->>O: normalized evidence bundle
+    O->>A: execute bounded tasks
+    A-->>O: structured findings
+    O->>V: validate findings and proposed deltas
+    V-->>O: validated proposals + gaps
+    O-->>UI: stream RunEvents
+    UI-->>Analyst: show cited Thesis Delta Proposal
+    Analyst->>R: accept/edit/reject/escalate
+    R->>V: validate review and transition
+    V-->>R: approved transition
+    R->>L: append state transition v12 → v13
+    L-->>UI: updated thesis + audit record
+
+%% -----------------------------------------------------------------
+%% 4. Stable, runtime, and governance separation
+%% -----------------------------------------------------------------
+flowchart LR
+    subgraph Stable["Stable institutional state"]
+      IC[InvestmentCase]
+      T[ThesisVersion]
+      P[ThesisPillar]
+      F[Forecast]
+      RK[Risk]
+      OQ[OpenQuestion]
+      D[Decision]
+    end
+
+    subgraph Runtime["Run-specific state"]
+      RUN[WorkflowRun]
+      TASK[Task]
+      TOOL[ToolCall]
+      FIND[Finding]
+      PROP[DeltaProposal]
+      EVT[RunEvent]
+    end
+
+    subgraph Governance["Governed transition"]
+      REV[ReviewAction]
+      ST[StateTransition]
+      AUD[AuditRecord]
+    end
+
+    IC --> T
+    T --> P
+    T --> F
+    T --> RK
+    T --> OQ
+
+    RUN --> TASK
+    TASK --> TOOL
+    TASK --> FIND
+    FIND --> PROP
+    RUN --> EVT
+
+    PROP --> REV
+    REV --> ST
+    ST --> T
+    ST --> AUD
+    ST --> D
+
+%% -----------------------------------------------------------------
+%% 5. Decision graph
+%% -----------------------------------------------------------------
+flowchart LR
+    SD[Source Document] --> SE[Source Excerpt]
+    SE --> C[Claim]
+    C -->|supports / contradicts| A[Assumption]
+    A --> TP[Thesis Pillar]
+    TP --> DP[Delta Proposal]
+    DP --> RA[Review Action]
+    RA --> ST[State Transition]
+    ST --> DEC[Decision]
+    DEC --> POS[Position - read only]
+    POS --> OUT[Outcome]
+    OUT --> POST[Postmortem]
+
+%% -----------------------------------------------------------------
+%% 6. Control Plane / Data Plane
+%% -----------------------------------------------------------------
+flowchart TB
+    subgraph CP["Delphi Control Plane"]
+      LIC[License & entitlement]
+      BUND[Signed workflow / skill bundles]
+      VER[Version registry]
+      HEALTH[Content-free health metadata]
+      DEPLOY[Deployment automation]
+    end
+
+    subgraph DP["Customer-owned Data Plane"]
+      CONN[Connectors]
+      DB[(Customer Postgres)]
+      OBJ[(Object storage)]
+      WORK[Durable workflow workers]
+      AG[Agent runtime]
+      MG[Customer-approved model gateway]
+      IAM[Customer IAM / KMS / Secrets]
+      LEDGER[Decision Ledger & Audit]
+      POLICY[Policy Broker]
+    end
+
+    BUND -->|signed packages| WORK
+    VER --> WORK
+    LIC --> WORK
+    WORK --> HEALTH
+    CONN --> DB
+    CONN --> OBJ
+    WORK --> AG
+    AG --> POLICY
+    POLICY --> MG
+    POLICY --> DB
+    IAM --> POLICY
+    WORK --> LEDGER
+
+%% -----------------------------------------------------------------
+%% 7. Run state machine
+%% -----------------------------------------------------------------
+stateDiagram-v2
+    [*] --> Created
+    Created --> Loading
+    Loading --> Analyzing
+    Loading --> Degraded: source unavailable
+    Analyzing --> Validating
+    Analyzing --> Degraded: agent incomplete
+    Validating --> Proposed
+    Validating --> Degraded: validation gaps
+    Proposed --> Completed
+    Degraded --> Proposed: safe partial proposal
+    Degraded --> Failed: no safe output
+    Loading --> Failed: unrecoverable
+    Analyzing --> Failed: judge/orchestrator failure
+
+%% -----------------------------------------------------------------
+%% 8. Proposal state machine
+%% -----------------------------------------------------------------
+stateDiagram-v2
+    [*] --> Detected
+    Detected --> Analyzing
+    Analyzing --> Proposed
+    Analyzing --> Degraded
+    Proposed --> UnderReview
+    UnderReview --> Accepted
+    UnderReview --> Edited
+    UnderReview --> Rejected
+    UnderReview --> Escalated
+    UnderReview --> Deferred
+    Edited --> Accepted
+    Escalated --> Accepted
+    Escalated --> Rejected
+    Accepted --> Recorded
+    Recorded --> RolledBack
+    Degraded --> UnderReview
+
+%% -----------------------------------------------------------------
+%% 9. Agent workflow
+%% -----------------------------------------------------------------
+flowchart TB
+    E[Normalized earnings evidence] --> F[Agent 1: Facts & Numbers]
+    T[Approved thesis snapshot] --> TI[Agent 2: Thesis Impact]
+    F --> TI
+    F --> R[Agent 3: Risk & Counterevidence]
+    T --> R
+    TI --> R
+    F --> V1[Deterministic validators]
+    TI --> V1
+    R --> V1
+    V1 --> J[Agent 4: Judge / Delta Composer]
+    J --> V2[Proposal validators]
+    V2 --> P[Reviewable proposals]
+    P --> H[Human action]
+    H --> G[State Transition Gateway]
+
+%% -----------------------------------------------------------------
+%% 10. Tool policy
+%% -----------------------------------------------------------------
+flowchart LR
+    A[Agent proposes tool call] --> B[Policy Broker]
+    B --> C{Authorized?}
+    C -- No --> D[Deny + audit]
+    C -- Yes --> E[Task-scoped capability]
+    E --> F[Sandboxed tool]
+    F --> G[Sanitized result]

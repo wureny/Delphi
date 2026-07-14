@@ -1,0 +1,18 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "caseId": "case_arct_001",
+  "tenantId": "tenant_delphi_demo",
+  "entityId": "entity_arct",
+  "ticker": "ARCT-DEMO",
+  "companyName": "Archetype Systems",
+  "strategyPack": "fundamental_equity",
+  "sector": "AI infrastructure software",
+  "horizon": "24 months",
+  "ownerUserId": "user_analyst_01",
+  "status": "active",
+  "approvedThesisVersion": 12,
+  "createdAt": "2025-09-15T13:00:00Z",
+  "updatedAt": "2026-06-14T15:30:00Z"
+}

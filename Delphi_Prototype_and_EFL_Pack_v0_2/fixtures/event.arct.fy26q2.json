@@ -1,0 +1,20 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "domainEventId": "event_arct_fy26_q2",
+  "tenantId": "tenant_delphi_demo",
+  "entityId": "entity_arct",
+  "eventType": "earnings",
+  "title": "Archetype Systems FY2026 Q2 earnings",
+  "occurredAt": "2026-07-09T20:05:00Z",
+  "publishedAt": "2026-07-09T20:05:00Z",
+  "observedAt": "2026-07-09T20:05:12Z",
+  "sourceRefs": [
+    "source_release_q2",
+    "source_transcript_q2",
+    "source_team_forecast_q2"
+  ],
+  "clusterId": "cluster_arct_q2",
+  "status": "ready"
+}

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "delphi",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:$PATH exec npx next dev --port 3050"],
+      "port": 3050,
+      "autoPort": false
+    }
+  ]
+}

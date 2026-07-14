@@ -1,0 +1,23 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "name": "Delphi Earnings-to-Thesis Synthetic Demo",
+  "caseId": "case_arct_001",
+  "files": [
+    "case.arct.json",
+    "thesis.arct.v12.json",
+    "event.arct.fy26q2.json",
+    "sources/earnings-release.json",
+    "sources/transcript.json",
+    "sources/team-forecast.json",
+    "runs/successful-run.json",
+    "runs/degraded-run.json",
+    "proposals/thesis-deltas.json",
+    "proposals/degraded-thesis-deltas.json",
+    "expected/thesis.arct.v13.json",
+    "expected/ledger-transition.json",
+    "expected/privacy-receipt.json"
+  ],
+  "disclaimer": "All entities, figures, statements, and events are synthetic and are not investment advice."
+}

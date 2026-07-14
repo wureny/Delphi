@@ -1,0 +1,172 @@
+{
+  "fixtureVersion": "0.2.0",
+  "schemaVersion": "2026-07-13",
+  "synthetic": true,
+  "proposals": [
+    {
+      "proposalId": "proposal_arct_enterprise_001",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_success_001",
+      "fromThesisVersion": 12,
+      "deltaType": "thesis_pillar_update",
+      "targetObjectType": "thesis_pillar",
+      "targetObjectId": "pillar_enterprise_demand",
+      "headline": "Large-enterprise demand remains supportive",
+      "whatChanged": "Reported revenue exceeded the team forecast and management described record regulated-industry pipeline.",
+      "againstOurView": "The approved pillar expects durable large-enterprise demand despite budget scrutiny.",
+      "whyItMatters": "The quarter supports the demand pillar and raises confidence in the enterprise pipeline.",
+      "uncertainties": [
+        "Pipeline conversion timing remains unquantified."
+      ],
+      "recommendedFollowUp": "Track regulated-industry conversion and certification timing.",
+      "evidenceRefs": [
+        "excerpt_release_revenue_01",
+        "excerpt_call_enterprise_01"
+      ],
+      "findingRefs": [
+        "finding_revenue_beat",
+        "finding_enterprise_pipeline"
+      ],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/pillars/pillar_enterprise_demand/teamConviction",
+          "value": "high"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:06:30Z"
+    },
+    {
+      "proposalId": "proposal_arct_midmarket_002",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_success_001",
+      "fromThesisVersion": 12,
+      "deltaType": "thesis_pillar_update",
+      "targetObjectType": "thesis_pillar",
+      "targetObjectId": "pillar_midmarket_demand",
+      "headline": "Mid-market demand durability is less certain",
+      "whatChanged": "Net revenue retention was 114%, below the team's 118%–122% range, and management cited longer implementation cycles.",
+      "againstOurView": "The approved pillar assumes stable implementation velocity and resilient mid-market expansion.",
+      "whyItMatters": "A sustained implementation slowdown would reduce confidence in FY2027 expansion assumptions.",
+      "uncertainties": [
+        "Management did not quantify how long the implementation-cycle effect will persist."
+      ],
+      "recommendedFollowUp": "Revisit FY2027 net-retention assumptions after cohort and implementation data is available.",
+      "evidenceRefs": [
+        "excerpt_release_nrr_02",
+        "excerpt_call_implementation_02",
+        "excerpt_call_duration_unknown_03",
+        "excerpt_team_forecast_01"
+      ],
+      "findingRefs": [
+        "finding_nrr_miss",
+        "finding_implementation_delay"
+      ],
+      "confidence": "high",
+      "materiality": "high",
+      "requiredReviewerRole": "pm",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/pillars/pillar_midmarket_demand/status",
+          "value": "weakened"
+        },
+        {
+          "op": "replace",
+          "path": "/risks/risk_implementation/status",
+          "value": "increasing"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:06:35Z"
+    },
+    {
+      "proposalId": "proposal_arct_forecast_003",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_success_001",
+      "fromThesisVersion": 12,
+      "deltaType": "forecast_review",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_revenue_q3",
+      "headline": "Q3 revenue forecast requires upward review",
+      "whatChanged": "Company guidance implies a $551m midpoint versus the team's $540m base case.",
+      "againstOurView": "The current approved forecast is $540m.",
+      "whyItMatters": "The guidance midpoint is approximately 2.0% above the current base case.",
+      "uncertainties": [
+        "Guidance basis is synthetic and should be reviewed with margin and seasonality assumptions."
+      ],
+      "recommendedFollowUp": "Open the team model and review the Q3 revenue bridge.",
+      "evidenceRefs": [
+        "excerpt_release_guidance_04",
+        "excerpt_team_forecast_01"
+      ],
+      "findingRefs": [
+        "finding_guidance_variance"
+      ],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_revenue_q3/status",
+          "value": "review_required"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:06:40Z"
+    },
+    {
+      "proposalId": "proposal_arct_question_004",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_arct_001",
+      "runId": "run_arct_success_001",
+      "fromThesisVersion": 12,
+      "deltaType": "open_question_create",
+      "targetObjectType": "open_question",
+      "headline": "Separate implementation capacity from end-demand weakness",
+      "whatChanged": "Management attributed mid-market weakness to deployment complexity but did not provide cohort evidence.",
+      "againstOurView": "The current case does not distinguish delayed implementation from lower underlying demand.",
+      "whyItMatters": "The two explanations imply different forecast and valuation consequences.",
+      "uncertainties": [
+        "No cohort-level conversion or delay duration was disclosed."
+      ],
+      "recommendedFollowUp": "Request cohort conversion data and track pilot-to-production duration.",
+      "evidenceRefs": [
+        "excerpt_call_implementation_02",
+        "excerpt_call_duration_unknown_03"
+      ],
+      "findingRefs": [
+        "finding_open_question"
+      ],
+      "confidence": "medium",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "add",
+          "path": "/openQuestions/-",
+          "value": {
+            "questionId": "question_demand_vs_capacity",
+            "question": "Is mid-market weakness caused by implementation capacity or lower underlying demand?",
+            "ownerUserId": "user_analyst_01",
+            "status": "open",
+            "evidenceRefs": [
+              "excerpt_call_implementation_02",
+              "excerpt_call_duration_unknown_03"
+            ]
+          }
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-07-09T22:06:45Z"
+    }
+  ]
+}

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Delphi v0.2 · Prototype & EFL Documentation Portal</title>
+  <style>
+    :root{
+      --bg:#07100e;--panel:#0c1714;--panel2:#101e1a;--line:#22332e;--text:#edf5f1;
+      --muted:#9eada7;--green:#83f0bd;--green2:#42c98d;--amber:#f4c56b;--red:#ff8e8e;
+      --shadow:0 24px 70px rgba(0,0,0,.28);--radius:18px;--max:1240px;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;background:
+      radial-gradient(circle at 18% -10%,rgba(65,201,141,.15),transparent 34%),
+      radial-gradient(circle at 96% 12%,rgba(69,122,255,.08),transparent 30%),var(--bg);
+      color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}
+    a{color:inherit;text-decoration:none} button,input{font:inherit}
+    .topbar{position:sticky;top:0;z-index:40;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(7,16,14,.82);backdrop-filter:blur(18px)}
+    .topbar-inner{max-width:var(--max);margin:auto;padding:14px 24px;display:flex;align-items:center;gap:18px}
+    .brand{display:flex;align-items:center;gap:11px;font-weight:780;letter-spacing:-.02em}.mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(145deg,var(--green),#238f64);display:grid;place-items:center;color:#062118;font-weight:900;box-shadow:0 0 32px rgba(131,240,189,.22)}
+    .toplinks{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}.toplinks a{padding:8px 12px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:13px}.toplinks a:hover{color:var(--text);border-color:#395249}
+    main{max-width:var(--max);margin:auto;padding:62px 24px 100px}
+    .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--green);font-weight:800}
+    h1{font-size:clamp(42px,7vw,78px);line-height:.98;letter-spacing:-.055em;max-width:900px;margin:18px 0 24px}
+    .dek{font-size:clamp(18px,2.3vw,24px);color:#b9c7c1;max-width:860px;margin:0}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-weight:740;cursor:pointer}.btn.primary{background:var(--green);color:#052016;border-color:transparent}.btn:hover{transform:translateY(-1px)}
+    .meta-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:46px 0 72px}.metric{padding:18px;border:1px solid var(--line);border-radius:15px;background:rgba(12,23,20,.72)}.metric b{display:block;font-size:23px;letter-spacing:-.03em}.metric span{font-size:12px;color:var(--muted)}
+    section{margin-top:76px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:24px}.section-head h2{font-size:34px;letter-spacing:-.035em;margin:0}.section-head p{color:var(--muted);margin:0;max-width:600px}
+    .loop{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.loop-node{min-height:124px;padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(16,30,26,.96),rgba(10,21,18,.96));position:relative}.loop-node:not(:last-child):after{content:"→";position:absolute;right:-12px;top:46px;z-index:2;color:var(--green);font-weight:900}.loop-node b{display:block;margin-top:18px;font-size:14px}.loop-node span{font-size:12px;color:var(--muted)}.step{font-size:11px;color:var(--green);font-weight:800}
+    .readiness{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}.panel{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(160deg,rgba(16,30,26,.9),rgba(9,19,16,.9));box-shadow:var(--shadow);padding:24px}.checklist{display:grid;gap:10px}.check{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:start;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.check:last-child{border-bottom:0}.icon{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(131,240,189,.12);color:var(--green);font-size:12px;font-weight:900}.tag{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);white-space:nowrap}.tag.blocker{color:var(--amber);border-color:rgba(244,197,107,.35)}
+    .deadline{display:flex;flex-direction:column;justify-content:space-between}.deadline .date{font-size:48px;letter-spacing:-.05em;font-weight:850;line-height:1}.deadline small{color:var(--muted)}.warning{margin-top:18px;padding:14px;border-radius:12px;background:rgba(244,197,107,.08);border:1px solid rgba(244,197,107,.26);color:#f8db9f;font-size:13px}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.search{min-width:280px;flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#09130f;color:var(--text);outline:none}.chip{padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}.chip.active{background:rgba(131,240,189,.12);color:var(--green);border-color:rgba(131,240,189,.34)}
+    .doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.doc{padding:18px;border:1px solid var(--line);border-radius:15px;background:rgba(12,23,20,.74);display:flex;flex-direction:column;min-height:210px;transition:.18s}.doc:hover{transform:translateY(-3px);border-color:#385148;background:#10201b}.doc .num{font-size:11px;color:var(--green);font-weight:800}.doc h3{font-size:18px;margin:10px 0 7px;line-height:1.25}.doc p{font-size:13px;color:var(--muted);margin:0}.doc footer{display:flex;justify-content:space-between;gap:12px;margin-top:auto;padding-top:20px;font-size:11px;color:#7f9189}.empty{display:none;padding:30px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+    .arch{display:grid;grid-template-columns:1fr 60px 1fr;align-items:stretch;gap:12px}.plane{border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--panel)}.plane h3{margin:0 0 6px}.plane p{color:var(--muted);font-size:13px}.plane ul{padding-left:18px;color:#c5d0cb;font-size:13px}.arrow{display:grid;place-items:center;color:var(--green);font-size:28px}.customer{border-color:rgba(131,240,189,.4);box-shadow:inset 0 0 0 1px rgba(131,240,189,.06)}
+    .principles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.principle{padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(12,23,20,.68)}.principle b{display:block;margin-bottom:8px}.principle p{font-size:13px;color:var(--muted);margin:0}
+    .footer{margin-top:90px;padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:30px;color:var(--muted);font-size:12px}
+    @media(max-width:1000px){.doc-grid{grid-template-columns:repeat(2,1fr)}.loop{grid-template-columns:repeat(2,1fr)}.loop-node:after{display:none}.principles{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){.toplinks{display:none}main{padding-top:42px}.meta-strip,.readiness,.doc-grid,.arch,.principles{grid-template-columns:1fr}.arrow{transform:rotate(90deg);height:38px}.section-head{display:block}.section-head p{margin-top:8px}.footer{display:block}.footer div+div{margin-top:10px}}
+  </style>
+</head>
+<body>
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#top"><span class="mark">D</span><span>Delphi · v0.2</span></a>
+      <div class="toplinks">
+        <a href="Delphi_Prototype_Wireframe.html">Interactive prototype</a>
+        <a href="Delphi_Company_Website_Mockup.html">Website mockup</a>
+        <a href="Delphi_Architecture_Board.html">Architecture board</a>
+        <a href="../Delphi_Master_Context.md">Master context</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <div class="eyebrow">Prototype · Architecture · EFL Application · Customer Materials</div>
+    <h1>把 Delphi 从愿景变成一个可点击、可解释、可实现的闭环。</h1>
+    <p class="dek">这套 v0.2 文档包围绕一个核心证明组织：新财报如何被转化为有证据的 Thesis Delta，经人工审核后成为可追踪的正式状态变更。</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="Delphi_Prototype_Wireframe.html">打开可交互原型 →</a>
+      <a class="btn" href="../00_README.md">从 README 开始</a>
+      <a class="btn" href="../12_BUILD_BRIEF_FOR_CLAUDE_CODE_CODEX.md">复制实现任务书</a>
+    </div>
+
+    <div class="meta-strip">
+      <div class="metric"><b>1</b><span>首个高价值 workflow</span></div>
+      <div class="metric"><b>5</b><span>审核动作：Accept / Edit / Reject / Escalate / Defer</span></div>
+      <div class="metric"><b>2</b><span>稳定演示模式：successful / degraded</span></div>
+      <div class="metric"><b>0</b><span>fixture happy path 的网络依赖</span></div>
+    </div>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">The proof</div><h2>Earnings-to-Thesis 闭环</h2></div>
+        <p>不是“生成一篇更好的研报”，而是把新信息转化为受控、可审计、可回放的投资状态变化。</p>
+      </div>
+      <div class="loop">
+        <div class="loop-node"><span class="step">01</span><b>Earnings event</b><span>财报、电话会、团队预测</span></div>
+        <div class="loop-node"><span class="step">02</span><b>Reconcile</b><span>提取事实并核对数字</span></div>
+        <div class="loop-node"><span class="step">03</span><b>Compare</b><span>对比批准的 Thesis v12</span></div>
+        <div class="loop-node"><span class="step">04</span><b>Propose</b><span>形成有证据的 Delta</span></div>
+        <div class="loop-node"><span class="step">05</span><b>Review</b><span>人工接受、编辑或升级</span></div>
+        <div class="loop-node"><span class="step">06</span><b>Record</b><span>批准后写入 Ledger v13</span></div>
+        <div class="loop-node"><span class="step">07</span><b>Replay</b><span>还原当时信息与责任链</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">EFL readiness</div><h2>申请不是靠页面漂亮，而是靠证据闭环。</h2></div>
+        <p>本包覆盖技术、产品、市场、里程碑和外部叙事；法律实体、全职投入和真实 traction 仍需创始人确认。</p>
+      </div>
+      <div class="readiness">
+        <div class="panel checklist">
+          <div class="check"><span class="icon">✓</span><div><b>明确的 Digital Tech 技术核心</b><div style="color:var(--muted);font-size:13px">Canonical investment state、bounded agent runtime、validated state transition、point-in-time ledger。</div></div><span class="tag">Documented</span></div>
+          <div class="check"><span class="icon">✓</span><div><b>可重放的交互式 Demo</b><div style="color:var(--muted);font-size:13px">成功路径、降级路径、审批权限、证据抽屉、Privacy Receipt。</div></div><span class="tag">Included</span></div>
+          <div class="check"><span class="icon">✓</span><div><b>窄客户切口与商业化路径</b><div style="color:var(--muted);font-size:13px">基本面投资团队，先做 4–8 周 Earnings-to-Thesis shadow pilot。</div></div><span class="tag">Hypothesis</span></div>
+          <div class="check"><span class="icon">!</span><div><b>公司注册与至少一名全职成员</b><div style="color:var(--muted);font-size:13px">这是 EFL 明确资格条件，必须用真实事实填写。</div></div><span class="tag blocker">Founder blocker</span></div>
+          <div class="check"><span class="icon">!</span><div><b>团队、IP、客户发现与 traction</b><div style="color:var(--muted);font-size:13px">不得把访谈、兴趣或 fixture 写成客户、收入或生产使用。</div></div><span class="tag blocker">Founder input</span></div>
+        </div>
+        <div class="panel deadline">
+          <div>
+            <div class="eyebrow">Application deadline</div>
+            <div class="date">Jul 31</div>
+            <div style="font-size:18px;margin-top:10px">2026 · 11:59 PM ET</div>
+            <small>材料中的日期以 2026–27 官方申请信息为准。</small>
+          </div>
+          <div class="warning">这套材料提升申请完整度，但不能代替可运行演示、公司资格、创始人执行证据或客户验证，也不保证录取。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="documents">
+      <div class="section-head">
+        <div><div class="eyebrow">Document library</div><h2>按受众查找材料</h2></div>
+        <p>所有文档都可以独立交付；实现时优先使用 Master Context 与 Build Brief。</p>
+      </div>
+      <div class="filters">
+        <input id="search" class="search" type="search" placeholder="搜索文档、受众或主题…" aria-label="搜索文档" />
+        <button class="chip active" data-filter="all">全部</button>
+        <button class="chip" data-filter="internal">内部</button>
+        <button class="chip" data-filter="engineering">工程</button>
+        <button class="chip" data-filter="investor">EFL / 投资人</button>
+        <button class="chip" data-filter="customer">客户 / 网站</button>
+      </div>
+      <div id="docGrid" class="doc-grid"></div>
+      <div id="empty" class="empty">没有匹配文档。</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">Trust boundary</div><h2>机构版本的主架构方向</h2></div>
+        <p>原型可以单机运行，但叙事应清楚展示未来生产边界：控制平面分发软件，客户数据平面保留研究内容与模型调用。</p>
+      </div>
+      <div class="arch">
+        <div class="plane">
+          <div class="eyebrow">Delphi-managed</div><h3>Control Plane</h3>
+          <p>只处理不含客户内容的产品运营能力。</p>
+          <ul><li>License & entitlements</li><li>Signed workflow / skill bundles</li><li>Version and health metadata</li><li>Deployment coordination</li></ul>
+        </div>
+        <div class="arrow">→</div>
+        <div class="plane customer">
+          <div class="eyebrow">Customer-owned</div><h3>Data Plane</h3>
+          <p>承载真正敏感的投研内容与执行。</p>
+          <ul><li>Documents, models, thesis and positions</li><li>Agent runtime and model endpoint</li><li>Decision Ledger, embeddings and audit</li><li>Customer IAM, KMS and secrets</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <div><div class="eyebrow">Design doctrine</div><h2>四条不能被代码 Agent 稀释的原则</h2></div>
+      </div>
+      <div class="principles">
+        <div class="principle"><b>Delta over document</b><p>首页展示“变化及其影响”，而不是另一篇长报告。</p></div>
+        <div class="principle"><b>Proposal before mutation</b><p>模型可以提案，只有授权用户可以改变正式状态。</p></div>
+        <div class="principle"><b>Honest degradation</b><p>缺失证据必须显式阻断结论，不能用看似合理的文本填空。</p></div>
+        <div class="principle"><b>State outlives models</b><p>模型和 Agent SDK 可替换，正式状态、权限、历史和评测长期存在。</p></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      <div>Delphi Prototype & EFL Application Pack · v0.2 · 2026-07-13</div>
+      <div>Synthetic demonstration data · Not investment advice · No customer or performance claims</div>
+    </div>
+  </main>
+
+  <script>
+    const docs = [
+      ["00","README / 使用说明","00_README.md","internal engineering investor customer","中文","入口、文档地图、事实标签、EFL 约束和推荐使用顺序。"],
+      ["01","内部产品与公司战略","01_INTERNAL_STRATEGY_ZH.md","internal investor","中文","定位、ICP、GTM、护城河、指标与反目标。"],
+      ["02","Prototype PRD","02_PROTOTYPE_PRD_ZH.md","internal engineering","中文","Earnings-to-Thesis 原型范围、角色、页面、验收与非目标。"],
+      ["03","UX & Interaction Spec","03_UX_AND_INTERACTION_SPEC_ZH.md","engineering internal","中文","Change Inbox、Case、Ledger、Runs、Trust 的交互与视觉规则。"],
+      ["04","System Architecture","04_SYSTEM_ARCHITECTURE.md","engineering investor customer","双语","原型架构、生产架构、信任边界和迁移路径。"],
+      ["05","Domain Model & API Contracts","05_DOMAIN_MODEL_AND_API_CONTRACTS.md","engineering","英文为主","对象、API、RunEvent、Review 与 StateTransition 合同。"],
+      ["06","Agent Workflow & Evals","06_AGENT_WORKFLOW_AND_EVALS.md","engineering investor","双语","有边界 Agent、验证器、降级语义和评测方案。"],
+      ["07","Security, Privacy & Trust","07_SECURITY_PRIVACY_TRUST.md","engineering customer investor","双语","数据分级、客户数据平面、Privacy Receipt 与 Trust Package。"],
+      ["08","Investor / Incubator Memo","08_INVESTOR_INCUBATOR_MEMO_EN.md","investor","English","面向 EFL、种子投资人与顾问的完整英文 Memo。"],
+      ["09","EFL Application Answer Bank","09_EFL_APPLICATION_ANSWER_BANK_EN.md","investor","English","按官方申请结构准备的答案底稿与创始人占位符。"],
+      ["10","Customer Overview","10_CUSTOMER_OVERVIEW_EN.md","customer","English","面向 CIO、PM、Head of Research、COO/CTO/CCO 的客户说明。"],
+      ["11","Company Website Copy","11_WEBSITE_COPY_EN.md","customer investor","English","可公开网站的信息架构、正文、FAQ 与禁用表述。"],
+      ["12","Claude Code / Codex Build Brief","12_BUILD_BRIEF_FOR_CLAUDE_CODE_CODEX.md","engineering","双语","可直接复制给代码 Agent 的项目任务书。"],
+      ["13","Demo Script & Acceptance","13_DEMO_SCRIPT_AND_ACCEPTANCE.md","engineering investor","双语","90 秒、4 分钟演示脚本，功能验收和故障预案。"],
+      ["14","Competitive Positioning","14_COMPETITIVE_POSITIONING.md","internal investor","双语","相对通用模型、金融研究平台与内部自建的可信差异。"],
+      ["15","Roadmap & Risk Register","15_ROADMAP_RISK_REGISTER_ZH.md","internal investor engineering","中文","提交前冲刺、六个月里程碑、风险、kill signals。"],
+      ["16","Founder Input Checklist","16_FOUNDER_INPUT_CHECKLIST.md","internal investor","双语","公司、团队、IP、traction、融资等不可编造的必填项。"],
+      ["17","Sources & Assumptions","17_SOURCES_AND_ASSUMPTIONS.md","internal investor customer","双语","官方来源、竞品来源、内部假设与证据等级。"],
+      ["MC","Master Context","Delphi_Master_Context.md","engineering","双语","PRD、架构、合同、评测、安全和验收的合并实现上下文。"],
+      ["TS","TypeScript Contracts","schemas/domain-types.ts","engineering","TypeScript","可直接复制进代码库的共享领域类型。"],
+      ["JS","JSON Schema","schemas/domain.schema.json","engineering","JSON","用于 fixture 和 API payload 的结构验证。"],
+      ["AB","Architecture Board","html/Delphi_Architecture_Board.html","engineering investor customer","English","七张可截图、可展示的产品与技术架构图。"]
+    ];
+    const grid=document.getElementById('docGrid'), empty=document.getElementById('empty'), search=document.getElementById('search');
+    let active='all';
+    function render(){
+      const q=search.value.trim().toLowerCase();
+      const filtered=docs.filter(d=> (active==='all'||d[3].includes(active)) && (!q||d.join(' ').toLowerCase().includes(q)));
+      grid.innerHTML=filtered.map(d=>`<a class="doc" href="../${d[2]}"><span class="num">${d[0]}</span><h3>${d[1]}</h3><p>${d[5]}</p><footer><span>${d[4]}</span><span>Open →</span></footer></a>`).join('');
+      empty.style.display=filtered.length?'none':'block';
+    }
+    document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');active=b.dataset.filter;render()}));
+    search.addEventListener('input',render);render();
+  </script>
+</body>
+</html>
