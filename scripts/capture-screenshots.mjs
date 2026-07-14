@@ -17,21 +17,27 @@ const context = await browser.newContext({
   viewport: { width: 1440, height: 900 },
   deviceScaleFactor: 2,
 });
-const page = await context.newPage();
+let page;
+
+const open = async (path) => {
+  await page?.close();
+  page = await context.newPage();
+  await page.goto(path.startsWith("http") ? path : `${BASE}${path}`);
+};
 
 const shot = async (name) => {
   await page.waitForTimeout(400);
-  await page.screenshot({ path: `${OUT}${name}.png` });
+  await page.screenshot({ path: `${OUT}${name}.png`, animations: "disabled" });
   console.log(`captured ${name}.png`);
 };
 
 // 1 — Change Inbox (pristine).
-await page.goto(`${BASE}/`);
+await open("/");
 await page.getByRole("heading", { name: "Change Inbox" }).waitFor();
 await shot("change-inbox");
 
 // 2 — Delta Review (pristine, focused on the weakening high-materiality delta).
-await page.goto(`${BASE}/deltas/proposal_arct_midmarket_002`);
+await open("/deltas/proposal_arct_midmarket_002");
 await page.locator("#proposal_arct_midmarket_002").waitFor();
 await shot("delta-review");
 
@@ -46,13 +52,15 @@ await shot("evidence-drawer");
 await page.keyboard.press("Escape");
 
 // 4 — Run Observatory after a deterministic replay.
-await page.goto(`${BASE}/runs/run-arct-success`);
+await open("/runs/run-arct-success");
 await page.getByRole("button", { name: "Replay deterministic demo" }).last().click();
 await page.getByText("15/15 events").waitFor({ timeout: 20_000 });
+await open("/runs/run-arct-success");
+await page.getByText("15/15 events").waitFor();
 await shot("run-observatory");
 
 // 5 — Perform the demo review flow, then capture the ledger transition.
-await page.goto(`${BASE}/deltas/proposal_arct_enterprise_001`);
+await open("/deltas/proposal_arct_enterprise_001");
 const card = (id) => page.locator(`#${id}`);
 
 await card("proposal_arct_enterprise_001").getByRole("button", { name: "Accept", exact: true }).click();
@@ -72,10 +80,12 @@ await page.getByRole("button", { name: "Apply approved changes" }).click();
 await page.getByRole("button", { name: "Record state transition" }).click();
 await page.getByRole("heading", { name: "v12 → v13" }).waitFor();
 await page.waitForTimeout(5600); // let the confirmation toast clear
+await open(page.url()); // Fresh page avoids Chromium sticky-layer capture artifacts.
+await page.getByRole("heading", { name: "v12 → v13" }).waitFor();
 await shot("decision-ledger");
 
 // 6 — Privacy Receipt (now shows 4 proposed / 3 approved — real state).
-await page.goto(`${BASE}/trust/run-arct-success`);
+await open("/trust/run-arct-success");
 await page.getByText("Canonical writes").waitFor();
 await shot("privacy-receipt");
 

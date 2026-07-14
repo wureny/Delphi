@@ -60,7 +60,7 @@ export function ToastViewport() {
           key={t.id}
           onClick={() => dismiss(t.id)}
           className={cn(
-            "pointer-events-auto flex items-start gap-2 rounded-md border bg-panel-2 px-3 py-2 text-left shadow-xl",
+            "pointer-events-auto flex items-start gap-2 rounded-[3px] border bg-panel px-3 py-2.5 text-left shadow-[0_14px_34px_rgba(21,32,41,0.15)]",
             toneBorder[t.tone],
           )}
         >

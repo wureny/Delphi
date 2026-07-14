@@ -102,7 +102,7 @@ function useInboxRows(): InboxRowData[] {
       stateTone: "warn",
       company: arctCase.companyName,
       ticker: arctCase.ticker,
-      event: "FY2026 Q2 Earnings — transcript unavailable",
+      event: "FY2026 Q2 Earnings: transcript unavailable",
       summary: `2 safe deltas retained · ${degradedBlockedProposalIds.length} transcript-dependent proposals blocked`,
       materiality: "medium",
       evidence: evidenceHealth(
@@ -130,7 +130,7 @@ function useInboxRows(): InboxRowData[] {
         summary: "Next expected event: FY2026 Q3 earnings",
         materiality: "low",
         evidence: { available: 0, total: 0 },
-        reviewer: "—",
+        reviewer: "Not assigned",
         time: "2026-07-11T14:00:00Z",
         cta: "No action",
         disabledReason: "Outside the scope of this demo fixture. Only the ARCT-DEMO case is interactive.",
@@ -147,7 +147,7 @@ function useInboxRows(): InboxRowData[] {
         summary: "Watching hyperscaler capex commentary",
         materiality: "low",
         evidence: { available: 0, total: 0 },
-        reviewer: "—",
+        reviewer: "Not assigned",
         time: "2026-07-10T09:30:00Z",
         cta: "No action",
         disabledReason: "Outside the scope of this demo fixture. Only the ARCT-DEMO case is interactive.",
@@ -188,8 +188,9 @@ function InboxRow({ row }: { row: InboxRowData }) {
   return (
     <li
       className={cn(
-        "group border-b border-line px-4 py-3 transition-colors",
-        interactive ? "cursor-pointer hover:bg-panel-2/60" : "opacity-55",
+        "group relative border-b border-line px-5 py-4 last:border-0",
+        interactive ? "cursor-pointer hover:bg-inset" : "opacity-50",
+        row.state === "needs_review" && "before:absolute before:top-3 before:bottom-3 before:left-0 before:w-0.5 before:bg-accent",
         row.degraded && transcriptUnavailable && "border-l-2 border-l-warn",
       )}
       onClick={interactive ? open : undefined}
@@ -207,15 +208,17 @@ function InboxRow({ row }: { row: InboxRowData }) {
         <Badge tone="warn" outlined className="hidden sm:inline-flex">
           Synthetic
         </Badge>
-        <span className="ml-auto font-mono text-[11px] text-ink-3 tnum">{formatDateTime(row.time)} UTC</span>
+        <span className="w-full font-mono text-[10px] tracking-wide text-ink-3 tnum sm:ml-auto sm:w-auto">
+          {formatDateTime(row.time)} UTC
+        </span>
       </div>
-      <div className="mt-1.5 flex items-center justify-between gap-3">
+      <div className="mt-2.5 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
         <div className="min-w-0">
-          <p className="truncate text-[15px] font-semibold text-ink">
+          <p className="text-[15px] font-semibold tracking-[-0.015em] text-ink sm:truncate">
             {row.company} <span className="font-mono text-xs font-normal text-ink-3">({row.ticker})</span>
-            <span className="text-ink-2"> — {row.event}</span>
+            <span className="text-ink-2">: {row.event}</span>
           </p>
-          <p className="mt-0.5 truncate text-[13px] text-ink-2">
+          <p className="mt-1 text-xs leading-relaxed text-ink-2 sm:truncate">
             {row.summary}
             <span className="text-ink-3"> · Required reviewer: {row.reviewer}</span>
           </p>
@@ -224,7 +227,7 @@ function InboxRow({ row }: { row: InboxRowData }) {
           <Button
             variant={row.state === "needs_review" ? "primary" : "secondary"}
             size="sm"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
             onClick={(e) => {
               e.stopPropagation();
               open();
@@ -234,7 +237,7 @@ function InboxRow({ row }: { row: InboxRowData }) {
             <ArrowRight size={13} aria-hidden />
           </Button>
         ) : (
-          <Button variant="ghost" size="sm" className="shrink-0" disabled title={row.disabledReason}>
+          <Button variant="ghost" size="sm" className="w-full shrink-0 sm:w-auto" disabled title={row.disabledReason}>
             {row.cta}
           </Button>
         )}
@@ -252,31 +255,31 @@ export default function ChangeInboxPage() {
   ) as Record<InboxFilter, number>;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
-      <header className="flex flex-wrap items-end justify-between gap-2">
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line-strong pb-5">
         <div>
-          <h1 className="text-lg font-semibold text-ink">Change Inbox</h1>
-          <p className="mt-0.5 text-[13px] text-ink-2">
+          <h1 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Change Inbox</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-ink-2">
             Material changes awaiting a human decision against the approved investment view.
           </p>
         </div>
-        <p className="flex items-center gap-1.5 text-xs text-ink-3">
-          <Eye size={13} aria-hidden />
+        <p className="flex items-center gap-1.5 pb-0.5 text-[11px] text-ink-3">
+          <Eye size={13} strokeWidth={1.6} aria-hidden />
           Delphi is monitoring 18 active cases
         </p>
       </header>
 
-      <div role="group" aria-label="Inbox filters" className="mt-4 flex flex-wrap gap-1.5">
+      <div role="group" aria-label="Inbox filters" className="mt-5 flex flex-wrap gap-6 border-b border-line">
         {FILTERS.map((f) => (
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
             aria-pressed={filter === f.id}
             className={cn(
-              "rounded-sm border px-2.5 py-1 text-xs transition-colors",
+              "relative -mb-px border-b-2 px-0.5 pb-2.5 text-[11px] font-medium",
               filter === f.id
-                ? "border-accent/50 bg-accent-dim/40 font-medium text-ink"
-                : "border-line bg-panel text-ink-2 hover:border-line-strong hover:text-ink",
+                ? "border-accent text-ink"
+                : "border-transparent text-ink-3 hover:border-line-strong hover:text-ink",
             )}
           >
             {f.label} <span className="ml-1 font-mono text-[10px] text-ink-3 tnum">{counts[f.id]}</span>
@@ -284,7 +287,7 @@ export default function ChangeInboxPage() {
         ))}
       </div>
 
-      <ul className="mt-3 overflow-hidden rounded-md border border-line bg-panel">
+      <ul className="mt-4 overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_1px_0_rgba(21,32,41,0.03)]">
         {visible.length === 0 ? (
           <li className="flex flex-col items-center gap-2 px-4 py-12 text-center">
             <FileSearch2 size={22} className="text-ink-3" aria-hidden />
@@ -298,7 +301,7 @@ export default function ChangeInboxPage() {
         )}
       </ul>
 
-      <p className="mt-3 text-[11px] text-ink-3">
+      <p className="mt-4 max-w-3xl text-[10px] leading-relaxed text-ink-3">
         All companies, events, figures, and statements are synthetic.{" "}
         <Link href="/trust" className="text-accent hover:underline">
           See the Privacy Receipt

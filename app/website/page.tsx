@@ -25,7 +25,7 @@ import {
 import { resolvePublicContactEmail } from "@/lib/public-contact";
 
 export const metadata: Metadata = {
-  title: "Delphi — The Decision Layer for Fundamental Investment Teams",
+  title: "Delphi | The Decision Layer for Fundamental Investment Teams",
   description:
     "Delphi compares material events against your approved investment view, proposes cited thesis changes, and records only what your team approves.",
 };
@@ -34,17 +34,17 @@ const CONTACT = resolvePublicContactEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL)
 
 function SectionHeading({ eyebrow, title, lead }: { eyebrow?: string; title: string; lead?: string }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      {eyebrow && <p className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">{eyebrow}</p>}
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{title}</h2>
-      {lead && <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{lead}</p>}
+    <div className="max-w-3xl">
+      {eyebrow && <p className="text-[10px] font-semibold tracking-[0.12em] text-accent uppercase">{eyebrow}</p>}
+      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em] text-ink sm:text-3xl">{title}</h2>
+      {lead && <p className="mt-3 max-w-2xl text-[14px] leading-relaxed text-ink-2">{lead}</p>}
     </div>
   );
 }
 
 function Screenshot({ src, alt, caption }: { src: string; alt: string; caption: string }) {
   return (
-    <figure className="overflow-hidden rounded-md border border-line bg-panel">
+    <figure className="overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_14px_50px_rgba(21,32,41,0.08)]">
       {/* Static product screenshots captured from the real prototype. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="w-full" loading="lazy" />
@@ -65,11 +65,11 @@ export default function WebsitePage() {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       {/* Navigation */}
-      <header className="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-line-strong bg-canvas/95 backdrop-blur">
         <nav className="mx-auto flex h-14 max-w-6xl items-center gap-5 px-4" aria-label="Website">
           <a href="#top" className="flex items-center gap-2">
-            <span className="flex size-6 items-center justify-center rounded-sm border border-accent/40 bg-accent-dim/40">
-              <Landmark size={13} className="text-accent" aria-hidden />
+            <span className="flex size-6 items-center justify-center rounded-[3px] bg-ink">
+              <Landmark size={13} className="text-white" aria-hidden />
             </span>
             <span className="text-sm font-semibold tracking-tight">Delphi</span>
           </a>
@@ -101,32 +101,21 @@ export default function WebsitePage() {
 
       <main id="top">
         {/* ------------------------------ Hero ------------------------------ */}
-        <section className="relative overflow-hidden border-b border-line">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-              maskImage: "radial-gradient(ellipse 90% 70% at 50% 0%, black 0%, transparent 70%)",
-              opacity: 0.5,
-            }}
-          />
-          <div className="relative mx-auto max-w-6xl px-4 pt-16 pb-14 sm:pt-24">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-panel px-3 py-1 text-xs text-ink-2">
-                <span className="size-1.5 rounded-full bg-warn" aria-hidden />
+        <section className="border-b border-line-strong">
+          <div className="mx-auto grid min-h-[calc(100dvh-3.5rem)] max-w-6xl items-center gap-10 px-4 py-14 lg:grid-cols-[0.98fr_1.12fr] lg:gap-12 lg:py-16">
+            <div>
+              <p className="flex items-center gap-2 text-[11px] font-medium text-ink-3">
+                <span className="h-px w-7 bg-warn" aria-hidden />
                 Pre-launch prototype · synthetic demonstration · seeking design partners
               </p>
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+              <h1 className="mt-5 text-4xl font-semibold tracking-[-0.045em] text-balance text-ink">
                 From market events to governed investment decisions.
               </h1>
-              <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-ink-2 sm:text-base">
+              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-2">
                 Delphi compares new evidence against your team's approved thesis, identifies what changed, and turns
                 only human-approved updates into a point-in-time Decision Ledger.
               </p>
-              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <div className="mt-7 flex flex-wrap items-center gap-3">
                 {CONTACT ? (
                   <a
                     href={`mailto:${CONTACT}?subject=Delphi%20design-partner%20conversation`}
@@ -143,16 +132,16 @@ export default function WebsitePage() {
                   <ArrowRight size={14} aria-hidden />
                 </a>
               </div>
-              <p className="mt-5 text-[13px] text-ink-3">
+              <p className="mt-7 border-l-2 border-line-strong pl-3 text-xs leading-relaxed text-ink-3">
                 Models propose. Your team decides. Every approved change keeps its evidence and history.
               </p>
             </div>
 
-            <div className="mx-auto mt-12 max-w-4xl">
+            <div className="min-w-0">
               <Screenshot
                 src="/screenshots/delta-review.png"
                 alt="Delphi Delta Review screen showing a cited thesis delta with accept, edit, reject, escalate, and defer actions"
-                caption="Real prototype: a cited Thesis Delta reviewed against approved thesis v12 — synthetic demonstration data."
+                caption="Real prototype: a cited Thesis Delta reviewed against approved thesis v12, using synthetic demonstration data."
               />
             </div>
           </div>
@@ -162,10 +151,10 @@ export default function WebsitePage() {
         <section className="border-b border-line py-16">
           <div className="mx-auto max-w-6xl px-4">
             <SectionHeading
-              title="Your team has more answers than ever — and no formal system for how the view changes."
+              title="Your team has more answers than ever, but no formal system for how the view changes."
               lead="After earnings, analysts still reconcile numbers, compare management commentary with the current thesis, update fragmented trackers, brief the PM, and preserve the reasoning manually. A generated report can summarize the event. It cannot tell the institution what it officially believed before, who approved a new view, or how to reconstruct the decision later."
             />
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-10 grid border-y border-line-strong md:grid-cols-3">
               {[
                 {
                   icon: <Layers size={17} aria-hidden />,
@@ -183,7 +172,7 @@ export default function WebsitePage() {
                   body: "Months later, teams struggle to recover what evidence was available and why the view changed.",
                 },
               ].map((c) => (
-                <div key={c.title} className="rounded-md border border-line bg-panel p-5">
+                <div key={c.title} className="border-b border-line px-0 py-5 md:border-r md:border-b-0 md:px-5 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
                   <span className="text-accent">{c.icon}</span>
                   <h3 className="mt-3 text-[15px] font-semibold">{c.title}</h3>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-ink-2">{c.body}</p>
@@ -201,7 +190,7 @@ export default function WebsitePage() {
               title="Earnings-to-Thesis"
               lead="Delphi does not default to another long report. It creates a small set of cited, reviewable changes to the state your team already approved."
             />
-            <ol className="mx-auto mt-10 grid max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ol className="mt-10 grid max-w-5xl border-y border-line-strong sm:grid-cols-2 lg:grid-cols-3">
               {[
                 "Detect the event",
                 "Reconcile facts and forecasts",
@@ -210,8 +199,8 @@ export default function WebsitePage() {
                 "Review and approve",
                 "Record the state transition",
               ].map((step, i) => (
-                <li key={step} className="flex items-start gap-3 rounded-md border border-line bg-panel p-4">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-sm bg-accent-dim/50 font-mono text-xs text-accent tnum">
+                <li key={step} className="flex min-h-20 items-start gap-3 border-b border-line p-4 sm:border-r lg:[&:nth-child(3n)]:border-r-0 lg:[&:nth-last-child(-n+3)]:border-b-0">
+                  <span className="flex size-6 shrink-0 items-center justify-center border border-line-strong bg-inset font-mono text-xs text-accent tnum">
                     {i + 1}
                   </span>
                   <span className="text-[14px] text-ink">{step}</span>
@@ -222,7 +211,7 @@ export default function WebsitePage() {
               <Screenshot
                 src="/screenshots/run-observatory.png"
                 alt="Run Observatory showing a deterministic runtime timeline and structured event inspector"
-                caption="Runtime observability: bounded agents, deterministic validators, and externally meaningful events — no hidden chain of thought."
+                caption="Runtime observability: bounded agents, deterministic validators, and externally meaningful events. No hidden chain of thought."
               />
             </div>
           </div>
@@ -234,28 +223,28 @@ export default function WebsitePage() {
             <SectionHeading
               eyebrow="Product"
               title="Review the delta, not the document."
-              lead="Every proposal shows what changed, how it differs from the approved view, why it matters, the exact evidence, and what remains unknown — with materiality and confidence kept separate."
+              lead="Every proposal shows what changed, how it differs from the approved view, why it matters, the exact evidence, and what remains unknown. Materiality and confidence stay separate."
             />
             <div className="mt-10 grid gap-4 md:grid-cols-2">
               <Screenshot
                 src="/screenshots/change-inbox.png"
                 alt="Change Inbox listing material changes with materiality, evidence health, and required reviewer"
-                caption="Change Inbox — material changes awaiting a decision, not a chat box."
+                caption="Change Inbox: material changes awaiting a decision, not a chat box."
               />
               <Screenshot
                 src="/screenshots/evidence-drawer.png"
                 alt="Evidence drawer showing an exact excerpt with locator, published and observed timestamps"
-                caption="Evidence drawer — the exact excerpt, locator, timestamps, and extracted values behind every claim."
+                caption="Evidence drawer: the exact excerpt, locator, timestamps, and extracted values behind every claim."
               />
               <Screenshot
                 src="/screenshots/decision-ledger.png"
                 alt="Decision Ledger detail showing a v12 to v13 transition with before/after diff"
-                caption="Decision Ledger — the exact v12 → v13 diff, evidence lineage, reviewers, and workflow versions."
+                caption="Decision Ledger: the exact v12 → v13 diff, evidence lineage, reviewers, and workflow versions."
               />
               <Screenshot
                 src="/screenshots/privacy-receipt.png"
                 alt="Privacy receipt showing fixture adapter, no external web access, and canonical write counts"
-                caption="Privacy Receipt — a visible record of what each run did with data."
+                caption="Privacy Receipt: a visible record of what each run did with data."
               />
             </div>
 
@@ -299,7 +288,7 @@ export default function WebsitePage() {
               <p className="mt-3 text-center text-[13px] leading-relaxed text-ink-2">
                 When a source is missing, numbers conflict, or a model output fails validation, Delphi makes the
                 limitation visible. Safe partial results remain available; unsupported sections are blocked or
-                escalated — never silently filled in.
+                escalated, never silently filled in.
               </p>
             </div>
           </div>
@@ -318,7 +307,7 @@ export default function WebsitePage() {
                 { icon: <UserRound size={16} aria-hidden />, title: "Human-authorized write-back", body: "No canonical state changes without the required reviewer." },
                 { icon: <GitCommitHorizontal size={16} aria-hidden />, title: "Versioned model & workflow records", body: "Every transition records workflow, skill, and model versions." },
                 { icon: <Layers size={16} aria-hidden />, title: "Data classification & policy routing", body: "Each data class defines allowed model routes, retention, and approvals." },
-                { icon: <ShieldCheck size={16} aria-hidden />, title: "Customer-owned deployment direction", body: "BYO data plane is the roadmap target — beyond bring-your-own-key." },
+                { icon: <ShieldCheck size={16} aria-hidden />, title: "Customer-owned deployment direction", body: "BYO data plane is the roadmap target, beyond bring-your-own-key." },
                 { icon: <FileSearch size={16} aria-hidden />, title: "Visible Privacy Receipt", body: "Each run shows what was accessed, where it executed, and what was written." },
                 { icon: <Inbox size={16} aria-hidden />, title: "Export and deletion path", body: "Institutional trust includes the ability to leave with your data." },
               ].map((c) => (
@@ -344,13 +333,13 @@ export default function WebsitePage() {
             <SectionHeading
               eyebrow="Design partners"
               title="Start with one event, not a platform migration."
-              lead="The design-partner sequence is intentionally narrow: a reverse demo of your current workflow, a one-event proof, a 4–8 week shadow pilot, then controlled production."
+              lead="The design-partner sequence is intentionally narrow: a reverse demo of your current workflow, a one-event proof, a 4-8 week shadow pilot, then controlled production."
             />
             <div className="mx-auto mt-8 max-w-3xl rounded-md border border-line bg-panel p-6">
               <h3 className="text-sm font-semibold tracking-widest text-ink-2 uppercase">Pilot scope</h3>
               <ul className="mt-3 grid gap-2 text-[14px] text-ink sm:grid-cols-2">
                 {[
-                  "10–20 names, one earnings workflow",
+                  "10-20 names, one earnings workflow",
                   "Read-only state; no automated trading",
                   "Weekly review with the research team",
                   "Measured citation, numeric, materiality, and review-time outcomes",
@@ -380,7 +369,7 @@ export default function WebsitePage() {
           <div className="mx-auto max-w-6xl px-4">
             <SectionHeading
               eyebrow="Company"
-              title="The fund's harness — not the model's harness."
+              title="The fund's harness, not the model's harness."
               lead="Models, providers, and agent frameworks will change. A fund's approved thesis, permissions, workflow, decision history, and evaluation data should persist. Delphi is building the governed institutional state that allows stronger models to become useful without becoming an uncontrolled black box."
             />
             <p className="mx-auto mt-6 max-w-2xl text-center text-[13px] leading-relaxed text-ink-2">
@@ -411,7 +400,7 @@ export default function WebsitePage() {
                 },
                 {
                   q: "What makes Delphi different from financial search or AI workflow platforms?",
-                  a: "Delphi is centered on canonical investment state, human-authorized state changes, point-in-time decision history, and firm-specific materiality — not only search, generation, or task automation.",
+                  a: "Delphi is centered on canonical investment state, human-authorized state changes, point-in-time decision history, and firm-specific materiality, not only search, generation, or task automation.",
                 },
                 {
                   q: "What data is used for the public demo?",
@@ -466,7 +455,7 @@ export default function WebsitePage() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 text-xs text-ink-3">
           <div className="flex items-center gap-2">
             <Landmark size={13} aria-hidden />
-            <span>Delphi — pre-launch prototype</span>
+            <span>Delphi | pre-launch prototype</span>
           </div>
           <div className="flex gap-4">
             {NAV_LINKS.map((l) => (

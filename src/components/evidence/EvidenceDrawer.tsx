@@ -22,7 +22,7 @@ function locatorLabel(locator: SourceLocator): string {
   }
   if (locator.cellRange) parts.push(locator.cellRange);
   if (locator.page !== undefined) parts.push(`p. ${locator.page}`);
-  return parts.join(" · ") || "—";
+  return parts.join(" · ") || "Not available";
 }
 
 export function EvidenceDrawer({ excerptId, onClose }: { excerptId: string | null; onClose: () => void }) {
@@ -36,7 +36,7 @@ export function EvidenceDrawer({ excerptId, onClose }: { excerptId: string | nul
         <div className="space-y-3">
           <InlineAlert tone="bad" icon={<TriangleAlert size={14} aria-hidden />}>
             Evidence reference <span className="font-mono text-xs">{excerptId}</span> is not part of this demo fixture
-            set. It is marked <strong>unavailable</strong> — Delphi does not reconstruct missing evidence.
+            set. It is marked <strong>unavailable</strong>; Delphi does not reconstruct missing evidence.
           </InlineAlert>
           <dl className="rounded-sm border border-line bg-inset px-3 py-1">
             <Kv label="Reference ID" mono>

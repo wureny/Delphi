@@ -102,7 +102,7 @@ export function TrustReceipt({ runId }: { runId: string }) {
           value={<Badge tone="ok">None</Badge>}
         />
         <p className="mt-2.5 border-t border-line pt-2.5 text-[11px] leading-relaxed text-ink-3">
-          This receipt is generated from the current interactive state — the write counts change as you review proposals. In the
+          This receipt is generated from the current interactive state. The write counts change as you review proposals. In the
           target production architecture, receipts are generated per run inside a customer-owned data plane.
         </p>
       </Panel>
@@ -138,7 +138,7 @@ export function TrustReceipt({ runId }: { runId: string }) {
           </dl>
         </Panel>
 
-        <Panel title="Current stage — honest claims">
+        <Panel title="Current stage: honest claims">
           <ul className="space-y-1.5 text-[13px] text-ink-2">
             <li>· Pre-launch prototype with synthetic data only.</li>
             <li>· Human review is required for every canonical write.</li>

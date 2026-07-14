@@ -158,7 +158,7 @@ export function FundContextDebug() {
   if (!selectedArtifact) return null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-5">
+    <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">

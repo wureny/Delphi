@@ -17,11 +17,11 @@ export default function CasesPage() {
   const approvedAt = useDemoStore((s) => s.domain.currentThesis.approvedAt);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
-      <h1 className="text-lg font-semibold text-ink">Cases</h1>
-      <p className="mt-0.5 text-[13px] text-ink-2">Long-lived investment cases with approved, versioned team state.</p>
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
+      <h1 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Cases</h1>
+      <p className="mt-1 text-xs text-ink-2">Long-lived investment cases with approved, versioned team state.</p>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
+      <div className="mt-6 grid gap-3 md:grid-cols-2">
         <Panel className="md:col-span-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>

@@ -47,8 +47,8 @@ function useSearchTargets(): SearchTarget[] {
       { label: "Change Inbox", hint: "Page", href: "/" },
       { label: `${arctCase.companyName} (${arctCase.ticker})`, hint: "Investment case", href: "/cases/arct-demo" },
       { label: "Decision Ledger", hint: "Page", href: "/ledger" },
-      { label: "Successful run — FY26 Q2", hint: "Run Observatory", href: "/runs/run-arct-success" },
-      { label: "Degraded run — transcript unavailable", hint: "Run Observatory", href: "/runs/run-arct-degraded" },
+      { label: "Successful run - FY26 Q2", hint: "Run Observatory", href: "/runs/run-arct-success" },
+      { label: "Degraded run - transcript unavailable", hint: "Run Observatory", href: "/runs/run-arct-degraded" },
       { label: "Privacy Receipt", hint: "Trust", href: "/trust/run-arct-success" },
       { label: "Graph Projection Debug", hint: "Internal debug", href: "/debug/graph" },
       { label: "Fund Context Boundary", hint: "Internal debug", href: "/debug/context" },
@@ -85,8 +85,8 @@ function GlobalSearch() {
     : [];
 
   return (
-    <div className="relative hidden min-w-0 flex-1 max-w-md md:block">
-      <Search size={13} className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-ink-3" aria-hidden />
+    <div className="relative hidden min-w-0 max-w-sm flex-1 md:block xl:max-w-md">
+      <Search size={14} className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-ink-3" aria-hidden />
       <input
         ref={inputRef}
         type="search"
@@ -109,14 +109,14 @@ function GlobalSearch() {
             inputRef.current?.blur();
           }
         }}
-        className="w-full rounded-sm border border-line bg-inset py-1 pr-2 pl-7 text-xs text-ink placeholder:text-ink-3 focus:border-accent/50"
+        className="h-8 w-full rounded-[3px] border border-line-strong bg-panel py-1 pr-2 pl-8 text-[11px] text-ink placeholder:text-ink-3 focus:border-accent"
       />
       {open && results.length > 0 && (
-        <ul className="absolute top-full right-0 left-0 z-40 mt-1 overflow-hidden rounded-sm border border-line-strong bg-panel-2 shadow-xl">
+        <ul className="absolute top-full right-0 left-0 z-40 mt-1 overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_14px_34px_rgba(21,32,41,0.14)]">
           {results.map((r) => (
             <li key={r.href + r.label}>
               <button
-                className="flex w-full items-center justify-between gap-2 px-2.5 py-1.5 text-left text-xs hover:bg-accent-dim/30"
+                className="flex w-full items-center justify-between gap-2 border-b border-line px-3 py-2 text-left text-xs last:border-0 hover:bg-inset"
                 onMouseDown={(e) => {
                   e.preventDefault();
                   router.push(r.href);
@@ -125,7 +125,7 @@ function GlobalSearch() {
                 }}
               >
                 <span className="truncate text-ink">{r.label}</span>
-                <span className="shrink-0 text-[10px] text-ink-3 uppercase">{r.hint}</span>
+                <span className="shrink-0 text-[9px] font-semibold tracking-[0.07em] text-ink-3 uppercase">{r.hint}</span>
               </button>
             </li>
           ))}
@@ -140,8 +140,8 @@ function RoleSwitcher() {
   const setRole = useDemoStore((s) => s.setRole);
   const push = useToasts((s) => s.push);
   return (
-    <label className="flex items-center gap-1.5 text-xs text-ink-2">
-      <UserRound size={13} aria-hidden className="text-ink-3" />
+    <label className="flex items-center gap-1.5 text-[11px] text-ink-2">
+      <UserRound size={13} aria-hidden className="hidden text-ink-3 xl:block" />
       <span className="sr-only md:not-sr-only">Acting as</span>
       <select
         aria-label="Active reviewer role"
@@ -155,10 +155,10 @@ function RoleSwitcher() {
             detail: next === "pm" ? "PM can approve high-materiality changes." : "High-materiality changes will require escalation to the PM.",
           });
         }}
-        className="rounded-sm border border-line bg-inset px-1.5 py-0.5 text-xs text-ink focus:border-accent/50"
+        className="h-8 max-w-32 rounded-[3px] border border-line-strong bg-panel px-2 text-[11px] text-ink focus:border-accent sm:max-w-40"
       >
-        <option value="analyst">Analyst — A. Chen</option>
-        <option value="pm">PM — R. Okafor</option>
+        <option value="analyst">Analyst - A. Chen</option>
+        <option value="pm">PM - R. Okafor</option>
       </select>
     </label>
   );
@@ -228,9 +228,9 @@ function DemoControls() {
   const push = useToasts((s) => s.push);
 
   return (
-    <div className="space-y-2 border-t border-line px-3 py-3">
-      <p className="text-[10px] font-semibold tracking-widest text-ink-3 uppercase">Demo controls</p>
-      <div className="flex flex-col items-start gap-1">
+    <div className="space-y-2.5 border-t border-line px-3 py-4">
+      <p className="text-[9px] font-semibold tracking-[0.12em] text-ink-3 uppercase">Demo controls</p>
+      <div className="flex flex-col items-start gap-0.5">
         <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/debug/context")}>
           <DatabaseZap size={13} aria-hidden />
           Fund context boundary
@@ -266,11 +266,11 @@ function DemoControls() {
           <TriangleAlert size={13} aria-hidden />
           {transcriptUnavailable ? "Restore transcript source" : "Simulate degraded source"}
         </Button>
-        <div className="w-full px-2 py-1">
+        <div className="w-full">
           <ResetButton compact />
         </div>
       </div>
-      <div className="flex items-center justify-between rounded-sm border border-line bg-inset px-2 py-1.5">
+      <div className="flex items-center justify-between border-t border-line pt-2.5">
         <span className="text-[11px] text-ink-3">Approved thesis</span>
         <span className="font-mono text-xs text-ink tnum">v{version}</span>
       </div>
@@ -290,7 +290,7 @@ export function Shell({
 
   return (
     <RuntimeProvider capabilities={capabilities}>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-[100dvh] flex-col">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-accent focus:px-3 focus:py-1 focus:text-canvas"
@@ -299,16 +299,18 @@ export function Shell({
       </a>
 
       {/* Top bar */}
-      <header className="sticky top-0 z-40 flex h-12 items-center gap-3 border-b border-line bg-panel px-3">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex size-6 items-center justify-center rounded-sm border border-accent/40 bg-accent-dim/40">
-            <Landmark size={13} className="text-accent" aria-hidden />
+      <header className="sticky top-0 z-40 flex h-14 items-center border-b border-line-strong bg-panel">
+        <Link href="/" className="flex h-full w-32 shrink-0 items-center gap-2 border-r border-line px-3 md:w-56 md:gap-2.5 md:px-4">
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-[3px] bg-ink">
+            <Landmark size={14} className="text-white" strokeWidth={1.7} aria-hidden />
           </span>
-          <span className="text-sm font-semibold tracking-tight text-ink">Delphi</span>
-          <span className="hidden text-xs text-ink-3 sm:inline">· Meridian Demo Fund — Research</span>
+          <span className="text-sm font-semibold tracking-[-0.025em] text-ink md:text-[15px]">Delphi</span>
         </Link>
-        <GlobalSearch />
-        <div className="ml-auto flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-4 px-3 lg:px-5">
+          <span className="hidden truncate text-[11px] text-ink-3 xl:block">Meridian Demo Fund - Research</span>
+          <GlobalSearch />
+        </div>
+        <div className="ml-auto flex min-w-0 items-center gap-1.5 px-2 sm:gap-2 sm:px-3 lg:px-5">
           <Badge tone="warn" icon={<FlaskConical size={11} aria-hidden />} title="All entities, figures, and events are synthetic.">
             <span className="hidden sm:inline">Synthetic demo data</span>
             <span className="sm:hidden">Synthetic</span>
@@ -325,8 +327,8 @@ export function Shell({
 
       <div className="flex flex-1">
         {/* Sidebar */}
-        <nav aria-label="Primary" className="sticky top-12 hidden h-[calc(100vh-3rem)] w-52 shrink-0 flex-col justify-between border-r border-line bg-panel md:flex">
-          <ul className="space-y-0.5 p-2">
+        <nav aria-label="Primary" className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 flex-col justify-between border-r border-line bg-panel-2/70 md:flex">
+          <ul className="space-y-0.5 px-2 py-4">
             {NAV.map(({ href, label, icon: Icon }) => {
               const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
               return (
@@ -335,11 +337,13 @@ export function Shell({
                     href={href}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "flex items-center gap-2 rounded-sm px-2.5 py-1.5 text-[13px] transition-colors",
-                      active ? "bg-accent-dim/40 font-medium text-ink" : "text-ink-2 hover:bg-panel-2 hover:text-ink",
+                      "relative flex min-h-9 items-center gap-2.5 rounded-[3px] border px-3 py-2 text-xs",
+                      active
+                        ? "border-line bg-panel font-semibold text-ink shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] before:absolute before:top-1.5 before:bottom-1.5 before:left-0 before:w-0.5 before:bg-accent"
+                        : "border-transparent text-ink-2 hover:border-line hover:bg-panel/70 hover:text-ink",
                     )}
                   >
-                    <Icon size={15} aria-hidden className={active ? "text-accent" : "text-ink-3"} />
+                    <Icon size={15} strokeWidth={1.65} aria-hidden className={active ? "text-accent" : "text-ink-3"} />
                     {label}
                   </Link>
                 </li>
@@ -350,7 +354,7 @@ export function Shell({
         </nav>
 
         {/* Mobile nav */}
-        <nav aria-label="Primary mobile" className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-panel md:hidden">
+        <nav aria-label="Primary mobile" className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line-strong bg-panel md:hidden">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -359,8 +363,8 @@ export function Shell({
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px]",
-                  active ? "text-accent" : "text-ink-3",
+                  "relative flex flex-1 flex-col items-center gap-0.5 py-2 text-[9px] font-medium",
+                  active ? "bg-accent-dim/45 text-accent" : "text-ink-3",
                 )}
               >
                 <Icon size={16} aria-hidden />
@@ -375,9 +379,9 @@ export function Shell({
             children
           ) : (
             <div className="p-6" aria-busy="true" aria-label="Loading demo state">
-              <div className="h-5 w-44 animate-pulse rounded-sm bg-panel-2" />
-              <div className="mt-4 h-24 animate-pulse rounded-md bg-panel-2" />
-              <div className="mt-2 h-24 animate-pulse rounded-md bg-panel-2" />
+              <div className="h-5 w-44 animate-pulse rounded-[3px] bg-panel-2" />
+              <div className="mt-4 h-24 animate-pulse rounded-[3px] bg-panel-2" />
+              <div className="mt-2 h-24 animate-pulse rounded-[3px] bg-panel-2" />
             </div>
           )}
         </main>

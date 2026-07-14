@@ -15,18 +15,18 @@ export default function LedgerPage() {
   const version = useDemoStore((s) => s.domain.currentThesis.version);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
       <header className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold text-ink">Decision Ledger</h1>
-          <p className="mt-0.5 text-[13px] text-ink-2">
-            Every approved change to institutional state — before/after, evidence, actor, and versions.
+          <h1 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Decision Ledger</h1>
+          <p className="mt-1 text-xs text-ink-2">
+            Every approved change to institutional state: before/after, evidence, actor, and versions.
           </p>
         </div>
         <Badge tone="ok">Current approved thesis: v{version}</Badge>
       </header>
 
-      <Panel className="mt-4" bodyClassName="p-0">
+      <Panel className="mt-6" bodyClassName="overflow-x-auto p-0">
         {transitions.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-4 py-14 text-center">
             <BookOpenCheck size={22} className="text-ink-3" aria-hidden />

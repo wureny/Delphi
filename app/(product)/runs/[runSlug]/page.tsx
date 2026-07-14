@@ -73,7 +73,7 @@ function EventInspector({ event, nextEventAt, runId }: { event: RunEvent; nextEv
   const runProposals = proposalsForRun(runId);
   const duration = nextEventAt
     ? formatDuration(new Date(nextEventAt).getTime() - new Date(event.occurredAt).getTime())
-    : "—";
+    : "Not available";
 
   return (
     <div className="space-y-3">
@@ -119,7 +119,7 @@ function EventInspector({ event, nextEventAt, runId }: { event: RunEvent; nextEv
                   ) : (
                     <span className="flex items-center gap-1.5 rounded-sm border border-line bg-inset px-2 py-1 font-mono text-[11px] text-ink-2">
                       {ref}
-                      {source && <span className="truncate text-ink-3">— {source.title}</span>}
+                      {source && <span className="truncate text-ink-3">- {source.title}</span>}
                     </span>
                   )}
                 </li>
@@ -192,7 +192,7 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
       : runStatusMeta[run.status];
   const totalDuration = run.completedAt
     ? formatDuration(new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime())
-    : "—";
+    : "Not available";
 
   const replay = async () => {
     abortRef.current?.abort();
@@ -219,7 +219,7 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-5">
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -275,7 +275,7 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
               <Play size={20} className="text-ink-3" aria-hidden />
               <p className="text-sm text-ink-2">This run has not been replayed in your session yet.</p>
               <p className="text-xs text-ink-3">
-                Replay emits the recorded runtime events deterministically — same input, same events, same order.
+                Replay emits the recorded runtime events deterministically: same input, same events, same order.
               </p>
               <Button variant="primary" size="sm" onClick={replay} className="mt-1">
                 <Play size={13} aria-hidden />
@@ -288,7 +288,7 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
                 const next = bundle.events[i + 1];
                 const duration = next
                   ? formatDuration(new Date(next.occurredAt).getTime() - new Date(event.occurredAt).getTime())
-                  : "—";
+                  : "Not available";
                 const active = i === selectedIdx;
                 return (
                   <li key={event.runEventId} className="animate-event-in">
@@ -363,7 +363,7 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
               <div className="mt-2 space-y-1.5">
                 {run.degradedReasons.map((reason) => (
                   <InlineAlert key={reason.code} tone="warn" icon={<TriangleAlert size={13} aria-hidden />}>
-                    <span className="font-mono text-[11px]">{reason.code}</span> — {reason.message}
+                    <span className="font-mono text-[11px]">{reason.code}</span>: {reason.message}
                     <span className="mt-1 block font-mono text-[10px] text-ink-3">
                       affects: {reason.affectedObjectRefs.join(", ")} · recoverable: {String(reason.recoverable)}
                     </span>

@@ -123,7 +123,7 @@ export function GraphProjectionDebug() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-5">
+    <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -274,7 +274,7 @@ export function GraphProjectionDebug() {
                 <dl className="mt-3 rounded-sm border border-line bg-inset px-3 py-1">
                   {selectedNode.status ? <Kv label="Status" mono>{selectedNode.status}</Kv> : null}
                   {Object.entries(selectedNode.attributes).map(([label, value]) => (
-                    <Kv key={label} label={label} mono>{value === null ? "—" : String(value)}</Kv>
+                    <Kv key={label} label={label} mono>{value === null ? "Not available" : String(value)}</Kv>
                   ))}
                 </dl>
               </>

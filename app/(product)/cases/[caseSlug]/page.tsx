@@ -21,7 +21,7 @@ function PendingProposalChip({ proposal }: { proposal: ThesisDeltaProposal }) {
   return (
     <Link href={`/deltas/${proposal.proposalId}`} className="inline-flex" title={proposal.headline}>
       <Badge tone={direction.tone} outlined icon={direction.icon}>
-        Agent proposal — {direction.label}
+        Agent proposal: {direction.label}
       </Badge>
     </Link>
   );
@@ -63,7 +63,7 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
   if (!caseId) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-5">
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
       {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -146,7 +146,7 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
                     <td className="px-3 py-2 text-right font-mono text-xs text-ink tnum">
                       {f.value !== undefined
                         ? `${f.currency === "USD" ? "$" : ""}${f.value}${f.unit === "percent" ? "%" : f.unit === "million" ? "M" : ""}`
-                        : `${f.minValue}–${f.maxValue}${f.unit === "percent" ? "%" : ""}`}
+                        : `${f.minValue}-${f.maxValue}${f.unit === "percent" ? "%" : ""}`}
                     </td>
                     <td className="px-3 py-2">
                       <Badge tone={objectStatusTone[f.status] ?? "neutral"}>{f.status.replace(/_/g, " ")}</Badge>
@@ -173,8 +173,8 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
               <Kv label="Status">
                 <Badge tone="ok">{thesis.status}</Badge>
               </Kv>
-              <Kv label="Owner">A. Chen — Analyst</Kv>
-              <Kv label="Approved by">R. Okafor — PM</Kv>
+              <Kv label="Owner">A. Chen, Analyst</Kv>
+              <Kv label="Approved by">R. Okafor, PM</Kv>
               <Kv label="Approved at (UTC)">{formatDateTime(thesis.approvedAt)}</Kv>
               <Kv label="Valid from (UTC)">{formatDateTime(thesis.validFrom)}</Kv>
             </dl>

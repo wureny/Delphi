@@ -88,7 +88,7 @@ export function ApplyBar({ runId, proposalIds }: { runId: string; proposalIds: s
         }
       >
         <p className="text-[13px] text-ink-2">
-          This creates exactly one Decision Ledger transition. Only the changes below are applied — rejected,
+          This creates exactly one Decision Ledger transition. Only the changes below are applied; rejected,
           escalated, and deferred proposals are excluded and the version increments once.
         </p>
         <ul className="mt-3 space-y-2">

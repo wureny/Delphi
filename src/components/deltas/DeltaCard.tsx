@@ -210,11 +210,11 @@ export function DeltaCard({
       return false;
     }
     const titles: Record<string, string> = {
-      accept: "Change approved — queued for application",
-      edit: "Edited version approved — queued for application",
-      reject: "Proposal rejected — approved thesis unchanged",
-      escalate: "Escalated to PM queue — approved thesis unchanged",
-      defer: "Deferred — approved thesis unchanged",
+      accept: "Change approved, queued for application",
+      edit: "Edited version approved, queued for application",
+      reject: "Proposal rejected, approved thesis unchanged",
+      escalate: "Escalated to PM queue, approved thesis unchanged",
+      defer: "Deferred, approved thesis unchanged",
     };
     push({ tone: action === "reject" ? "neutral" : action === "escalate" ? "esc" : "ok", title: titles[action]!, detail: result.messages[0]?.message });
     closeModal();
@@ -306,7 +306,7 @@ export function DeltaCard({
           </ul>
           {review?.action === "edit" && (
             <p className="mt-1.5 text-[11px] text-ink-3">
-              Human-edited by {review.reviewerUserId} — the original agent proposal is retained in review history.
+              Human-edited by {review.reviewerUserId}. The original agent proposal is retained in review history.
             </p>
           )}
         </div>
@@ -346,7 +346,7 @@ export function DeltaCard({
                 size="sm"
                 onClick={() => setModal("accept")}
                 disabled={blocked}
-                title={blocked ? "Evidence unavailable — approval fails closed." : undefined}
+                title={blocked ? "Evidence unavailable; approval fails closed." : undefined}
               >
                 <Check size={13} aria-hidden />
                 Accept
@@ -358,7 +358,7 @@ export function DeltaCard({
                   setModal("edit");
                 }}
                 disabled={blocked}
-                title={blocked ? "Evidence unavailable — approval fails closed." : undefined}
+                title={blocked ? "Evidence unavailable; approval fails closed." : undefined}
               >
                 <PencilLine size={13} aria-hidden />
                 Edit
@@ -378,7 +378,7 @@ export function DeltaCard({
               {!policy.allowed && !blocked && (
                 <span className="ml-auto flex items-center gap-1 text-[11px] text-warn">
                   <TriangleAlert size={12} aria-hidden />
-                  {role === "analyst" ? "Requires PM — escalate or switch role" : policy.message}
+                  {role === "analyst" ? "Requires PM; escalate or switch role" : policy.message}
                 </span>
               )}
             </>

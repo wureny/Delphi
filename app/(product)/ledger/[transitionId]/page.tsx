@@ -30,7 +30,7 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
     // The transition can disappear mid-session (demo reset). Render a calm
     // empty state instead of a hard 404 so in-flight navigation completes.
     return (
-      <div className="mx-auto max-w-5xl px-4 py-5">
+      <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
         <Link href="/ledger" className="flex w-fit items-center gap-1 text-xs text-ink-3 hover:text-ink">
           <ArrowLeft size={12} aria-hidden />
           Decision Ledger
@@ -63,7 +63,7 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
       <Link href="/ledger" className="flex w-fit items-center gap-1 text-xs text-ink-3 hover:text-ink">
         <ArrowLeft size={12} aria-hidden />
         Decision Ledger
@@ -187,7 +187,7 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
               {transition.approvedByUserId}
             </Kv>
             <Kv label="Approved at (UTC)">{formatDateTime(transition.approvedAt)}</Kv>
-            <Kv label="Reversible">{transition.reversible ? "Yes — safe rollback" : "No"}</Kv>
+            <Kv label="Reversible">{transition.reversible ? "Yes, safe rollback" : "No"}</Kv>
           </dl>
 
           <h4 className="mt-3 text-[11px] font-semibold tracking-widest text-ink-3 uppercase">Review history</h4>
@@ -308,7 +308,7 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
       >
         <p className="text-[13px] text-ink-2">
           This restores the approved thesis to v{transition.fromVersion} exactly as recorded before the transition. The
-          ledger entry is never deleted — it is marked <span className="font-mono text-xs">rolled_back</span> and the
+          ledger entry is never deleted; it is marked <span className="font-mono text-xs">rolled_back</span> and the
           review history is preserved.
         </p>
       </Modal>

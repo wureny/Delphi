@@ -14,23 +14,23 @@ export default function TrustPage() {
   const [runId, setRunId] = useState(RUNS[0]!.runId);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-5">
-      <h1 className="text-lg font-semibold text-ink">Trust</h1>
-      <p className="mt-0.5 text-[13px] text-ink-2">
-        A visible receipt of what each run did with data — designed as a product feature, not a compliance export.
+    <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
+      <h1 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Trust</h1>
+      <p className="mt-1 text-xs text-ink-2">
+        A visible receipt of what each run did with data, designed as a product feature rather than a compliance export.
       </p>
 
-      <div role="group" aria-label="Select run" className="mt-4 flex gap-1.5">
+      <div role="group" aria-label="Select run" className="mt-6 flex gap-1.5 border-b border-line">
         {RUNS.map((r) => (
           <button
             key={r.runId}
             onClick={() => setRunId(r.runId)}
             aria-pressed={runId === r.runId}
             className={cn(
-              "rounded-sm border px-2.5 py-1 text-xs transition-colors",
+              "-mb-px border-b-2 px-1 pb-2.5 text-[11px] font-medium",
               runId === r.runId
-                ? "border-accent/50 bg-accent-dim/40 font-medium text-ink"
-                : "border-line bg-panel text-ink-2 hover:border-line-strong",
+                ? "border-accent text-ink"
+                : "border-transparent text-ink-3 hover:border-line-strong hover:text-ink",
             )}
           >
             {r.label}
@@ -38,7 +38,7 @@ export default function TrustPage() {
         ))}
       </div>
 
-      <div className="mt-3">
+      <div className="mt-5">
         <TrustReceipt runId={runId} />
       </div>
 

@@ -1,50 +1,52 @@
 @import "tailwindcss";
 
 /*
- * Delphi institutional dark theme.
- * Deep neutral canvas, layered panels, crisp borders, restrained accent.
- * Status is always icon+label — color is reinforcement, never the only signal.
+ * Delphi institutional research theme.
+ * Mineral neutrals, editorial typography, crisp rules, and a single cobalt
+ * action color. Status is always icon + label; color only reinforces meaning.
  */
 @theme {
-  --color-canvas: #0a0d13;
-  --color-panel: #0f141d;
-  --color-panel-2: #141b27;
-  --color-inset: #0c1017;
-  --color-line: #1e2634;
-  --color-line-strong: #2b3547;
+  --color-canvas: #f3f5f4;
+  --color-panel: #ffffff;
+  --color-panel-2: #ecefed;
+  --color-inset: #f7f8f7;
+  --color-line: #d9deda;
+  --color-line-strong: #b8c1bc;
 
-  --color-ink: #e7ebf3;
-  --color-ink-2: #9aa4b8;
-  --color-ink-3: #6a7590;
+  --color-ink: #152029;
+  --color-ink-2: #4d5a63;
+  --color-ink-3: #727f87;
 
-  --color-accent: #7aa5f8;
-  --color-accent-dim: #2c4370;
+  --color-accent: #1d55b3;
+  --color-accent-dim: #dce7f8;
 
-  --color-ok: #4cbd8b;
-  --color-ok-dim: #16382c;
-  --color-warn: #d9a03f;
-  --color-warn-dim: #3d2f14;
-  --color-bad: #e07a7a;
-  --color-bad-dim: #3f2020;
-  --color-esc: #b195f5;
-  --color-esc-dim: #2f2547;
-  --color-info: #6fb5d8;
-  --color-info-dim: #16323f;
-  --color-neutral: #8b95ab;
-  --color-neutral-dim: #232a38;
+  --color-ok: #256245;
+  --color-ok-dim: #e3f0e8;
+  --color-warn: #82570f;
+  --color-warn-dim: #f5ecd8;
+  --color-bad: #943f3f;
+  --color-bad-dim: #f5e6e6;
+  --color-esc: #6f4f87;
+  --color-esc-dim: #eee7f2;
+  --color-info: #28617e;
+  --color-info-dim: #e2eef3;
+  --color-neutral: #66727a;
+  --color-neutral-dim: #edf0ee;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
+  background: var(--color-canvas);
 }
 
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
-  font-feature-settings: "ss01";
+  font-feature-settings: "ss01", "cv02", "cv03";
+  letter-spacing: -0.005em;
 }
 
 /* Numeric alignment for tables, versions, timestamps. */
@@ -53,20 +55,47 @@ body {
 }
 
 ::selection {
-  background: var(--color-accent-dim);
+  background: #c9daf4;
+  color: var(--color-ink);
 }
 
 /* Visible keyboard focus everywhere. */
 :focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-  border-radius: 2px;
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 /* Thin scrollbars appropriate to density. */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-line-strong) transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a,
+select {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: 140ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+button:not(:disabled):active,
+a:active {
+  transform: translateY(1px);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -96,7 +125,7 @@ body {
 
 @keyframes delphi-row-flash {
   0% {
-    background-color: var(--color-accent-dim);
+    background-color: #e7eef9;
   }
   100% {
     background-color: transparent;
