@@ -4,7 +4,7 @@ import { createContext, useContext, useMemo } from "react";
 import type { AnalysisAdapter } from "./adapter";
 import { FixtureAnalysisAdapter } from "./adapter";
 import type { RuntimeCapabilities } from "./config";
-import { degradedRun, successRun } from "@/fixtures/loader";
+import { degradedRun, defaultSuccessRun } from "@/fixtures/loader";
 
 interface ClientRuntime {
   capabilities: RuntimeCapabilities;
@@ -21,7 +21,7 @@ export function RuntimeProvider({
   children: React.ReactNode;
 }) {
   const analysisAdapter = useMemo(
-    () => new FixtureAnalysisAdapter({ success: successRun, degraded: degradedRun }),
+    () => new FixtureAnalysisAdapter({ success: defaultSuccessRun, degraded: degradedRun }),
     [],
   );
   const value = useMemo(

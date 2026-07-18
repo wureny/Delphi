@@ -23,11 +23,11 @@ export function generatePrivacyReceipt(
   return {
     fixtureVersion: runBundle.fixtureVersion,
     schemaVersion: runBundle.schemaVersion,
-    synthetic: true,
+    synthetic: runBundle.synthetic,
     receiptId: `receipt_${run.runId}`,
     runId: run.runId,
     workflowVersion: run.workflowVersion,
-    classification: "synthetic",
+    classification: runBundle.synthetic ? "synthetic" : "public",
     executionLocation: "Local demo runtime (browser)",
     modelRoutes: run.modelRoutes,
     rawContentSentToDelphiCloud: false,
@@ -37,5 +37,10 @@ export function generatePrivacyReceipt(
     canonicalWritesApproved: approvedCount,
     supportAccess: "none",
     generatedAt: now,
+    originCounts: run.contextUsage?.reduce<NonNullable<PrivacyReceipt["originCounts"]>>((counts, item) => {
+      counts[item.originKind] = (counts[item.originKind] ?? 0) + 1;
+      return counts;
+    }, {}),
+    localContextCount: run.contextUsage?.filter((item) => item.originKind === "user_provided_local").length ?? 0,
   };
 }

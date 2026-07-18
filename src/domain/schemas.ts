@@ -32,8 +32,12 @@ export const reviewerRoleSchema = z.enum(["analyst", "senior_analyst", "pm", "ci
 export const envelopeSchema = z.object({
   fixtureVersion: z.string(),
   schemaVersion: z.string(),
-  synthetic: z.literal(true),
+  synthetic: z.boolean(),
 });
+
+export const originKindSchema = z.enum(["real_public", "demo_derived", "synthetic", "user_provided_local"]);
+export const publisherKindSchema = z.enum(["issuer", "regulator", "institution", "demo_team", "user"]);
+export const inputUsageStatusSchema = z.enum(["eligible", "used", "excluded", "unavailable"]);
 
 export const investmentCaseSchema = envelopeSchema.extend({
   caseId: z.string(),
@@ -49,6 +53,8 @@ export const investmentCaseSchema = envelopeSchema.extend({
   approvedThesisVersion: z.number().int(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  originKind: originKindSchema.optional(),
+  authorshipLabel: z.string().optional(),
 });
 
 export const pillarSchema = z.object({
@@ -118,6 +124,9 @@ export const thesisSnapshotSchema = envelopeSchema.extend({
   catalysts: z.array(catalystSchema),
   risks: z.array(riskSchema),
   openQuestions: z.array(openQuestionSchema),
+  originKind: originKindSchema.optional(),
+  authorshipLabel: z.string().optional(),
+  derivedFromSourceRefs: z.array(z.string()).optional(),
 });
 
 export const domainEventSchema = envelopeSchema.extend({
@@ -174,6 +183,12 @@ export const sourceDocumentSchema = z.object({
   version: z.number().int(),
   accessPolicyId: z.string(),
   status: z.enum(["available", "unavailable", "superseded"]),
+  originKind: originKindSchema.optional(),
+  publisherKind: publisherKindSchema.optional(),
+  publisherName: z.string().optional(),
+  canonicalUri: z.string().url().optional(),
+  retrievedAt: z.string().optional(),
+  rightsNote: z.string().optional(),
 });
 
 export const sourceBundleSchema = envelopeSchema.extend({
@@ -183,8 +198,11 @@ export const sourceBundleSchema = envelopeSchema.extend({
 
 export const fundContextRoleSchema = z.enum([
   "external_evidence",
+  "institution_policy",
+  "portfolio_position",
   "internal_working_context",
   "internal_approved_state",
+  "local_reference",
 ]);
 
 export const fundContextConnectorSchema = z.object({
@@ -192,15 +210,19 @@ export const fundContextConnectorSchema = z.object({
   label: z.string(),
   connectorType: z.enum([
     "public_event_feed",
+    "official_investor_relations",
+    "regulatory_filing",
+    "public_institution_repository",
+    "browser_local_import",
     "customer_model_repository",
     "customer_research_repository",
     "canonical_state_store",
   ]),
-  mode: z.literal("fixture_simulated"),
+  mode: z.enum(["fixture_simulated", "bundled_public_snapshot", "browser_local_import"]),
   accessMode: z.literal("read_only"),
-  executionLocation: z.literal("local_demo"),
-  persistence: z.literal("none"),
-  status: z.literal("fixture_available"),
+  executionLocation: z.enum(["local_demo", "build_pipeline", "browser_local"]),
+  persistence: z.enum(["none", "bundled", "browser_local"]),
+  status: z.enum(["fixture_available", "snapshot_available", "local_available"]),
 });
 
 export const fundContextArtifactSchema = z.object({
@@ -211,7 +233,7 @@ export const fundContextArtifactSchema = z.object({
   contextRole: fundContextRoleSchema,
   connectorId: z.string(),
   classification: classificationSchema,
-  dataOwner: z.enum(["external_publisher", "customer"]),
+  dataOwner: z.enum(["external_publisher", "customer", "user"]),
   accessPolicyId: z.string(),
   allowedRoles: z.array(z.enum(["analyst", "pm"])).min(1),
   policyInheritance: z.literal("source"),
@@ -220,12 +242,24 @@ export const fundContextArtifactSchema = z.object({
   version: z.number().int().positive(),
   contentHash: z.string(),
   externalModelAccess: z.enum(["not_used", "blocked"]),
-  allowedExecution: z.literal("fixture_only"),
+  allowedExecution: z.enum(["fixture_only", "browser_only"]),
   externalTransfer: z.literal(false),
-  lifecycleStage: z.literal("normalized_fixture"),
-  deletionPropagation: z.literal("simulated"),
+  lifecycleStage: z.enum(["normalized_fixture", "normalized_snapshot", "local_attached"]),
+  deletionPropagation: z.enum(["simulated", "local_reset", "not_applicable"]),
   graphProjection: z.literal("derived_only"),
   derivedObjectRefs: z.array(z.string()),
+  originKind: originKindSchema.optional(),
+  publisherKind: publisherKindSchema.optional(),
+  publisherName: z.string().optional(),
+  authorshipLabel: z.string().optional(),
+  canonicalUri: z.string().url().optional(),
+  retrievedAt: z.string().optional(),
+  rightsNote: z.string().optional(),
+  inputUsage: inputUsageStatusSchema.optional(),
+  inputUsageReason: z.string().optional(),
+  defaultSelected: z.boolean().optional(),
+  defaultScope: z.enum(["pre_event", "event", "post_event"]).optional(),
+  nonEndorsementNotice: z.string().optional(),
 });
 
 export const fundContextManifestSchema = envelopeSchema.extend({
@@ -235,6 +269,7 @@ export const fundContextManifestSchema = envelopeSchema.extend({
   generatedAt: z.string(),
   connectors: z.array(fundContextConnectorSchema).min(1),
   artifacts: z.array(fundContextArtifactSchema).min(1),
+  eventCutoff: z.string().optional(),
 });
 
 export const patchOperationSchema = z.discriminatedUnion("op", [
@@ -303,6 +338,17 @@ export const workflowRunSchema = z.object({
   sourceRefs: z.array(z.string()),
   degradedReasons: z.array(degradedReasonSchema),
   outputProposalIds: z.array(z.string()),
+  contextSetHash: z.string().optional(),
+  contextUsage: z
+    .array(
+      z.object({
+        artifactId: z.string(),
+        status: inputUsageStatusSchema,
+        reason: z.string(),
+        originKind: originKindSchema,
+      }),
+    )
+    .optional(),
 });
 
 export const runEventSchema = z.object({
@@ -351,6 +397,8 @@ export const privacyReceiptSchema = envelopeSchema.extend({
   canonicalWritesApproved: z.number().int(),
   supportAccess: z.string(),
   generatedAt: z.string(),
+  originCounts: z.partialRecord(originKindSchema, z.number().int().nonnegative()).optional(),
+  localContextCount: z.number().int().nonnegative().optional(),
 });
 
 export const ledgerTransitionSchema = envelopeSchema.extend({
@@ -375,4 +423,6 @@ export const ledgerTransitionSchema = envelopeSchema.extend({
   status: z.enum(["applied", "rolled_back", "superseded"]),
   beforeSnapshotHash: z.string(),
   afterSnapshotHash: z.string(),
+  contextSetHash: z.string().optional(),
+  evidenceOrigins: z.array(originKindSchema).optional(),
 });

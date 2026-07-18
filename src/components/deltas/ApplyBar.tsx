@@ -12,9 +12,11 @@ import { useToasts } from "@/components/ui/toast";
 import { useDemoStore, pendingApprovals, proposalsById } from "@/store/demo-store";
 import { describePatchOp } from "@/lib/labels";
 import { useMemo } from "react";
+import { defaultCase, getRunBundle } from "@/fixtures/loader";
 
 export function ApplyBar({ runId, proposalIds }: { runId: string; proposalIds: string[] }) {
-  const domain = useDemoStore((s) => s.domain);
+  const caseId = getRunBundle(runId)?.workflowRun.caseId;
+  const domain = useDemoStore((s) => (caseId === defaultCase.caseId ? s.domain : s.arctDomain));
   const applyApproved = useDemoStore((s) => s.applyApproved);
   const push = useToasts((s) => s.push);
   const router = useRouter();

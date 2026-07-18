@@ -22,18 +22,23 @@ import type { Tone } from "@/components/ui/primitives";
 import type { ProposalReviewState } from "@/store/demo-store";
 
 export const runSlugToId: Record<string, string> = {
+  "run-msft-fy25q4": "run_msft_fy25q4_success",
   "run-arct-success": "run_arct_success_001",
   "run-arct-degraded": "run_arct_degraded_001",
+  run_msft_fy25q4_success: "run_msft_fy25q4_success",
   run_arct_success_001: "run_arct_success_001",
   run_arct_degraded_001: "run_arct_degraded_001",
 };
 
 export const runIdToSlug: Record<string, string> = {
+  run_msft_fy25q4_success: "run-msft-fy25q4",
   run_arct_success_001: "run-arct-success",
   run_arct_degraded_001: "run-arct-degraded",
 };
 
 export const caseSlugToId: Record<string, string> = {
+  "msft-fy25q4": "case_msft_fy25q4",
+  case_msft_fy25q4: "case_msft_fy25q4",
   "arct-demo": "case_arct_001",
   case_arct_001: "case_arct_001",
 };

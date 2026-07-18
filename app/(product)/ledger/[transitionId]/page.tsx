@@ -18,14 +18,17 @@ import { DEMO_USERS, REJECT_REASONS } from "@/domain/policies";
 
 export default function TransitionDetailPage({ params }: { params: Promise<{ transitionId: string }> }) {
   const { transitionId } = use(params);
-  const domain = useDemoStore((s) => s.domain);
+  const defaultDomain = useDemoStore((s) => s.domain);
+  const arctDomain = useDemoStore((s) => s.arctDomain);
   const rollback = useDemoStore((s) => s.rollback);
   const push = useToasts((s) => s.push);
   const router = useRouter();
   const [evidenceId, setEvidenceId] = useState<string | null>(null);
   const [confirmRollback, setConfirmRollback] = useState(false);
 
-  const transition = domain.transitions.find((t) => t.transitionId === transitionId);
+  const transition =
+    defaultDomain.transitions.find((item) => item.transitionId === transitionId) ??
+    arctDomain.transitions.find((item) => item.transitionId === transitionId);
   if (!transition) {
     // The transition can disappear mid-session (demo reset). Render a calm
     // empty state instead of a hard 404 so in-flight navigation completes.
@@ -46,6 +49,8 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
       </div>
     );
   }
+
+  const domain = transition.caseId === defaultDomain.currentThesis.caseId ? defaultDomain : arctDomain;
 
   const before =
     domain.thesisHistory.find((t) => t.version === transition.fromVersion) ??
@@ -254,6 +259,14 @@ export default function TransitionDetailPage({ params }: { params: Promise<{ tra
             </Kv>
             <Kv label="Endpoint owner">{transition.modelRoutes[0]?.endpointOwner}</Kv>
             <Kv label="Retention">{transition.modelRoutes[0]?.retentionPolicy}</Kv>
+            {transition.contextSetHash && (
+              <Kv label="Context set" mono>
+                <span className="block max-w-72 truncate" title={transition.contextSetHash}>{transition.contextSetHash}</span>
+              </Kv>
+            )}
+            {transition.evidenceOrigins && (
+              <Kv label="Evidence origins">{transition.evidenceOrigins.map((origin) => origin.replaceAll("_", " ")).join(" · ")}</Kv>
+            )}
           </dl>
           <h4 className="mt-3 text-[11px] font-semibold tracking-widest text-ink-3 uppercase">Skill versions</h4>
           <dl className="mt-1 rounded-sm border border-line bg-inset px-3 py-1">

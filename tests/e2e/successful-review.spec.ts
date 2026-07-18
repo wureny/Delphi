@@ -1,95 +1,75 @@
-/**
- * E2E 1 — successful review.
- * Inbox → ARCT-DEMO → replay run → inspect evidence → accept / edit /
- * escalate → apply approved batch → verify v12 → v13 in the Decision Ledger
- * with only the approved patches applied.
- */
 import { test, expect, type Page } from "@playwright/test";
 
 const card = (page: Page, proposalId: string) => page.locator(`#${proposalId}`);
 
-test("full successful review path records exactly the approved changes as v13", async ({ page }) => {
-  // 1 — Change Inbox is the home surface.
+async function expand(page: Page, proposalId: string, headline: RegExp) {
+  const proposal = card(page, proposalId);
+  const collapsed = proposal.getByRole("button", { name: headline });
+  if (await collapsed.isVisible()) await collapsed.click();
+  return proposal;
+}
+
+test("MSFT public-source review records exactly the approved demo-thesis changes as v13", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Change Inbox" })).toBeVisible();
-  await expect(page.getByText("Synthetic demo data")).toBeVisible();
+  await expect(page.getByText("Real sources + demo thesis")).toBeVisible();
+  await expect(page.getByText(/Microsoft.*FY2025 Q4 Earnings/)).toBeVisible();
 
-  // 2 — the first item opens the ARCT-DEMO earnings review.
-  await page.getByRole("button", { name: /Open review/ }).click();
-  await expect(page).toHaveURL(/\/deltas\/proposal_arct_enterprise_001/);
+  await page.getByRole("button", { name: /Open review/ }).first().click();
+  await expect(page).toHaveURL(/\/deltas\/proposal_msft_azure_001/);
+  await expect(page.getByText("Real event · demo thesis")).toBeVisible();
+  await expect(page.getByText(/0 of 4 decisions recorded/)).toBeVisible();
 
-  // 3 — replay the successful run deterministically.
   await page.getByRole("link", { name: "Run Observatory" }).click();
-  await expect(page).toHaveURL(/\/runs\/run-arct-success/);
+  await expect(page).toHaveURL(/\/runs\/run-msft-fy25q4/);
   await page.getByRole("button", { name: "Replay deterministic demo" }).last().click();
   await expect(page.getByText("15/15 events", { exact: false })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Run completed in fixture mode.").first()).toBeVisible();
+  await expect(page.getByText("No live model was called.", { exact: false }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Declared inputs/ })).toBeVisible();
 
-  // 4 — back to the proposals.
   await page.getByRole("button", { name: /Review 4 thesis delta proposals/ }).click();
-  await expect(page).toHaveURL(/\/deltas\//);
-
-  // 5 — inspect exact evidence in the drawer.
-  await card(page, "proposal_arct_enterprise_001").getByRole("button", { name: /Release ·/ }).first().click();
+  const azure = card(page, "proposal_msft_azure_001");
+  await azure.getByRole("button", { name: /Release ·/ }).first().click();
   const drawer = page.getByRole("dialog", { name: "Evidence" });
-  await expect(drawer.getByText("Revenue was $526 million, up 31% year over year.")).toBeVisible();
-  await expect(drawer.getByText("Observed by Delphi (UTC)")).toBeVisible();
+  await expect(drawer.getByText("Azure and other cloud services revenue grew 39% year over year.")).toBeVisible();
+  await expect(drawer.getByText("Microsoft Investor Relations")).toBeVisible();
+  await expect(drawer.getByRole("link", { name: "Open canonical source" })).toHaveAttribute("href", /^https:\/\/www\.microsoft\.com/);
   await page.keyboard.press("Escape");
 
-  // 6 — accept the medium-materiality supported pillar.
-  await card(page, "proposal_arct_enterprise_001").getByRole("button", { name: "Accept", exact: true }).click();
+  await azure.getByRole("button", { name: "Accept", exact: true }).click();
   await page.getByRole("button", { name: "Approve and record" }).click();
-  await expect(card(page, "proposal_arct_enterprise_001").getByText("Accepted", { exact: true })).toBeVisible();
+  await expect(azure.getByText("Accepted", { exact: true })).toBeVisible();
 
-  // 7 — edit the forecast-review proposal; the human actor is attributed.
-  await card(page, "proposal_arct_forecast_003").getByRole("button", { name: "Edit", exact: true }).click();
-  await page.getByPlaceholder("Why the team's judgment differs").fill("Confirmed against the team model bridge.");
+  const margin = await expand(page, "proposal_msft_margin_003", /Cloud margin forecast requires review/);
+  await margin.getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByPlaceholder("Why the team's judgment differs").fill("Review margin together with the capital-intensity bridge.");
   await page.getByRole("button", { name: "Approve edited version" }).click();
-  await expect(card(page, "proposal_arct_forecast_003").getByText("Edited & approved")).toBeVisible();
+  await expect(margin.getByText("Edited & approved")).toBeVisible();
 
-  // 8 — the Analyst cannot accept the high-materiality PM-required delta and
-  //     is prompted to escalate it instead.
-  await card(page, "proposal_arct_midmarket_002").getByRole("button", { name: "Accept", exact: true }).click();
+  const capacity = await expand(page, "proposal_msft_capacity_002", /Capacity constraint duration increased/);
+  await capacity.getByRole("button", { name: "Accept", exact: true }).click();
   await expect(page.getByText("Not authorized.", { exact: false })).toBeVisible();
-  await expect(page.getByText(/High-materiality changes require PM approval/)).toBeVisible();
   await page.getByRole("button", { name: "Escalate to PM instead" }).click();
-  await expect(card(page, "proposal_arct_midmarket_002").getByText("Escalated to PM")).toBeVisible();
+  await expect(capacity.getByText("Escalated to PM")).toBeVisible();
 
-  // 9 — accept the new open question.
-  await card(page, "proposal_arct_question_004").getByRole("button", { name: "Accept", exact: true }).click();
+  const outlook = await expand(page, "proposal_msft_outlook_004", /Test growth against rising AI capital intensity/);
+  await outlook.getByRole("button", { name: "Accept", exact: true }).click();
   await page.getByRole("button", { name: "Approve and record" }).click();
-  await expect(card(page, "proposal_arct_question_004").getByText("Accepted", { exact: true })).toBeVisible();
 
-  // 10 — apply the approved batch: exactly one v12 → v13 transition.
+  await expect(page.getByText(/4 of 4 decisions recorded/)).toBeVisible();
   await expect(page.getByText("3 approved changes ready")).toBeVisible();
   await page.getByRole("button", { name: "Apply approved changes" }).click();
   await page.getByRole("button", { name: "Record state transition" }).click();
-  await expect(page).toHaveURL(/\/ledger\/transition_arct_001/);
+
+  await expect(page).toHaveURL(/\/ledger\/transition_msft_001/);
   await expect(page.getByRole("heading", { name: "v12 → v13" })).toBeVisible();
-
-  const stateDiff = page.getByRole("heading", { name: "State diff" }).locator("..").locator("..");
-  await expect(stateDiff.getByText("Enterprise demand remains durable", { exact: true })).toBeVisible();
-  await expect(stateDiff.getByText("teamConviction", { exact: true })).toBeVisible();
-  await expect(stateDiff.getByText("medium", { exact: true })).toBeVisible();
-  await expect(stateDiff.getByText("high", { exact: true })).toBeVisible();
-  await expect(stateDiff.getByText(/metadata-only transition/i)).toHaveCount(0);
-
-  // 11 — the ledger records only the approved patches; the escalated pillar
-  //      is excluded and no thesis mutation happened for it.
-  await expect(page.getByText("Forecast · Q3 revenue", { exact: false }).or(page.getByText("review required").first())).toBeVisible();
+  await expect(page.getByText("sha256:0fbbae6f9953b6016874270eb3a3cadf304309f333e707a417ca2999dbcb206e")).toBeVisible();
+  await expect(page.getByText("real public · demo derived")).toBeVisible();
   await expect(page.getByText("Excluded from this transition")).toBeVisible();
-  await expect(page.getByText(/ESCALATE — Mid-market demand durability/)).toBeVisible();
+  await expect(page.getByText(/ESCALATE — Capacity constraint duration increased/)).toBeVisible();
 
-  // The current approved thesis is now v13.
-  await expect(page.getByRole("navigation", { name: "Primary" }).getByText("v13", { exact: true })).toBeVisible();
-
-  // 12 — the investment case reflects v13: escalated pillar untouched, new
-  //      question present, forecast flagged for review.
-  await page.goto("/cases/arct-demo");
+  await page.goto("/cases/msft-fy25q4");
   await expect(page.getByText("Approved team state · v13")).toBeVisible();
-  await expect(
-    page.getByText("Is mid-market weakness caused by implementation capacity or lower underlying demand?"),
-  ).toBeVisible();
-  const midmarketPillar = page.getByRole("article").filter({ hasText: "Mid-market expansion remains resilient" });
-  await expect(midmarketPillar.getByText("active")).toBeVisible();
+  await expect(page.getByText("Is accelerating Azure growth producing adequate returns relative to the rising level and mix of AI capital expenditure?")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Context coverage" })).toBeVisible();
 });

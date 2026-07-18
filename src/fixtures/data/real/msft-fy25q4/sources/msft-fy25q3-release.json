@@ -1,0 +1,65 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_msft_fy25q3_release",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Microsoft FY2025 Q3 Earnings Release",
+    "sourceType": "earnings_release",
+    "issuerEntityId": "entity_msft",
+    "uri": "https://www.microsoft.com/en-us/investor/earnings/FY-2025-Q3/press-release-webcast",
+    "canonicalUri": "https://www.microsoft.com/en-us/investor/earnings/FY-2025-Q3/press-release-webcast",
+    "publishedAt": "2025-04-30T20:05:00Z",
+    "observedAt": "2025-04-30T20:05:30Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:eec4f61e041e6dff18d692146b5fdc7101af1755dba97232835803ae258204be",
+    "version": 1,
+    "accessPolicyId": "policy_public_official",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "issuer",
+    "publisherName": "Microsoft Investor Relations",
+    "rightsNote": "Official public page; normalized facts and short excerpts only."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_q3_azure_01",
+      "sourceId": "source_msft_fy25q3_release",
+      "locator": { "section": "Business Highlights — Intelligent Cloud", "paragraph": 1 },
+      "text": "Azure and other cloud services revenue grew 35% in constant currency.",
+      "numericValues": [
+        {
+          "label": "Azure revenue growth",
+          "value": 35,
+          "unit": "percent constant currency",
+          "period": "FY2025 Q3",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_q3_azure_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:eec4f61e041e6dff18d692146b5fdc7101af1755dba97232835803ae258204be"
+    },
+    {
+      "excerptId": "excerpt_msft_q3_cloud_revenue_01",
+      "sourceId": "source_msft_fy25q3_release",
+      "locator": { "section": "Management commentary", "paragraph": 2 },
+      "text": "Microsoft Cloud revenue was $42.4 billion, up 20% year over year.",
+      "numericValues": [
+        {
+          "label": "Microsoft Cloud revenue",
+          "value": 42.4,
+          "unit": "billion",
+          "currency": "USD",
+          "period": "FY2025 Q3",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_q3_cloud_revenue_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:eec4f61e041e6dff18d692146b5fdc7101af1755dba97232835803ae258204be"
+    }
+  ]
+}

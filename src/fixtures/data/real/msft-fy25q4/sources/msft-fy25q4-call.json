@@ -1,0 +1,90 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_msft_fy25q4_call",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Microsoft FY2025 Q4 Earnings Conference Call",
+    "sourceType": "transcript",
+    "issuerEntityId": "entity_msft",
+    "uri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+    "canonicalUri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+    "publishedAt": "2025-07-30T21:30:00Z",
+    "observedAt": "2025-07-30T22:45:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc",
+    "version": 1,
+    "accessPolicyId": "policy_public_official",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "issuer",
+    "publisherName": "Microsoft Investor Relations",
+    "rightsNote": "Official public transcript; complete transcript remains on the publisher site."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_q4_capex_01",
+      "sourceId": "source_msft_fy25q4_call",
+      "locator": { "section": "CFO results — capital expenditure" },
+      "text": "Quarterly capital expenditures were $24.2 billion, including $6.5 billion of finance leases.",
+      "numericValues": [
+        {
+          "label": "Capital expenditures",
+          "value": 24.2,
+          "unit": "billion",
+          "currency": "USD",
+          "period": "FY2025 Q4",
+          "basis": "reported including finance leases",
+          "sourceExcerptId": "excerpt_msft_q4_capex_01"
+        },
+        {
+          "label": "Finance leases",
+          "value": 6.5,
+          "unit": "billion",
+          "currency": "USD",
+          "period": "FY2025 Q4",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_q4_capex_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc"
+    },
+    {
+      "excerptId": "excerpt_msft_q4_capacity_01",
+      "sourceId": "source_msft_fy25q4_call",
+      "locator": { "section": "CFO outlook — Azure" },
+      "text": "Management expected Azure to remain capacity constrained through the first half of FY2026.",
+      "classification": "public",
+      "contentHash": "sha256:93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc"
+    },
+    {
+      "excerptId": "excerpt_msft_q4_q1_outlook_01",
+      "sourceId": "source_msft_fy25q4_call",
+      "locator": { "section": "CFO outlook — FY2026 Q1" },
+      "text": "Azure growth was guided to approximately 37% in constant currency for FY2026 Q1.",
+      "numericValues": [
+        {
+          "label": "Azure growth guidance",
+          "value": 37,
+          "unit": "percent constant currency",
+          "period": "FY2026 Q1",
+          "basis": "management guidance",
+          "sourceExcerptId": "excerpt_msft_q4_q1_outlook_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc"
+    },
+    {
+      "excerptId": "excerpt_msft_q4_ai_labs_qa_01",
+      "sourceId": "source_msft_fy25q4_call",
+      "locator": { "section": "Q&A — AI labs as customers and competitors" },
+      "text": "Management described large AI workloads as both a platform-learning advantage and a competitive consideration.",
+      "classification": "public",
+      "contentHash": "sha256:93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc"
+    }
+  ]
+}

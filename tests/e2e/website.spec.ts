@@ -7,7 +7,7 @@ test("public website exposes a real contact and reaches the interactive product"
   const contact = page.getByRole("link", { name: "Request a design-partner conversation" }).first();
   await expect(contact).toHaveAttribute("href", /mailto:alixwu2004@gmail\.com/);
   await expect(page.locator("body")).not.toContainText(".example");
-  await expect(page.getByText(/deterministic browser-based demonstration with an in-memory graph projection/)).toBeVisible();
+  await expect(page.getByText(/deterministic browser-based demonstration.*frozen official public snapshots/)).toBeVisible();
 
   await page.getByRole("link", { name: "Open the interactive demo" }).click();
   await expect(page).toHaveURL(/\/$/);

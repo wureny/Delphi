@@ -1,12 +1,12 @@
 {
   "name": "delphi-prototype",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=22.13.0"
   },
-  "description": "Delphi — Earnings-to-Thesis interactive prototype and public website (synthetic demo data)",
+  "description": "Delphi — Earnings-to-Thesis interactive prototype grounded in labeled public-source snapshots and demo-authored context",
   "scripts": {
     "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
@@ -16,12 +16,13 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:sources": "node scripts/verify-public-sources.mjs"
   },
   "dependencies": {
-    "geist": "^1.7.2",
     "lucide-react": "^1.24.0",
     "next": "^16.2.10",
+    "pdfjs-dist": "^6.1.200",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "zod": "^4.4.3",

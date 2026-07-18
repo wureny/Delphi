@@ -25,14 +25,20 @@ import { cn } from "@/lib/cn";
 
 const ROLE_LABELS: Record<FundContextRole, string> = {
   external_evidence: "External evidence",
+  institution_policy: "Institution policy",
+  portfolio_position: "Portfolio position",
   internal_working_context: "Internal working context",
   internal_approved_state: "Internal approved state",
+  local_reference: "Local reference",
 };
 
 const ROLE_TONES: Record<FundContextRole, "info" | "warn" | "ok"> = {
   external_evidence: "info",
+  institution_policy: "info",
+  portfolio_position: "info",
   internal_working_context: "warn",
   internal_approved_state: "ok",
+  local_reference: "warn",
 };
 
 const PIPELINE = [

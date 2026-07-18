@@ -2,6 +2,7 @@
 
 /** Small accessible UI primitives shared across the product. */
 import { useEffect, useRef, type ReactNode, type ButtonHTMLAttributes } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -140,21 +141,67 @@ export function Kv({ label, children, mono = false }: { label: string; children:
 
 function useOverlay(open: boolean, onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
   useEffect(() => {
     if (!open) return;
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    ref.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    const overlayRoot = ref.current?.parentElement;
+    const background = Array.from(document.body.children)
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && element !== overlayRoot)
+      .map((element) => ({ element, inert: element.inert, ariaHidden: element.getAttribute("aria-hidden") }));
+    for (const { element } of background) {
+      element.inert = true;
+      element.setAttribute("aria-hidden", "true");
+    }
+    const focusableSelector =
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const animationFrame = requestAnimationFrame(() => {
+      const focusable = Array.from(ref.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? []);
+      (focusable[0] ?? ref.current)?.focus();
+    });
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab" || !ref.current) return;
+      const focusable = Array.from(ref.current.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+        (element) => element.offsetParent !== null,
+      );
+      if (focusable.length === 0) {
+        e.preventDefault();
+        ref.current.focus();
+        return;
+      }
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
+      cancelAnimationFrame(animationFrame);
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      for (const { element, inert, ariaHidden } of background) {
+        element.inert = inert;
+        if (ariaHidden === null) element.removeAttribute("aria-hidden");
+        else element.setAttribute("aria-hidden", ariaHidden);
+      }
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
   return ref;
 }
 
@@ -175,7 +222,7 @@ export function Modal({
 }) {
   const ref = useOverlay(open, onClose);
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/30 p-4 pt-[8vh]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
@@ -197,7 +244,8 @@ export function Modal({
         <div className="max-h-[60vh] overflow-y-auto px-4 py-3">{children}</div>
         {footer && <footer className="flex justify-end gap-2 border-t border-line px-4 py-3">{footer}</footer>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -214,7 +262,7 @@ export function Drawer({
 }) {
   const ref = useOverlay(open, onClose);
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 bg-ink/25" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
@@ -232,7 +280,8 @@ export function Drawer({
         </header>
         <div className="flex-1 overflow-y-auto px-4 py-3">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

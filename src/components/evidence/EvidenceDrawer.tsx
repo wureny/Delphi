@@ -4,7 +4,8 @@
  * Evidence drawer — opens an exact excerpt with locator, provenance, and
  * numeric extractions. Unavailable evidence is marked, never reconstructed.
  */
-import { FileText, Quote, TriangleAlert } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, FileText, Quote, TriangleAlert } from "lucide-react";
 import { Badge, Drawer, InlineAlert, Kv } from "@/components/ui/primitives";
 import { resolveExcerpt } from "@/fixtures/loader";
 import { useDemoStore, unavailableSourceIds } from "@/store/demo-store";
@@ -124,8 +125,13 @@ export function EvidenceDrawer({ excerptId, onClose }: { excerptId: string | nul
                 {document.publishedAt && <Kv label="Published (UTC)">{formatDateTime(document.publishedAt)}</Kv>}
                 <Kv label="Observed by Delphi (UTC)">{formatDateTime(document.observedAt)}</Kv>
                 <Kv label="Classification">
-                  <Badge tone="warn">Synthetic</Badge>
+                  <Badge tone={document.originKind === "real_public" ? "ok" : document.originKind === "demo_derived" ? "info" : "warn"}>
+                    {(document.originKind ?? "synthetic").replaceAll("_", " ")}
+                  </Badge>
                 </Kv>
+                {document.publisherName && <Kv label="Publisher">{document.publisherName}</Kv>}
+                {document.retrievedAt && <Kv label="Retrieved (UTC)">{formatDateTime(document.retrievedAt)}</Kv>}
+                {document.rightsNote && <Kv label="Usage note">{document.rightsNote}</Kv>}
                 <Kv label="Source version" mono>
                   v{document.version}
                 </Kv>
@@ -133,6 +139,16 @@ export function EvidenceDrawer({ excerptId, onClose }: { excerptId: string | nul
                   <span className="block max-w-48 truncate">{excerpt.contentHash}</span>
                 </Kv>
               </dl>
+              {(document.canonicalUri ?? document.uri) && (
+                <Link
+                  href={document.canonicalUri ?? document.uri}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:underline"
+                >
+                  Open canonical source <ExternalLink size={12} aria-hidden />
+                </Link>
+              )}
             </div>
           );
         })()

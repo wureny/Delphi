@@ -35,6 +35,11 @@ export type DataClassification =
   | "mnpi_like"
   | "synthetic";
 
+/** Data reality is independent from runtime mode and document classification. */
+export type OriginKind = "real_public" | "demo_derived" | "synthetic" | "user_provided_local";
+export type PublisherKind = "issuer" | "regulator" | "institution" | "demo_team" | "user";
+export type InputUsageStatus = "eligible" | "used" | "excluded" | "unavailable";
+
 /** Demo roles selectable in the prototype role switcher. */
 export type DemoRole = "analyst" | "pm";
 
@@ -64,6 +69,8 @@ export interface InvestmentCase extends VersionEnvelope {
   approvedThesisVersion: number;
   createdAt: ISODateTime;
   updatedAt: ISODateTime;
+  originKind?: OriginKind;
+  authorshipLabel?: string;
 }
 
 export interface ThesisPillar {
@@ -133,6 +140,9 @@ export interface ThesisSnapshot extends VersionEnvelope {
   catalysts: Catalyst[];
   risks: Risk[];
   openQuestions: OpenQuestion[];
+  originKind?: OriginKind;
+  authorshipLabel?: string;
+  derivedFromSourceRefs?: Id[];
 }
 
 export interface DomainEvent extends VersionEnvelope {
@@ -163,6 +173,12 @@ export interface SourceDocument {
   version: number;
   accessPolicyId: Id;
   status: "available" | "unavailable" | "superseded";
+  originKind?: OriginKind;
+  publisherKind?: PublisherKind;
+  publisherName?: string;
+  canonicalUri?: string;
+  retrievedAt?: ISODateTime;
+  rightsNote?: string;
 }
 
 export interface SourceLocator {
@@ -198,10 +214,20 @@ export interface SourceBundle extends VersionEnvelope {
   excerpts: SourceExcerpt[];
 }
 
-export type FundContextRole = "external_evidence" | "internal_working_context" | "internal_approved_state";
+export type FundContextRole =
+  | "external_evidence"
+  | "institution_policy"
+  | "portfolio_position"
+  | "internal_working_context"
+  | "internal_approved_state"
+  | "local_reference";
 export type FundContextObjectKind = "source_document" | "thesis_snapshot";
 export type FundContextConnectorType =
   | "public_event_feed"
+  | "official_investor_relations"
+  | "regulatory_filing"
+  | "public_institution_repository"
+  | "browser_local_import"
   | "customer_model_repository"
   | "customer_research_repository"
   | "canonical_state_store";
@@ -210,11 +236,11 @@ export interface FundContextConnector {
   connectorId: Id;
   label: string;
   connectorType: FundContextConnectorType;
-  mode: "fixture_simulated";
+  mode: "fixture_simulated" | "bundled_public_snapshot" | "browser_local_import";
   accessMode: "read_only";
-  executionLocation: "local_demo";
-  persistence: "none";
-  status: "fixture_available";
+  executionLocation: "local_demo" | "build_pipeline" | "browser_local";
+  persistence: "none" | "bundled" | "browser_local";
+  status: "fixture_available" | "snapshot_available" | "local_available";
 }
 
 export interface FundContextArtifact {
@@ -225,7 +251,7 @@ export interface FundContextArtifact {
   contextRole: FundContextRole;
   connectorId: Id;
   classification: DataClassification;
-  dataOwner: "external_publisher" | "customer";
+  dataOwner: "external_publisher" | "customer" | "user";
   accessPolicyId: Id;
   allowedRoles: DemoRole[];
   policyInheritance: "source";
@@ -234,12 +260,24 @@ export interface FundContextArtifact {
   version: number;
   contentHash: string;
   externalModelAccess: "not_used" | "blocked";
-  allowedExecution: "fixture_only";
+  allowedExecution: "fixture_only" | "browser_only";
   externalTransfer: false;
-  lifecycleStage: "normalized_fixture";
-  deletionPropagation: "simulated";
+  lifecycleStage: "normalized_fixture" | "normalized_snapshot" | "local_attached";
+  deletionPropagation: "simulated" | "local_reset" | "not_applicable";
   graphProjection: "derived_only";
   derivedObjectRefs: Id[];
+  originKind?: OriginKind;
+  publisherKind?: PublisherKind;
+  publisherName?: string;
+  authorshipLabel?: string;
+  canonicalUri?: string;
+  retrievedAt?: ISODateTime;
+  rightsNote?: string;
+  inputUsage?: InputUsageStatus;
+  inputUsageReason?: string;
+  defaultSelected?: boolean;
+  defaultScope?: "pre_event" | "event" | "post_event";
+  nonEndorsementNotice?: string;
 }
 
 export interface FundContextManifest extends VersionEnvelope {
@@ -249,6 +287,42 @@ export interface FundContextManifest extends VersionEnvelope {
   generatedAt: ISODateTime;
   connectors: FundContextConnector[];
   artifacts: FundContextArtifact[];
+  eventCutoff?: ISODateTime;
+}
+
+export interface CaseContextBinding {
+  bindingId: Id;
+  caseId: Id;
+  artifactId: Id;
+  contextRole: FundContextRole;
+  scope: "pre_event" | "event" | "post_event";
+  addedAt: ISODateTime;
+  source: "curated_default" | "curated_user_added" | "local_import";
+}
+
+export interface LocalContextArtifact {
+  artifactId: Id;
+  title: string;
+  fileName: string;
+  mediaType: string;
+  sizeBytes: number;
+  contentHash: string;
+  textPreview: string;
+  warnings: string[];
+  contextRole: FundContextRole;
+  classification: DataClassification;
+  asOf: ISODateTime;
+  createdAt: ISODateTime;
+  originKind: "user_provided_local";
+  inputUsage: "excluded";
+  inputUsageReason: "not_analyzed_in_deterministic_demo";
+}
+
+export interface RunContextUsage {
+  artifactId: Id;
+  status: InputUsageStatus;
+  reason: string;
+  originKind: OriginKind;
 }
 
 export type PatchOperation =
@@ -319,6 +393,8 @@ export interface WorkflowRun {
   sourceRefs: Id[];
   degradedReasons: DegradedReason[];
   outputProposalIds: Id[];
+  contextSetHash?: string;
+  contextUsage?: RunContextUsage[];
 }
 
 export type RunEventType =
@@ -391,6 +467,8 @@ export interface StateTransition extends VersionEnvelope {
   status: "applied" | "rolled_back" | "superseded";
   beforeSnapshotHash: string;
   afterSnapshotHash: string;
+  contextSetHash?: string;
+  evidenceOrigins?: OriginKind[];
 }
 
 export interface PrivacyReceipt extends VersionEnvelope {
@@ -407,6 +485,8 @@ export interface PrivacyReceipt extends VersionEnvelope {
   canonicalWritesApproved: number;
   supportAccess: "none" | "jit" | string;
   generatedAt: ISODateTime;
+  originCounts?: Partial<Record<OriginKind, number>>;
+  localContextCount?: number;
 }
 
 /** Typed result returned by every validator and by the transition gateway. */

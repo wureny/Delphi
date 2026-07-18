@@ -25,7 +25,7 @@ export const useToasts = create<ToastStore>((set) => ({
   toasts: [],
   push: (toast) => {
     const id = nextId++;
-    set((s) => ({ toasts: [...s.toasts, { ...toast, id }] }));
+    set((s) => ({ toasts: [...s.toasts.slice(-2), { ...toast, id }] }));
     setTimeout(() => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })), 5200);
   },
   dismiss: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
@@ -54,7 +54,7 @@ const toneBorder: Record<string, string> = {
 export function ToastViewport() {
   const { toasts, dismiss } = useToasts();
   return (
-    <div aria-live="polite" className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-80 flex-col gap-2">
+    <div aria-live="polite" className="pointer-events-none fixed top-16 right-3 z-[60] flex w-[min(20rem,calc(100vw-1.5rem))] flex-col gap-2 sm:right-4">
       {toasts.map((t) => (
         <button
           key={t.id}

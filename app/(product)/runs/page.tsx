@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { Badge, Button, Panel, Kv } from "@/components/ui/primitives";
 import { useDemoStore } from "@/store/demo-store";
-import { runBundles } from "@/fixtures/loader";
+import { getCase, productRunBundles } from "@/fixtures/loader";
 import { formatDateTime, runIdToSlug, runStatusMeta } from "@/lib/labels";
 
 export default function RunsPage() {
@@ -18,8 +18,9 @@ export default function RunsPage() {
       </p>
 
       <div className="mt-6 grid gap-3 md:grid-cols-2">
-        {runBundles.map((bundle) => {
+        {productRunBundles.map((bundle) => {
           const run = bundle.workflowRun;
+          const investmentCase = getCase(run.caseId);
           const meta = runStatusMeta[run.status];
           const pb = playback[run.runId];
           return (
@@ -28,12 +29,13 @@ export default function RunsPage() {
                 <Badge tone={meta.tone} icon={meta.icon}>
                   {meta.label}
                 </Badge>
-                <Badge tone="neutral">Fixture · deterministic</Badge>
+                <Badge tone={bundle.synthetic ? "warn" : "ok"}>{bundle.synthetic ? "Synthetic fixture" : "Real-public snapshots"}</Badge>
+                <Badge tone="neutral">Deterministic replay</Badge>
                 <Badge tone="neutral">Earnings-to-Thesis v{run.workflowVersion}</Badge>
               </div>
               <dl>
                 <Kv label="Case" mono>
-                  {run.caseId}
+                  {investmentCase ? `${investmentCase.ticker} · ${investmentCase.companyName}` : run.caseId}
                 </Kv>
                 <Kv label="Started (UTC)">{formatDateTime(run.startedAt)}</Kv>
                 <Kv label="Events" mono>
@@ -41,6 +43,9 @@ export default function RunsPage() {
                 </Kv>
                 <Kv label="Proposals" mono>
                   {run.outputProposalIds.length}
+                </Kv>
+                <Kv label="Context inputs">
+                  {run.contextUsage ? `${run.contextUsage.filter((item) => item.status === "used").length} used · ${run.contextUsage.length} declared` : "Legacy fixture"}
                 </Kv>
                 <Kv label="Replay state">
                   {pb?.status === "completed" ? "Replayed" : pb?.status === "playing" ? "Replaying…" : "Not replayed yet"}

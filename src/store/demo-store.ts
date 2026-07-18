@@ -19,6 +19,8 @@ import type {
   ValidationResult,
   Review,
   StateTransition,
+  CaseContextBinding,
+  LocalContextArtifact,
 } from "@/domain/types";
 import {
   initialDomainState,
@@ -32,13 +34,18 @@ import {
 import { DEMO_USERS } from "@/domain/policies";
 import {
   thesisV12,
+  defaultThesis,
   allProposals,
   getRunBundle,
+  getCase,
   resolveExcerpt,
   successRun,
   degradedRun,
-  arctCase,
+  defaultSuccessRun,
+  defaultCase,
+  defaultContextManifest,
 } from "@/fixtures/loader";
+import { defaultContextBindings } from "@/context/fund-context";
 
 export type PlaybackStatus = "idle" | "playing" | "completed";
 
@@ -61,7 +68,12 @@ export interface ReviewCommand {
 }
 
 interface DemoStoreState {
+  /** Canonical state for the default real-public MSFT scenario. */
   domain: DomainState;
+  /** Canonical state for the synthetic degraded ARCT fallback scenario. */
+  arctDomain: DomainState;
+  contextBindings: CaseContextBinding[];
+  localContextArtifacts: LocalContextArtifact[];
   role: DemoRole;
   /** True once the degraded source simulation has been enabled. */
   transcriptUnavailable: boolean;
@@ -72,6 +84,10 @@ interface DemoStoreState {
   setRole: (role: DemoRole) => void;
   setTranscriptUnavailable: (unavailable: boolean) => void;
   setPlayback: (runId: string, playback: RunPlayback) => void;
+  addContextBinding: (artifactId: string, scope?: CaseContextBinding["scope"]) => void;
+  removeContextBinding: (artifactId: string) => void;
+  addLocalContext: (artifact: LocalContextArtifact, scope?: CaseContextBinding["scope"]) => void;
+  removeLocalContext: (artifactId: string) => void;
   submitReview: (command: ReviewCommand) => ValidationResult<{ review?: Review }>;
   applyApproved: (runId: string, limitToProposalIds?: ReadonlySet<string>) => ValidationResult<{ transition: StateTransition }>;
   rollback: (transitionId: string) => ValidationResult<unknown>;
@@ -94,6 +110,7 @@ export function isProposalBlocked(proposal: ThesisDeltaProposal, transcriptUnava
 }
 
 const initialPlayback: Record<string, RunPlayback> = {
+  [defaultSuccessRun.workflowRun.runId]: { status: "idle", visibleEvents: 0 },
   [successRun.workflowRun.runId]: { status: "idle", visibleEvents: 0 },
   [degradedRun.workflowRun.runId]: { status: "idle", visibleEvents: 0 },
 };
@@ -101,7 +118,10 @@ const initialPlayback: Record<string, RunPlayback> = {
 export const useDemoStore = create<DemoStoreState>()(
   persist(
     (set, get) => ({
-      domain: initialDomainState(thesisV12),
+      domain: initialDomainState(defaultThesis),
+      arctDomain: initialDomainState(thesisV12),
+      contextBindings: defaultContextBindings(defaultContextManifest),
+      localContextArtifacts: [],
       role: "analyst",
       transcriptUnavailable: false,
       runPlayback: initialPlayback,
@@ -116,6 +136,56 @@ export const useDemoStore = create<DemoStoreState>()(
       setPlayback: (runId, playback) =>
         set((s) => ({ runPlayback: { ...s.runPlayback, [runId]: playback } })),
 
+      addContextBinding: (artifactId, scope) =>
+        set((s) => {
+          if (s.contextBindings.some((binding) => binding.artifactId === artifactId)) return s;
+          const artifact = defaultContextManifest.artifacts.find((item) => item.artifactId === artifactId);
+          if (!artifact) return s;
+          return {
+            contextBindings: [
+              ...s.contextBindings,
+              {
+                bindingId: `binding_user_${artifactId}`,
+                caseId: defaultCase.caseId,
+                artifactId,
+                contextRole: artifact.contextRole,
+                scope: scope ?? artifact.defaultScope ?? "pre_event",
+                addedAt: new Date().toISOString(),
+                source: "curated_user_added",
+              },
+            ],
+          };
+        }),
+
+      removeContextBinding: (artifactId) =>
+        set((s) => ({ contextBindings: s.contextBindings.filter((binding) => binding.artifactId !== artifactId) })),
+
+      addLocalContext: (artifact, scope = "pre_event") =>
+        set((s) => ({
+          localContextArtifacts: [
+            ...s.localContextArtifacts.filter((item) => item.artifactId !== artifact.artifactId),
+            artifact,
+          ],
+          contextBindings: [
+            ...s.contextBindings.filter((binding) => binding.artifactId !== artifact.artifactId),
+            {
+              bindingId: `binding_${artifact.artifactId}`,
+              caseId: defaultCase.caseId,
+              artifactId: artifact.artifactId,
+              contextRole: artifact.contextRole,
+              scope,
+              addedAt: artifact.createdAt,
+              source: "local_import",
+            },
+          ],
+        })),
+
+      removeLocalContext: (artifactId) =>
+        set((s) => ({
+          localContextArtifacts: s.localContextArtifacts.filter((item) => item.artifactId !== artifactId),
+          contextBindings: s.contextBindings.filter((binding) => binding.artifactId !== artifactId),
+        })),
+
       submitReview: (command) => {
         const s = get();
         const proposal = proposalsById.get(command.proposalId);
@@ -128,7 +198,9 @@ export const useDemoStore = create<DemoStoreState>()(
           };
         }
         const runBundle = getRunBundle(proposal.runId);
-        const result = recordReview(s.domain, {
+        const isDefaultCase = proposal.caseId === defaultCase.caseId;
+        const caseDomain = isDefaultCase ? s.domain : s.arctDomain;
+        const result = recordReview(caseDomain, {
           proposal,
           action: command.action,
           actor: DEMO_USERS[s.role],
@@ -144,24 +216,27 @@ export const useDemoStore = create<DemoStoreState>()(
           deferredUntil: command.deferredUntil,
         });
         if (result.status !== "rejected" && result.value) {
-          set({ domain: result.value.state });
+          set(isDefaultCase ? { domain: result.value.state } : { arctDomain: result.value.state });
         }
         return { status: result.status, value: { review: result.value?.review }, messages: result.messages };
       },
 
       applyApproved: (runId, limitToProposalIds) => {
         const s = get();
-        const runBundle = getRunBundle(runId) ?? successRun;
-        const result = applyApprovedChanges(s.domain, {
+        const runBundle = getRunBundle(runId) ?? defaultSuccessRun;
+        const investmentCase = getCase(runBundle.workflowRun.caseId) ?? defaultCase;
+        const isDefaultCase = investmentCase.caseId === defaultCase.caseId;
+        const caseDomain = isDefaultCase ? s.domain : s.arctDomain;
+        const result = applyApprovedChanges(caseDomain, {
           actor: DEMO_USERS[s.role],
           now: new Date().toISOString(),
           runBundle,
           proposalsById,
-          tenantId: arctCase.tenantId,
+          tenantId: investmentCase.tenantId,
           limitToProposalIds,
         });
         if (result.status !== "rejected" && result.value) {
-          set({ domain: result.value.state });
+          set(isDefaultCase ? { domain: result.value.state } : { arctDomain: result.value.state });
           return { status: result.status, value: { transition: result.value.transition }, messages: result.messages };
         }
         return { status: "rejected", messages: result.messages };
@@ -169,16 +244,20 @@ export const useDemoStore = create<DemoStoreState>()(
 
       rollback: (transitionId) => {
         const s = get();
-        const result = rollbackTransition(s.domain, transitionId);
+        const isDefaultCase = s.domain.transitions.some((transition) => transition.transitionId === transitionId);
+        const result = rollbackTransition(isDefaultCase ? s.domain : s.arctDomain, transitionId);
         if (result.status !== "rejected" && result.value) {
-          set({ domain: result.value.state });
+          set(isDefaultCase ? { domain: result.value.state } : { arctDomain: result.value.state });
         }
         return result;
       },
 
       resetDemo: () =>
         set({
-          domain: initialDomainState(thesisV12),
+          domain: initialDomainState(defaultThesis),
+          arctDomain: initialDomainState(thesisV12),
+          contextBindings: defaultContextBindings(defaultContextManifest),
+          localContextArtifacts: [],
           role: "analyst",
           transcriptUnavailable: false,
           runPlayback: { ...initialPlayback },
@@ -188,10 +267,13 @@ export const useDemoStore = create<DemoStoreState>()(
       // Baseline fixture semantics changed in the hardened workflow. A new
       // versioned key prevents stale v12 state from reintroducing the old
       // metadata-only transition after hydration.
-      name: "delphi-demo-state-v0.2.1",
+      name: "delphi-demo-state-v0.3.0",
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         domain: s.domain,
+        arctDomain: s.arctDomain,
+        contextBindings: s.contextBindings,
+        localContextArtifacts: s.localContextArtifacts,
         role: s.role,
         transcriptUnavailable: s.transcriptUnavailable,
         runPlayback: s.runPlayback,

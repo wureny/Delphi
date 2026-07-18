@@ -19,6 +19,21 @@ import degradedProposalsJson from "./data/proposals/degraded-thesis-deltas.json"
 import expectedThesisV13Json from "./data/expected/thesis.arct.v13.json";
 import expectedTransitionJson from "./data/expected/ledger-transition.json";
 import expectedReceiptJson from "./data/expected/privacy-receipt.json";
+import msftCaseJson from "./data/real/msft-fy25q4/case.msft.json";
+import msftThesisV12Json from "./data/real/msft-fy25q4/thesis.msft.v12.json";
+import msftEventJson from "./data/real/msft-fy25q4/event.msft.fy25q4.json";
+import msftContextManifestJson from "./data/real/msft-fy25q4/context-manifest.msft.json";
+import msftRunJson from "./data/real/msft-fy25q4/run.msft.json";
+import msftProposalsJson from "./data/real/msft-fy25q4/proposals.msft.json";
+import msftQ3ReleaseJson from "./data/real/msft-fy25q4/sources/msft-fy25q3-release.json";
+import msftQ3CallJson from "./data/real/msft-fy25q4/sources/msft-fy25q3-call.json";
+import msftDemoForecastJson from "./data/real/msft-fy25q4/sources/msft-demo-forecast.json";
+import msftQ4ReleaseJson from "./data/real/msft-fy25q4/sources/msft-fy25q4-release.json";
+import msftQ4CallJson from "./data/real/msft-fy25q4/sources/msft-fy25q4-call.json";
+import msftQ4MetricsJson from "./data/real/msft-fy25q4/sources/msft-fy25q4-metrics.json";
+import msftAnnualReportJson from "./data/real/msft-fy25q4/sources/msft-fy25-annual-report.json";
+import calpersPolicyJson from "./data/real/msft-fy25q4/sources/calpers-policy.json";
+import calpers13fJson from "./data/real/msft-fy25q4/sources/calpers-13f-msft.json";
 
 import {
   investmentCaseSchema,
@@ -103,7 +118,59 @@ export const expectedReceipt = parse<PrivacyReceipt>(
   expectedReceiptJson,
 );
 
+// ---------------------------------------------------------------------------
+// Default real-public scenario: Microsoft FY2025 Q4
+// ---------------------------------------------------------------------------
+
+export const msftCase = parse<InvestmentCase>("real/msft-fy25q4/case", investmentCaseSchema, msftCaseJson);
+export const msftThesisV12 = parse<ThesisSnapshot>(
+  "real/msft-fy25q4/thesis.v12",
+  thesisSnapshotSchema,
+  msftThesisV12Json,
+);
+export const msftEarningsEvent = parse<DomainEvent>(
+  "real/msft-fy25q4/event",
+  domainEventSchema,
+  msftEventJson,
+);
+export const msftFundContextManifest = parse<FundContextManifest>(
+  "real/msft-fy25q4/context-manifest",
+  fundContextManifestSchema,
+  msftContextManifestJson,
+);
+export const msftSuccessRun = parse<WorkflowRunBundle>(
+  "real/msft-fy25q4/run",
+  runBundleSchema,
+  msftRunJson,
+);
+export const msftSuccessProposals = parse<{ proposals: ThesisDeltaProposal[] }>(
+  "real/msft-fy25q4/proposals",
+  proposalFileSchema,
+  msftProposalsJson,
+).proposals;
+
+export const msftSourceBundles = [
+  parse<SourceBundle>("real/msft-fy25q4/sources/q3-release", sourceBundleSchema, msftQ3ReleaseJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/q3-call", sourceBundleSchema, msftQ3CallJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/demo-forecast", sourceBundleSchema, msftDemoForecastJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/q4-release", sourceBundleSchema, msftQ4ReleaseJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/q4-call", sourceBundleSchema, msftQ4CallJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/q4-metrics", sourceBundleSchema, msftQ4MetricsJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/annual-report", sourceBundleSchema, msftAnnualReportJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/calpers-policy", sourceBundleSchema, calpersPolicyJson),
+  parse<SourceBundle>("real/msft-fy25q4/sources/calpers-13f", sourceBundleSchema, calpers13fJson),
+];
+
+/** Product defaults use a real-public event and an explicitly demo-derived thesis. */
+export const defaultCase = msftCase;
+export const defaultThesis = msftThesisV12;
+export const defaultEvent = msftEarningsEvent;
+export const defaultSuccessRun = msftSuccessRun;
+export const defaultSuccessProposals = msftSuccessProposals;
+export const defaultContextManifest = msftFundContextManifest;
+
 export const sourceBundles: SourceBundle[] = [
+  ...msftSourceBundles,
   releaseBundle,
   transcriptBundle,
   teamForecastBundle,
@@ -138,7 +205,11 @@ export function getSourceDocument(sourceId: string): SourceDocument | undefined 
   return sourceBundles.find((b) => b.sourceDocument.sourceId === sourceId)?.sourceDocument;
 }
 
-export const allProposals: ThesisDeltaProposal[] = [...successProposals, ...degradedProposals];
+export const allProposals: ThesisDeltaProposal[] = [
+  ...msftSuccessProposals,
+  ...successProposals,
+  ...degradedProposals,
+];
 
 export function getProposal(proposalId: string): ThesisDeltaProposal | undefined {
   return allProposals.find((p) => p.proposalId === proposalId);
@@ -148,7 +219,8 @@ export function proposalsForRun(runId: string): ThesisDeltaProposal[] {
   return allProposals.filter((p) => p.runId === runId);
 }
 
-export const runBundles: WorkflowRunBundle[] = [successRun, degradedRun];
+export const runBundles: WorkflowRunBundle[] = [msftSuccessRun, successRun, degradedRun];
+export const productRunBundles: WorkflowRunBundle[] = [msftSuccessRun, degradedRun];
 
 const fundContextIssues = validateFundContextManifest({
   manifest: fundContextManifest,
@@ -163,6 +235,33 @@ const fundContextIssues = validateFundContextManifest({
 });
 if (fundContextIssues.length > 0) {
   throw new Error(`Fund context manifest failed validation: ${JSON.stringify(fundContextIssues)}`);
+}
+
+const msftFundContextIssues = validateFundContextManifest({
+  manifest: msftFundContextManifest,
+  sources: msftSourceBundles,
+  thesis: msftThesisV12,
+  knownObjectRefs: collectFundContextObjectRefs({
+    sources: msftSourceBundles,
+    thesis: msftThesisV12,
+    proposals: msftSuccessProposals,
+    runs: [msftSuccessRun],
+  }),
+});
+if (msftFundContextIssues.length > 0) {
+  throw new Error(`MSFT fund context manifest failed validation: ${JSON.stringify(msftFundContextIssues)}`);
+}
+
+export const cases: InvestmentCase[] = [msftCase, arctCase];
+
+export function getCase(caseId: string): InvestmentCase | undefined {
+  return cases.find((item) => item.caseId === caseId);
+}
+
+export function getThesisForCase(caseId: string): ThesisSnapshot | undefined {
+  if (caseId === msftCase.caseId) return msftThesisV12;
+  if (caseId === arctCase.caseId) return thesisV12;
+  return undefined;
 }
 
 export function getRunBundle(runId: string): WorkflowRunBundle | undefined {

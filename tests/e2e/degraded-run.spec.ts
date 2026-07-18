@@ -30,6 +30,7 @@ test("degraded run retains safe findings, blocks unsafe approval, and never muta
   // 5 — the transcript-dependent high-impact proposal is visibly blocked.
   const blocked = card(page, "proposal_arct_midmarket_002");
   await expect(blocked.getByText("Blocked — required evidence is unavailable", { exact: false })).toBeVisible();
+  await blocked.getByRole("button", { name: /Mid-market demand durability is less certain/ }).click();
 
   // 6 — unsafe approval is impossible: Accept fails closed (disabled).
   await expect(blocked.getByRole("button", { name: "Accept", exact: true })).toBeDisabled();
@@ -50,5 +51,5 @@ test("degraded run retains safe findings, blocks unsafe approval, and never muta
   // 8 — no canonical transition occurred.
   await page.goto("/ledger");
   await expect(page.getByText("No state transitions recorded yet.")).toBeVisible();
-  await expect(page.getByText("Current approved thesis: v12")).toBeVisible();
+  await expect(page.getByText("MSFT approved v12")).toBeVisible();
 });

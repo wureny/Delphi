@@ -10,12 +10,12 @@ test("internal graph debug page exposes a current read-only product projection",
   await expect(page.getByRole("heading", { name: "Node inventory" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Selected node" })).toBeVisible();
 
-  await page.getByPlaceholder("Search ID, label, or kind").fill("proposal_arct_enterprise_001");
-  const proposalNode = page.getByRole("button", { name: /Large-enterprise demand remains supportive/ });
+  await page.getByPlaceholder("Search ID, label, or kind").fill("proposal_msft_azure_001");
+  const proposalNode = page.getByRole("button", { name: /Azure demand evidence strengthened/ });
   await expect(proposalNode).toBeVisible();
   await proposalNode.click();
 
-  await expect(page.getByText("proposal_arct_enterprise_001").last()).toBeVisible();
+  await expect(page.getByText("proposal_msft_azure_001").last()).toBeVisible();
   await expect(page.getByText("CITES", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("TARGETS", { exact: true }).first()).toBeVisible();
 });

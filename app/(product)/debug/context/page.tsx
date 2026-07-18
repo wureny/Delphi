@@ -1,5 +1,5 @@
-import { FundContextDebug } from "@/components/debug/FundContextDebug";
+import { redirect } from "next/navigation";
 
 export default function FundContextDebugPage() {
-  return <FundContextDebug />;
+  redirect("/context");
 }

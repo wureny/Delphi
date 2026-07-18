@@ -43,8 +43,11 @@ describe("fund context ingestion boundary", () => {
       externalTransferCount: 0,
       roleCounts: {
         external_evidence: 2,
+        institution_policy: 0,
+        portfolio_position: 0,
         internal_working_context: 2,
         internal_approved_state: 1,
+        local_reference: 0,
       },
     });
     expect(validate()).toEqual([]);

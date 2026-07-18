@@ -1,0 +1,21 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "domainEventId": "event_msft_fy25q4",
+  "tenantId": "tenant_delphi_demo",
+  "entityId": "entity_msft",
+  "eventType": "earnings",
+  "title": "Microsoft FY2025 Q4 earnings",
+  "occurredAt": "2025-07-30T20:05:00Z",
+  "publishedAt": "2025-07-30T20:05:00Z",
+  "observedAt": "2025-07-30T20:05:30Z",
+  "sourceRefs": [
+    "source_msft_fy25q4_release",
+    "source_msft_fy25q4_call",
+    "source_msft_fy25q4_metrics",
+    "source_msft_demo_forecast_v12"
+  ],
+  "clusterId": "cluster_msft_fy25q4",
+  "status": "ready"
+}

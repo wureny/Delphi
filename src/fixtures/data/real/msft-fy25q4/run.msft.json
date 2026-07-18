@@ -1,0 +1,72 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "workflowRun": {
+    "runId": "run_msft_fy25q4_success",
+    "tenantId": "tenant_delphi_demo",
+    "caseId": "case_msft_fy25q4",
+    "domainEventId": "event_msft_fy25q4",
+    "workflowId": "earnings_to_thesis",
+    "workflowVersion": "0.3.0",
+    "status": "completed",
+    "mode": "fixture",
+    "startedAt": "2025-07-30T22:45:10Z",
+    "completedAt": "2025-07-30T22:46:16Z",
+    "modelRoutes": [
+      {
+        "provider": "fixture",
+        "model": "deterministic-real-data-demo-v0.3",
+        "endpointOwner": "local",
+        "retentionPolicy": "zero",
+        "trainingUse": "disabled"
+      }
+    ],
+    "skillVersions": {
+      "facts_numbers": "0.3.0",
+      "thesis_impact": "0.3.0",
+      "risk_counterevidence": "0.3.0",
+      "judge_composer": "0.3.0"
+    },
+    "sourceRefs": [
+      "source_msft_fy25q4_release",
+      "source_msft_fy25q4_call",
+      "source_msft_fy25q4_metrics",
+      "source_msft_demo_forecast_v12"
+    ],
+    "degradedReasons": [],
+    "outputProposalIds": [
+      "proposal_msft_azure_001",
+      "proposal_msft_capacity_002",
+      "proposal_msft_margin_003",
+      "proposal_msft_outlook_004"
+    ],
+    "contextSetHash": "sha256:0fbbae6f9953b6016874270eb3a3cadf304309f333e707a417ca2999dbcb206e",
+    "contextUsage": [
+      { "artifactId": "context_msft_q3_release", "status": "used", "reason": "Pre-event thesis derivation", "originKind": "real_public" },
+      { "artifactId": "context_msft_q3_call", "status": "used", "reason": "Pre-event capacity and margin baseline", "originKind": "real_public" },
+      { "artifactId": "context_msft_demo_forecast_v12", "status": "used", "reason": "Demo-team comparison baseline", "originKind": "demo_derived" },
+      { "artifactId": "context_msft_thesis_v12", "status": "used", "reason": "Approved governed-state baseline", "originKind": "demo_derived" },
+      { "artifactId": "context_msft_q4_release", "status": "used", "reason": "Reported result evidence", "originKind": "real_public" },
+      { "artifactId": "context_msft_q4_call", "status": "used", "reason": "Prepared remarks, outlook, and Q&A", "originKind": "real_public" },
+      { "artifactId": "context_msft_q4_metrics", "status": "used", "reason": "Margin and outlook reconciliation", "originKind": "real_public" }
+    ]
+  },
+  "events": [
+    { "runEventId": "event_msft_run_01", "runId": "run_msft_fy25q4_success", "eventType": "run_created", "occurredAt": "2025-07-30T22:45:10Z", "actorType": "system", "actorId": "system", "publicMessage": "Deterministic runtime created for MSFT FY2025 Q4 using frozen real-public snapshots.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_02", "runId": "run_msft_fy25q4_success", "eventType": "source_loaded", "occurredAt": "2025-07-30T22:45:14Z", "actorType": "system", "actorId": "system", "publicMessage": "Loaded approved demo thesis v12, demo forecast, and three official event sources.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_03", "runId": "run_msft_fy25q4_success", "eventType": "validation_passed", "occurredAt": "2025-07-30T22:45:18Z", "actorType": "system", "actorId": "system", "publicMessage": "Origin, point-in-time, source hash, and context-set validation passed.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_04", "runId": "run_msft_fy25q4_success", "eventType": "task_assigned", "occurredAt": "2025-07-30T22:45:22Z", "actorType": "system", "actorId": "system", "publicMessage": "Assigned reported-facts and numeric reconciliation task.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_05", "runId": "run_msft_fy25q4_success", "eventType": "agent_started", "occurredAt": "2025-07-30T22:45:26Z", "actorType": "agent", "actorId": "facts_numbers", "publicMessage": "Facts & Numbers Analyst replay started.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_06", "runId": "run_msft_fy25q4_success", "eventType": "finding_created", "occurredAt": "2025-07-30T22:45:30Z", "actorType": "agent", "actorId": "facts_numbers", "publicMessage": "Azure growth, cloud margin, capex, and outlook values were reconciled to official sources.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_07", "runId": "run_msft_fy25q4_success", "eventType": "validation_passed", "occurredAt": "2025-07-30T22:45:34Z", "actorType": "system", "actorId": "system", "publicMessage": "Numeric basis and citation validation passed with an explicit reported-versus-constant-currency warning.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_08", "runId": "run_msft_fy25q4_success", "eventType": "agent_started", "occurredAt": "2025-07-30T22:45:38Z", "actorType": "agent", "actorId": "thesis_impact", "publicMessage": "Thesis Impact Analyst replay started.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_09", "runId": "run_msft_fy25q4_success", "eventType": "finding_created", "occurredAt": "2025-07-30T22:45:42Z", "actorType": "agent", "actorId": "thesis_impact", "publicMessage": "Demand, capacity conversion, and AI-economics pillars were mapped against the event.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_10", "runId": "run_msft_fy25q4_success", "eventType": "agent_started", "occurredAt": "2025-07-30T22:45:46Z", "actorType": "agent", "actorId": "risk_counterevidence", "publicMessage": "Risk & Counterevidence Analyst replay started.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_11", "runId": "run_msft_fy25q4_success", "eventType": "finding_created", "occurredAt": "2025-07-30T22:45:50Z", "actorType": "agent", "actorId": "risk_counterevidence", "publicMessage": "Capacity duration, capital intensity, and AI-customer concentration uncertainties were preserved.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_12", "runId": "run_msft_fy25q4_success", "eventType": "agent_started", "occurredAt": "2025-07-30T22:45:54Z", "actorType": "agent", "actorId": "judge_composer", "publicMessage": "Judge / Delta Composer replay started.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_13", "runId": "run_msft_fy25q4_success", "eventType": "proposal_created", "occurredAt": "2025-07-30T22:45:58Z", "actorType": "agent", "actorId": "judge_composer", "publicMessage": "Four deterministic, cited Thesis Delta Proposals were loaded for review.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_14", "runId": "run_msft_fy25q4_success", "eventType": "review_required", "occurredAt": "2025-07-30T22:46:12Z", "actorType": "system", "actorId": "system", "publicMessage": "Human review is required; the capacity-risk proposal requires PM approval.", "objectRefs": [] },
+    { "runEventId": "event_msft_run_15", "runId": "run_msft_fy25q4_success", "eventType": "run_completed", "occurredAt": "2025-07-30T22:46:16Z", "actorType": "system", "actorId": "system", "publicMessage": "Deterministic real-data snapshot replay completed. No live model was called.", "objectRefs": [] }
+  ]
+}

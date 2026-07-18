@@ -1,0 +1,20 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "caseId": "case_msft_fy25q4",
+  "tenantId": "tenant_delphi_demo",
+  "entityId": "entity_msft",
+  "ticker": "MSFT",
+  "companyName": "Microsoft Corporation",
+  "strategyPack": "fundamental_equity",
+  "sector": "Software and cloud infrastructure",
+  "horizon": "24 months",
+  "ownerUserId": "user_analyst_01",
+  "status": "active",
+  "approvedThesisVersion": 12,
+  "createdAt": "2025-05-02T14:00:00Z",
+  "updatedAt": "2025-07-30T19:59:00Z",
+  "originKind": "real_public",
+  "authorshipLabel": "Real public company; case framing by Delphi Demo Team"
+}

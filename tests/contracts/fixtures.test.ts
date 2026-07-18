@@ -20,6 +20,14 @@ import {
   degradedBlockedProposalIds,
   fundContextManifest,
   internalResearchMemoBundle,
+  msftCase,
+  msftThesisV12,
+  msftSuccessRun,
+  msftSuccessProposals,
+  msftFundContextManifest,
+  msftSourceBundles,
+  runBundles,
+  getThesisForCase,
 } from "@/fixtures/loader";
 import { validateSemanticPatch } from "@/domain/patch";
 import { validateNumbers, validateReferenceScope, type EvidenceContext } from "@/domain/validators";
@@ -34,7 +42,7 @@ const evidenceCtx: EvidenceContext = {
 };
 
 describe("fixture envelopes", () => {
-  it("all fixtures are explicitly synthetic v0.2.0", () => {
+  it("retains the explicitly synthetic legacy ARCT v0.2.0 fixtures", () => {
     for (const fixture of [
       arctCase,
       thesisV12,
@@ -49,6 +57,15 @@ describe("fixture envelopes", () => {
       expect(fixture.fixtureVersion).toBe("0.2.0");
       expect(fixture.schemaVersion).toBe("2026-07-13");
     }
+  });
+
+  it("loads a real-public MSFT event with an explicitly demo-derived thesis", () => {
+    expect(msftCase).toMatchObject({ ticker: "MSFT", synthetic: false, originKind: "real_public" });
+    expect(msftSuccessRun.synthetic).toBe(false);
+    expect(msftThesisV12).toMatchObject({ synthetic: true, originKind: "demo_derived", version: 12 });
+    expect(msftThesisV12.authorshipLabel).toContain("hypothetical");
+    expect(msftFundContextManifest.eventCutoff).toBe("2025-07-30T20:00:00Z");
+    expect(msftSourceBundles.filter((bundle) => bundle.sourceDocument.originKind === "real_public")).toHaveLength(8);
   });
 
   it("the approved thesis starts at v12 with three pillars, five forecasts, three risks, three open questions", () => {
@@ -108,9 +125,10 @@ describe("proposal contracts", () => {
   });
 
   it("every proposal references the known case, a known run, and thesis v12", () => {
-    const runIds = new Set([successRun.workflowRun.runId, degradedRun.workflowRun.runId]);
+    const runIds = new Set(runBundles.map((run) => run.workflowRun.runId));
+    const caseIds = new Set([arctCase.caseId, msftCase.caseId]);
     for (const p of allProposals) {
-      expect(p.caseId).toBe(arctCase.caseId);
+      expect(caseIds.has(p.caseId)).toBe(true);
       expect(runIds.has(p.runId)).toBe(true);
       expect(p.fromThesisVersion).toBe(12);
     }
@@ -126,14 +144,16 @@ describe("proposal contracts", () => {
 
   it("every proposed patch is an allowed semantic patch against v12", () => {
     for (const p of allProposals) {
-      const result = validateSemanticPatch(thesisV12, p.proposedPatch);
+      const thesis = getThesisForCase(p.caseId);
+      expect(thesis).toBeDefined();
+      const result = validateSemanticPatch(thesis!, p.proposedPatch);
       expect(result.status, `${p.proposalId}: ${JSON.stringify(result.messages)}`).toBe("accepted");
     }
   });
 
   it("every proposal targets objects inside the approved snapshot", () => {
     for (const p of allProposals) {
-      expect(validateReferenceScope(p, thesisV12)).toHaveLength(0);
+      expect(validateReferenceScope(p, getThesisForCase(p.caseId)!)).toHaveLength(0);
     }
   });
 
@@ -145,6 +165,11 @@ describe("proposal contracts", () => {
 });
 
 describe("run fixtures", () => {
+  it("the MSFT run records the complete deterministic proposal and context set", () => {
+    expect(msftSuccessRun.workflowRun.outputProposalIds).toEqual(msftSuccessProposals.map((proposal) => proposal.proposalId));
+    expect(msftSuccessRun.workflowRun.contextUsage?.filter((item) => item.status === "used")).toHaveLength(7);
+    expect(msftSuccessRun.events.at(-1)?.publicMessage).toContain("No live model was called");
+  });
   it("the successful run outputs exactly the four proposal ids", () => {
     expect(successRun.workflowRun.outputProposalIds).toEqual(successProposals.map((p) => p.proposalId));
   });

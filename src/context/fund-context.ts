@@ -1,4 +1,5 @@
 import type {
+  CaseContextBinding,
   FundContextArtifact,
   FundContextManifest,
   SourceBundle,
@@ -7,6 +8,7 @@ import type {
   WorkflowRunBundle,
 } from "@/domain/types";
 import { semanticThesisHash } from "@/domain/semantic-thesis";
+import { contentHash } from "@/domain/hash";
 
 export type FundContextIssueCode =
   | "duplicate_connector"
@@ -15,7 +17,10 @@ export type FundContextIssueCode =
   | "object_missing"
   | "metadata_mismatch"
   | "unsafe_model_policy"
-  | "derived_reference_missing";
+  | "derived_reference_missing"
+  | "provenance_incomplete"
+  | "binding_missing"
+  | "point_in_time_violation";
 
 export interface FundContextIssue {
   code: FundContextIssueCode;
@@ -133,12 +138,30 @@ export function validateFundContextManifest({
       if (artifact.observedAt !== thesis.recordedAt) issues.push(metadataIssue(artifact, "observation time"));
     }
 
-    if (artifact.contextRole !== "external_evidence" && artifact.externalModelAccess !== "blocked") {
+    const sensitive = ["internal", "restricted", "mnpi_like"].includes(artifact.classification);
+    if ((sensitive || artifact.originKind === "user_provided_local") && artifact.externalModelAccess !== "blocked") {
       issues.push({
         code: "unsafe_model_policy",
         artifactId: artifact.artifactId,
         message: `${artifact.artifactId} must block external-model access`,
       });
+    }
+
+    if (artifact.originKind === "real_public") {
+      const missing = [
+        artifact.publisherKind,
+        artifact.publisherName,
+        artifact.canonicalUri,
+        artifact.retrievedAt,
+        artifact.rightsNote,
+      ].some((value) => !value);
+      if (missing) {
+        issues.push({
+          code: "provenance_incomplete",
+          artifactId: artifact.artifactId,
+          message: `${artifact.artifactId} is real public context without complete publisher, URI, retrieval, and rights metadata`,
+        });
+      }
     }
 
     for (const derivedRef of artifact.derivedObjectRefs) {
@@ -155,11 +178,74 @@ export function validateFundContextManifest({
   return issues;
 }
 
+export function defaultContextBindings(manifest: FundContextManifest): CaseContextBinding[] {
+  return manifest.artifacts
+    .filter((artifact) => artifact.defaultSelected)
+    .map((artifact) => ({
+      bindingId: `binding_${artifact.artifactId}`,
+      caseId: manifest.caseId,
+      artifactId: artifact.artifactId,
+      contextRole: artifact.contextRole,
+      scope: artifact.defaultScope ?? (artifact.contextRole === "external_evidence" ? "event" : "pre_event"),
+      addedAt: manifest.generatedAt,
+      source: "curated_default",
+    }));
+}
+
+export function contextSetHash(bindings: readonly CaseContextBinding[]): string {
+  return contentHash(
+    bindings
+      .map(({ caseId, artifactId, contextRole, scope, source }) => ({ caseId, artifactId, contextRole, scope, source }))
+      .sort((a, b) => a.artifactId.localeCompare(b.artifactId)),
+  );
+}
+
+export function validateCaseContextBindings({
+  manifest,
+  bindings,
+}: {
+  manifest: FundContextManifest;
+  bindings: readonly CaseContextBinding[];
+}): FundContextIssue[] {
+  const issues: FundContextIssue[] = [];
+  const artifacts = new Map(manifest.artifacts.map((artifact) => [artifact.artifactId, artifact]));
+  const cutoff = manifest.eventCutoff ? Date.parse(manifest.eventCutoff) : undefined;
+  for (const binding of bindings) {
+    const artifact = artifacts.get(binding.artifactId);
+    if (!artifact) {
+      issues.push({
+        code: "binding_missing",
+        artifactId: binding.artifactId,
+        message: `${binding.bindingId} references missing artifact ${binding.artifactId}`,
+      });
+      continue;
+    }
+    if (binding.caseId !== manifest.caseId) {
+      issues.push({
+        code: "binding_missing",
+        artifactId: binding.artifactId,
+        message: `${binding.bindingId} belongs to a different case`,
+      });
+    }
+    if (binding.scope === "pre_event" && cutoff !== undefined && Date.parse(artifact.observedAt) > cutoff) {
+      issues.push({
+        code: "point_in_time_violation",
+        artifactId: artifact.artifactId,
+        message: `${artifact.artifactId} was observed after the pre-event cutoff`,
+      });
+    }
+  }
+  return issues;
+}
+
 export function summarizeFundContext(manifest: FundContextManifest) {
-  const roleCounts = {
+  const roleCounts: Record<FundContextArtifact["contextRole"], number> = {
     external_evidence: 0,
+    institution_policy: 0,
+    portfolio_position: 0,
     internal_working_context: 0,
     internal_approved_state: 0,
+    local_reference: 0,
   };
   for (const artifact of manifest.artifacts) roleCounts[artifact.contextRole] += 1;
   return {

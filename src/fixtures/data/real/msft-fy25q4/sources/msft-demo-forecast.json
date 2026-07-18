@@ -1,0 +1,60 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": true,
+  "sourceDocument": {
+    "sourceId": "source_msft_demo_forecast_v12",
+    "tenantId": "tenant_delphi_demo",
+    "title": "MSFT Delphi Demo Team Forecast v12",
+    "sourceType": "financial_model",
+    "issuerEntityId": "entity_msft",
+    "uri": "delphi://demo-team/msft/forecast/v12",
+    "publishedAt": "2025-07-30T19:50:00Z",
+    "observedAt": "2025-07-30T19:50:00Z",
+    "classification": "internal",
+    "contentHash": "sha256:5bb43615ed20385d8ca923fdf356bb33dd72ac7190b8c2483bc9f2fdd1ed67ee",
+    "version": 12,
+    "accessPolicyId": "policy_demo_internal",
+    "status": "available",
+    "originKind": "demo_derived",
+    "publisherKind": "demo_team",
+    "publisherName": "Delphi Demo Team",
+    "rightsNote": "Hypothetical model inputs derived from public sources; not a real institution forecast."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_demo_forecast_01",
+      "sourceId": "source_msft_demo_forecast_v12",
+      "locator": { "section": "Base case", "cellRange": "FY25Q4:FY26Q1" },
+      "text": "Base case assumed 34.5% Q4 Azure constant-currency growth, 67% Q4 cloud gross margin, and 35% Q1 Azure growth.",
+      "numericValues": [
+        {
+          "label": "FY2025 Q4 Azure growth",
+          "value": 34.5,
+          "unit": "percent constant currency",
+          "period": "FY2025 Q4",
+          "basis": "demo-derived forecast",
+          "sourceExcerptId": "excerpt_msft_demo_forecast_01"
+        },
+        {
+          "label": "FY2025 Q4 Microsoft Cloud gross margin",
+          "value": 67,
+          "unit": "percent",
+          "period": "FY2025 Q4",
+          "basis": "demo-derived forecast",
+          "sourceExcerptId": "excerpt_msft_demo_forecast_01"
+        },
+        {
+          "label": "FY2026 Q1 Azure growth",
+          "value": 35,
+          "unit": "percent constant currency",
+          "period": "FY2026 Q1",
+          "basis": "demo-derived forecast",
+          "sourceExcerptId": "excerpt_msft_demo_forecast_01"
+        }
+      ],
+      "classification": "internal",
+      "contentHash": "sha256:5bb43615ed20385d8ca923fdf356bb33dd72ac7190b8c2483bc9f2fdd1ed67ee"
+    }
+  ]
+}

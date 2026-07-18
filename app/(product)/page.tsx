@@ -11,7 +11,15 @@ import { ArrowRight, FileSearch2, TriangleAlert, Eye } from "lucide-react";
 import { Badge, Button, type Tone } from "@/components/ui/primitives";
 import { cn } from "@/lib/cn";
 import { useDemoStore, proposalReviewState, type ProposalReviewState } from "@/store/demo-store";
-import { successProposals, degradedProposals, earningsEvent, arctCase, degradedBlockedProposalIds } from "@/fixtures/loader";
+import {
+  defaultSuccessProposals,
+  defaultEvent,
+  defaultCase,
+  degradedProposals,
+  earningsEvent,
+  arctCase,
+  degradedBlockedProposalIds,
+} from "@/fixtures/loader";
 import { evidenceHealth } from "@/components/evidence/EvidenceDrawer";
 import { formatDateTime, materialityTone, reviewStateMeta } from "@/lib/labels";
 
@@ -43,15 +51,17 @@ interface InboxRowData {
   cta: string;
   disabledReason?: string;
   degraded?: boolean;
+  origin: "real_public" | "synthetic";
 }
 
 function useInboxRows(): InboxRowData[] {
   const domain = useDemoStore((s) => s.domain);
+  const arctDomain = useDemoStore((s) => s.arctDomain);
   const transcriptUnavailable = useDemoStore((s) => s.transcriptUnavailable);
 
   return useMemo(() => {
-    // --- Successful-run review item -------------------------------------
-    const states = successProposals.map((p) => proposalReviewState(domain, p, false));
+    // --- Default real-public review item ---------------------------------
+    const states = defaultSuccessProposals.map((p) => proposalReviewState(domain, p, false));
     const applied = states.filter((s) => s === "applied").length;
     const escalated = states.filter((s) => s === "escalated").length;
     const open = states.filter((s) => s === "needs_review").length;
@@ -59,36 +69,37 @@ function useInboxRows(): InboxRowData[] {
       open > 0 ? "needs_review" : applied > 0 ? "applied" : escalated > 0 ? "escalated" : "needs_review";
 
     const successRow: InboxRowData = {
-      id: "inbox_arct_success",
+      id: "inbox_msft_fy25q4",
       kind: "review",
       state: successState,
       stateLabel:
         successState === "needs_review"
-          ? open === successProposals.length
+          ? open === defaultSuccessProposals.length
             ? "Needs review"
             : `Needs review · ${open} open`
           : successState === "applied"
             ? "Approved · v13 recorded"
             : "Escalated to PM",
       stateTone: successState === "needs_review" ? "accent" : successState === "applied" ? "ok" : "esc",
-      company: arctCase.companyName,
-      ticker: arctCase.ticker,
-      event: "FY2026 Q2 Earnings",
+      company: defaultCase.companyName,
+      ticker: defaultCase.ticker,
+      event: "FY2025 Q4 Earnings",
       summary: "2 pillar deltas · 1 forecast review · 1 new open question",
       materiality: "high",
       evidence: evidenceHealth(
-        successProposals.flatMap((p) => p.evidenceRefs),
-        transcriptUnavailable,
+        defaultSuccessProposals.flatMap((p) => p.evidenceRefs),
+        false,
       ),
       reviewer: "PM (1 delta) · Analyst (3)",
-      time: earningsEvent.observedAt,
-      href: `/deltas/${successProposals[0]!.proposalId}`,
+      time: defaultEvent.observedAt,
+      href: `/deltas/${defaultSuccessProposals[0]!.proposalId}`,
       cta: successState === "applied" ? "View review" : "Open review",
       degraded: false,
+      origin: "real_public",
     };
 
-    // --- Degraded-run item ------------------------------------------------
-    const degradedStates = degradedProposals.map((p) => proposalReviewState(domain, p, transcriptUnavailable));
+    // --- Synthetic degraded fallback -------------------------------------
+    const degradedStates = degradedProposals.map((p) => proposalReviewState(arctDomain, p, transcriptUnavailable));
     const degradedOpen = degradedStates.filter((s) => s === "needs_review").length;
     const degradedRow: InboxRowData = {
       id: "inbox_arct_degraded",
@@ -114,48 +125,11 @@ function useInboxRows(): InboxRowData[] {
       href: "/runs/run-arct-degraded",
       cta: transcriptUnavailable ? "Open degraded review" : "Simulate & replay",
       degraded: true,
+      origin: "synthetic",
     };
 
-    // --- Monitoring rows (intentionally outside demo scope) ---------------
-    const monitoring: InboxRowData[] = [
-      {
-        id: "inbox_helios",
-        kind: "monitoring",
-        state: "monitoring",
-        stateLabel: "Monitoring",
-        stateTone: "neutral",
-        company: "Helios Compute",
-        ticker: "HELX-DEMO",
-        event: "No material changes since v8 approval",
-        summary: "Next expected event: FY2026 Q3 earnings",
-        materiality: "low",
-        evidence: { available: 0, total: 0 },
-        reviewer: "Not assigned",
-        time: "2026-07-11T14:00:00Z",
-        cta: "No action",
-        disabledReason: "Outside the scope of this demo fixture. Only the ARCT-DEMO case is interactive.",
-      },
-      {
-        id: "inbox_meridian_grid",
-        kind: "monitoring",
-        state: "monitoring",
-        stateLabel: "Monitoring",
-        stateTone: "neutral",
-        company: "Meridian Grid Systems",
-        ticker: "MGRD-DEMO",
-        event: "No material changes since v15 approval",
-        summary: "Watching hyperscaler capex commentary",
-        materiality: "low",
-        evidence: { available: 0, total: 0 },
-        reviewer: "Not assigned",
-        time: "2026-07-10T09:30:00Z",
-        cta: "No action",
-        disabledReason: "Outside the scope of this demo fixture. Only the ARCT-DEMO case is interactive.",
-      },
-    ];
-
-    return [successRow, degradedRow, ...monitoring];
-  }, [domain, transcriptUnavailable]);
+    return [successRow, degradedRow];
+  }, [domain, arctDomain, transcriptUnavailable]);
 }
 
 function matchesFilter(row: InboxRowData, filter: InboxFilter): boolean {
@@ -205,8 +179,8 @@ function InboxRow({ row }: { row: InboxRowData }) {
             Evidence {row.evidence.available}/{row.evidence.total}
           </Badge>
         )}
-        <Badge tone="warn" outlined className="hidden sm:inline-flex">
-          Synthetic
+        <Badge tone={row.origin === "real_public" ? "ok" : "warn"} outlined className="hidden sm:inline-flex">
+          {row.origin === "real_public" ? "Real event · demo thesis" : "Synthetic fallback"}
         </Badge>
         <span className="w-full font-mono text-[10px] tracking-wide text-ink-3 tnum sm:ml-auto sm:w-auto">
           {formatDateTime(row.time)} UTC
@@ -265,7 +239,7 @@ export default function ChangeInboxPage() {
         </div>
         <p className="flex items-center gap-1.5 pb-0.5 text-[11px] text-ink-3">
           <Eye size={13} strokeWidth={1.6} aria-hidden />
-          Delphi is monitoring 18 active cases
+          1 real-public scenario · 1 synthetic degraded fallback
         </p>
       </header>
 
@@ -293,7 +267,7 @@ export default function ChangeInboxPage() {
             <FileSearch2 size={22} className="text-ink-3" aria-hidden />
             <p className="text-sm font-medium text-ink">No material changes need your review.</p>
             <p className="text-[13px] text-ink-3">
-              Delphi is monitoring 18 active cases. New earnings events will appear here with cited thesis deltas.
+              No scenario currently matches this review filter.
             </p>
           </li>
         ) : (
@@ -302,7 +276,7 @@ export default function ChangeInboxPage() {
       </ul>
 
       <p className="mt-4 max-w-3xl text-[10px] leading-relaxed text-ink-3">
-        All companies, events, figures, and statements are synthetic.{" "}
+        MSFT event facts come from frozen official public sources; the investment thesis and inferred deltas are demo-authored. ARCT-DEMO remains wholly synthetic.{" "}
         <Link href="/trust" className="text-accent hover:underline">
           See the Privacy Receipt
         </Link>{" "}

@@ -1,0 +1,53 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "scenario": "analyst_accept_edit_escalate_apply",
+  "reviewedAt": "2025-07-30T23:00:00Z",
+  "expectedApprovedThesis": {
+    "thesisId": "thesis_msft_demo",
+    "version": 13,
+    "originKind": "demo_derived",
+    "approvedByUserId": "user_analyst_01",
+    "pillarConviction": {
+      "pillar_msft_azure_demand": "high"
+    },
+    "riskSeverity": {
+      "risk_msft_capacity_constraint": "medium"
+    },
+    "forecastStatus": {
+      "forecast_msft_q4_cloud_gm": "review_required"
+    },
+    "addedOpenQuestionIds": [
+      "question_msft_growth_vs_capital"
+    ],
+    "contentHash": "sha256:ed4eb78185e55ae30ea7aabeddd02d573a49885aa737056f05dd23218ff3d292"
+  },
+  "expectedTransition": {
+    "transitionId": "transition_msft_001",
+    "fromVersion": 12,
+    "toVersion": 13,
+    "beforeSnapshotHash": "sha256:23ef336b14628f07edd51b1cf0fbe3154c6d2f328e2bb30274b0c8fabcd911c1",
+    "afterSnapshotHash": "sha256:ed4eb78185e55ae30ea7aabeddd02d573a49885aa737056f05dd23218ff3d292",
+    "contextSetHash": "sha256:0fbbae6f9953b6016874270eb3a3cadf304309f333e707a417ca2999dbcb206e",
+    "evidenceOrigins": [
+      "real_public",
+      "demo_derived"
+    ],
+    "proposalIds": [
+      "proposal_msft_azure_001",
+      "proposal_msft_margin_003",
+      "proposal_msft_outlook_004"
+    ],
+    "reviewIds": [
+      "review_001_proposal_msft_azure_001_accept",
+      "review_003_proposal_msft_margin_003_edit",
+      "review_004_proposal_msft_outlook_004_accept"
+    ],
+    "excludedProposalIds": [
+      "proposal_msft_capacity_002"
+    ],
+    "excludedReviewIds": [
+      "review_002_proposal_msft_capacity_002_escalate"
+    ]
+  }
+}

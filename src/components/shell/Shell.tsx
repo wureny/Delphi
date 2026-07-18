@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   RotateCcw,
   Search,
-  FlaskConical,
   TriangleAlert,
   UserRound,
   Landmark,
@@ -22,7 +21,7 @@ import { cn } from "@/lib/cn";
 import { Badge, Button, Modal } from "@/components/ui/primitives";
 import { ToastViewport, useToasts } from "@/components/ui/toast";
 import { useDemoStore } from "@/store/demo-store";
-import { allProposals, arctCase } from "@/fixtures/loader";
+import { allProposals, arctCase, defaultCase } from "@/fixtures/loader";
 import type { DemoRole } from "@/domain/types";
 import type { RuntimeCapabilities } from "@/runtime/config";
 import { RuntimeProvider } from "@/runtime/client-context";
@@ -30,6 +29,7 @@ import { RuntimeProvider } from "@/runtime/client-context";
 const NAV = [
   { href: "/", label: "Change Inbox", icon: Inbox },
   { href: "/cases", label: "Cases", icon: Briefcase },
+  { href: "/context", label: "Context", icon: DatabaseZap },
   { href: "/runs", label: "Runs", icon: Activity },
   { href: "/ledger", label: "Decision Ledger", icon: BookOpenCheck },
   { href: "/trust", label: "Trust", icon: ShieldCheck },
@@ -45,11 +45,13 @@ function useSearchTargets(): SearchTarget[] {
   return useMemo(
     () => [
       { label: "Change Inbox", hint: "Page", href: "/" },
+      { label: `${defaultCase.companyName} (${defaultCase.ticker})`, hint: "Real-public case", href: "/cases/msft-fy25q4" },
       { label: `${arctCase.companyName} (${arctCase.ticker})`, hint: "Investment case", href: "/cases/arct-demo" },
+      { label: "Context Library", hint: "Case inputs", href: "/context" },
       { label: "Decision Ledger", hint: "Page", href: "/ledger" },
-      { label: "Successful run - FY26 Q2", hint: "Run Observatory", href: "/runs/run-arct-success" },
+      { label: "Microsoft FY2025 Q4 run", hint: "Run Observatory", href: "/runs/run-msft-fy25q4" },
       { label: "Degraded run - transcript unavailable", hint: "Run Observatory", href: "/runs/run-arct-degraded" },
-      { label: "Privacy Receipt", hint: "Trust", href: "/trust/run-arct-success" },
+      { label: "Privacy Receipt", hint: "Trust", href: "/trust/run-msft-fy25q4" },
       { label: "Graph Projection Debug", hint: "Internal debug", href: "/debug/graph" },
       { label: "Fund Context Boundary", hint: "Internal debug", href: "/debug/context" },
       ...allProposals.map((p) => ({
@@ -67,6 +69,7 @@ function GlobalSearch() {
   const targets = useSearchTargets();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -92,18 +95,30 @@ function GlobalSearch() {
         type="search"
         role="combobox"
         aria-expanded={open && results.length > 0}
+        aria-autocomplete="list"
+        aria-controls="global-search-results"
+        aria-activedescendant={open && results[activeIndex] ? `global-search-option-${activeIndex}` : undefined}
         aria-label="Search cases, deltas, and pages"
         placeholder="Search cases, deltas, runs…  ( / )"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
           setOpen(true);
+          setActiveIndex(0);
         }}
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 120)}
         onKeyDown={(e) => {
-          if (e.key === "Enter" && results[0]) {
-            router.push(results[0].href);
+          if (e.key === "ArrowDown" && results.length > 0) {
+            e.preventDefault();
+            setActiveIndex((index) => Math.min(index + 1, results.length - 1));
+          } else if (e.key === "ArrowUp" && results.length > 0) {
+            e.preventDefault();
+            setActiveIndex((index) => Math.max(index - 1, 0));
+          } else if (e.key === "Escape") {
+            setOpen(false);
+          } else if (e.key === "Enter" && results[activeIndex]) {
+            router.push(results[activeIndex].href);
             setQuery("");
             setOpen(false);
             inputRef.current?.blur();
@@ -112,11 +127,18 @@ function GlobalSearch() {
         className="h-8 w-full rounded-[3px] border border-line-strong bg-panel py-1 pr-2 pl-8 text-[11px] text-ink placeholder:text-ink-3 focus:border-accent"
       />
       {open && results.length > 0 && (
-        <ul className="absolute top-full right-0 left-0 z-40 mt-1 overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_14px_34px_rgba(21,32,41,0.14)]">
-          {results.map((r) => (
-            <li key={r.href + r.label}>
+        <ul id="global-search-results" role="listbox" className="absolute top-full right-0 left-0 z-40 mt-1 overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_14px_34px_rgba(21,32,41,0.14)]">
+          {results.map((r, index) => (
+            <li key={r.href + r.label} role="none">
               <button
-                className="flex w-full items-center justify-between gap-2 border-b border-line px-3 py-2 text-left text-xs last:border-0 hover:bg-inset"
+                id={`global-search-option-${index}`}
+                role="option"
+                aria-selected={index === activeIndex}
+                className={cn(
+                  "flex w-full items-center justify-between gap-2 border-b border-line px-3 py-2 text-left text-xs last:border-0 hover:bg-inset",
+                  index === activeIndex && "bg-inset",
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
                 onMouseDown={(e) => {
                   e.preventDefault();
                   router.push(r.href);
@@ -201,9 +223,9 @@ function ResetButton({ compact = false }: { compact?: boolean }) {
       >
         <p className="text-[13px] text-ink-2">This deterministically restores the pristine fixture state:</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-ink-2">
-          <li>approved thesis returns to v12 (original fixture hash);</li>
+          <li>the MSFT demo thesis and synthetic fallback return to their pristine v12 hashes;</li>
           <li>all review actions and Decision Ledger transitions are removed;</li>
-          <li>run replays and the degraded-source simulation are cleared.</li>
+          <li>run replays, local context previews, and the degraded-source simulation are cleared.</li>
         </ul>
       </Modal>
     </>
@@ -231,17 +253,17 @@ function DemoControls() {
     <div className="space-y-2.5 border-t border-line px-3 py-4">
       <p className="text-[9px] font-semibold tracking-[0.12em] text-ink-3 uppercase">Demo controls</p>
       <div className="flex flex-col items-start gap-0.5">
-        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/debug/context")}>
+        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/context")}>
           <DatabaseZap size={13} aria-hidden />
-          Fund context boundary
+          Context Library
         </Button>
         <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/debug/graph")}>
           <Network size={13} aria-hidden />
           Graph projection debug
         </Button>
-        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/runs/run-arct-success")}>
+        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={() => router.push("/runs/run-msft-fy25q4")}>
           <Activity size={13} aria-hidden />
-          Replay successful run
+          Replay MSFT FY25 Q4
         </Button>
         <Button
           variant="ghost"
@@ -311,9 +333,9 @@ export function Shell({
           <GlobalSearch />
         </div>
         <div className="ml-auto flex min-w-0 items-center gap-1.5 px-2 sm:gap-2 sm:px-3 lg:px-5">
-          <Badge tone="warn" icon={<FlaskConical size={11} aria-hidden />} title="All entities, figures, and events are synthetic.">
-            <span className="hidden sm:inline">Synthetic demo data</span>
-            <span className="sm:hidden">Synthetic</span>
+          <Badge tone="ok" icon={<ShieldCheck size={11} aria-hidden />} title="Official public sources are combined with an explicitly demo-authored investment thesis.">
+            <span className="hidden sm:inline">Real sources + demo thesis</span>
+            <span className="sm:hidden">Mixed origin</span>
           </Badge>
           <div className="hidden lg:block">
             <RunHealth capabilities={capabilities} />

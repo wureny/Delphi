@@ -6,8 +6,8 @@ import { cn } from "@/lib/cn";
 import { useState } from "react";
 
 const RUNS = [
-  { runId: "run_arct_success_001", label: "Successful run" },
-  { runId: "run_arct_degraded_001", label: "Degraded run" },
+  { runId: "run_msft_fy25q4_success", label: "MSFT real-public scenario" },
+  { runId: "run_arct_degraded_001", label: "ARCT synthetic degraded fallback" },
 ];
 
 export default function TrustPage() {
@@ -43,7 +43,7 @@ export default function TrustPage() {
       </div>
 
       <p className="mt-3 text-[11px] text-ink-3">
-        Synthetic demonstration only. Not investment advice.{" "}
+        Real public source facts and demo-authored investment context are labeled separately. Not investment advice.{" "}
         <Link href="/website#security" className="text-accent hover:underline">
           Read about the target security architecture
         </Link>

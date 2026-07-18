@@ -1,0 +1,96 @@
+{
+  "inventoryVersion": "0.3.0",
+  "reviewedAt": "2026-07-18T08:00:00Z",
+  "eventCutoff": "2025-07-30T20:00:00Z",
+  "runtimeNetworkAccess": false,
+  "sources": [
+    {
+      "sourceId": "source_msft_fy25q3_release",
+      "phase": "pre_event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/en-us/investor/earnings/FY-2025-Q3/press-release-webcast",
+      "publishedAt": "2025-04-30T20:05:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "eec4f61e041e6dff18d692146b5fdc7101af1755dba97232835803ae258204be",
+      "extraction": "metadata, numeric facts, short excerpts",
+      "rightsNote": "Official public investor-relations page. Delphi stores normalized facts, locators, and short excerpts only."
+    },
+    {
+      "sourceId": "source_msft_fy25q3_call",
+      "phase": "pre_event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q3",
+      "publishedAt": "2025-04-30T21:30:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "a258a442c3193bd90d379324d44420ff002db61e5709d7f48002af592083d7bf",
+      "extraction": "metadata, guidance facts, short excerpts",
+      "rightsNote": "Official public conference-call transcript. Delphi does not redistribute the complete transcript."
+    },
+    {
+      "sourceId": "source_msft_fy25q4_release",
+      "phase": "event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/en-us/Investor/earnings/FY-2025-Q4/press-release-webcast",
+      "publishedAt": "2025-07-30T20:05:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "82c2a3f8cde52edd57644a79a44a46bdbd8b54ea3df9676f3f701e373efc20ca",
+      "extraction": "metadata, numeric facts, short excerpts",
+      "rightsNote": "Official public investor-relations page. Delphi stores normalized facts, locators, and short excerpts only."
+    },
+    {
+      "sourceId": "source_msft_fy25q4_call",
+      "phase": "event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q4",
+      "publishedAt": "2025-07-30T21:30:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "93952af8021dd75b7928de35f29e2ec052e71c2fbad055885e5aadd71872e8cc",
+      "extraction": "metadata, prepared remarks, Q&A facts, short excerpts",
+      "rightsNote": "Official public conference-call transcript. Delphi does not redistribute the complete transcript."
+    },
+    {
+      "sourceId": "source_msft_fy25q4_metrics",
+      "phase": "event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+      "publishedAt": "2025-07-30T20:05:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "8182bd8290ae613518c3de7eabdf425805e7e9841f1e8a43a1a31206958dac46",
+      "extraction": "normalized reported metrics",
+      "rightsNote": "Official public investor metrics. Numeric facts remain linked to the source page."
+    },
+    {
+      "sourceId": "source_msft_fy25_annual_report",
+      "phase": "post_event",
+      "publisher": "Microsoft Investor Relations",
+      "canonicalUri": "https://www.microsoft.com/investor/reports/ar25/download-center/",
+      "publishedAt": "2025-07-30T23:30:00Z",
+      "mediaType": "text/html",
+      "expectedRemoteSha256": "cc1d1ee107fc28c2342fa5322a998c777c3c518b1a482c49c1a2244db967656a",
+      "extraction": "metadata and corroborating filing facts",
+      "rightsNote": "Official annual-report download center. The report is linked, not redistributed."
+    },
+    {
+      "sourceId": "source_calpers_total_fund_policy",
+      "phase": "pre_event",
+      "publisher": "CalPERS",
+      "canonicalUri": "https://www.calpers.ca.gov/documents/total-fund-investment-policy/download?inline=",
+      "publishedAt": "2024-09-16T00:00:00Z",
+      "mediaType": "application/pdf",
+      "expectedRemoteSha256": "bd84fb82b54291f471ce5d355e1e797b28c53dd43fb2c77cb45f8dddc51b3e14",
+      "extraction": "metadata and short policy excerpts",
+      "rightsNote": "Official public policy document. Used only as an institutional reference, not as a Delphi Demo Fund mandate."
+    },
+    {
+      "sourceId": "source_calpers_13f_msft_2024q4",
+      "phase": "pre_event",
+      "publisher": "U.S. Securities and Exchange Commission",
+      "canonicalUri": "https://www.sec.gov/Archives/edgar/data/919079/000091907925000004/xslForm13F_X02/informationtable.xml",
+      "publishedAt": "2025-04-23T13:09:11Z",
+      "mediaType": "application/xml",
+      "expectedRemoteSha256": "76c8b59553208ece2de94bbc70ea9d59ba1ac59346dc331f4d7abcea3f708b18",
+      "extraction": "single MSFT holding row plus filing metadata",
+      "rightsNote": "Official SEC filing. A disclosed holding does not establish a private thesis, recommendation, endorsement, or active decision."
+    }
+  ]
+}

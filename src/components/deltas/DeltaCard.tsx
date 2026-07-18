@@ -5,7 +5,7 @@
  * Authorization and validation live in the domain gateway — this component
  * renders whatever the policy decides and never re-implements the rules.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -30,7 +30,7 @@ import {
   type ProposalReviewState,
 } from "@/store/demo-store";
 import { DEMO_USERS, REJECT_REASONS, canApplyProposal } from "@/domain/policies";
-import { getRunBundle } from "@/fixtures/loader";
+import { defaultCase, getRunBundle } from "@/fixtures/loader";
 import {
   confidenceLabel,
   deltaTypeLabel,
@@ -44,8 +44,10 @@ import type { PatchOperation, ThesisDeltaProposal } from "@/domain/types";
 
 type ActiveModal = "accept" | "edit" | "reject" | "escalate" | "defer" | null;
 
-function usePatchLookup() {
-  const thesis = useDemoStore((s) => s.domain.currentThesis);
+function usePatchLookup(caseId: string) {
+  const thesis = useDemoStore((s) =>
+    caseId === defaultCase.caseId ? s.domain.currentThesis : s.arctDomain.currentThesis,
+  );
   return useMemo(
     () => ({
       pillarTitle: (id: string) => thesis.pillars.find((p) => p.pillarId === id)?.title ?? id,
@@ -166,12 +168,12 @@ export function DeltaCard({
   focused: boolean;
   onOpenEvidence: (excerptId: string) => void;
 }) {
-  const domain = useDemoStore((s) => s.domain);
+  const domain = useDemoStore((s) => (proposal.caseId === defaultCase.caseId ? s.domain : s.arctDomain));
   const role = useDemoStore((s) => s.role);
   const transcriptUnavailable = useDemoStore((s) => s.transcriptUnavailable);
   const submitReview = useDemoStore((s) => s.submitReview);
   const push = useToasts((s) => s.push);
-  const lookup = usePatchLookup();
+  const lookup = usePatchLookup(proposal.caseId);
 
   const [modal, setModal] = useState<ActiveModal>(null);
   const [editedPatch, setEditedPatch] = useState<PatchOperation[]>(proposal.proposedPatch);
@@ -179,6 +181,11 @@ export function DeltaCard({
   const [reasonCode, setReasonCode] = useState<string>(REJECT_REASONS[0].code);
   const [deferUntil, setDeferUntil] = useState("2026-07-27");
   const [showOriginal, setShowOriginal] = useState(false);
+  const [collapsed, setCollapsed] = useState(!focused);
+
+  useEffect(() => {
+    if (focused) setCollapsed(false);
+  }, [focused]);
 
   const state: ProposalReviewState = proposalReviewState(domain, proposal, transcriptUnavailable);
   const stateMeta = reviewStateMeta[state];
@@ -240,7 +247,26 @@ export function DeltaCard({
         </div>
       )}
 
-      <div className="p-3.5">
+      {collapsed && (
+        <button
+          type="button"
+          onClick={() => setCollapsed(false)}
+          aria-expanded="false"
+          className="flex w-full items-center gap-3 p-3.5 text-left hover:bg-inset"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span className="truncate text-[13px] font-semibold text-ink">{proposal.headline}</span>
+              <Badge tone={materialityTone[proposal.materiality]}>{proposal.materiality}</Badge>
+              <Badge tone={stateMeta.tone} icon={stateMeta.icon}>{stateMeta.label}</Badge>
+            </span>
+            <span className="mt-1 block truncate text-[11px] text-ink-3">{proposal.whatChanged}</span>
+          </span>
+          <ChevronDown size={14} className="shrink-0 text-ink-3" aria-hidden />
+        </button>
+      )}
+
+      <div className={cn("p-3.5", collapsed && "hidden")}>
         {/* Badges */}
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone="neutral">{deltaTypeLabel[proposal.deltaType] ?? proposal.deltaType}</Badge>
@@ -256,6 +282,17 @@ export function DeltaCard({
               {stateMeta.label}
             </Badge>
           </span>
+          {!focused && (
+            <button
+              type="button"
+              onClick={() => setCollapsed(true)}
+              aria-label={`Collapse ${proposal.headline}`}
+              aria-expanded="true"
+              className="rounded-[3px] p-1 text-ink-3 hover:bg-inset hover:text-ink"
+            >
+              <ChevronDown size={13} className="rotate-180" aria-hidden />
+            </button>
+          )}
         </div>
 
         <h3 className="mt-2 text-[15px] font-semibold text-ink">{proposal.headline}</h3>

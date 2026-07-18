@@ -230,6 +230,9 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
             <Badge tone={capabilities.analysis.state === "fixture" ? "neutral" : "warn"}>
               {capabilities.analysis.label}
             </Badge>
+            <Badge tone={bundle.synthetic ? "warn" : "ok"} outlined>
+              {bundle.synthetic ? "Synthetic scenario" : "Real-public inputs · demo-derived outputs"}
+            </Badge>
           </div>
           <p className="mt-1 font-mono text-xs text-ink-3">
             {run.runId} · earnings_to_thesis v{run.workflowVersion} · total {totalDuration}
@@ -240,9 +243,9 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
             {visibleCount > 0 ? <RotateCw size={13} aria-hidden /> : <Play size={13} aria-hidden />}
             {playing ? "Replaying…" : visibleCount > 0 ? "Replay deterministic demo" : "Replay deterministic demo"}
           </Button>
-          <Link href={`/runs/${isDegraded ? "run-arct-success" : "run-arct-degraded"}`}>
+          <Link href={`/runs/${isDegraded ? "run-msft-fy25q4" : "run-arct-degraded"}`}>
             <Button size="sm">
-              {isDegraded ? "View successful run" : "Simulate degraded source"}
+              {isDegraded ? "View real-public scenario" : "View synthetic degraded fallback"}
               <ArrowRight size={13} aria-hidden />
             </Button>
           </Link>
@@ -358,6 +361,11 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
               <Kv label="Sources">
                 {run.sourceRefs.length} loaded{isDegraded ? " · 1 unavailable" : ""}
               </Kv>
+              {run.contextSetHash && (
+                <Kv label="Context set" mono>
+                  <span className="inline-block max-w-44 truncate align-bottom" title={run.contextSetHash}>{run.contextSetHash}</span>
+                </Kv>
+              )}
             </dl>
             {run.degradedReasons.length > 0 && (
               <div className="mt-2 space-y-1.5">
@@ -372,6 +380,23 @@ export default function RunObservatoryPage({ params }: { params: Promise<{ runSl
               </div>
             )}
           </Panel>
+
+          {run.contextUsage && (
+            <Panel title={`Declared inputs · ${run.contextUsage.filter((item) => item.status === "used").length} used`} bodyClassName="space-y-1.5">
+              {run.contextUsage.map((item) => (
+                <div key={item.artifactId} className="rounded-[3px] border border-line bg-inset p-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-mono text-[10px] text-ink">{item.artifactId}</span>
+                    <Badge tone={item.status === "used" ? "ok" : item.status === "excluded" ? "warn" : "neutral"}>{item.status}</Badge>
+                  </div>
+                  <p className="mt-1 text-[10px] text-ink-3">{item.originKind.replaceAll("_", " ")} · {item.reason}</p>
+                </div>
+              ))}
+              <Link href="/context" className="mt-2 inline-flex items-center gap-1 text-xs text-accent hover:underline">
+                Inspect provenance in Context Library <ArrowRight size={11} aria-hidden />
+              </Link>
+            </Panel>
+          )}
 
           {(playback?.status === "completed" || visibleCount === bundle.events.length) && visibleCount > 0 && (
             <Link href={`/deltas/${proposalsForRun(run.runId)[0]?.proposalId ?? successProposals[0]!.proposalId}`} className="block">

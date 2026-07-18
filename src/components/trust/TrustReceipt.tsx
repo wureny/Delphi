@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Badge, Kv, Panel } from "@/components/ui/primitives";
 import { useDemoStore } from "@/store/demo-store";
-import { getRunBundle, proposalsForRun } from "@/fixtures/loader";
+import { defaultCase, getRunBundle, proposalsForRun } from "@/fixtures/loader";
 import { generatePrivacyReceipt } from "@/runtime/receipt";
 import { formatDateTime, runIdToSlug, runStatusMeta } from "@/lib/labels";
 import { cn } from "@/lib/cn";
@@ -46,9 +46,11 @@ function ReceiptLine({
 }
 
 export function TrustReceipt({ runId }: { runId: string }) {
-  const domain = useDemoStore((s) => s.domain);
-  const { capabilities } = useClientRuntime();
   const bundle = getRunBundle(runId)!;
+  const domain = useDemoStore((s) =>
+    bundle.workflowRun.caseId === defaultCase.caseId ? s.domain : s.arctDomain,
+  );
+  const { capabilities } = useClientRuntime();
   const run = bundle.workflowRun;
   const runProposals = proposalsForRun(runId);
   const receipt = generatePrivacyReceipt(bundle, runProposals, domain, new Date().toISOString());
@@ -58,9 +60,13 @@ export function TrustReceipt({ runId }: { runId: string }) {
     <div className="grid gap-3 lg:grid-cols-5">
       <Panel title="Privacy receipt" className="lg:col-span-3" bodyClassName="px-4 py-2">
         <ReceiptLine
-          icon={<FlaskConical size={15} aria-hidden />}
-          label="Data classification"
-          value={<Badge tone="warn">Synthetic demo data</Badge>}
+          icon={bundle.synthetic ? <FlaskConical size={15} aria-hidden /> : <ShieldCheck size={15} aria-hidden />}
+          label="Input provenance"
+          value={
+            <Badge tone={bundle.synthetic ? "warn" : "ok"}>
+              {bundle.synthetic ? "Synthetic fixture" : "Real public + demo-derived"}
+            </Badge>
+          }
         />
         <ReceiptLine
           icon={<Cpu size={15} aria-hidden />}
@@ -68,6 +74,17 @@ export function TrustReceipt({ runId }: { runId: string }) {
           value={
             <span className="font-mono text-xs">
               {receipt.modelRoutes[0]?.provider}/{receipt.modelRoutes[0]?.model} · {capabilities.analysis.activeMode} adapter
+            </span>
+          }
+        />
+        <ReceiptLine
+          icon={<Globe size={15} aria-hidden />}
+          label="Declared context origins"
+          value={
+            <span className="font-mono text-xs">
+              {receipt.originCounts
+                ? Object.entries(receipt.originCounts).map(([origin, count]) => `${origin.replaceAll("_", " ")} ${count}`).join(" · ")
+                : "legacy synthetic fixture"}
             </span>
           }
         />
@@ -127,6 +144,11 @@ export function TrustReceipt({ runId }: { runId: string }) {
             <Kv label="Started (UTC)">{formatDateTime(run.startedAt)}</Kv>
             <Kv label="Retention">{run.modelRoutes[0]?.retentionPolicy}</Kv>
             <Kv label="Training use">{run.modelRoutes[0]?.trainingUse}</Kv>
+            {run.contextSetHash && (
+              <Kv label="Context set" mono>
+                <span className="inline-block max-w-44 truncate align-bottom" title={run.contextSetHash}>{run.contextSetHash}</span>
+              </Kv>
+            )}
           </dl>
           <h4 className="mt-3 text-[11px] font-semibold tracking-widest text-ink-3 uppercase">Skill versions</h4>
           <dl className="mt-1 rounded-sm border border-line bg-inset px-3 py-1">
@@ -140,7 +162,9 @@ export function TrustReceipt({ runId }: { runId: string }) {
 
         <Panel title="Current stage: honest claims">
           <ul className="space-y-1.5 text-[13px] text-ink-2">
-            <li>· Pre-launch prototype with synthetic data only.</li>
+            <li>· Pre-launch prototype using frozen official public snapshots and an explicitly demo-authored MSFT thesis.</li>
+            <li>· The public CalPERS holding and policy fixtures do not imply a CalPERS thesis, recommendation, or endorsement.</li>
+            <li>· Browser-local imports are not sent to a model and are excluded from the frozen replay.</li>
             <li>· Human review is required for every canonical write.</li>
             <li>
               · The <strong className="text-ink">target architecture</strong> separates a Delphi control plane from a

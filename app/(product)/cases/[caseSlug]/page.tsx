@@ -5,16 +5,24 @@
  * is "Approved team state" unless explicitly marked as a pending agent
  * proposal (dashed outline).
  */
-import { use, useMemo, useState } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, GitCompareArrows, History } from "lucide-react";
 import { Badge, Button, Panel, Kv } from "@/components/ui/primitives";
 import { EvidenceDrawer, EvidenceChips } from "@/components/evidence/EvidenceDrawer";
 import { useDemoStore, proposalReviewState } from "@/store/demo-store";
-import { arctCase, successProposals, thesisV12 } from "@/fixtures/loader";
+import {
+  defaultCase,
+  defaultContextManifest,
+  defaultSuccessProposals,
+  degradedProposals,
+  getCase,
+  getThesisForCase,
+} from "@/fixtures/loader";
 import { caseSlugToId, formatDate, formatDateTime, proposalDirection, reviewStateMeta } from "@/lib/labels";
 import type { ThesisDeltaProposal } from "@/domain/types";
+import { contextSetHash } from "@/context/fund-context";
 
 function PendingProposalChip({ proposal }: { proposal: ThesisDeltaProposal }) {
   const direction = proposalDirection(proposal);
@@ -41,16 +49,26 @@ const objectStatusTone: Record<string, "ok" | "warn" | "bad" | "neutral" | "info
 
 export default function InvestmentCasePage({ params }: { params: Promise<{ caseSlug: string }> }) {
   const { caseSlug } = use(params);
-  const domain = useDemoStore((s) => s.domain);
+  const defaultDomain = useDemoStore((s) => s.domain);
+  const arctDomain = useDemoStore((s) => s.arctDomain);
+  const contextBindings = useDemoStore((s) => s.contextBindings);
+  const localContextArtifacts = useDemoStore((s) => s.localContextArtifacts);
   const transcriptUnavailable = useDemoStore((s) => s.transcriptUnavailable);
   const [evidenceId, setEvidenceId] = useState<string | null>(null);
 
   const caseId = caseSlugToId[caseSlug];
+  if (!caseId) notFound();
+  const investmentCase = getCase(caseId);
+  const baselineThesis = getThesisForCase(caseId);
+  if (!investmentCase || !baselineThesis) notFound();
+  const isDefaultCase = caseId === defaultCase.caseId;
+  const domain = isDefaultCase ? defaultDomain : arctDomain;
+  const proposals = isDefaultCase ? defaultSuccessProposals : degradedProposals;
   const thesis = domain.currentThesis;
 
-  const pendingByTarget = useMemo(() => {
+  const pendingByTarget = (() => {
     const map = new Map<string, ThesisDeltaProposal[]>();
-    for (const p of successProposals) {
+    for (const p of proposals) {
       const state = proposalReviewState(domain, p, transcriptUnavailable);
       if (state === "needs_review" || state === "escalated" || state === "deferred" || state === "blocked") {
         const key = p.targetObjectId ?? "thesis";
@@ -58,9 +76,10 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
       }
     }
     return map;
-  }, [domain, transcriptUnavailable]);
-
-  if (!caseId) notFound();
+  })();
+  const activeCatalogArtifacts = defaultContextManifest.artifacts.filter((artifact) =>
+    contextBindings.some((binding) => binding.artifactId === artifact.artifactId),
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-8 lg:px-8 lg:py-10">
@@ -68,26 +87,31 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold text-ink">{arctCase.companyName}</h1>
-            <span className="font-mono text-sm text-ink-3">{arctCase.ticker}</span>
+            <h1 className="text-lg font-semibold text-ink">{investmentCase.companyName}</h1>
+            <span className="font-mono text-sm text-ink-3">{investmentCase.ticker}</span>
             <Badge tone="ok">Approved team state · v{thesis.version}</Badge>
-            <Badge tone="warn" outlined>
-              Synthetic
+            <Badge tone={isDefaultCase ? "ok" : "warn"} outlined>
+              {isDefaultCase ? "Demo-authored · real public evidence" : "Synthetic"}
             </Badge>
           </div>
           <p className="mt-1 text-[13px] text-ink-2">
-            {arctCase.sector} · {arctCase.horizon} horizon · Owner <span className="text-ink">A. Chen (Analyst)</span> ·
+            {investmentCase.sector} · {investmentCase.horizon} horizon · Owner <span className="text-ink">A. Chen (Analyst)</span> ·
             Approved by <span className="text-ink">R. Okafor (PM)</span> · {formatDate(thesis.approvedAt)}
           </p>
         </div>
         <div className="flex gap-2">
+          {isDefaultCase && (
+            <Link href="/context">
+              <Button size="sm">Context Library</Button>
+            </Link>
+          )}
           <Link href="/ledger">
             <Button size="sm">
               <GitCompareArrows size={13} aria-hidden />
               Version history
             </Button>
           </Link>
-          <Link href={`/deltas/${successProposals[0]!.proposalId}`}>
+          <Link href={`/deltas/${proposals[0]!.proposalId}`}>
             <Button variant="primary" size="sm">
               Open latest event
               <ArrowRight size={13} aria-hidden />
@@ -165,6 +189,23 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
 
         {/* Right column */}
         <div className="space-y-3">
+          {isDefaultCase && (
+            <Panel title="Context coverage">
+              <dl>
+                <Kv label="Active inputs" mono>{contextBindings.length}</Kv>
+                <Kv label="Real public">{activeCatalogArtifacts.filter((artifact) => artifact.originKind === "real_public").length}</Kv>
+                <Kv label="Demo-derived">{activeCatalogArtifacts.filter((artifact) => artifact.originKind === "demo_derived").length}</Kv>
+                <Kv label="Local-only">{localContextArtifacts.length}</Kv>
+                <Kv label="Event cutoff">Jul 30, 2025 · 20:00 UTC</Kv>
+                <Kv label="Context set" mono>
+                  <span className="inline-block max-w-44 truncate align-bottom" title={contextSetHash(contextBindings)}>{contextSetHash(contextBindings)}</span>
+                </Kv>
+              </dl>
+              <Link href="/context" className="mt-2 inline-flex items-center gap-1 text-xs text-accent hover:underline">
+                Inspect used, excluded, and available inputs <ArrowRight size={11} aria-hidden />
+              </Link>
+            </Panel>
+          )}
           <Panel title="Approval metadata">
             <dl>
               <Kv label="Approved version" mono>
@@ -226,13 +267,13 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
               ))}
               <li className="relative pl-5">
                 <span className="absolute top-1 left-0 size-2.5 rounded-full border-2 border-ok bg-ok-dim" aria-hidden />
-                <p className="text-[13px] text-ink">v{thesisV12.version} approved</p>
-                <p className="text-xs text-ink-3">Quarterly review · {formatDateTime(thesisV12.approvedAt)} UTC</p>
+                <p className="text-[13px] text-ink">v{baselineThesis.version} approved</p>
+                <p className="text-xs text-ink-3">Quarterly review · {formatDateTime(baselineThesis.approvedAt)} UTC</p>
               </li>
               <li className="relative pl-5">
                 <span className="absolute top-1 left-0 size-2.5 rounded-full border-2 border-ink-3 bg-panel" aria-hidden />
                 <p className="text-[13px] text-ink-2">v11 superseded</p>
-                <p className="text-xs text-ink-3">Prior review cycle · May 2026 (not in fixture)</p>
+                <p className="text-xs text-ink-3">Prior review cycle · not included in this fixture</p>
               </li>
             </ol>
             <div className="mt-3 border-t border-line pt-2">

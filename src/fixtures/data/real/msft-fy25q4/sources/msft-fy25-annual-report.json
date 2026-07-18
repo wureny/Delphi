@@ -1,0 +1,47 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_msft_fy25_annual_report",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Microsoft 2025 Annual Report and Form 10-K",
+    "sourceType": "filing",
+    "issuerEntityId": "entity_msft",
+    "uri": "https://www.microsoft.com/investor/reports/ar25/download-center/",
+    "canonicalUri": "https://www.microsoft.com/investor/reports/ar25/download-center/",
+    "publishedAt": "2025-07-30T23:30:00Z",
+    "observedAt": "2025-07-30T23:31:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:cc1d1ee107fc28c2342fa5322a998c777c3c518b1a482c49c1a2244db967656a",
+    "version": 1,
+    "accessPolicyId": "policy_public_official",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "issuer",
+    "publisherName": "Microsoft Investor Relations",
+    "rightsNote": "Official annual-report download center; full filing is linked, not redistributed."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_fy25_annual_revenue_01",
+      "sourceId": "source_msft_fy25_annual_report",
+      "locator": { "section": "Income Statements" },
+      "text": "Fiscal 2025 revenue was $281.7 billion and operating income was $128.5 billion.",
+      "numericValues": [
+        {
+          "label": "Fiscal-year revenue",
+          "value": 281.724,
+          "unit": "billion",
+          "currency": "USD",
+          "period": "FY2025",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_fy25_annual_revenue_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:cc1d1ee107fc28c2342fa5322a998c777c3c518b1a482c49c1a2244db967656a"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 /**
  * Delphi public company website — single responsive page.
  * Same visual identity as the product; explains and markets the workflow.
- * All claims follow the v0.2 claims policy: pre-launch prototype, synthetic
- * demonstration, seeking design partners.
+ * All claims follow the current claims policy: pre-launch prototype, frozen
+ * public-source snapshots plus labeled demo-authored context, seeking design partners.
  */
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -42,12 +42,12 @@ function SectionHeading({ eyebrow, title, lead }: { eyebrow?: string; title: str
   );
 }
 
-function Screenshot({ src, alt, caption }: { src: string; alt: string; caption: string }) {
+function Screenshot({ src, alt, caption, priority = false }: { src: string; alt: string; caption: string; priority?: boolean }) {
   return (
     <figure className="overflow-hidden rounded-[3px] border border-line-strong bg-panel shadow-[0_14px_50px_rgba(21,32,41,0.08)]">
       {/* Static product screenshots captured from the real prototype. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="w-full" loading="lazy" />
+      <img src={src} alt={alt} className="w-full" loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} />
       <figcaption className="border-t border-line px-3 py-2 text-xs text-ink-2">{caption}</figcaption>
     </figure>
   );
@@ -106,7 +106,7 @@ export default function WebsitePage() {
             <div>
               <p className="flex items-center gap-2 text-[11px] font-medium text-ink-3">
                 <span className="h-px w-7 bg-warn" aria-hidden />
-                Pre-launch prototype · synthetic demonstration · seeking design partners
+                Pre-launch prototype · real public sources + demo-authored thesis · seeking design partners
               </p>
               <h1 className="mt-5 text-4xl font-semibold tracking-[-0.045em] text-balance text-ink">
                 From market events to governed investment decisions.
@@ -141,7 +141,8 @@ export default function WebsitePage() {
               <Screenshot
                 src="/screenshots/delta-review.png"
                 alt="Delphi Delta Review screen showing a cited thesis delta with accept, edit, reject, escalate, and defer actions"
-                caption="Real prototype: a cited Thesis Delta reviewed against approved thesis v12, using synthetic demonstration data."
+                caption="Real prototype: a cited Thesis Delta reviewed against an explicitly demo-authored thesis, grounded in labeled official public source snapshots."
+                priority
               />
             </div>
           </div>
@@ -319,8 +320,8 @@ export default function WebsitePage() {
               ))}
             </div>
             <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-relaxed text-ink-3">
-              Deployment capabilities are staged. The current prototype is a synthetic, deterministic browser-based
-              demonstration with an in-memory graph projection; customer data-plane separation, live model endpoints,
+              Deployment capabilities are staged. The current prototype is a deterministic browser-based demonstration
+              using frozen official public snapshots, explicitly demo-authored investment context, and an in-memory graph projection; customer data-plane separation, live model endpoints,
               and graph persistence remain roadmap direction, not certified or deployed capabilities. No compliance
               certifications are claimed.
             </p>
@@ -404,7 +405,7 @@ export default function WebsitePage() {
                 },
                 {
                   q: "What data is used for the public demo?",
-                  a: "Synthetic data only. No real customer research or position data is used.",
+                  a: "The default MSFT event uses frozen official public sources. Its pre-event thesis, forecast, and inferred deltas are authored for the demo and are not a real institution's view. A public CalPERS holding and policy appear only as institutional references and do not imply a thesis, recommendation, or endorsement. Browser-local imports never leave the browser or enter the frozen replay.",
                 },
                 {
                   q: "Does Delphi guarantee better investment performance?",
@@ -464,7 +465,7 @@ export default function WebsitePage() {
               </a>
             ))}
           </div>
-          <p>© 2026 Delphi (synthetic demonstration) · Not investment advice.</p>
+          <p>© 2026 Delphi (public-source, demo-authored demonstration) · Not investment advice.</p>
         </div>
       </footer>
     </div>

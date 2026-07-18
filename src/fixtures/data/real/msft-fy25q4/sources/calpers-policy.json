@@ -1,0 +1,44 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_calpers_total_fund_policy",
+    "tenantId": "tenant_delphi_demo",
+    "title": "CalPERS Total Fund Investment Policy",
+    "sourceType": "institution_policy",
+    "issuerEntityId": "entity_calpers",
+    "uri": "https://www.calpers.ca.gov/documents/total-fund-investment-policy/download?inline=",
+    "canonicalUri": "https://www.calpers.ca.gov/documents/total-fund-investment-policy/download?inline=",
+    "publishedAt": "2024-09-16T00:00:00Z",
+    "observedAt": "2025-04-23T13:15:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:bd84fb82b54291f471ce5d355e1e797b28c53dd43fb2c77cb45f8dddc51b3e14",
+    "version": 2024,
+    "accessPolicyId": "policy_public_institution",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "institution",
+    "publisherName": "CalPERS",
+    "rightsNote": "Official public policy; included only as an institutional reference."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_calpers_policy_beliefs_01",
+      "sourceId": "source_calpers_total_fund_policy",
+      "locator": { "section": "Investment Beliefs", "page": 5 },
+      "text": "Investment beliefs provide a framework for judgment and portfolio decisions under uncertainty.",
+      "classification": "public",
+      "contentHash": "sha256:bd84fb82b54291f471ce5d355e1e797b28c53dd43fb2c77cb45f8dddc51b3e14"
+    },
+    {
+      "excerptId": "excerpt_calpers_policy_equity_01",
+      "sourceId": "source_calpers_total_fund_policy",
+      "locator": { "section": "Global Equity", "page": 19 },
+      "text": "Global Equity strategies require written guidelines, objectives, and defined investment parameters.",
+      "classification": "public",
+      "contentHash": "sha256:bd84fb82b54291f471ce5d355e1e797b28c53dd43fb2c77cb45f8dddc51b3e14"
+    }
+  ]
+}

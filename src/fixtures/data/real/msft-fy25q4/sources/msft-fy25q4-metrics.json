@@ -1,0 +1,64 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_msft_fy25q4_metrics",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Microsoft FY2025 Q4 Investor Metrics and Outlook",
+    "sourceType": "financial_statements",
+    "issuerEntityId": "entity_msft",
+    "uri": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+    "canonicalUri": "https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/metrics",
+    "publishedAt": "2025-07-30T20:05:00Z",
+    "observedAt": "2025-07-30T20:06:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:8182bd8290ae613518c3de7eabdf425805e7e9841f1e8a43a1a31206958dac46",
+    "version": 1,
+    "accessPolicyId": "policy_public_official",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "issuer",
+    "publisherName": "Microsoft Investor Relations",
+    "rightsNote": "Official public investor metrics; normalized numeric facts only."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_q4_cloud_margin_01",
+      "sourceId": "source_msft_fy25q4_metrics",
+      "locator": { "section": "Investor metrics — Microsoft Cloud" },
+      "text": "Microsoft Cloud gross margin was 68% in FY2025 Q4.",
+      "numericValues": [
+        {
+          "label": "Microsoft Cloud gross margin",
+          "value": 68,
+          "unit": "percent",
+          "period": "FY2025 Q4",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_q4_cloud_margin_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:8182bd8290ae613518c3de7eabdf425805e7e9841f1e8a43a1a31206958dac46"
+    },
+    {
+      "excerptId": "excerpt_msft_q1_margin_outlook_01",
+      "sourceId": "source_msft_fy25q4_metrics",
+      "locator": { "section": "FY2026 Q1 outlook — Microsoft Cloud" },
+      "text": "Microsoft Cloud gross margin was expected to be approximately 67% in FY2026 Q1.",
+      "numericValues": [
+        {
+          "label": "Microsoft Cloud gross margin outlook",
+          "value": 67,
+          "unit": "percent",
+          "period": "FY2026 Q1",
+          "basis": "management guidance",
+          "sourceExcerptId": "excerpt_msft_q1_margin_outlook_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:8182bd8290ae613518c3de7eabdf425805e7e9841f1e8a43a1a31206958dac46"
+    }
+  ]
+}

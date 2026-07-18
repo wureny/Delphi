@@ -8,9 +8,19 @@ import { test, expect, type Page } from "@playwright/test";
 const card = (page: Page, proposalId: string) => page.locator(`#${proposalId}`);
 
 test("reset restores thesis v12, clears transitions, and returns the initial state", async ({ page }) => {
-  // 1 — create a transition.
-  await page.goto("/deltas/proposal_arct_enterprise_001");
-  await card(page, "proposal_arct_enterprise_001").getByRole("button", { name: "Accept", exact: true }).click();
+  // 1 — attach browser-local context, then create a transition.
+  await page.goto("/context");
+  await page.getByRole("button", { name: "Add context" }).click();
+  await page.getByRole("button", { name: /Local file/ }).click();
+  await page.locator("#context-file").setInputFiles({
+    name: "reset-me.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("ticker,note\nMSFT,temporary\n"),
+  });
+  await page.getByRole("button", { name: "Attach context" }).click();
+  await page.getByRole("button", { name: "Done" }).click();
+  await page.goto("/deltas/proposal_msft_azure_001");
+  await card(page, "proposal_msft_azure_001").getByRole("button", { name: "Accept", exact: true }).click();
   await page.getByRole("button", { name: "Approve and record" }).click();
   await page.getByRole("button", { name: "Apply approved changes" }).click();
   await page.getByRole("button", { name: "Record state transition" }).click();
@@ -30,15 +40,19 @@ test("reset restores thesis v12, clears transitions, and returns the initial sta
 
   await page.goto("/ledger");
   await expect(page.getByText("No state transitions recorded yet.")).toBeVisible();
-  await expect(page.getByText("Current approved thesis: v12")).toBeVisible();
+  await expect(page.getByText("MSFT approved v12")).toBeVisible();
 
   // Reviews cleared — the proposal is reviewable again.
-  await page.goto("/deltas/proposal_arct_enterprise_001");
+  await page.goto("/deltas/proposal_msft_azure_001");
   await expect(
-    card(page, "proposal_arct_enterprise_001").getByText("Needs review", { exact: true }),
+    card(page, "proposal_msft_azure_001").getByText("Needs review", { exact: true }),
   ).toBeVisible();
 
   // Run replays cleared.
-  await page.goto("/runs/run-arct-success");
+  await page.goto("/runs/run-msft-fy25q4");
   await expect(page.getByText("This run has not been replayed in your session yet.")).toBeVisible();
+
+  // Browser-local normalized context is also cleared.
+  await page.goto("/context");
+  await expect(page.getByText("Local-only inputs").locator("..").getByText("0", { exact: true })).toBeVisible();
 });

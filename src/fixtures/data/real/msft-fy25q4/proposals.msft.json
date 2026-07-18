@@ -1,0 +1,165 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "proposals": [
+    {
+      "proposalId": "proposal_msft_azure_001",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_msft_fy25q4",
+      "runId": "run_msft_fy25q4_success",
+      "fromThesisVersion": 12,
+      "deltaType": "thesis_pillar_update",
+      "targetObjectType": "thesis_pillar",
+      "targetObjectId": "pillar_msft_azure_demand",
+      "headline": "Azure demand evidence strengthened",
+      "whatChanged": "Azure grew 39% year over year versus the demo team's 34.5% constant-currency base case, while Microsoft Cloud revenue reached $46.7 billion.",
+      "againstOurView": "The approved demo thesis expected durable mid-30s Azure growth but held only medium conviction before results.",
+      "whyItMatters": "The reported acceleration strengthens the demand pillar, although reported and constant-currency bases should not be treated as identical.",
+      "uncertainties": [
+        "Azure reported growth and the pre-event constant-currency forecast use different bases.",
+        "Capacity constraints may still defer some demand conversion."
+      ],
+      "recommendedFollowUp": "Reconcile reported and constant-currency Azure growth and track capacity delivery through FY2026 H1.",
+      "evidenceRefs": [
+        "excerpt_msft_q4_azure_01",
+        "excerpt_msft_q4_cloud_revenue_01",
+        "excerpt_msft_demo_forecast_01"
+      ],
+      "findingRefs": ["finding_msft_azure_acceleration"],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/pillars/pillar_msft_azure_demand/teamConviction",
+          "value": "high"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2025-07-30T22:46:00Z"
+    },
+    {
+      "proposalId": "proposal_msft_capacity_002",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_msft_fy25q4",
+      "runId": "run_msft_fy25q4_success",
+      "fromThesisVersion": 12,
+      "deltaType": "risk_update",
+      "targetObjectType": "risk",
+      "targetObjectId": "risk_msft_capacity_constraint",
+      "headline": "Capacity constraint duration increased",
+      "whatChanged": "Management expected Azure to remain capacity constrained through the first half of FY2026 despite continued datacenter additions.",
+      "againstOurView": "The approved demo thesis expected capacity additions to prevent a prolonged constraint after FY2025 Q4.",
+      "whyItMatters": "A longer constraint raises execution and timing risk for backlog conversion and makes quarterly Azure growth more dependent on capacity delivery.",
+      "uncertainties": [
+        "Management did not quantify revenue deferred by the constraint.",
+        "The delivery schedule and workload mix can change quarter to quarter."
+      ],
+      "recommendedFollowUp": "Track capacity commissioning, finance-lease timing, and Azure growth sensitivity through FY2026 H1.",
+      "evidenceRefs": [
+        "excerpt_msft_q3_capacity_01",
+        "excerpt_msft_q4_capacity_01",
+        "excerpt_msft_q4_capex_01"
+      ],
+      "findingRefs": ["finding_msft_capacity_extended"],
+      "confidence": "high",
+      "materiality": "high",
+      "requiredReviewerRole": "pm",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/risks/risk_msft_capacity_constraint/severity",
+          "value": "high"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2025-07-30T22:46:05Z"
+    },
+    {
+      "proposalId": "proposal_msft_margin_003",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_msft_fy25q4",
+      "runId": "run_msft_fy25q4_success",
+      "fromThesisVersion": 12,
+      "deltaType": "forecast_review",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_msft_q4_cloud_gm",
+      "headline": "Cloud margin forecast requires review",
+      "whatChanged": "Microsoft Cloud gross margin was 68%, one point above the demo team's 67% base case, while quarterly capital expenditures reached $24.2 billion.",
+      "againstOurView": "The approved forecast expected 67% cloud gross margin and assumed efficiency gains would offset part of AI infrastructure pressure.",
+      "whyItMatters": "The quarter was modestly better than the base case, but the scale and mix of capital spending remain central to long-term AI economics.",
+      "uncertainties": [
+        "Gross margin alone does not measure the return on incremental AI capital.",
+        "Finance leases create quarter-to-quarter capex timing variability."
+      ],
+      "recommendedFollowUp": "Review the cloud margin bridge and separate long-lived datacenter assets from shorter-lived compute equipment.",
+      "evidenceRefs": [
+        "excerpt_msft_q4_cloud_margin_01",
+        "excerpt_msft_q4_capex_01",
+        "excerpt_msft_demo_forecast_01"
+      ],
+      "findingRefs": ["finding_msft_margin_and_capex"],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_msft_q4_cloud_gm/status",
+          "value": "review_required"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2025-07-30T22:46:10Z"
+    },
+    {
+      "proposalId": "proposal_msft_outlook_004",
+      "tenantId": "tenant_delphi_demo",
+      "caseId": "case_msft_fy25q4",
+      "runId": "run_msft_fy25q4_success",
+      "fromThesisVersion": 12,
+      "deltaType": "open_question_create",
+      "targetObjectType": "open_question",
+      "headline": "Test growth against rising AI capital intensity",
+      "whatChanged": "FY2026 Q1 Azure growth was guided to approximately 37% constant currency while cloud gross margin was expected near 67% and capacity remained constrained.",
+      "againstOurView": "The demo team forecast assumed 35% Azure growth but did not define an explicit test connecting growth, margin, and incremental capital requirements.",
+      "whyItMatters": "A governed thesis needs a measurable way to distinguish productive capacity investment from growth that consumes progressively more capital.",
+      "uncertainties": [
+        "The company does not disclose Azure revenue or workload-level return on invested capital.",
+        "Capital expenditure timing includes finance-lease variability."
+      ],
+      "recommendedFollowUp": "Track Azure growth, cloud gross margin, capex mix, and management commentary as one evidence cluster.",
+      "evidenceRefs": [
+        "excerpt_msft_q4_q1_outlook_01",
+        "excerpt_msft_q1_margin_outlook_01",
+        "excerpt_msft_q4_capex_01",
+        "excerpt_msft_demo_forecast_01"
+      ],
+      "findingRefs": ["finding_msft_returns_open_question"],
+      "confidence": "medium",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "add",
+          "path": "/openQuestions/-",
+          "value": {
+            "questionId": "question_msft_growth_vs_capital",
+            "question": "Is accelerating Azure growth producing adequate returns relative to the rising level and mix of AI capital expenditure?",
+            "ownerUserId": "user_analyst_01",
+            "status": "open",
+            "evidenceRefs": [
+              "excerpt_msft_q4_q1_outlook_01",
+              "excerpt_msft_q1_margin_outlook_01",
+              "excerpt_msft_q4_capex_01"
+            ]
+          }
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2025-07-30T22:46:15Z"
+    }
+  ]
+}

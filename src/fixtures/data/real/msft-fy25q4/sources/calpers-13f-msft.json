@@ -1,0 +1,55 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_calpers_13f_msft_2024q4",
+    "tenantId": "tenant_delphi_demo",
+    "title": "CalPERS Form 13F — MSFT position at 2024-12-31",
+    "sourceType": "regulatory_filing",
+    "issuerEntityId": "entity_calpers",
+    "uri": "https://www.sec.gov/Archives/edgar/data/919079/000091907925000004/xslForm13F_X02/informationtable.xml",
+    "canonicalUri": "https://www.sec.gov/Archives/edgar/data/919079/000091907925000004/xslForm13F_X02/informationtable.xml",
+    "publishedAt": "2025-04-23T13:09:11Z",
+    "observedAt": "2025-04-23T13:10:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:76c8b59553208ece2de94bbc70ea9d59ba1ac59346dc331f4d7abcea3f708b18",
+    "version": 1,
+    "accessPolicyId": "policy_public_regulatory",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "regulator",
+    "publisherName": "U.S. Securities and Exchange Commission",
+    "rightsNote": "Official SEC filing. A disclosed holding does not establish a private thesis or recommendation."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_calpers_13f_msft_01",
+      "sourceId": "source_calpers_13f_msft_2024q4",
+      "locator": { "section": "Form 13F Information Table — Microsoft Corp" },
+      "text": "The filing reported 19,233,688 Microsoft shares with a reported value of $8.107 billion at 2024-12-31.",
+      "numericValues": [
+        {
+          "label": "Microsoft shares",
+          "value": 19233688,
+          "unit": "shares",
+          "period": "2024-12-31",
+          "basis": "SEC Form 13F reported",
+          "sourceExcerptId": "excerpt_calpers_13f_msft_01"
+        },
+        {
+          "label": "Reported position value",
+          "value": 8.106999492,
+          "unit": "billion",
+          "currency": "USD",
+          "period": "2024-12-31",
+          "basis": "SEC Form 13F reported",
+          "sourceExcerptId": "excerpt_calpers_13f_msft_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:76c8b59553208ece2de94bbc70ea9d59ba1ac59346dc331f4d7abcea3f708b18"
+    }
+  ]
+}

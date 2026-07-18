@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("an incompatible persisted fixture envelope cannot override the current baseline", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem(
-      "delphi-demo-state-v0.2.0",
+      "delphi-demo-state-v0.2.1",
       JSON.stringify({
         state: {
           domain: { currentThesis: { version: 99, summary: "stale persisted state" } },

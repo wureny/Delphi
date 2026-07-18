@@ -1,0 +1,72 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": false,
+  "sourceDocument": {
+    "sourceId": "source_msft_fy25q3_call",
+    "tenantId": "tenant_delphi_demo",
+    "title": "Microsoft FY2025 Q3 Earnings Conference Call",
+    "sourceType": "transcript",
+    "issuerEntityId": "entity_msft",
+    "uri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q3",
+    "canonicalUri": "https://www.microsoft.com/en-us/investor/events/fy-2025/earnings-fy-2025-q3",
+    "publishedAt": "2025-04-30T21:30:00Z",
+    "observedAt": "2025-04-30T22:45:00Z",
+    "retrievedAt": "2026-07-18T08:00:00Z",
+    "classification": "public",
+    "contentHash": "sha256:a258a442c3193bd90d379324d44420ff002db61e5709d7f48002af592083d7bf",
+    "version": 1,
+    "accessPolicyId": "policy_public_official",
+    "status": "available",
+    "originKind": "real_public",
+    "publisherKind": "issuer",
+    "publisherName": "Microsoft Investor Relations",
+    "rightsNote": "Official public transcript; complete transcript remains on the publisher site."
+  },
+  "excerpts": [
+    {
+      "excerptId": "excerpt_msft_q3_capacity_01",
+      "sourceId": "source_msft_fy25q3_call",
+      "locator": { "section": "CFO outlook — Azure" },
+      "text": "Demand was growing faster than planned capacity, extending AI constraints beyond June.",
+      "classification": "public",
+      "contentHash": "sha256:a258a442c3193bd90d379324d44420ff002db61e5709d7f48002af592083d7bf"
+    },
+    {
+      "excerptId": "excerpt_msft_q3_margin_01",
+      "sourceId": "source_msft_fy25q3_call",
+      "locator": { "section": "CFO results — cloud margin" },
+      "text": "Microsoft Cloud gross margin was 69%, with AI infrastructure scaling pressure partly offset by Azure efficiencies.",
+      "numericValues": [
+        {
+          "label": "Microsoft Cloud gross margin",
+          "value": 69,
+          "unit": "percent",
+          "period": "FY2025 Q3",
+          "basis": "reported",
+          "sourceExcerptId": "excerpt_msft_q3_margin_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:a258a442c3193bd90d379324d44420ff002db61e5709d7f48002af592083d7bf"
+    },
+    {
+      "excerptId": "excerpt_msft_q3_q4_guidance_01",
+      "sourceId": "source_msft_fy25q3_call",
+      "locator": { "section": "CFO outlook — FY2025 Q4" },
+      "text": "Azure revenue growth was guided to 34%–35% in constant currency for FY2025 Q4.",
+      "numericValues": [
+        {
+          "label": "Azure growth guidance midpoint",
+          "value": 34.5,
+          "unit": "percent constant currency",
+          "period": "FY2025 Q4",
+          "basis": "guidance midpoint",
+          "sourceExcerptId": "excerpt_msft_q3_q4_guidance_01"
+        }
+      ],
+      "classification": "public",
+      "contentHash": "sha256:a258a442c3193bd90d379324d44420ff002db61e5709d7f48002af592083d7bf"
+    }
+  ]
+}

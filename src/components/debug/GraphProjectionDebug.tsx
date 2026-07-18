@@ -13,7 +13,13 @@ import {
 } from "lucide-react";
 import { Badge, InlineAlert, Kv, Panel } from "@/components/ui/primitives";
 import { useDemoStore } from "@/store/demo-store";
-import { allProposals, arctCase, fundContextManifest, runBundles, sourceBundles } from "@/fixtures/loader";
+import {
+  defaultCase,
+  defaultContextManifest,
+  defaultSuccessProposals,
+  msftSourceBundles,
+  productRunBundles,
+} from "@/fixtures/loader";
 import {
   DeterministicGraphProjectionPort,
   type ProductGraphNodeKind,
@@ -74,16 +80,16 @@ export function GraphProjectionDebug() {
   const projection = useMemo(
     () =>
       projector.project({
-        investmentCase: arctCase,
+        investmentCase: defaultCase,
         domain,
-        proposals: allProposals,
-        runs: runBundles,
-        sources: sourceBundles,
-        context: fundContextManifest,
+        proposals: defaultSuccessProposals,
+        runs: productRunBundles.filter((run) => run.workflowRun.caseId === defaultCase.caseId),
+        sources: msftSourceBundles,
+        context: defaultContextManifest,
       }),
     [domain],
   );
-  const validation = validateGraphProjection(projection, arctCase, domain.currentThesis);
+  const validation = validateGraphProjection(projection, defaultCase, domain.currentThesis);
   const kindCounts = useMemo(() => {
     const counts = new Map<ProductGraphNodeKind, number>();
     for (const node of projection.nodes) counts.set(node.kind, (counts.get(node.kind) ?? 0) + 1);

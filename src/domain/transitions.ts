@@ -282,8 +282,8 @@ export function applyApprovedChanges(
   const transition: StateTransition = {
     fixtureVersion: fromThesis.fixtureVersion,
     schemaVersion: fromThesis.schemaVersion,
-    synthetic: true,
-    transitionId: `transition_arct_${String(state.transitions.length + 1).padStart(3, "0")}`,
+    synthetic: input.runBundle.synthetic,
+    transitionId: `transition_${fromThesis.caseId === "case_arct_001" ? "arct" : "msft"}_${String(state.transitions.length + 1).padStart(3, "0")}`,
     tenantId: input.tenantId,
     caseId: fromThesis.caseId,
     proposalIds: pending.map((p) => p.proposal.proposalId),
@@ -304,6 +304,10 @@ export function applyApprovedChanges(
     status: "applied",
     beforeSnapshotHash: beforeHash,
     afterSnapshotHash: afterHash,
+    contextSetHash: input.runBundle.workflowRun.contextSetHash,
+    evidenceOrigins: input.runBundle.workflowRun.contextUsage
+      ? [...new Set(input.runBundle.workflowRun.contextUsage.filter((item) => item.status === "used").map((item) => item.originKind))]
+      : undefined,
   };
 
   const supersededThesis: ThesisSnapshot = { ...fromThesis, status: "superseded" };

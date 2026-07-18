@@ -1,4 +1,4 @@
-# Delphi — Earnings-to-Thesis Prototype (v0.2)
+# Delphi — Earnings-to-Thesis Prototype (v0.3)
 
 > **Models propose. Validators constrain. Humans approve. The ledger records.**
 
@@ -6,15 +6,15 @@ Delphi is an AI-native **Investment Decision OS** for fundamental investment tea
 interactive prototype of the first workflow — **Earnings-to-Thesis** — plus the public company website, built to the
 v0.2 specification in [`Delphi_Prototype_and_EFL_Pack_v0_2/`](Delphi_Prototype_and_EFL_Pack_v0_2/).
 
-**All data is synthetic. Nothing here is investment advice.**
+**The default MSFT event uses frozen official public sources. Its thesis, forecast, and inferred deltas are demo-authored—not a real institution's view. ARCT-DEMO is synthetic. Nothing here is investment advice.**
 
 ## What the prototype proves
 
 One coherent, governed loop:
 
 ```text
-Synthetic earnings event
-→ compare with approved thesis v12
+Frozen MSFT FY2025 Q4 official-source event
+→ compare with a clearly labeled demo-derived thesis v12
 → generate cited Thesis Delta Proposals
 → human Accept / Edit / Reject / Escalate / Defer
 → apply only authorized, approved changes
@@ -37,7 +37,7 @@ Specifically:
   proposals, and never fabricates evidence.
 - **Reset is deterministic** — one action restores the pristine fixture state (verified by content hash).
 - **Backend boundaries are inspectable without pretending they are deployed** — typed composition selects fixture mode
-  by default, `/debug/context` shows a policy-checked synthetic fund-context ingestion contract, and `/debug/graph`
+  by default, `/context` shows a policy-checked interactive Context Library, and `/debug/graph`
   exposes its deterministic read-only product projection with no graph database.
 
 ## Requirements
@@ -56,8 +56,10 @@ npm run build:next        # optional native Next.js compatibility build
 npm run start             # run the production Worker locally
 npm run typecheck         # TypeScript strict typecheck
 npm run lint              # ESLint
-npm test                  # Vitest unit + contract tests (73 tests)
-npm run test:e2e          # Playwright E2E (9 scenarios; starts its own dev server on :3050)
+npm test                  # Vitest unit + contract tests
+npm run test:e2e          # Playwright E2E (starts its own dev server on :3050)
+npm run verify:sources    # offline source/provenance/hash contract
+npm run verify:sources -- --refresh # developer-only public-source drift check
 node scripts/capture-screenshots.mjs   # regenerate website screenshots from the live app
 ```
 
@@ -66,17 +68,21 @@ node scripts/capture-screenshots.mjs   # regenerate website screenshots from the
 | Surface | Route |
 |---|---|
 | **Change Inbox** (home) | `/` |
-| Investment Case | `/cases/arct-demo` |
-| Delta Review | `/deltas/proposal_arct_enterprise_001` (any proposal ID) |
-| Run Observatory | `/runs/run-arct-success` · `/runs/run-arct-degraded` |
+| Investment Case | `/cases/msft-fy25q4` · `/cases/arct-demo` |
+| Context Library | `/context` |
+| Delta Review | `/deltas/proposal_msft_azure_001` (any proposal ID) |
+| Run Observatory | `/runs/run-msft-fy25q4` · `/runs/run-arct-degraded` |
 | Decision Ledger | `/ledger` · `/ledger/:transitionId` |
-| Trust / Privacy Receipt | `/trust` · `/trust/run-arct-success` |
-| Internal fund-context ingestion debug | `/debug/context` |
+| Trust / Privacy Receipt | `/trust` · `/trust/run-msft-fy25q4` |
+| Context compatibility redirect | `/debug/context` → `/context` |
 | Internal graph projection debug | `/debug/graph` |
 | **Public website** | `/website` (`#product` `#how-it-works` `#security` `#company` `#contact`) |
 
 > The build brief assigns `/` to both the product and the website; per the v0.2 rule "the default home route must be
 > Change Inbox", the product owns `/` and the website lives at `/website`.
+
+Current implementation notes: [architecture](docs/architecture-v0.3.md), [trust boundaries](docs/trust-and-data-boundaries-v0.3.md),
+[demo script](docs/demo-script-v0.3.md), and [source register](docs/source-register.md).
 
 ## Architecture
 
@@ -87,8 +93,8 @@ app/                      Next.js App Router
 src/
 ├── domain/               types · zod schemas · semantic patch engine · transition
 │                         gateway · policies · validators · content hashing
-├── fixtures/             canonical v0.2 JSON fixtures + schema-validated loader
-├── context/              typed fund-context manifest validation + policy checks
+├── fixtures/             legacy ARCT fixtures + MSFT official-source snapshots + schema loader
+├── context/              context binding/hash validation + browser-local import
 ├── runtime/              typed runtime composition + AnalysisAdapter boundary +
 │                         deterministic replay + read-only graph projection + receipt
 ├── store/                Zustand demo store (localStorage persistence, reset)
@@ -125,21 +131,23 @@ Key boundaries (mirroring the production direction in `04_SYSTEM_ARCHITECTURE.md
 - The graph port derives nodes and typed relationships from canonical product objects using stable Delphi IDs. The
   first implementation is an in-memory projection for internal inspection only; it has no write authority, persistence,
   Cypher, Neo4j, or vendor payloads.
-- The fund-context boundary normalizes five synthetic artifacts from four fixture-simulated read-only connectors. It
-  records ownership, classification, source ACL, point-in-time metadata, model policy, lifecycle, and derived object
-  links; internal model and memo fixtures block external-model access and every artifact forbids external transfer.
+- The fund-context boundary normalizes official issuer, SEC, and CalPERS snapshots alongside demo-authored state. It
+  records origin, publisher, canonical URI, retrieval, rights, classification, point-in-time scope, model policy,
+  lifecycle, input usage, and derived links. Browser-local imports persist only bounded text previews, metadata, and
+  hashes; raw bytes are not stored or uploaded.
 
 ## Fixture mode (default and only demo mode)
 
-Fixtures in `src/fixtures/data/` are the v0.2 canonical set (copied verbatim from the spec pack) and are
-schema-validated with Zod at load. Every file carries `{ fixtureVersion: "0.2.0", schemaVersion: "2026-07-13",
-synthetic: true }`. The demo works fully offline after install; no environment variables are required
-(see [`.env.example`](.env.example)).
+Fixtures in `src/fixtures/data/` are schema-validated with Zod at load. The default v0.3 scenario contains frozen,
+hashed official public source snapshots for Microsoft FY2025 Q3/Q4, the FY2025 annual-report page, a CalPERS public
+policy, and a SEC Form 13F holding row. The approved pre-event thesis and team forecast are explicitly
+`demo_derived`. The public CalPERS references do not establish a CalPERS thesis, recommendation, active decision, or
+endorsement. Runtime execution remains deterministic and offline; the optional refresh command is developer-only.
 
 ## Demo script (90-second path)
 
 1. **Problem** — inbox shows material changes, not a chat box.
-2. **Change Inbox** → open ARCT-DEMO FY2026 Q2.
+2. **Change Inbox** → open Microsoft FY2025 Q4 and note “Real event · demo thesis.”
 3. Open the high-materiality **Thesis Delta**; open the exact **evidence** excerpt.
 4. **Human review** — Accept the medium-materiality item (or Edit; note the Analyst is blocked from the PM-required
    item and prompted to escalate).
@@ -147,15 +155,16 @@ synthetic: true }`. The demo works fully offline after install; no environment v
    workflow/model versions.
 6. Close: governed investment state persists across models.
 
-The four-minute path adds: Investment Case (approved v12), deterministic replay in the Run Observatory, all four
-proposals, the Analyst/PM role switcher, the degraded run (missing transcript → blocked proposal → escalate), the
-Privacy Receipt, and the design-partner CTA on `/website`. Before any demo: click **Reset demo**.
+The four-minute path adds: Context Library provenance and local import, Investment Case context coverage,
+deterministic replay and declared inputs, all four proposals, the Analyst/PM role switcher, the synthetic ARCT degraded
+run (missing transcript → blocked proposal → escalate), Privacy Receipt, and the CTA on `/website`. Before any demo:
+click **Reset demo**.
 
 ## Security disclaimer
 
-This is a **pre-launch prototype using synthetic data only**. It runs entirely in the local browser session; no raw
-content is sent to any cloud, no external web access occurs at runtime, and no secrets exist in the repository or
-client bundle. The customer-owned data-plane separation described on the website and Trust page is a **target
+This is a **pre-launch prototype using frozen public-source snapshots and demo-authored investment context**. It runs
+entirely in the local browser session; no raw local-import content is sent to any cloud, no external web access occurs
+at runtime, and no secrets exist in the repository or client bundle. The customer-owned data-plane separation described on the website and Trust page is a **target
 architecture / roadmap direction** — not a deployed or certified capability. No SOC 2, penetration-testing, retention,
 or MNPI-compliance claims are made.
 
@@ -164,12 +173,11 @@ or MNPI-compliance claims are made.
 - Demo state lives in `localStorage` (single browser profile); there is no server persistence or authentication —
   intentional for the prototype stage (`07_SECURITY_PRIVACY_TRUST.md` §12).
 - The role switcher simulates Analyst/PM identity; it is a demo affordance, not access control.
-- Only the ARCT-DEMO case is interactive; the other inbox/case rows are explicitly disabled scope markers.
+- MSFT is the primary happy path; ARCT-DEMO remains a controlled synthetic degradation scenario.
 - Rollback is limited to the most recent transition (safe demo flow).
-- Prior-quarter evidence referenced by the approved thesis resolves as *unavailable by design* (the fixture set ships
-  only event-window sources) — demonstrating the fail-closed evidence path.
+- Context attachment changes browser-local case context but cannot retroactively alter the frozen run's recorded input usage.
 - The live-model adapter is a typed stub; wiring a provider requires implementing it server-side (never required for
   the demo).
 - The graph debug page is a deterministic in-memory projection, not a graph database or durable graph service.
-- The context debug page demonstrates contracts and policy behavior only. It is not a live document connector, upload
-  service, permission sync, RAG index, model gateway, authentication layer, or customer data plane.
+- The Context Library is a catalog and browser-local parsing demonstration. It is not a live document connector,
+  permission sync, RAG index, model gateway, authentication layer, or customer data plane.

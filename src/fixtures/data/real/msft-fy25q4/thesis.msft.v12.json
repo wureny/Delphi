@@ -1,0 +1,138 @@
+{
+  "fixtureVersion": "0.3.0",
+  "schemaVersion": "2026-07-18",
+  "synthetic": true,
+  "thesisId": "thesis_msft_demo",
+  "caseId": "case_msft_fy25q4",
+  "version": 12,
+  "status": "approved",
+  "summary": "Microsoft can compound durable cloud and AI growth as Azure demand converts into revenue, provided capacity additions arrive on schedule and infrastructure intensity does not structurally erode cloud economics.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2025-07-30T19:59:00Z",
+  "validFrom": "2025-07-30T19:59:00Z",
+  "recordedAt": "2025-07-30T19:59:00Z",
+  "originKind": "demo_derived",
+  "authorshipLabel": "Delphi Demo Team — hypothetical pre-earnings view derived from public sources",
+  "derivedFromSourceRefs": [
+    "source_msft_fy25q3_release",
+    "source_msft_fy25q3_call",
+    "source_msft_demo_forecast_v12"
+  ],
+  "pillars": [
+    {
+      "pillarId": "pillar_msft_azure_demand",
+      "title": "Azure demand remains durable",
+      "statement": "Azure and AI demand should sustain mid-30s constant-currency growth as capacity comes online.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": ["excerpt_msft_q3_azure_01"]
+    },
+    {
+      "pillarId": "pillar_msft_capacity_conversion",
+      "title": "Capacity converts backlog into revenue",
+      "statement": "Planned datacenter additions should convert strong demand into recognized Azure revenue without a prolonged constraint.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": ["excerpt_msft_q3_capacity_01"]
+    },
+    {
+      "pillarId": "pillar_msft_ai_economics",
+      "title": "AI investment preserves attractive economics",
+      "statement": "Efficiency gains should offset enough infrastructure cost to keep Microsoft Cloud gross margin near the high-60s while AI scale expands.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": ["excerpt_msft_q3_margin_01"]
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_msft_q4_azure_cc",
+      "metric": "Azure revenue growth",
+      "period": "FY2025 Q4",
+      "scenario": "base",
+      "value": 34.5,
+      "unit": "percent constant currency",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_msft_q4_cloud_gm",
+      "metric": "Microsoft Cloud gross margin",
+      "period": "FY2025 Q4",
+      "scenario": "base",
+      "value": 67,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_msft_q1_azure_cc",
+      "metric": "Azure revenue growth",
+      "period": "FY2026 Q1",
+      "scenario": "base",
+      "value": 35,
+      "unit": "percent constant currency",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_msft_capacity",
+      "title": "Incremental AI capacity comes online",
+      "expectedAt": "2025-12-31T23:59:59Z",
+      "probability": "medium",
+      "expectedImpact": "Converts constrained demand into Azure revenue",
+      "status": "open"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_msft_capacity_constraint",
+      "title": "AI capacity remains constrained",
+      "description": "Demand may continue to exceed available datacenter capacity and delay revenue conversion.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": ["excerpt_msft_q3_capacity_01"]
+    },
+    {
+      "riskId": "risk_msft_capital_intensity",
+      "title": "AI capital intensity pressures returns",
+      "description": "Accelerating infrastructure spend may outpace near-term monetization and reduce cloud margin resilience.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": ["excerpt_msft_q3_margin_01"]
+    },
+    {
+      "riskId": "risk_msft_ai_customer_concentration",
+      "title": "Large AI customer concentration",
+      "description": "A small number of AI labs may be both major customers and emerging platform competitors.",
+      "severity": "medium",
+      "likelihood": "low",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_msft_capacity_duration",
+      "question": "How long will AI capacity constraints delay Azure demand conversion?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": ["excerpt_msft_q3_capacity_01"]
+    },
+    {
+      "questionId": "question_msft_ai_returns",
+      "question": "What evidence will show that incremental AI capex is earning an attractive return?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ]
+}
