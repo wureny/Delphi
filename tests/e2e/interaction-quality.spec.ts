@@ -11,13 +11,17 @@ test("rapid feedback is capped at three top-positioned toasts", async ({ page })
   expect(Math.max(...boxes.map((box) => box.bottom))).toBeLessThan(420);
 });
 
-test("system typography produces no missing font assets and hero media is prioritized", async ({ page }) => {
+test("system typography and site icon load without 404s while hero media is prioritized", async ({ page }) => {
   const font404s: string[] = [];
   page.on("response", (response) => {
     if (response.status() === 404 && /font|woff/i.test(response.url())) font404s.push(response.url());
   });
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Change Inbox" })).toBeVisible();
+  const iconHref = await page.locator('link[rel="icon"]').getAttribute("href");
+  expect(iconHref).toBe("/delphi-mark.svg");
+  const iconResponse = await page.request.get(iconHref!);
+  expect(iconResponse.status()).toBe(200);
   await page.goto("/website");
   const screenshots = page.locator("figure img");
   await expect(screenshots.first()).toHaveAttribute("loading", "eager");

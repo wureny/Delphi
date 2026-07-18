@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   },
   description:
     "Delphi turns material market events into cited, human-reviewed changes in an approved investment view. Real public source facts and demo-authored thesis context are labeled separately.",
+  icons: {
+    icon: [{ url: "/delphi-mark.svg", type: "image/svg+xml" }],
+    shortcut: "/delphi-mark.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
