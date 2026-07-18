@@ -41,6 +41,6 @@
 - [x] 6.1 Add source-contract tests for official URLs, origin labels, hashes, citations, numeric reconciliation, point-in-time cutoff, and rights metadata.
 - [x] 6.2 Add unit tests for context add/remove/import, policy failure, context-set hashing, canonical-write isolation, local reset, and deterministic MSFT outputs.
 - [x] 6.3 Add E2E journeys for curated context addition, local PDF/CSV import, MSFT review/apply/ledger, ARCT degradation, rapid-action Toast behavior, review progress, keyboard-only modal/search use, and desktop/mobile layouts.
-- [ ] 6.4 Run typecheck, lint, all unit/contract tests, Playwright E2E, production build, strict OpenSpec validation, and a deployed network/console inspection with zero application-asset 404s.
+- [x] 6.4 Run typecheck, lint, all unit/contract tests, Playwright E2E, production build, strict OpenSpec validation, and a deployed network/console inspection with zero application-asset 404s.
 - [x] 6.5 Update README, architecture, trust/privacy, demo script, source register, and public copy so real-public, demo-derived, synthetic, local-only, fixture execution, and non-advice boundaries remain consistent.
-- [ ] 6.6 Publish a new ChatGPT Sites version only after source review and full acceptance pass; smoke-test all primary routes and retain the previous version as rollback.
+- [x] 6.6 Publish a new ChatGPT Sites version only after source review and full acceptance pass; smoke-test all primary routes and retain the previous version as rollback.
