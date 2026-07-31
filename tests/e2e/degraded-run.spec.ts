@@ -10,7 +10,7 @@ const card = (page: Page, proposalId: string) => page.locator(`#${proposalId}`);
 
 test("degraded run retains safe findings, blocks unsafe approval, and never mutates state", async ({ page }) => {
   // 1 — trigger the missing transcript from the inbox degraded row.
-  await page.goto("/");
+  await page.goto("/demo");
   await page.getByRole("button", { name: /Simulate & replay/ }).click();
   await expect(page).toHaveURL(/\/runs\/run-arct-degraded/);
 

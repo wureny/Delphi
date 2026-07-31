@@ -32,7 +32,7 @@ const shot = async (name) => {
 };
 
 // 1 — Change Inbox (pristine).
-await open("/");
+  await open("/demo");
 await page.getByRole("heading", { name: "Change Inbox" }).waitFor();
 await shot("change-inbox");
 

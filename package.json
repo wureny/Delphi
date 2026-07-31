@@ -20,7 +20,9 @@
     "verify:sources": "node scripts/verify-public-sources.mjs"
   },
   "dependencies": {
+    "geist": "^1.7.2",
     "lucide-react": "^1.24.0",
+    "motion": "^12.43.0",
     "next": "^16.2.10",
     "pdfjs-dist": "^6.1.200",
     "react": "^19.2.7",

@@ -44,7 +44,7 @@ export default function TrustPage() {
 
       <p className="mt-3 text-[11px] text-ink-3">
         Real public source facts and demo-authored investment context are labeled separately. Not investment advice.{" "}
-        <Link href="/website#security" className="text-accent hover:underline">
+        <Link href="/#system" className="text-accent hover:underline">
           Read about the target security architecture
         </Link>
         .

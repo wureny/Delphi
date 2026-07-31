@@ -87,7 +87,7 @@ export default function DeltaReviewPage({ params }: { params: Promise<{ proposal
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-8 lg:px-8 lg:py-10">
-      <Link href="/" className="flex w-fit items-center gap-1 text-xs text-ink-3 hover:text-ink">
+      <Link href="/demo" className="flex w-fit items-center gap-1 text-xs text-ink-3 hover:text-ink">
         <ArrowLeft size={12} aria-hidden />
         Change Inbox
       </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Change Inbox — the home surface. Material changes awaiting a human
+ * Change Inbox — the demo home surface. Material changes awaiting a human
  * decision against the approved investment view. Not a chat page.
  */
 import { useMemo, useState } from "react";

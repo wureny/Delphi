@@ -35,7 +35,7 @@ test("reset restores thesis v12, clears transitions, and returns the initial sta
   await page.getByRole("button", { name: "Reset to fixture state" }).click();
 
   // 3 — the fixture-backed starting state is restored.
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/demo$/);
   await expect(page.getByRole("navigation", { name: "Primary" }).getByText("v12", { exact: true })).toBeVisible();
 
   await page.goto("/ledger");

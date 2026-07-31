@@ -67,7 +67,8 @@ node scripts/capture-screenshots.mjs   # regenerate website screenshots from the
 
 | Surface | Route |
 |---|---|
-| **Change Inbox** (home) | `/` |
+| **Public website** | `/` (`#thesis` `#prototype` `#system` `#stage` `#contact`) |
+| **Change Inbox** (demo home) | `/demo` |
 | Investment Case | `/cases/msft-fy25q4` · `/cases/arct-demo` |
 | Context Library | `/context` |
 | Delta Review | `/deltas/proposal_msft_azure_001` (any proposal ID) |
@@ -76,10 +77,9 @@ node scripts/capture-screenshots.mjs   # regenerate website screenshots from the
 | Trust / Privacy Receipt | `/trust` · `/trust/run-msft-fy25q4` |
 | Context compatibility redirect | `/debug/context` → `/context` |
 | Internal graph projection debug | `/debug/graph` |
-| **Public website** | `/website` (`#product` `#how-it-works` `#security` `#company` `#contact`) |
+| Legacy website redirect | `/website` → `/` |
 
-> The build brief assigns `/` to both the product and the website; per the v0.2 rule "the default home route must be
-> Change Inbox", the product owns `/` and the website lives at `/website`.
+> The public company website owns `/`. The deterministic product prototype starts at `/demo`; deep product routes remain stable.
 
 Current implementation notes: [architecture](docs/architecture-v0.3.md), [trust boundaries](docs/trust-and-data-boundaries-v0.3.md),
 [demo script](docs/demo-script-v0.3.md), and [source register](docs/source-register.md).
@@ -88,8 +88,9 @@ Current implementation notes: [architecture](docs/architecture-v0.3.md), [trust 
 
 ```text
 app/                      Next.js App Router
-├── (product)/            product surfaces (inbox, cases, deltas, runs, ledger, trust)
-└── website/              public company website
+├── page.tsx              public company website
+├── website/              compatibility redirect to `/`
+└── (product)/            product surfaces (demo, cases, deltas, runs, ledger, trust)
 src/
 ├── domain/               types · zod schemas · semantic patch engine · transition
 │                         gateway · policies · validators · content hashing

@@ -10,7 +10,7 @@ async function expand(page: Page, proposalId: string, headline: RegExp) {
 }
 
 test("MSFT public-source review records exactly the approved demo-thesis changes as v13", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Change Inbox" })).toBeVisible();
   await expect(page.getByText("Real sources + demo thesis")).toBeVisible();
   await expect(page.getByText(/Microsoft.*FY2025 Q4 Earnings/)).toBeVisible();

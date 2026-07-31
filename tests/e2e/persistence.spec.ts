@@ -14,7 +14,7 @@ test("an incompatible persisted fixture envelope cannot override the current bas
     );
   });
 
-  await page.goto("/");
+  await page.goto("/demo");
   await expect(page.getByRole("navigation", { name: "Primary" }).getByText("v12", { exact: true })).toBeVisible();
   await expect(page.getByText("stale persisted state")).toHaveCount(0);
   await expect(page.getByRole("combobox", { name: "Active reviewer role" })).toHaveValue("analyst");

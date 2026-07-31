@@ -85,7 +85,7 @@ test("local CSV and text PDF imports remain browser-local and excluded from the 
 });
 
 test("context and search flows are keyboard operable and mobile-safe", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Change Inbox" })).toBeVisible();
   const search = page.getByRole("combobox", { name: "Search cases, deltas, and pages" });
   await search.fill("Context Library");

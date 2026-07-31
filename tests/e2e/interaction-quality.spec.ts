@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("rapid feedback is capped at three top-positioned toasts", async ({ page }) => {
   await page.goto("/deltas/proposal_msft_azure_001");
+  await expect(page.getByRole("heading", { name: "Microsoft Corporation (MSFT)" })).toBeVisible();
   const role = page.getByRole("combobox", { name: "Active reviewer role" });
   for (const value of ["pm", "analyst", "pm", "analyst", "pm"]) await role.selectOption(value);
   const toasts = page.locator('[aria-live="polite"] > button');
@@ -16,13 +17,13 @@ test("system typography and site icon load without 404s while hero media is prio
   page.on("response", (response) => {
     if (response.status() === 404 && /font|woff/i.test(response.url())) font404s.push(response.url());
   });
-  await page.goto("/");
+  await page.goto("/demo");
   await expect(page.getByRole("heading", { name: "Change Inbox" })).toBeVisible();
   const iconHref = await page.locator('link[rel="icon"]').getAttribute("href");
   expect(iconHref).toBe("/delphi-mark.svg");
   const iconResponse = await page.request.get(iconHref!);
   expect(iconResponse.status()).toBe(200);
-  await page.goto("/website");
+  await page.goto("/");
   const screenshots = page.locator("figure img");
   await expect(screenshots.first()).toHaveAttribute("loading", "eager");
   await expect(screenshots.first()).toHaveAttribute("fetchpriority", "high");

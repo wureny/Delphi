@@ -27,7 +27,7 @@ import type { RuntimeCapabilities } from "@/runtime/config";
 import { RuntimeProvider } from "@/runtime/client-context";
 
 const NAV = [
-  { href: "/", label: "Change Inbox", icon: Inbox },
+  { href: "/demo", label: "Change Inbox", icon: Inbox },
   { href: "/cases", label: "Cases", icon: Briefcase },
   { href: "/context", label: "Context", icon: DatabaseZap },
   { href: "/runs", label: "Runs", icon: Activity },
@@ -44,7 +44,7 @@ interface SearchTarget {
 function useSearchTargets(): SearchTarget[] {
   return useMemo(
     () => [
-      { label: "Change Inbox", hint: "Page", href: "/" },
+      { label: "Change Inbox", hint: "Page", href: "/demo" },
       { label: `${defaultCase.companyName} (${defaultCase.ticker})`, hint: "Real-public case", href: "/cases/msft-fy25q4" },
       { label: `${arctCase.companyName} (${arctCase.ticker})`, hint: "Investment case", href: "/cases/arct-demo" },
       { label: "Context Library", hint: "Case inputs", href: "/context" },
@@ -212,7 +212,7 @@ function ResetButton({ compact = false }: { compact?: boolean }) {
               onClick={() => {
                 resetDemo();
                 setConfirming(false);
-                router.push("/");
+                router.push("/demo");
                 push({ tone: "ok", title: "Demo reset", detail: "Approved thesis restored to v12; reviews, transitions, and replays cleared." });
               }}
             >
@@ -322,7 +322,7 @@ export function Shell({
 
       {/* Top bar */}
       <header className="sticky top-0 z-40 flex h-14 items-center border-b border-line-strong bg-panel">
-        <Link href="/" className="flex h-full w-32 shrink-0 items-center gap-2 border-r border-line px-3 md:w-56 md:gap-2.5 md:px-4">
+        <Link href="/demo" className="flex h-full w-32 shrink-0 items-center gap-2 border-r border-line px-3 md:w-56 md:gap-2.5 md:px-4">
           <span className="flex size-7 shrink-0 items-center justify-center rounded-[3px] bg-ink">
             <Landmark size={14} className="text-white" strokeWidth={1.7} aria-hidden />
           </span>
@@ -352,7 +352,7 @@ export function Shell({
         <nav aria-label="Primary" className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] w-56 shrink-0 flex-col justify-between border-r border-line bg-panel-2/70 md:flex">
           <ul className="space-y-0.5 px-2 py-4">
             {NAV.map(({ href, label, icon: Icon }) => {
-              const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+              const active = href === "/demo" ? pathname === "/demo" : pathname.startsWith(href);
               return (
                 <li key={href}>
                   <Link
@@ -378,7 +378,7 @@ export function Shell({
         {/* Mobile nav */}
         <nav aria-label="Primary mobile" className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line-strong bg-panel md:hidden">
           {NAV.map(({ href, label, icon: Icon }) => {
-            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            const active = href === "/demo" ? pathname === "/demo" : pathname.startsWith(href);
             return (
               <Link
                 key={href}
