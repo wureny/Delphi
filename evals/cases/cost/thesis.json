@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_cost_eval",
+  "caseId": "case_cost_q4fy26",
+  "version": 1,
+  "status": "approved",
+  "summary": "Costco compounds through traffic-led comparable sales and membership fee income; valuation leaves little room for a comp slowdown.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-06-10T14:00:00Z",
+  "validFrom": "2026-06-10T14:00:00Z",
+  "recordedAt": "2026-06-10T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_cost_comps",
+      "title": "Traffic-led comps stay strong",
+      "statement": "Comparable sales excluding gas and FX stay in the 6-7% range, driven by traffic rather than inflation.",
+      "teamConviction": "high",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_cost_membership",
+      "title": "Membership fee income grows double digits",
+      "statement": "The fee increase keeps membership fee income growing faster than sales.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_cost_earnings",
+      "title": "Earnings compound faster than sales",
+      "statement": "Net income grows faster than net sales through operating leverage.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_cost_q4_sales_growth",
+      "metric": "Net sales growth",
+      "period": "Q4 FY2026",
+      "scenario": "base",
+      "value": 9.0,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_cost_q4_net_income",
+      "metric": "Net income",
+      "period": "Q4 FY2026",
+      "scenario": "base",
+      "value": 2.95,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_cost_q4_eps",
+      "metric": "Diluted EPS",
+      "period": "Q4 FY2026",
+      "scenario": "base",
+      "value": 6.65,
+      "unit": "USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_cost_tariffs",
+      "title": "Tariffs pressure gross margin",
+      "description": "Import costs could pressure merchandise margins if not passed through.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_cost_valuation",
+      "title": "Valuation leaves no room for a miss",
+      "description": "Any comp deceleration could de-rate the shares.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_cost_ecommerce",
+      "question": "Is digital growth accelerating enough to offset slower warehouse openings?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_cost_fy27",
+      "title": "Fiscal 2027 warehouse opening plans",
+      "expectedAt": "2026-09-24T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Sets unit growth expectations",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to Costco's FY2026 Q3 release (8-K filed 2026-05-28). Not a real institution's view; not investment advice."
+}

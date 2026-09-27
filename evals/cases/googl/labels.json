@@ -1,0 +1,57 @@
+{
+  "ticker": "GOOGL",
+  "accessionNumber": "0001652044-26-000066",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_googl_cloud",
+      "direction": "strengthen",
+      "note": "Cloud +82% to $24.8B vs 58% forecast"
+    },
+    {
+      "importance": "must",
+      "objectId": "pillar_googl_margin",
+      "direction": "weaken_or_review",
+      "note": "Op margin 34% vs >35% pillar"
+    },
+    {
+      "importance": "must",
+      "objectId": "risk_googl_capex",
+      "direction": "increase",
+      "note": "Capex $44.9B vs $22.4B; $49.6B equity raise"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_googl_q2_cloud_growth",
+      "direction": "touch",
+      "note": "82% vs 58%"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_googl_q2_op_margin",
+      "direction": "touch",
+      "note": "34% vs 35%"
+    },
+    {
+      "importance": "should",
+      "objectId": "*",
+      "direction": "new_question",
+      "note": "Equity raise / dilution to fund capex"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_googl_cloud",
+      "direction": "weaken"
+    },
+    {
+      "objectId": "pillar_googl_margin",
+      "direction": "strengthen"
+    },
+    {
+      "objectId": "risk_googl_capex",
+      "direction": "decrease"
+    }
+  ]
+}

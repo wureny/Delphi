@@ -91,6 +91,8 @@ export interface Forecast {
   value?: number;
   minValue?: number;
   maxValue?: number;
+  /** Reported outcome for the forecast period. Recorded alongside, never over, the forecast. */
+  actualValue?: number;
   unit: string;
   currency?: string;
   ownerUserId: Id;

@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_nvda_eval",
+  "caseId": "case_nvda_q2fy27",
+  "version": 1,
+  "status": "approved",
+  "summary": "NVIDIA's data center franchise keeps compounding on AI infrastructure demand with mid-70s gross margins; guidance credibility and China exclusion are the swing factors.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-06-01T14:00:00Z",
+  "validFrom": "2026-06-01T14:00:00Z",
+  "recordedAt": "2026-06-01T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_nvda_dc_demand",
+      "title": "Data Center demand keeps compounding",
+      "statement": "Data Center revenue keeps growing sequentially as hyperscale and AI cloud builds continue.",
+      "teamConviction": "high",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_nvda_margin",
+      "title": "Gross margin holds mid-70s",
+      "statement": "Non-GAAP gross margin stays around 75% despite new platform ramps.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_nvda_networking",
+      "title": "Networking is a second engine",
+      "statement": "Networking grows faster than compute and becomes a durable second growth driver.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_nvda_q2_revenue",
+      "metric": "Revenue",
+      "period": "Q2 FY2027",
+      "scenario": "base",
+      "value": 91.0,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_nvda_q2_gm",
+      "metric": "Non-GAAP gross margin",
+      "period": "Q2 FY2027",
+      "scenario": "base",
+      "value": 75.0,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_nvda_q2_opex",
+      "metric": "Non-GAAP operating expenses",
+      "period": "Q2 FY2027",
+      "scenario": "base",
+      "value": 8.3,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_nvda_concentration",
+      "title": "Hyperscale customer concentration",
+      "description": "A handful of hyperscalers drive most Data Center revenue; a pause by one would hit growth.",
+      "severity": "high",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_nvda_china",
+      "title": "China compute excluded",
+      "description": "Guidance assumes no China Data Center compute revenue; policy shifts cut both ways.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_nvda_new_segments",
+      "question": "How do Hyperscale and ACIE sub-markets split under the new reporting framework?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_nvda_q3_guide",
+      "title": "Q3 FY2027 outlook",
+      "expectedAt": "2026-08-26T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Tests whether sequential growth continues",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to NVIDIA's Q1 FY2027 release and Q2 outlook (8-K filed 2026-05-20). Not a real institution's view; not investment advice."
+}

@@ -14,3 +14,7 @@ next-env.d.ts
 
 # Live analysis outputs (may contain licensed or customer content)
 data/live-runs/
+
+# Eval caches and reports (regenerable)
+evals/cache/
+evals/reports/runs-*/

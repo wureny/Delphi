@@ -1,0 +1,53 @@
+{
+  "ticker": "MSFT",
+  "accessionNumber": "0001193125-26-323632",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_msft_azure_demand",
+      "direction": "strengthen",
+      "note": "Azure +43% vs ~38-40% thesis"
+    },
+    {
+      "importance": "must",
+      "objectId": "forecast_msft_q4_azure_cc",
+      "direction": "touch",
+      "note": "Azure 43% above 38% forecast"
+    },
+    {
+      "importance": "must",
+      "objectId": "risk_msft_capex_returns",
+      "direction": "increase",
+      "note": "Capex $35.8B vs $17.1B YoY"
+    },
+    {
+      "importance": "must",
+      "objectId": "forecast_msft_q4_capex",
+      "direction": "touch",
+      "note": "Capex $35.8B above $32.0B forecast"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_msft_q4_revenue",
+      "direction": "touch",
+      "note": "Revenue $90.0B vs $87.5B forecast"
+    },
+    {
+      "importance": "should",
+      "objectId": "pillar_msft_pc_drag",
+      "direction": "weaken",
+      "note": "MPC revenue down ~4% YoY, not flat"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_msft_azure_demand",
+      "direction": "weaken"
+    },
+    {
+      "objectId": "risk_msft_capex_returns",
+      "direction": "decrease"
+    }
+  ]
+}

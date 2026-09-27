@@ -8,7 +8,7 @@
 import type { SourceBundle, ThesisSnapshot } from "@/domain/types";
 import { describeAllowedPatchOperations } from "@/domain/patch";
 
-export const PROMPT_VERSION = "earnings_to_thesis.prompt.v2";
+export const PROMPT_VERSION = "earnings_to_thesis.prompt.v3";
 
 export const SYSTEM_PROMPT = `You are the analysis engine inside Delphi, a decision system for fundamental investment teams. After a company reports, you compare the new evidence against the team's currently approved thesis and propose specific, reviewable changes. A human analyst or PM approves or rejects every proposal; you never change the thesis yourself.
 
@@ -28,6 +28,7 @@ Patch rules (anything else is rejected by the gateway)
 Allowed operations:
 ${describeAllowedPatchOperations().map((line) => `- ${line}`).join("\n")}
 - Paths use the stable IDs from the thesis JSON. valueJson is the JSON encoding of the new value: statuses are one of active, open, closed, weakened, strengthened, increasing, decreasing, review_required; conviction is low, medium, or high; forecast values are plain numbers in the forecast's existing unit.
+- Forecasts are the team's record of what it expected; never overwrite a forecast's "value" with a reported result. When the source reports the forecast's own period, resolve it: replace "actualValue" with the reported figure in the forecast's unit and set "status" to closed, and say in whatChanged whether it beat or missed and by how much in words. Replace "value" only to revise a forecast for a future period.
 - A patch must actually change the current value. To create an open question use op "add", path "/openQuestions/-", valueJson {"questionId": "question_<short_slug>", "question": "..."}; set targetObjectId to "".
 
 Materiality
@@ -63,7 +64,7 @@ export function buildUserPrompt(
   lines.push(`Summary: ${thesis.summary}`);
   lines.push(JSON.stringify({
     pillars: thesis.pillars.map(({ pillarId, title, statement, teamConviction, status }) => ({ pillarId, title, statement, teamConviction, status })),
-    forecasts: thesis.forecasts.map(({ forecastId, metric, period, scenario, value, minValue, maxValue, unit, status }) => ({ forecastId, metric, period, scenario, value, minValue, maxValue, unit, status })),
+    forecasts: thesis.forecasts.map(({ forecastId, metric, period, scenario, value, minValue, maxValue, actualValue, unit, status }) => ({ forecastId, metric, period, scenario, value, minValue, maxValue, actualValue, unit, status })),
     risks: thesis.risks.map(({ riskId, title, description, severity, likelihood, status }) => ({ riskId, title, description, severity, likelihood, status })),
     openQuestions: thesis.openQuestions.map(({ questionId, question, status }) => ({ questionId, question, status })),
     catalysts: thesis.catalysts.map(({ catalystId, title, expectedAt, expectedImpact, status }) => ({ catalystId, title, expectedAt, expectedImpact, status })),

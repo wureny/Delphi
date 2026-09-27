@@ -1,0 +1,37 @@
+{
+  "ticker": "NVDA",
+  "accessionNumber": "0001045810-26-000073",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_nvda_dc_demand",
+      "direction": "strengthen",
+      "note": "DC $89.0B, +18% q/q, +117% y/y"
+    },
+    {
+      "importance": "must",
+      "objectId": "forecast_nvda_q2_revenue",
+      "direction": "touch",
+      "note": "Revenue $96.2B vs $91.0B guide"
+    },
+    {
+      "importance": "should",
+      "objectId": "pillar_nvda_margin",
+      "direction": "weaken_or_review",
+      "note": "Q3 GM guided down to 74.0%"
+    },
+    {
+      "importance": "should",
+      "objectId": "risk_nvda_concentration",
+      "direction": "decrease_or_review",
+      "note": "Management cites broadening beyond one lab"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_nvda_dc_demand",
+      "direction": "weaken"
+    }
+  ]
+}

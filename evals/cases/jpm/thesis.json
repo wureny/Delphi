@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_jpm_eval",
+  "caseId": "case_jpm_q2_2026",
+  "version": 1,
+  "status": "approved",
+  "summary": "JPMorgan compounds through fee momentum and a resilient deposit franchise while NII fades with lower rates; expense growth and credit are the watch items.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-04-28T14:00:00Z",
+  "validFrom": "2026-04-28T14:00:00Z",
+  "recordedAt": "2026-04-28T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_jpm_fees",
+      "title": "Fee momentum continues",
+      "statement": "Investment banking and markets revenue keep growing double digits on strong client activity.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_jpm_nii",
+      "title": "NII resilient despite lower rates",
+      "statement": "Net interest income holds near first-quarter levels as deposit and card balances grow.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_jpm_credit",
+      "title": "Credit remains benign",
+      "statement": "Card net charge-offs stay within expectations and reserve builds stay modest.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_jpm_q2_nii",
+      "metric": "Net interest income",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 25.3,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_jpm_q2_expense",
+      "metric": "Noninterest expense",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 26.5,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_jpm_q2_ib_fees_growth",
+      "metric": "Investment banking fees growth",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 15,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_jpm_expense",
+      "title": "Expense growth outpaces revenue",
+      "description": "Noninterest expense grew 14% in Q1; sustained growth above revenue would compress returns.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_jpm_rates",
+      "title": "Rate cuts compress NII",
+      "description": "Further rate cuts reduce net interest income excluding Markets.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_jpm_buybacks",
+      "question": "Will net payout stay above 80% of earnings?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_jpm_stress_test",
+      "title": "Stress capital buffer result",
+      "expectedAt": "2026-06-30T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Sets capital return capacity",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to JPMorgan's Q1 2026 release (8-K filed 2026-04-14). Not a real institution's view; not investment advice."
+}

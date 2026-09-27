@@ -75,6 +75,7 @@ export const forecastSchema = z.object({
   value: z.number().optional(),
   minValue: z.number().optional(),
   maxValue: z.number().optional(),
+  actualValue: z.number().optional(),
   unit: z.string(),
   currency: z.string().optional(),
   ownerUserId: z.string(),

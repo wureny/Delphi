@@ -1,0 +1,53 @@
+{
+  "ticker": "AMZN",
+  "accessionNumber": "0001018724-26-000024",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_amzn_aws",
+      "direction": "strengthen",
+      "note": "AWS +37%, fastest in 18 quarters"
+    },
+    {
+      "importance": "must",
+      "objectId": "risk_amzn_fcf",
+      "direction": "increase",
+      "note": "TTM FCF -$7.6B vs +$1.2B prior"
+    },
+    {
+      "importance": "must",
+      "objectId": "forecast_amzn_q2_sales",
+      "direction": "touch",
+      "note": "$200.6B above $194-199B guide"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_amzn_q2_aws_growth",
+      "direction": "touch",
+      "note": "37% vs 28%"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_amzn_q2_op_income",
+      "direction": "touch",
+      "note": "$27.5B vs $24.0B"
+    },
+    {
+      "importance": "should",
+      "objectId": "question_amzn_chips",
+      "direction": "close_or_review",
+      "note": "Chips business >$25B run rate now disclosed"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_amzn_aws",
+      "direction": "weaken"
+    },
+    {
+      "objectId": "risk_amzn_fcf",
+      "direction": "decrease"
+    }
+  ]
+}

@@ -171,6 +171,11 @@ export default function InvestmentCasePage({ params }: { params: Promise<{ caseS
                       {f.value !== undefined
                         ? `${f.currency === "USD" ? "$" : ""}${f.value}${f.unit === "percent" ? "%" : f.unit === "million" ? "M" : ""}`
                         : `${f.minValue}-${f.maxValue}${f.unit === "percent" ? "%" : ""}`}
+                      {f.actualValue !== undefined && (
+                        <span className="block text-ink-2">
+                          actual {f.currency === "USD" ? "$" : ""}{f.actualValue}{f.unit === "percent" ? "%" : f.unit === "million" ? "M" : ""}
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <Badge tone={objectStatusTone[f.status] ?? "neutral"}>{f.status.replace(/_/g, " ")}</Badge>

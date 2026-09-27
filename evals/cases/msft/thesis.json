@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_msft_eval",
+  "caseId": "case_msft_fy26q4",
+  "version": 1,
+  "status": "approved",
+  "summary": "Microsoft compounds as Azure AI demand converts to revenue at scale; the debate is whether record capex keeps earning cloud-level returns.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-05-15T14:00:00Z",
+  "validFrom": "2026-05-15T14:00:00Z",
+  "recordedAt": "2026-05-15T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_msft_azure_demand",
+      "title": "Azure demand stays near 40%",
+      "statement": "Azure should sustain roughly 38-40% constant-currency growth as AI capacity lands.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_msft_backlog_quality",
+      "title": "Backlog converts, not just grows",
+      "statement": "Commercial RPO growth should keep pace with Azure growth, showing multi-year commitments rather than one-off deals.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_msft_pc_drag",
+      "title": "PC segment is a small drag",
+      "statement": "More Personal Computing stays roughly flat and does not dilute group growth.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_msft_q4_azure_cc",
+      "metric": "Azure and other cloud services revenue growth",
+      "period": "FY2026 Q4",
+      "scenario": "base",
+      "value": 38,
+      "unit": "percent constant currency",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_msft_q4_revenue",
+      "metric": "Total revenue",
+      "period": "FY2026 Q4",
+      "scenario": "base",
+      "value": 87.5,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_msft_q4_capex",
+      "metric": "Additions to property and equipment",
+      "period": "FY2026 Q4",
+      "scenario": "base",
+      "value": 32.0,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_msft_capex_returns",
+      "title": "Capex outruns monetization",
+      "description": "AI infrastructure spend grows faster than cloud revenue and compresses returns.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_msft_rpo_slowdown",
+      "title": "Backlog growth decelerates",
+      "description": "A sharp slowdown in commercial RPO growth would signal demand normalization.",
+      "severity": "medium",
+      "likelihood": "low",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_msft_ai_run_rate",
+      "question": "How fast is the AI business growing after passing a $37 billion run rate?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_msft_fy27_guide",
+      "title": "FY2027 capex and margin framework",
+      "expectedAt": "2026-07-29T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Sets the capital-intensity debate for the year",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to Microsoft's FY2026 Q3 release (8-K filed 2026-04-29). Not a real institution's view; not investment advice."
+}

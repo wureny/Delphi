@@ -24,6 +24,7 @@ const REPLACE_RULES: ReplaceRule[] = [
   { collection: "pillars", idKey: "pillarId", field: "statement", valueSchema: z.string().min(8) },
   { collection: "forecasts", idKey: "forecastId", field: "status", valueSchema: objectStatusSchema },
   { collection: "forecasts", idKey: "forecastId", field: "value", valueSchema: z.number() },
+  { collection: "forecasts", idKey: "forecastId", field: "actualValue", valueSchema: z.number() },
   { collection: "risks", idKey: "riskId", field: "status", valueSchema: objectStatusSchema },
   { collection: "risks", idKey: "riskId", field: "severity", valueSchema: z.enum(["low", "medium", "high", "critical"]) },
   { collection: "openQuestions", idKey: "questionId", field: "status", valueSchema: objectStatusSchema },

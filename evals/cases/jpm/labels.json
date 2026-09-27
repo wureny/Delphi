@@ -1,0 +1,43 @@
+{
+  "ticker": "JPM",
+  "accessionNumber": "0001628280-26-048078",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_jpm_fees",
+      "direction": "strengthen",
+      "note": "IB fees +30%, Markets +35%"
+    },
+    {
+      "importance": "should",
+      "objectId": "risk_jpm_expense",
+      "direction": "touch",
+      "note": "Expense $27.3B (+15%) vs $26.5B forecast. Revised 2026-09-27: revenue ex-significant items also +15%, so 'expense outpaces revenue' is not clearly triggered; escalation not required."
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_jpm_q2_expense",
+      "direction": "touch",
+      "note": "$27.3B vs $26.5B"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_jpm_q2_ib_fees_growth",
+      "direction": "touch",
+      "note": "30% vs 15%"
+    },
+    {
+      "importance": "should",
+      "objectId": "question_jpm_buybacks",
+      "direction": "close_or_review",
+      "note": "LTM net payout 73%, below 80%"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_jpm_fees",
+      "direction": "weaken"
+    }
+  ]
+}

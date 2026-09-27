@@ -1,0 +1,31 @@
+{
+  "ticker": "COST",
+  "accessionNumber": "0000909832-26-000084",
+  "labelStatus": "draft_by_engineer_needs_analyst_review",
+  "expected": [
+    {
+      "importance": "must",
+      "objectId": "pillar_cost_membership",
+      "direction": "weaken_or_review",
+      "note": "Membership fees +7.3% (1,850 vs 1,724), not double digits"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_cost_q4_eps",
+      "direction": "touch",
+      "note": "EPS $6.75 incl. $0.15 one-off tariff refund"
+    },
+    {
+      "importance": "should",
+      "objectId": "forecast_cost_q4_sales_growth",
+      "direction": "touch",
+      "note": "Net sales +11.2% vs 9.0%"
+    }
+  ],
+  "contradictions": [
+    {
+      "objectId": "pillar_cost_membership",
+      "direction": "strengthen"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_amzn_eval",
+  "caseId": "case_amzn_q2_2026",
+  "version": 1,
+  "status": "approved",
+  "summary": "Amazon's thesis rests on AWS re-acceleration from AI plus retail margin expansion funding a historic capex cycle; free cash flow is the pressure point.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-05-12T14:00:00Z",
+  "validFrom": "2026-05-12T14:00:00Z",
+  "recordedAt": "2026-05-12T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_amzn_aws",
+      "title": "AWS re-accelerates on AI",
+      "statement": "AWS growth holds near 28% or better as AI capacity and custom chips come online.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_amzn_retail_margin",
+      "title": "Retail margins keep expanding",
+      "statement": "North America operating margin keeps expanding on regionalized fulfillment and advertising.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_amzn_capex_returns",
+      "title": "Capex earns returns",
+      "statement": "AI capex converts into AWS revenue and operating income growth rather than stranded capacity.",
+      "teamConviction": "low",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_amzn_q2_sales",
+      "metric": "Net sales",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "minValue": 194.0,
+      "maxValue": 199.0,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_amzn_q2_aws_growth",
+      "metric": "AWS segment sales growth",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 28,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_amzn_q2_op_income",
+      "metric": "Operating income",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 24.0,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_amzn_fcf",
+      "title": "Free cash flow compression",
+      "description": "Trailing free cash flow fell to $1.2 billion as capex surged; further declines would pressure the equity story.",
+      "severity": "high",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_amzn_intl",
+      "title": "International volatility",
+      "description": "International segment profits remain thin and FX-sensitive.",
+      "severity": "low",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_amzn_chips",
+      "question": "Is the custom chips business (Trainium, Graviton) becoming a disclosed growth driver?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_amzn_q3_guide",
+      "title": "Q3 2026 guidance",
+      "expectedAt": "2026-07-30T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Sets the second-half growth and margin bar",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to Amazon's Q1 2026 release and Q2 guidance (8-K filed 2026-04-29). Not a real institution's view; not investment advice."
+}

@@ -1,0 +1,117 @@
+{
+  "fixtureVersion": "eval-0.1",
+  "schemaVersion": "0.3.0",
+  "synthetic": false,
+  "thesisId": "thesis_googl_eval",
+  "caseId": "case_googl_q2_2026",
+  "version": 1,
+  "status": "approved",
+  "summary": "Alphabet is converting AI leadership into accelerating Cloud growth while Search stays resilient; capex intensity is the key debate.",
+  "ownerUserId": "user_analyst_01",
+  "approvedByUserId": "user_pm_01",
+  "approvedAt": "2026-05-12T14:00:00Z",
+  "validFrom": "2026-05-12T14:00:00Z",
+  "recordedAt": "2026-05-12T14:00:00Z",
+  "pillars": [
+    {
+      "pillarId": "pillar_googl_cloud",
+      "title": "Cloud acceleration is durable",
+      "statement": "Google Cloud sustains growth above 50% as AI infrastructure and enterprise AI demand convert from backlog.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_googl_search",
+      "title": "Search is resilient to AI",
+      "statement": "AI experiences expand Search usage and Search revenue keeps growing mid-to-high teens.",
+      "teamConviction": "medium",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    },
+    {
+      "pillarId": "pillar_googl_margin",
+      "title": "Margins expand despite capex",
+      "statement": "Consolidated operating margin stays above 35% as depreciation rises.",
+      "teamConviction": "low",
+      "status": "active",
+      "ownerUserId": "user_analyst_01",
+      "evidenceRefs": []
+    }
+  ],
+  "forecasts": [
+    {
+      "forecastId": "forecast_googl_q2_revenue",
+      "metric": "Consolidated revenue",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 115.0,
+      "unit": "billion USD",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_googl_q2_cloud_growth",
+      "metric": "Google Cloud revenue growth",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 58,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    },
+    {
+      "forecastId": "forecast_googl_q2_op_margin",
+      "metric": "Consolidated operating margin",
+      "period": "Q2 2026",
+      "scenario": "base",
+      "value": 35.0,
+      "unit": "percent",
+      "ownerUserId": "user_analyst_01",
+      "status": "active"
+    }
+  ],
+  "risks": [
+    {
+      "riskId": "risk_googl_capex",
+      "title": "Capex intensity erodes free cash flow",
+      "description": "Rising AI capex and depreciation compress free cash flow and margins.",
+      "severity": "medium",
+      "likelihood": "medium",
+      "status": "open",
+      "evidenceRefs": []
+    },
+    {
+      "riskId": "risk_googl_regulatory",
+      "title": "Regulatory remedies",
+      "description": "Antitrust remedies could affect Search distribution economics.",
+      "severity": "medium",
+      "likelihood": "low",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "openQuestions": [
+    {
+      "questionId": "question_googl_backlog",
+      "question": "How much of the $460 billion Cloud backlog converts within 24 months?",
+      "ownerUserId": "user_analyst_01",
+      "status": "open",
+      "evidenceRefs": []
+    }
+  ],
+  "catalysts": [
+    {
+      "catalystId": "catalyst_googl_capex_update",
+      "title": "Updated 2026 capex plan",
+      "expectedAt": "2026-07-22T21:00:00Z",
+      "probability": "medium",
+      "expectedImpact": "Resets free cash flow expectations",
+      "status": "open"
+    }
+  ],
+  "originKind": "demo_derived",
+  "authorshipLabel": "Demo-authored thesis anchored to Alphabet's Q1 2026 release (8-K filed 2026-04-29). Not a real institution's view; not investment advice."
+}

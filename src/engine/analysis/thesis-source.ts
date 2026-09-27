@@ -20,7 +20,8 @@ function describeObjects(thesis: ThesisSnapshot): Array<{ objectId: string; text
   }
   for (const f of thesis.forecasts) {
     const value = f.value !== undefined ? `${f.value}` : `${f.minValue ?? "?"} to ${f.maxValue ?? "?"}`;
-    out.push({ objectId: f.forecastId, text: `Forecast: ${f.metric}, ${f.period}, ${f.scenario} case: ${value} ${f.unit}. Status: ${f.status}.` });
+    const actual = f.actualValue !== undefined ? ` Actual: ${f.actualValue} ${f.unit}.` : "";
+    out.push({ objectId: f.forecastId, text: `Forecast: ${f.metric}, ${f.period}, ${f.scenario} case: ${value} ${f.unit}.${actual} Status: ${f.status}.` });
   }
   for (const r of thesis.risks) {
     out.push({ objectId: r.riskId, text: `Risk "${r.title}": ${r.description} Severity: ${r.severity}. Likelihood: ${r.likelihood}. Status: ${r.status}.` });
