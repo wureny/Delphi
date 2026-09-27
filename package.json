@@ -17,9 +17,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verify:sources": "node scripts/verify-public-sources.mjs"
+    "verify:sources": "node scripts/verify-public-sources.mjs",
+    "analyze": "tsx scripts/analyze.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.24.0",
     "motion": "^12.43.0",
@@ -44,6 +46,7 @@
     "eslint-config-next": "^16.2.10",
     "react-server-dom-webpack": "^19.2.7",
     "tailwindcss": "^4.3.2",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vinext": "^0.0.50",
     "vite": "^8.0.13",

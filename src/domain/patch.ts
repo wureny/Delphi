@@ -34,6 +34,17 @@ const ADD_RULES = [
   { collection: "openQuestions" as const, idKey: "questionId", valueSchema: openQuestionSchema },
 ];
 
+/**
+ * Human/model-readable description of the patch allowlist, derived from the
+ * same rules the gateway enforces so prompts can never drift from policy.
+ */
+export function describeAllowedPatchOperations(): string[] {
+  return [
+    ...REPLACE_RULES.map((r) => `replace /${r.collection}/<${r.idKey}>/${r.field}`),
+    ...ADD_RULES.map((r) => `add /${r.collection}/- (new object with a unique ${r.idKey})`),
+  ];
+}
+
 const err = (code: string, message: string, objectRefs?: string[]): ValidationMessage => ({
   validator: "semantic_patch",
   severity: "error",

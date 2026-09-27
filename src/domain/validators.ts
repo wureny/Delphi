@@ -119,12 +119,18 @@ function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
-function extractNumbers(text: string): number[] {
+/**
+ * Extract numeric claims from prose. Thousands separators are honored
+ * ("35,766" is one number), and tokens glued to letters (FY2026, Q2) are
+ * treated as labels, not claims. Shared with live-source ingestion so stated
+ * numbers and evidence numbers are tokenized identically.
+ */
+export function extractNumbers(text: string): number[] {
   const out: number[] = [];
-  const re = /(?<![A-Za-z0-9])(\d+(?:\.\d+)?)/g;
+  const re = /(?<![A-Za-z0-9.,])(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)/g;
   let match: RegExpExecArray | null;
   while ((match = re.exec(text)) !== null) {
-    out.push(Number(match[1]));
+    out.push(Number(match[1]!.replace(/,/g, "")));
   }
   return out;
 }
