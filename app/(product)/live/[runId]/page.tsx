@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { describePatchOp, formatDateTime, runStatusMeta } from "@/lib/labels";
 import { diffThesis } from "@/lib/diff";
 import { stripHandles } from "@/engine/analysis/prompt";
+import { reasonHelp } from "@/live/help";
 import { pendingApprovals } from "@/domain/transitions";
 import { useDemoStore } from "@/store/demo-store";
 import { proposalsIndex, useLiveStore } from "@/store/live-store";
@@ -69,6 +70,7 @@ export default function LiveRunPage({ params }: { params: Promise<{ runId: strin
         <Badge tone={statusMeta.tone} icon={statusMeta.icon}>{wf.status === "degraded" ? "Release only — transcript not ingested" : statusMeta.label}</Badge>
         <Badge tone="neutral">{wf.modelRoutes[0]?.provider}/{wf.modelRoutes[0]?.model}</Badge>
         <Badge tone="neutral">Analysis {secs.toFixed(0)}s</Badge>
+        <Link href="/guide#reviewing" className="text-[11px] text-accent hover:underline">How to review</Link>
         {release?.canonicalUri && (
           <a href={release.canonicalUri} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[11px] text-accent hover:underline">
             Open filing <ExternalLink size={11} aria-hidden />
@@ -111,7 +113,8 @@ export default function LiveRunPage({ params }: { params: Promise<{ runId: strin
               }
             >
               <p className="text-xs text-ink-2">
-                The model proposed these, but they failed verification (quote not found in the filing, ungrounded number, or a disallowed change). They can never be approved.
+                The model proposed these, but they failed verification (quote not found in the filing, ungrounded number, or a disallowed change). They can never be approved.{" "}
+                <Link href="/guide#blocked" className="text-accent hover:underline">What do the reasons mean?</Link>
               </p>
               {showBlocked && (
                 <ul className="mt-2 space-y-2">
@@ -122,7 +125,10 @@ export default function LiveRunPage({ params }: { params: Promise<{ runId: strin
                         {b.messages.filter((m) => m.severity === "error").map((m, i) => (
                           <li key={i} className="flex gap-1.5 text-[11px] text-bad">
                             <ShieldAlert size={11} aria-hidden className="mt-0.5 shrink-0" />
-                            <span><span className="font-mono">{m.code}</span> — {m.message}</span>
+                            <span>
+                              <span className="font-semibold">{reasonHelp(m.code)?.title ?? m.code}</span> — {m.message}
+                              {reasonHelp(m.code) && <span className="block text-ink-2">{reasonHelp(m.code)!.whatToDo}</span>}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -134,7 +140,10 @@ export default function LiveRunPage({ params }: { params: Promise<{ runId: strin
           )}
 
           {result.coverageGaps.length > 0 && (
-            <Panel title="Not resolvable from this filing">
+            <Panel
+              title="Not resolvable from this filing"
+              actions={<Link href="/guide#gaps" className="text-[11px] text-accent hover:underline">Why?</Link>}
+            >
               <ul className="space-y-1.5">
                 {result.coverageGaps.map((g) => (
                   <li key={g.objectId} className="flex gap-2 text-xs">

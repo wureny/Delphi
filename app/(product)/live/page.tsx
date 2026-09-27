@@ -137,7 +137,8 @@ export default function LiveDeskPage() {
         )}
       </div>
       <p className="mt-1 max-w-3xl text-xs leading-relaxed text-ink-2">
-        Pull the latest earnings release from SEC EDGAR and compare it against a team thesis. Every quote is verified word-for-word against the filing and every number is checked against the source. Anything that fails is blocked and shown with its reason. Nothing changes the thesis until someone approves it.
+        Pull the latest earnings release from SEC EDGAR and compare it against a team thesis. Every quote is verified word-for-word against the filing and every number is checked against the source. Anything that fails is blocked and shown with its reason. Nothing changes the thesis until someone approves it.{" "}
+        <Link href="/guide#quick-start" className="text-accent hover:underline">New here? Read the 5-minute guide →</Link>
       </p>
 
       {status && !status.enabled && (

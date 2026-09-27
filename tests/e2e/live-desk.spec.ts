@@ -48,3 +48,13 @@ test("a tampered run file is rejected on import", async ({ page }) => {
   await expect(page.getByText("Import rejected — the file failed re-verification.")).toBeVisible();
   await expect(page).toHaveURL(/\/live$/);
 });
+
+test("the guide is reachable from the Live Desk and explains blocked reasons", async ({ page }) => {
+  await page.goto("/live");
+  await page.getByRole("link", { name: /Read the 5-minute guide/ }).click();
+  await expect(page).toHaveURL(/\/guide/);
+  await expect(page.getByRole("heading", { name: "Quick start (5 minutes)" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Why a proposal is blocked" })).toBeVisible();
+  await expect(page.getByText("quote_not_found")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Guide" })).toHaveAttribute("aria-current", "page");
+});

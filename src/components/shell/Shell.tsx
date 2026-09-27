@@ -17,6 +17,7 @@ import {
   Network,
   DatabaseZap,
   Radio,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Badge, Button, Modal } from "@/components/ui/primitives";
@@ -35,6 +36,7 @@ const NAV = [
   { href: "/runs", label: "Runs", icon: Activity },
   { href: "/ledger", label: "Decision Ledger", icon: BookOpenCheck },
   { href: "/trust", label: "Trust", icon: ShieldCheck },
+  { href: "/guide", label: "Guide", icon: LifeBuoy },
 ];
 
 interface SearchTarget {
@@ -48,6 +50,7 @@ function useSearchTargets(): SearchTarget[] {
     () => [
       { label: "Change Inbox", hint: "Page", href: "/demo" },
       { label: "Live Desk", hint: "Real SEC filings", href: "/live" },
+      { label: "Guide", hint: "How to use Delphi", href: "/guide" },
       { label: `${defaultCase.companyName} (${defaultCase.ticker})`, hint: "Real-public case", href: "/cases/msft-fy25q4" },
       { label: `${arctCase.companyName} (${arctCase.ticker})`, hint: "Investment case", href: "/cases/arct-demo" },
       { label: "Context Library", hint: "Case inputs", href: "/context" },

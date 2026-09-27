@@ -100,6 +100,8 @@ node scripts/capture-screenshots.mjs   # regenerate website screenshots from the
 | Context compatibility redirect | `/debug/context` → `/context` |
 | Internal graph projection debug | `/debug/graph` |
 | Legacy website redirect | `/website` → `/` |
+| **Live Desk** (real SEC filings) | `/live` · `/live/:runId` |
+| **User guide** (customer-facing) | `/guide` |
 
 > The public company website owns `/`. The deterministic product prototype starts at `/demo`; deep product routes remain stable.
 

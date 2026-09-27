@@ -247,7 +247,7 @@ export function LiveProposalCard({
               ))}
             </select>
           </Field>
-          <Field label="Note (optional)" htmlFor="reject-note" hint="Rejections and reasons feed the eval set.">
+          <Field label="Note (optional)" htmlFor="reject-note" hint="Recorded in this run's review history.">
             <textarea id="reject-note" rows={3} className={inputClass} value={note} onChange={(e) => setNote(e.target.value)} />
           </Field>
         </div>
