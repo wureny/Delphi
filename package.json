@@ -18,7 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "verify:sources": "node scripts/verify-public-sources.mjs",
-    "analyze": "tsx scripts/analyze.ts"
+    "analyze": "tsx --env-file-if-exists=.env.local scripts/analyze.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
