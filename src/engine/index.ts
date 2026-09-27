@@ -8,4 +8,8 @@ export { EdgarClient, EdgarError, releaseToSourceBundle, filingToDomainEvent, so
 export type { EarningsFiling, EarningsRelease } from "./sec/edgar";
 export { runEarningsToThesis, WORKFLOW_VERSION } from "./analysis/run";
 export type { AnalysisModel, LiveRunResult, LiveAnalysisRequest, BlockedProposal } from "./analysis/run";
-export { ClaudeAnalysisModel, AnalysisModelError, DEFAULT_ANALYSIS_MODEL } from "./analysis/claude-model";
+export { ClaudeAnalysisModel, DEFAULT_ANALYSIS_MODEL } from "./analysis/claude-model";
+export { OpenAIAnalysisModel, DEFAULT_OPENAI_MODEL } from "./analysis/openai-model";
+export { AnalysisModelError } from "./analysis/model-errors";
+export { createAnalysisModel, resolveModelSelection } from "./analysis/select-model";
+export type { AnalysisProvider, ModelSelection } from "./analysis/select-model";

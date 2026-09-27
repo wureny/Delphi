@@ -7,6 +7,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { modelAnalysisSchema } from "./model-output";
+import { AnalysisModelError } from "./model-errors";
 import type { AnalysisModel, AnalysisModelResult } from "./run";
 
 export const DEFAULT_ANALYSIS_MODEL = "claude-opus-5";
@@ -16,16 +17,6 @@ export interface ClaudeModelOptions {
   model?: string;
   effort?: "low" | "medium" | "high" | "xhigh" | "max";
   client?: Anthropic;
-}
-
-export class AnalysisModelError extends Error {
-  constructor(
-    readonly code: "refusal" | "truncated" | "unparseable" | "provider_error",
-    message: string,
-  ) {
-    super(message);
-    this.name = "AnalysisModelError";
-  }
 }
 
 export class ClaudeAnalysisModel implements AnalysisModel {

@@ -5,7 +5,7 @@
  *   npm run analyze -- --ticker NVDA --thesis path/to/thesis.json
  *   npm run analyze -- --ticker MSFT --dry-run      # fetch + build prompt, no model call
  *
- * Requires ANTHROPIC_API_KEY (unless --dry-run) and DELPHI_SEC_USER_AGENT
+ * Requires OPENAI_API_KEY or ANTHROPIC_API_KEY (unless --dry-run) and DELPHI_SEC_USER_AGENT
  * ("Your Name you@example.com", per SEC fair-access policy).
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -14,12 +14,13 @@ import { parseArgs } from "node:util";
 import { thesisSnapshotSchema } from "@/domain/schemas";
 import type { ThesisSnapshot } from "@/domain/types";
 import {
-  ClaudeAnalysisModel,
-  DEFAULT_ANALYSIS_MODEL,
+  createAnalysisModel,
   EdgarClient,
   filingToDomainEvent,
   releaseToSourceBundle,
+  resolveModelSelection,
   runEarningsToThesis,
+  type AnalysisProvider,
 } from "@/engine";
 import { buildUserPrompt, SYSTEM_PROMPT } from "@/engine/analysis/prompt";
 import { thesisToSourceBundle } from "@/engine/analysis/thesis-source";
@@ -34,6 +35,7 @@ const { values } = parseArgs({
     accession: { type: "string" },
     thesis: { type: "string" },
     "case-id": { type: "string" },
+    provider: { type: "string" },
     model: { type: "string" },
     effort: { type: "string" },
     out: { type: "string", default: "data/live-runs" },
@@ -70,11 +72,13 @@ async function main() {
     return;
   }
 
-  const model = new ClaudeAnalysisModel({
-    model: values.model ?? process.env.DELPHI_LIVE_MODEL_NAME ?? DEFAULT_ANALYSIS_MODEL,
-    effort: (values.effort as "low" | "medium" | "high" | "xhigh" | "max" | undefined) ?? "high",
+  const selection = resolveModelSelection(process.env, {
+    ...(values.provider ? { provider: values.provider as AnalysisProvider } : {}),
+    ...(values.model ? { model: values.model } : {}),
+    ...(values.effort ? { effort: values.effort as "low" | "medium" | "high" | "xhigh" } : {}),
   });
-  console.error(`→ analyzing against thesis v${thesis.version} (${thesis.thesisId})…`);
+  const model = createAnalysisModel(selection);
+  console.error(`→ analyzing against thesis v${thesis.version} with ${selection.provider}/${selection.model} (effort ${selection.effort})…`);
   const started = Date.now();
   const result = await runEarningsToThesis(
     {

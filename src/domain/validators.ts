@@ -78,26 +78,46 @@ export function validateEvidenceRefs(
 }
 
 /**
- * Numbers stated in `whatChanged` must be present in the cited evidence's
- * extracted numeric values (or be a derivable midpoint of a cited range).
- * Period tokens like FY2026 / Q2 are not treated as claims.
+ * Numbers stated in `whatChanged` must be present in the cited evidence, or be
+ * deterministically derivable from it:
+ *  - midpoints of cited ranges;
+ *  - unit rescaling of a cited value (millions → billions, 1 decimal);
+ *  - growth between two adjacent figures on the same cited line (a table row
+ *    such as "Revenue | $90,007 | $76,441"), rounded to 0 or 1 decimal.
+ * Dates and calendar years are period labels, not claims.
  */
 export function validateNumbers(
   proposal: ThesisDeltaProposal,
   ctx: EvidenceContext,
 ): ValidationMessage[] {
-  const stated = extractNumbers(proposal.whatChanged);
+  const stated = extractNumbers(stripPeriodLabels(proposal.whatChanged));
   if (stated.length === 0) return [];
 
   const evidenceValues: number[] = [];
+  const derivable = new Set<number>();
   for (const ref of proposal.evidenceRefs) {
     const resolved = ctx.resolveExcerpt(ref);
-    for (const nv of resolved?.excerpt.numericValues ?? []) {
+    if (!resolved) continue;
+    for (const nv of resolved.excerpt.numericValues ?? []) {
       evidenceValues.push(nv.value);
     }
+    for (const line of resolved.excerpt.text.split("\n")) {
+      const row = extractNumbers(line);
+      for (let i = 0; i + 1 < row.length; i++) {
+        const [a, b] = [row[i]!, row[i + 1]!];
+        if (a > 0 && b > 0) {
+          for (const g of [(a / b - 1) * 100, (b / a - 1) * 100]) {
+            derivable.add(Math.round(Math.abs(g)));
+            derivable.add(round1(Math.abs(g)));
+          }
+        }
+      }
+    }
   }
-  const derivable = new Set<number>(evidenceValues);
   for (const a of evidenceValues) {
+    derivable.add(round1(a));
+    derivable.add(round1(a / 1000));
+    derivable.add(round1(a / 1_000_000));
     for (const b of evidenceValues) {
       derivable.add(round1((a + b) / 2)); // midpoints of cited ranges
     }
@@ -113,6 +133,17 @@ export function validateNumbers(
         `The value ${n} in "what changed" is not present in (or derivable from) the cited evidence.`,
       ),
     );
+}
+
+const MONTHS =
+  "Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?";
+
+/** Remove dates ("June 30, 2026", "2026-07-29") and calendar years, which label periods rather than claim values. */
+export function stripPeriodLabels(text: string): string {
+  return text
+    .replace(new RegExp(`\\b(?:${MONTHS})\\.?\\s+\\d{1,2}(?:,?\\s+\\d{4})?`, "g"), " ")
+    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, " ")
+    .replace(/(?<![\d.,$])\b(?:19|20)\d{2}\b(?![\d%]|[.,]\d)/g, " ");
 }
 
 function round1(n: number): number {
