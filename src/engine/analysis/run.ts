@@ -25,7 +25,7 @@ import type {
 import { validateProposal, type EvidenceContext } from "@/domain/validators";
 import { contentHash } from "@/domain/hash";
 import type { ModelAnalysis, ModelProposal } from "./model-output";
-import { buildUserPrompt, PROMPT_VERSION, SYSTEM_PROMPT, type ExcerptHandleMap } from "./prompt";
+import { buildUserPrompt, PROMPT_VERSION, stripHandles, SYSTEM_PROMPT, type ExcerptHandleMap } from "./prompt";
 import { quoteAppearsIn } from "./quotes";
 import { thesisToSourceBundle } from "./thesis-source";
 
@@ -176,12 +176,12 @@ function convertProposal(
     deltaType: raw.deltaType,
     targetObjectType: raw.targetObjectType,
     ...(raw.targetObjectId ? { targetObjectId: raw.targetObjectId } : {}),
-    headline: raw.headline,
-    whatChanged: raw.whatChanged,
-    againstOurView: raw.againstOurView,
-    whyItMatters: raw.whyItMatters,
-    uncertainties: raw.uncertainties,
-    recommendedFollowUp: raw.recommendedFollowUp,
+    headline: stripHandles(raw.headline),
+    whatChanged: stripHandles(raw.whatChanged),
+    againstOurView: stripHandles(raw.againstOurView),
+    whyItMatters: stripHandles(raw.whyItMatters),
+    uncertainties: raw.uncertainties.map(stripHandles),
+    recommendedFollowUp: stripHandles(raw.recommendedFollowUp),
     evidenceRefs,
     findingRefs: [],
     confidence: raw.confidence,
@@ -326,8 +326,8 @@ export async function runEarningsToThesis(
     blockedProposals,
     proposalWarnings,
     citedQuotes,
-    eventSummary: result.analysis.eventSummary,
-    coverageGaps: result.analysis.coverageGaps,
+    eventSummary: stripHandles(result.analysis.eventSummary),
+    coverageGaps: result.analysis.coverageGaps.map((g) => ({ ...g, reason: stripHandles(g.reason) })),
     sources: allBundles,
     usage: result.usage,
   };

@@ -233,3 +233,39 @@ describe("live Earnings-to-Thesis run", () => {
     expect(model.lastUser).not.toContain(source.excerpts[0]!.excerptId);
   });
 });
+
+describe("saved-run import verification", () => {
+  it("accepts an untouched run and rejects tampered quotes, numbers, and excerpt text", async () => {
+    const { verifyLiveRunResult } = await import("@/engine/analysis/verify");
+    const source = releaseToSourceBundle(release);
+    const model = fakeModel({ eventSummary: "s", proposals: [proposal({})], coverageGaps: [] });
+    const result = await runEarningsToThesis(
+      { tenantId: "t", caseId: msftThesisV12.caseId, companyName: "Microsoft", ticker: "MSFT", thesis: msftThesisV12, event, sources: [source], runId: "run_live_msft_verify" },
+      model,
+    );
+    const roundTrip = JSON.parse(JSON.stringify(result));
+    expect(verifyLiveRunResult(roundTrip).ok).toBe(true);
+
+    const badQuote = structuredClone(roundTrip);
+    badQuote.citedQuotes[badQuote.proposals[0].proposalId][0].quote = "Azure grew 60%";
+    expect(verifyLiveRunResult(badQuote).ok).toBe(false);
+
+    const badNumber = structuredClone(roundTrip);
+    badNumber.proposals[0].whatChanged = "Azure and other cloud services revenue increased 61%.";
+    expect(verifyLiveRunResult(badNumber).ok).toBe(false);
+
+    const badSource = structuredClone(roundTrip);
+    const ex = badSource.sources[1].excerpts[1];
+    ex.text = ex.text.replace("41%", "61%");
+    expect(verifyLiveRunResult(badSource).ok).toBe(false);
+  });
+});
+
+describe("prose hygiene", () => {
+  it("strips prompt-internal excerpt handles from prose", async () => {
+    const { stripHandles } = await import("@/engine/analysis/prompt");
+    expect(stripHandles("Prior view (T-E004) was 9 percent.")).toBe("Prior view was 9 percent.");
+    expect(stripHandles("Revenue grew 18% (S1-E002, S1-E010).")).toBe("Revenue grew 18%.");
+    expect(stripHandles("See S2-E101 for detail")).toBe("See for detail");
+  });
+});

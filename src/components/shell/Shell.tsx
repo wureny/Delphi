@@ -16,6 +16,7 @@ import {
   Landmark,
   Network,
   DatabaseZap,
+  Radio,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { Badge, Button, Modal } from "@/components/ui/primitives";
@@ -28,6 +29,7 @@ import { RuntimeProvider } from "@/runtime/client-context";
 
 const NAV = [
   { href: "/demo", label: "Change Inbox", icon: Inbox },
+  { href: "/live", label: "Live Desk", icon: Radio },
   { href: "/cases", label: "Cases", icon: Briefcase },
   { href: "/context", label: "Context", icon: DatabaseZap },
   { href: "/runs", label: "Runs", icon: Activity },
@@ -45,6 +47,7 @@ function useSearchTargets(): SearchTarget[] {
   return useMemo(
     () => [
       { label: "Change Inbox", hint: "Page", href: "/demo" },
+      { label: "Live Desk", hint: "Real SEC filings", href: "/live" },
       { label: `${defaultCase.companyName} (${defaultCase.ticker})`, hint: "Real-public case", href: "/cases/msft-fy25q4" },
       { label: `${arctCase.companyName} (${arctCase.ticker})`, hint: "Investment case", href: "/cases/arct-demo" },
       { label: "Context Library", hint: "Case inputs", href: "/context" },
@@ -234,7 +237,15 @@ function ResetButton({ compact = false }: { compact?: boolean }) {
 
 function RunHealth({ capabilities }: { capabilities: RuntimeCapabilities }) {
   const playback = useDemoStore((s) => s.runPlayback);
+  const pathname = usePathname();
   const anyPlaying = Object.values(playback).some((p) => p.status === "playing");
+  if (pathname.startsWith("/live")) {
+    return (
+      <Badge tone="accent" icon={<Radio size={11} aria-hidden />} title="Live Desk runs a real model against real SEC filings; outputs are verified before review.">
+        Live model analysis
+      </Badge>
+    );
+  }
   return (
     <Badge tone={anyPlaying ? "accent" : "neutral"} icon={<Activity size={11} aria-hidden />}>
       {anyPlaying ? "Run replaying" : capabilities.analysis.label}

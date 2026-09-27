@@ -40,6 +40,28 @@ Specifically:
   by default, `/context` shows a policy-checked interactive Context Library, and `/debug/graph`
   exposes its deterministic read-only product projection with no graph database.
 
+## Live Desk (real filings, real model)
+
+`/live` runs Earnings-to-Thesis on the **latest SEC EDGAR earnings release** (8-K Item 2.02, Ex. 99.1) against a
+point-in-time demo thesis:
+
+- The model is OpenAI or Anthropic, chosen by env; see `.env.example`.
+- Model output is untrusted. Every cited quote must appear verbatim in the filing. Every number must be present in, or
+  deterministically derivable from, the cited evidence. Every patch must be allowlisted.
+- Anything that fails is **blocked and shown with its reason**. Approved changes go through the same transition gateway
+  and ledger as the demo.
+- Forecast outcomes are recorded in `actualValue`, beside the team's forecast, never over it.
+- Run files from `npm run analyze` or `npm run eval` can be imported. They are re-verified on import, and tampered
+  files are rejected.
+
+```bash
+npm run analyze -- --ticker NVDA          # CLI run → data/live-runs/*.json
+npm run eval                              # 6-case eval → evals/reports/*.md (see evals/README.md)
+```
+
+Live runs require `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`, plus `DELPHI_SEC_USER_AGENT`. In production they also
+require `DELPHI_LIVE_ACCESS_TOKEN`. Workspaces persist in the browser only, since there is no server database yet.
+
 ## Requirements
 
 - **Node.js ≥ 22.13** (Next.js 16 + Sites/Vinext Worker build). On this machine use Homebrew Node:

@@ -90,7 +90,7 @@ export function diffThesis(before: ThesisSnapshot, after: ThesisSnapshot): Thesi
     });
   }
   compareCollection("Thesis pillar", beforeSemantic.pillars, afterSemantic.pillars, "pillarId", "title", ["title", "status", "teamConviction", "statement", "ownerUserId", "evidenceRefs"], out);
-  compareCollection("Forecast", beforeSemantic.forecasts, afterSemantic.forecasts, "forecastId", "metric", ["metric", "period", "scenario", "status", "value", "minValue", "maxValue", "unit", "currency", "ownerUserId"], out);
+  compareCollection("Forecast", beforeSemantic.forecasts, afterSemantic.forecasts, "forecastId", "metric", ["metric", "period", "scenario", "status", "value", "minValue", "maxValue", "actualValue", "unit", "currency", "ownerUserId"], out);
   compareCollection("Risk", beforeSemantic.risks, afterSemantic.risks, "riskId", "title", ["title", "description", "status", "severity", "likelihood", "evidenceRefs"], out);
   compareCollection("Open question", beforeSemantic.openQuestions, afterSemantic.openQuestions, "questionId", "question", ["question", "ownerUserId", "status", "evidenceRefs"], out);
   compareCollection("Catalyst", beforeSemantic.catalysts, afterSemantic.catalysts, "catalystId", "title", ["title", "expectedAt", "probability", "expectedImpact", "status"], out);

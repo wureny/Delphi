@@ -1,0 +1,2898 @@
+{
+  "resultVersion": 1,
+  "promptVersion": "earnings_to_thesis.prompt.v3",
+  "run": {
+    "fixtureVersion": "live",
+    "schemaVersion": "0.3.0",
+    "synthetic": false,
+    "workflowRun": {
+      "runId": "run_eval_cost_202609271238",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "domainEventId": "event_sec_cost_000090983226000084",
+      "workflowId": "earnings_to_thesis",
+      "workflowVersion": "0.4.0-live",
+      "status": "degraded",
+      "mode": "live",
+      "startedAt": "2026-09-27T12:38:34.373Z",
+      "completedAt": "2026-09-27T12:39:47.389Z",
+      "modelRoutes": [
+        {
+          "provider": "openai",
+          "model": "gpt-5.5-2026-04-23",
+          "endpointOwner": "delphi",
+          "retentionPolicy": "store_disabled",
+          "trainingUse": "disabled"
+        }
+      ],
+      "skillVersions": {
+        "earnings_to_thesis": "earnings_to_thesis.prompt.v3",
+        "validators": "0.4.0-live"
+      },
+      "sourceRefs": [
+        "source_thesis_thesis_cost_eval_v1",
+        "source_sec_cost_000090983226000084_ex991"
+      ],
+      "degradedReasons": [
+        {
+          "code": "transcript_not_ingested",
+          "message": "Earnings call transcript was not part of this run; management commentary and Q&A are not reflected.",
+          "affectedObjectRefs": [
+            "pillar_cost_comps",
+            "question_cost_ecommerce",
+            "catalyst_cost_fy27"
+          ],
+          "recoverable": true
+        }
+      ],
+      "outputProposalIds": [
+        "proposal_eval_cost_202609271238_01",
+        "proposal_eval_cost_202609271238_02",
+        "proposal_eval_cost_202609271238_03",
+        "proposal_eval_cost_202609271238_04",
+        "proposal_eval_cost_202609271238_05"
+      ],
+      "contextSetHash": "sha256:5720cc7e0009262a81ef396399b6b57b6cc571f6ea3668b3c0f229cc8fabf6ff"
+    },
+    "events": [
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_001",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "run_created",
+        "occurredAt": "2026-09-27T12:38:34.373Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "Live Earnings-to-Thesis run created for COSTCO WHOLESALE CORP /NEW against approved thesis v1.",
+        "objectRefs": []
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_002",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "source_loaded",
+        "occurredAt": "2026-09-27T12:38:34.373Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "Loaded COSTCO WHOLESALE CORP /NEW earnings release (8-K Ex. 99.1, filed 2026-09-24) (15 citable excerpts).",
+        "objectRefs": [
+          "source_sec_cost_000090983226000084_ex991"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_003",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "agent_started",
+        "occurredAt": "2026-09-27T12:38:34.373Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Analysis model started: reconcile reported results against the approved thesis.",
+        "objectRefs": []
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_004",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "proposal_created",
+        "occurredAt": "2026-09-27T12:39:47.386Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Proposal ready for review: Close Q4 net sales growth forecast as a beat.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_01"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_005",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "proposal_created",
+        "occurredAt": "2026-09-27T12:39:47.387Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Proposal ready for review: Close Q4 net income forecast as a slight reported beat.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_02"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_006",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "proposal_created",
+        "occurredAt": "2026-09-27T12:39:47.387Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Proposal ready for review: Close Q4 EPS forecast as a reported beat, with quality caveat.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_03"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_007",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "proposal_created",
+        "occurredAt": "2026-09-27T12:39:47.388Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Proposal ready for review: Put membership fee growth pillar into review.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_04"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_008",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "proposal_created",
+        "occurredAt": "2026-09-27T12:39:47.389Z",
+        "actorType": "agent",
+        "actorId": "agent_earnings_to_thesis",
+        "publicMessage": "Proposal ready for review: Create follow-up on non-recurring tariff refund benefit.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_05"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_009",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "validation_passed",
+        "occurredAt": "2026-09-27T12:39:47.389Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "5 of 5 proposals passed schema, quote, evidence, numeric, scope, version, and patch validation.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_01",
+          "proposal_eval_cost_202609271238_02",
+          "proposal_eval_cost_202609271238_03",
+          "proposal_eval_cost_202609271238_04",
+          "proposal_eval_cost_202609271238_05"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_010",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "degraded_mode_entered",
+        "occurredAt": "2026-09-27T12:39:47.389Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "Transcript not ingested: claims requiring management commentary are listed as coverage gaps, not guessed.",
+        "objectRefs": []
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_011",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "review_required",
+        "occurredAt": "2026-09-27T12:39:47.389Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "5 proposals await human review.",
+        "objectRefs": [
+          "proposal_eval_cost_202609271238_01",
+          "proposal_eval_cost_202609271238_02",
+          "proposal_eval_cost_202609271238_03",
+          "proposal_eval_cost_202609271238_04",
+          "proposal_eval_cost_202609271238_05"
+        ]
+      },
+      {
+        "runEventId": "run_eval_cost_202609271238_ev_012",
+        "runId": "run_eval_cost_202609271238",
+        "eventType": "run_completed",
+        "occurredAt": "2026-09-27T12:39:47.389Z",
+        "actorType": "system",
+        "actorId": "system",
+        "publicMessage": "Run completed with 5 reviewable and 0 blocked proposals.",
+        "objectRefs": []
+      }
+    ]
+  },
+  "event": {
+    "fixtureVersion": "live",
+    "schemaVersion": "0.3.0",
+    "synthetic": false,
+    "domainEventId": "event_sec_cost_000090983226000084",
+    "tenantId": "tenant_delphi_live",
+    "entityId": "entity_cost",
+    "eventType": "earnings",
+    "title": "COSTCO WHOLESALE CORP /NEW earnings release (8-K Item 2.02, filed 2026-09-24)",
+    "occurredAt": "2026-09-24T20:17:37.000Z",
+    "publishedAt": "2026-09-24T20:17:37.000Z",
+    "observedAt": "2026-09-27T12:33:37.477Z",
+    "sourceRefs": [
+      "source_sec_cost_000090983226000084_ex991"
+    ],
+    "clusterId": "cluster_cost_earnings",
+    "status": "ready"
+  },
+  "baselineThesis": {
+    "fixtureVersion": "eval-0.1",
+    "schemaVersion": "0.3.0",
+    "synthetic": false,
+    "thesisId": "thesis_cost_eval",
+    "caseId": "case_cost_q4fy26",
+    "version": 1,
+    "status": "approved",
+    "summary": "Costco compounds through traffic-led comparable sales and membership fee income; valuation leaves little room for a comp slowdown.",
+    "ownerUserId": "user_analyst_01",
+    "approvedByUserId": "user_pm_01",
+    "approvedAt": "2026-06-10T14:00:00Z",
+    "validFrom": "2026-06-10T14:00:00Z",
+    "recordedAt": "2026-06-10T14:00:00Z",
+    "pillars": [
+      {
+        "pillarId": "pillar_cost_comps",
+        "title": "Traffic-led comps stay strong",
+        "statement": "Comparable sales excluding gas and FX stay in the 6-7% range, driven by traffic rather than inflation.",
+        "teamConviction": "high",
+        "status": "active",
+        "ownerUserId": "user_analyst_01",
+        "evidenceRefs": []
+      },
+      {
+        "pillarId": "pillar_cost_membership",
+        "title": "Membership fee income grows double digits",
+        "statement": "The fee increase keeps membership fee income growing faster than sales.",
+        "teamConviction": "medium",
+        "status": "active",
+        "ownerUserId": "user_analyst_01",
+        "evidenceRefs": []
+      },
+      {
+        "pillarId": "pillar_cost_earnings",
+        "title": "Earnings compound faster than sales",
+        "statement": "Net income grows faster than net sales through operating leverage.",
+        "teamConviction": "medium",
+        "status": "active",
+        "ownerUserId": "user_analyst_01",
+        "evidenceRefs": []
+      }
+    ],
+    "forecasts": [
+      {
+        "forecastId": "forecast_cost_q4_sales_growth",
+        "metric": "Net sales growth",
+        "period": "Q4 FY2026",
+        "scenario": "base",
+        "value": 9,
+        "unit": "percent",
+        "ownerUserId": "user_analyst_01",
+        "status": "active"
+      },
+      {
+        "forecastId": "forecast_cost_q4_net_income",
+        "metric": "Net income",
+        "period": "Q4 FY2026",
+        "scenario": "base",
+        "value": 2.95,
+        "unit": "billion USD",
+        "ownerUserId": "user_analyst_01",
+        "status": "active"
+      },
+      {
+        "forecastId": "forecast_cost_q4_eps",
+        "metric": "Diluted EPS",
+        "period": "Q4 FY2026",
+        "scenario": "base",
+        "value": 6.65,
+        "unit": "USD",
+        "ownerUserId": "user_analyst_01",
+        "status": "active"
+      }
+    ],
+    "catalysts": [
+      {
+        "catalystId": "catalyst_cost_fy27",
+        "title": "Fiscal 2027 warehouse opening plans",
+        "expectedAt": "2026-09-24T21:00:00Z",
+        "probability": "medium",
+        "expectedImpact": "Sets unit growth expectations",
+        "status": "open"
+      }
+    ],
+    "risks": [
+      {
+        "riskId": "risk_cost_tariffs",
+        "title": "Tariffs pressure gross margin",
+        "description": "Import costs could pressure merchandise margins if not passed through.",
+        "severity": "medium",
+        "likelihood": "medium",
+        "status": "open",
+        "evidenceRefs": []
+      },
+      {
+        "riskId": "risk_cost_valuation",
+        "title": "Valuation leaves no room for a miss",
+        "description": "Any comp deceleration could de-rate the shares.",
+        "severity": "medium",
+        "likelihood": "medium",
+        "status": "open",
+        "evidenceRefs": []
+      }
+    ],
+    "openQuestions": [
+      {
+        "questionId": "question_cost_ecommerce",
+        "question": "Is digital growth accelerating enough to offset slower warehouse openings?",
+        "ownerUserId": "user_analyst_01",
+        "status": "open",
+        "evidenceRefs": []
+      }
+    ],
+    "originKind": "demo_derived",
+    "authorshipLabel": "Demo-authored thesis anchored to Costco's FY2026 Q3 release (8-K filed 2026-05-28). Not a real institution's view; not investment advice."
+  },
+  "proposals": [
+    {
+      "proposalId": "proposal_eval_cost_202609271238_01",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "runId": "run_eval_cost_202609271238",
+      "fromThesisVersion": 1,
+      "deltaType": "forecast_update",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_cost_q4_sales_growth",
+      "headline": "Close Q4 net sales growth forecast as a beat",
+      "whatChanged": "Costco reported Q4 FY2026 net sales growth of 11.2 percent versus our 9 percent base case, a beat of just over two percentage points. The period matches the 16-week fourth quarter ended August 30, 2026.",
+      "againstOurView": "Prior view (T-E004) was 9 percent Q4 FY2026 net sales growth.",
+      "whyItMatters": "The sales beat reduces near-term concern that Costco’s comp engine is slowing. It also raises the bar for FY2027 expectations given the valuation risk tied to any deceleration.",
+      "uncertainties": [
+        "The release does not disclose traffic versus ticket, so it does not fully prove the traffic-led component of the comp thesis.",
+        "Sustaining this growth rate into FY2027 depends on management commentary and monthly sales trends."
+      ],
+      "recommendedFollowUp": "Update the Q4 forecast record and review call commentary for traffic, ticket, and early FY2027 trends.",
+      "evidenceRefs": [
+        "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_sales_growth",
+        "source_sec_cost_000090983226000084_ex991_003",
+        "source_sec_cost_000090983226000084_ex991_002"
+      ],
+      "findingRefs": [],
+      "confidence": "high",
+      "materiality": "high",
+      "requiredReviewerRole": "pm",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_sales_growth/actualValue",
+          "value": 11.2
+        },
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_sales_growth/status",
+          "value": "closed"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-09-27T12:39:47.384Z"
+    },
+    {
+      "proposalId": "proposal_eval_cost_202609271238_02",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "runId": "run_eval_cost_202609271238",
+      "fromThesisVersion": 1,
+      "deltaType": "forecast_update",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_cost_q4_net_income",
+      "headline": "Close Q4 net income forecast as a slight reported beat",
+      "whatChanged": "Costco reported Q4 FY2026 net income of $2.998 billion versus our $2.95 billion base case, a slight beat of less than one tenth of a billion dollars. The period matches the 16-week fourth quarter ended August 30, 2026, but EPS included a $0.15 non-recurring tariff refund benefit.",
+      "againstOurView": "Prior view (T-E005) was $2.95 billion of Q4 FY2026 net income.",
+      "whyItMatters": "Reported earnings cleared the forecast, but the one-time tariff refund means the run-rate earnings power may be lower than the headline result implies.",
+      "uncertainties": [
+        "The release does not quantify the net income impact of the tariff refund separately from the EPS disclosure.",
+        "Management commentary is needed to assess how much benefit was reinvested in member value."
+      ],
+      "recommendedFollowUp": "Close the forecast on reported GAAP net income and isolate the tariff refund impact when updating FY2027 earnings assumptions.",
+      "evidenceRefs": [
+        "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_net_income",
+        "source_sec_cost_000090983226000084_ex991_007",
+        "source_sec_cost_000090983226000084_ex991_002"
+      ],
+      "findingRefs": [],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_net_income/actualValue",
+          "value": 2.998
+        },
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_net_income/status",
+          "value": "closed"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-09-27T12:39:47.384Z"
+    },
+    {
+      "proposalId": "proposal_eval_cost_202609271238_03",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "runId": "run_eval_cost_202609271238",
+      "fromThesisVersion": 1,
+      "deltaType": "forecast_update",
+      "targetObjectType": "forecast",
+      "targetObjectId": "forecast_cost_q4_eps",
+      "headline": "Close Q4 EPS forecast as a reported beat, with quality caveat",
+      "whatChanged": "Costco reported Q4 FY2026 diluted EPS of $6.75 versus our $6.65 base case, a beat of ten cents. The period matches the 16-week fourth quarter ended August 30, 2026, but $0.15 per share came from a non-recurring tariff refund benefit.",
+      "againstOurView": "Prior view (T-E006) was $6.65 of Q4 FY2026 diluted EPS.",
+      "whyItMatters": "The reported EPS beat is positive, but the non-recurring refund benefit is larger than the beat. That makes underlying EPS quality the key follow-up before raising forward earnings power.",
+      "uncertainties": [
+        "Whether the tariff refund benefit recurs or reverses is not answered in the release.",
+        "The release does not quantify the amount reinvested in member values."
+      ],
+      "recommendedFollowUp": "Close the EPS forecast on reported diluted EPS, but adjust the forward model after the call for any non-recurring tariff refund impact.",
+      "evidenceRefs": [
+        "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_eps",
+        "source_sec_cost_000090983226000084_ex991_007",
+        "source_sec_cost_000090983226000084_ex991_002"
+      ],
+      "findingRefs": [],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_eps/actualValue",
+          "value": 6.75
+        },
+        {
+          "op": "replace",
+          "path": "/forecasts/forecast_cost_q4_eps/status",
+          "value": "closed"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-09-27T12:39:47.384Z"
+    },
+    {
+      "proposalId": "proposal_eval_cost_202609271238_04",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "runId": "run_eval_cost_202609271238",
+      "fromThesisVersion": 1,
+      "deltaType": "thesis_pillar_update",
+      "targetObjectType": "thesis_pillar",
+      "targetObjectId": "pillar_cost_membership",
+      "headline": "Put membership fee growth pillar into review",
+      "whatChanged": "Membership fees in the 16-week quarter grew about 7% while net sales grew 11.2%; for the 52-week year, membership fees grew about 11% versus sales up 10.1%. That mixed cadence puts the “faster than sales” pillar into review rather than cleanly confirming it.",
+      "againstOurView": "Prior view (T-E002) was that the fee increase keeps membership fee income growing faster than sales.",
+      "whyItMatters": "Membership fee income is a high-quality earnings stream; if it is not consistently outgrowing sales after the fee increase, the earnings-compounding case is less clean.",
+      "uncertainties": [
+        "Q4 may be affected by timing of fee recognition versus the fee increase rollout.",
+        "Renewal rates, member counts, and executive member mix are not disclosed in the release."
+      ],
+      "recommendedFollowUp": "Review call commentary for membership renewal rates, fee increase recognition timing, and whether Q4 fee growth should reaccelerate.",
+      "evidenceRefs": [
+        "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_membership",
+        "source_sec_cost_000090983226000084_ex991_011",
+        "source_sec_cost_000090983226000084_ex991_003",
+        "source_sec_cost_000090983226000084_ex991_002"
+      ],
+      "findingRefs": [],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "replace",
+          "path": "/pillars/pillar_cost_membership/status",
+          "value": "review_required"
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-09-27T12:39:47.384Z"
+    },
+    {
+      "proposalId": "proposal_eval_cost_202609271238_05",
+      "tenantId": "tenant_delphi_eval",
+      "caseId": "case_cost_q4fy26",
+      "runId": "run_eval_cost_202609271238",
+      "fromThesisVersion": 1,
+      "deltaType": "open_question_create",
+      "targetObjectType": "open_question",
+      "headline": "Create follow-up on non-recurring tariff refund benefit",
+      "whatChanged": "Reported Q4 EPS included a $0.15 per diluted share non-recurring benefit from IEEPA tariff refunds, after partial reinvestment in member values. The release does not quantify the gross refund, reinvestment, or future reversal risk.",
+      "againstOurView": "Prior risk (T-E007) focused on tariffs pressuring merchandise margins if import costs could not be passed through.",
+      "whyItMatters": "The tariff item flips the near-term impact from pressure to benefit, but it may not be durable. The team needs to separate underlying margin from one-time refund and reinvestment effects.",
+      "uncertainties": [
+        "Gross refund amount is not disclosed.",
+        "Partial reinvestment amount is not disclosed.",
+        "Whether any benefit or reversal carries into future quarters is not disclosed."
+      ],
+      "recommendedFollowUp": "Ask management to quantify the tariff refund, reinvestment in member value, and expected impact on merchandise margins after Q4.",
+      "evidenceRefs": [
+        "excerpt_source_thesis_thesis_cost_eval_v1_risk_cost_tariffs",
+        "source_sec_cost_000090983226000084_ex991_007"
+      ],
+      "findingRefs": [],
+      "confidence": "high",
+      "materiality": "medium",
+      "requiredReviewerRole": "analyst",
+      "proposedPatch": [
+        {
+          "op": "add",
+          "path": "/openQuestions/-",
+          "value": {
+            "questionId": "question_cost_tariff_refund_quality",
+            "question": "How much of the Q4 IEEPA tariff refund benefit flowed through merchandise margin, how much was reinvested in member value, and what reverses after Q4 FY2026?",
+            "ownerUserId": "user_analyst_01",
+            "status": "open",
+            "evidenceRefs": [
+              "excerpt_source_thesis_thesis_cost_eval_v1_risk_cost_tariffs",
+              "source_sec_cost_000090983226000084_ex991_007"
+            ]
+          }
+        }
+      ],
+      "status": "proposed",
+      "createdAt": "2026-09-27T12:39:47.384Z"
+    }
+  ],
+  "blockedProposals": [],
+  "proposalWarnings": {},
+  "citedQuotes": {
+    "proposal_eval_cost_202609271238_01": [
+      {
+        "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_sales_growth",
+        "quote": "Forecast: Net sales growth, Q4 FY2026, base case: 9 percent. Status: active."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_003",
+        "quote": "Net sales for the quarter increased 11.2 percent, to $93.9 billion, from $84.4 billion last year."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_002",
+        "quote": "the 16-week fourth quarter and the 52-week fiscal year ended August 30, 2026"
+      }
+    ],
+    "proposal_eval_cost_202609271238_02": [
+      {
+        "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_net_income",
+        "quote": "Forecast: Net income, Q4 FY2026, base case: 2.95 billion USD. Status: active."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+        "quote": "Net income for the fourth quarter was $2.998 billion, $6.75 per diluted share, compared to $2.610 billion, $5.87 per diluted share, last year."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+        "quote": "This year's fourth quarter was positively impacted by a non-recurring benefit of $0.15 per diluted share from IEEPA tariff refunds received in the quarter, less partial reinvestment of those refunds in increased member values."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_002",
+        "quote": "the 16-week fourth quarter and the 52-week fiscal year ended August 30, 2026"
+      }
+    ],
+    "proposal_eval_cost_202609271238_03": [
+      {
+        "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_eps",
+        "quote": "Forecast: Diluted EPS, Q4 FY2026, base case: 6.65 USD. Status: active."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+        "quote": "Net income for the fourth quarter was $2.998 billion, $6.75 per diluted share, compared to $2.610 billion, $5.87 per diluted share, last year."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+        "quote": "This year's fourth quarter was positively impacted by a non-recurring benefit of $0.15 per diluted share from IEEPA tariff refunds received in the quarter, less partial reinvestment of those refunds in increased member values."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_002",
+        "quote": "the 16-week fourth quarter and the 52-week fiscal year ended August 30, 2026"
+      }
+    ],
+    "proposal_eval_cost_202609271238_04": [
+      {
+        "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_membership",
+        "quote": "Pillar \"Membership fee income grows double digits\": The fee increase keeps membership fee income growing faster than sales. Team conviction: medium. Status: active."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_011",
+        "quote": "Membership fees | 1,850 | 1,724 | 5,907 | 5,323"
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_003",
+        "quote": "Net sales for the quarter increased 11.2 percent, to $93.9 billion, from $84.4 billion last year. Net sales for the fiscal year increased 10.1 percent, to $297.2 billion, from $269.9 billion last year."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_002",
+        "quote": "the 16-week fourth quarter and the 52-week fiscal year ended August 30, 2026"
+      }
+    ],
+    "proposal_eval_cost_202609271238_05": [
+      {
+        "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_risk_cost_tariffs",
+        "quote": "Risk \"Tariffs pressure gross margin\": Import costs could pressure merchandise margins if not passed through. Severity: medium. Likelihood: medium. Status: open."
+      },
+      {
+        "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+        "quote": "This year's fourth quarter was positively impacted by a non-recurring benefit of $0.15 per diluted share from IEEPA tariff refunds received in the quarter, less partial reinvestment of those refunds in increased member values."
+      }
+    ]
+  },
+  "eventSummary": "Costco reported a strong Q4 FY2026 print: net sales growth beat the team’s forecast, adjusted total-company comps remained in the 6-7% range, and reported EPS beat. The quality of the EPS beat needs review because the quarter included a non-recurring tariff refund benefit. Membership fee income was mixed versus the thesis: fiscal-year growth outpaced sales, but Q4 membership fee growth lagged Q4 net sales growth.",
+  "coverageGaps": [
+    {
+      "objectId": "pillar_cost_comps",
+      "reason": "The release reports adjusted comparable sales but does not disclose traffic versus ticket, so it cannot resolve whether comps were traffic-led rather than inflation-led."
+    },
+    {
+      "objectId": "question_cost_ecommerce",
+      "reason": "The release reports digitally-enabled comparable sales, but not whether digital growth offsets slower warehouse openings or how digital economics compare with warehouse growth."
+    },
+    {
+      "objectId": "catalyst_cost_fy27",
+      "reason": "The release gives the current warehouse count but does not provide fiscal 2027 warehouse opening plans; this likely requires the earnings call or supplemental commentary."
+    }
+  ],
+  "sources": [
+    {
+      "fixtureVersion": "live",
+      "schemaVersion": "0.3.0",
+      "synthetic": false,
+      "sourceDocument": {
+        "sourceId": "source_thesis_thesis_cost_eval_v1",
+        "tenantId": "tenant_delphi_live",
+        "title": "Approved thesis v1",
+        "sourceType": "approved_thesis",
+        "issuerEntityId": "case_cost_q4fy26",
+        "uri": "delphi://thesis/thesis_cost_eval/v1",
+        "observedAt": "2026-06-10T14:00:00Z",
+        "publishedAt": "2026-06-10T14:00:00Z",
+        "classification": "internal",
+        "contentHash": "sha256:5fa25bcdda2ec4e3932e554629f680a7007a18055629688c3d45f3f6ca8df821",
+        "version": 1,
+        "accessPolicyId": "policy_internal_thesis",
+        "status": "available",
+        "originKind": "demo_derived",
+        "publisherKind": "demo_team",
+        "publisherName": "Approved team thesis"
+      },
+      "excerpts": [
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_comps",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "pillar_cost_comps"
+          },
+          "text": "Pillar \"Traffic-led comps stay strong\": Comparable sales excluding gas and FX stay in the 6-7% range, driven by traffic rather than inflation. Team conviction: high. Status: active.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 6,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_comps"
+            },
+            {
+              "label": "stated",
+              "value": 7,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_comps"
+            }
+          ],
+          "classification": "internal",
+          "contentHash": "sha256:7f7d834fe8a5ba294001c40f62ab61bca9771c08c107232c88f25989a7daa106"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_membership",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "pillar_cost_membership"
+          },
+          "text": "Pillar \"Membership fee income grows double digits\": The fee increase keeps membership fee income growing faster than sales. Team conviction: medium. Status: active.",
+          "numericValues": [],
+          "classification": "internal",
+          "contentHash": "sha256:fc4b33256c540236295b7eb0f05fb4ec5b24b1ab2faf645c988ab6a9ea716aea"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_pillar_cost_earnings",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "pillar_cost_earnings"
+          },
+          "text": "Pillar \"Earnings compound faster than sales\": Net income grows faster than net sales through operating leverage. Team conviction: medium. Status: active.",
+          "numericValues": [],
+          "classification": "internal",
+          "contentHash": "sha256:18465d424f88d50b225f90307fe7a46fc7b7efe9818d2f5d25a15afde30eabc2"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_sales_growth",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "forecast_cost_q4_sales_growth"
+          },
+          "text": "Forecast: Net sales growth, Q4 FY2026, base case: 9 percent. Status: active.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 9,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_sales_growth"
+            }
+          ],
+          "classification": "internal",
+          "contentHash": "sha256:41d17ee09519ca56f061b056dfe0fab8cbcbd495e364ca4b4b35db48683ac075"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_net_income",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "forecast_cost_q4_net_income"
+          },
+          "text": "Forecast: Net income, Q4 FY2026, base case: 2.95 billion USD. Status: active.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 2.95,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_net_income"
+            }
+          ],
+          "classification": "internal",
+          "contentHash": "sha256:e491c9e52813fb2d809782932290c4f64bff5463f9c06335327e8191efc63ccd"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_eps",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "forecast_cost_q4_eps"
+          },
+          "text": "Forecast: Diluted EPS, Q4 FY2026, base case: 6.65 USD. Status: active.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 6.65,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_forecast_cost_q4_eps"
+            }
+          ],
+          "classification": "internal",
+          "contentHash": "sha256:6c7f50f3019511d446ea6f485959363a46fc8692d70766908d82f423c0f61e90"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_risk_cost_tariffs",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "risk_cost_tariffs"
+          },
+          "text": "Risk \"Tariffs pressure gross margin\": Import costs could pressure merchandise margins if not passed through. Severity: medium. Likelihood: medium. Status: open.",
+          "numericValues": [],
+          "classification": "internal",
+          "contentHash": "sha256:57da83b11f8c419116c31f0af727350d5fa90fa0209a4edfae8388350cbcf4d0"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_risk_cost_valuation",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "risk_cost_valuation"
+          },
+          "text": "Risk \"Valuation leaves no room for a miss\": Any comp deceleration could de-rate the shares. Severity: medium. Likelihood: medium. Status: open.",
+          "numericValues": [],
+          "classification": "internal",
+          "contentHash": "sha256:f2ba9c0ed1ca898457a1172b475319103def803bad2dc447155a70a1b68ffac5"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_question_cost_ecommerce",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "question_cost_ecommerce"
+          },
+          "text": "Open question: Is digital growth accelerating enough to offset slower warehouse openings? Status: open.",
+          "numericValues": [],
+          "classification": "internal",
+          "contentHash": "sha256:c31faf3f5e3f98785b81a5f960c769f4d2a40717c5ded6d4a9fb1ac26e309e30"
+        },
+        {
+          "excerptId": "excerpt_source_thesis_thesis_cost_eval_v1_catalyst_cost_fy27",
+          "sourceId": "source_thesis_thesis_cost_eval_v1",
+          "locator": {
+            "section": "catalyst_cost_fy27"
+          },
+          "text": "Catalyst \"Fiscal 2027 warehouse opening plans\", expected by 2026-09-24: Sets unit growth expectations. Status: open.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 2027,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_catalyst_cost_fy27"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_catalyst_cost_fy27"
+            },
+            {
+              "label": "stated",
+              "value": 9,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_catalyst_cost_fy27"
+            },
+            {
+              "label": "stated",
+              "value": 24,
+              "unit": "as_stated",
+              "basis": "approved_thesis",
+              "sourceExcerptId": "excerpt_source_thesis_thesis_cost_eval_v1_catalyst_cost_fy27"
+            }
+          ],
+          "classification": "internal",
+          "contentHash": "sha256:356a69d03faf401d52ce914f04d6f924eb7cb1e8e18a6c6c11e0383bbcd5400d"
+        }
+      ]
+    },
+    {
+      "fixtureVersion": "live",
+      "schemaVersion": "0.3.0",
+      "synthetic": false,
+      "sourceDocument": {
+        "sourceId": "source_sec_cost_000090983226000084_ex991",
+        "tenantId": "tenant_delphi_live",
+        "title": "COSTCO WHOLESALE CORP /NEW earnings release (8-K Ex. 99.1, filed 2026-09-24)",
+        "sourceType": "earnings_release",
+        "issuerEntityId": "entity_cost",
+        "uri": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/costex9918-k92426.htm",
+        "canonicalUri": "https://www.sec.gov/Archives/edgar/data/909832/000090983226000084/costex9918-k92426.htm",
+        "publishedAt": "2026-09-24T20:17:37.000Z",
+        "observedAt": "2026-09-27T12:33:37.477Z",
+        "retrievedAt": "2026-09-27T12:33:37.477Z",
+        "classification": "public",
+        "contentHash": "sha256:20e4c846807397c3eed63dac59949c6d4dc9d0bcade5e7e7fa6e191959b08e88",
+        "version": 1,
+        "accessPolicyId": "policy_public_official",
+        "status": "available",
+        "originKind": "real_public",
+        "publisherKind": "regulator",
+        "publisherName": "SEC EDGAR",
+        "rightsNote": "Public SEC filing; excerpts retained for citation and audit."
+      },
+      "excerpts": [
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_001",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 3
+          },
+          "text": "Exhibit 99.1 Press Release\nCOSTCO WHOLESALE CORPORATION REPORTS FOURTH QUARTER AND FISCAL YEAR 2026 OPERATING RESULTS",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 99.1,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_001"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_001"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:ff71a61b7bbe31d12b5a36e285a971231f59697a704fa26626581c8812ba08c9"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_002",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 4
+          },
+          "text": "ISSAQUAH, Wash., September 24, 2026 - Costco Wholesale Corporation (\"Costco\" or the \"Company\") (Nasdaq: COST) today announced its operating results for the 16-week fourth quarter and the 52-week fiscal year ended August 30, 2026.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 24,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            },
+            {
+              "label": "stated",
+              "value": 16,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            },
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            },
+            {
+              "label": "stated",
+              "value": 30,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_002"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:facad1cb5f51749fcf79088a501aa1891bd1b8efd5c651be1b118b0ab6adac4f"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_003",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 5
+          },
+          "text": "Net sales for the quarter increased 11.2 percent, to $93.9 billion, from $84.4 billion last year. Net sales for the fiscal year increased 10.1 percent, to $297.2 billion, from $269.9 billion last year.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 11.2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            },
+            {
+              "label": "stated",
+              "value": 93.9,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            },
+            {
+              "label": "stated",
+              "value": 84.4,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            },
+            {
+              "label": "stated",
+              "value": 10.1,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            },
+            {
+              "label": "stated",
+              "value": 297.2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            },
+            {
+              "label": "stated",
+              "value": 269.9,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_003"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:7e900c9ef8b87bf9b413c12bde696916030154dc9f775320b5b074d2173067c9"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_004",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 6
+          },
+          "text": "Comparable sales for the fourth quarter and fiscal year were as follows:",
+          "numericValues": [],
+          "classification": "public",
+          "contentHash": "sha256:34b66675db5c376d06c87a90626cc600395f8a766d609e2b430698f07b69840d"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_005",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "table",
+            "paragraph": 7
+          },
+          "text": "16 Weeks | 16 Weeks | 52 Weeks | 52 Weeks\nAdjusted* | Adjusted*\nU.S. | 10.7% | 7.2% | 8.2% | 6.6%\nCanada | 5.0% | 4.6% | 7.8% | 6.7%\nOther International | 7.0% | 6.2% | 9.8% | 6.5%\nTotal Company | 9.4% | 6.7% | 8.4% | 6.6%\nDigitally-Enabled | 19.5% | 19.8% | 20.9% | 20.7%",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 16,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 16,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 10.7,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 7.2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 8.2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.6,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 5,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 4.6,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 7.8,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.7,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 7,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 9.8,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.5,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 9.4,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.7,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 8.4,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 6.6,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 19.5,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 19.8,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 20.9,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            },
+            {
+              "label": "stated",
+              "value": 20.7,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_005"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:9e91c6afd34bbf7a0474b6ff2e20b58111b1a97f0792fc7c1f4d830d4b7d25a3"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_006",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 8
+          },
+          "text": "*Excluding the impacts from changes in gasoline prices and foreign exchange.",
+          "numericValues": [],
+          "classification": "public",
+          "contentHash": "sha256:7dbdc70f087ba505f4094d7a2f109f61036346c88dce30be731920ef705532c8"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_007",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 9
+          },
+          "text": "Net income for the fourth quarter was $2.998 billion, $6.75 per diluted share, compared to $2.610 billion, $5.87 per diluted share, last year. This year's fourth quarter was positively impacted by a non-recurring benefit of $0.15 per diluted share from IEEPA tariff refunds received in the quarter, less partial reinvestment of those refunds in increased member values. Net income for the fiscal year was $9.226 billion, $20.76 per diluted share, compared to $8.099 billion, $18.21 per diluted share, last year.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 2.998,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 6.75,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 2.61,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 5.87,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 0.15,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 9.226,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 20.76,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 8.099,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            },
+            {
+              "label": "stated",
+              "value": 18.21,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_007"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:bfad234f4425f7f6d7481267dd32aa981b13effdc7687a77a6aacfbd31e47993"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_008",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 10
+          },
+          "text": "Costco currently operates 939 warehouses, including 647 in the United States and Puerto Rico, 115 in Canada, 43 in Mexico, 37 in Japan, 29 in the United Kingdom, 20 in Korea, 15 in Australia, 14 in Taiwan, seven in China, five in Spain, three in France, two in Sweden, and one each in Iceland, and New Zealand. Costco also operates e-commerce sites in the U.S., Canada, the U.K., Mexico, Korea, Taiwan, Japan, Australia, and China.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 939,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 647,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 115,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 43,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 37,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 29,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 20,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 15,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            },
+            {
+              "label": "stated",
+              "value": 14,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_008"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:8560061356dcc174f823993f4b2d625dd43a0f881f22a8ed65c0e273d27c5a2c"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_009",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 11
+          },
+          "text": "A conference call to discuss these results is scheduled for 2:00 p.m. (PT) today, September 24, 2026, and will be available via a webcast on investor.costco.com (click \"Events & Presentations\").",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_009"
+            },
+            {
+              "label": "stated",
+              "value": 0,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_009"
+            },
+            {
+              "label": "stated",
+              "value": 24,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_009"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_009"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:84e535466686f8d8c86a7acccdf6a02e344d52aa27636cb4459f856335be9bb3"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_010",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 13
+          },
+          "text": "Press Release\nCertain statements contained in this document constitute forward-looking statements within the meaning of the Private Securities Litigation Reform Act of 1995. For these purposes, forward-looking statements are statements that address activities, events, conditions or developments that the Company expects or anticipates may occur in the future. In some cases forward-looking statements can be identified because they contain words such as \"anticipate,\" \"believe,\" \"continue,\" \"could,\" \"estimate,\" \"expect,\" \"intend,\" \"likely,\" \"may,\" \"might,\" \"plan,\" \"potential,\" \"predict,\" \"project,\" \"seek,\" \"should,\" \"target,\" \"will,\" \"would,\" or similar expressions and the negatives of those terms. Such forward-looking statements involve risks and uncertainties that may cause actual events, results or performance to differ materially from those indicated by such statements. These risks and uncertainties include, but are not limited to, domestic and international economic conditions, including exchange rates, inflation or deflation, the effects of competition and regulation, uncertainties in the financial markets, consumer and small business spending patterns and debt levels, breaches of security or privacy of member or business information, conditions affecting the acquisition, development, ownership or use of real estate, capital spending, actions of vendors, rising costs associated with employees (generally including health-care costs and wages), workforce interruptions, energy and certain commodities, geopolitical conditions (including tariffs and global conflicts), the ability to maintain effective internal control over financial reporting, regulatory and other impacts related to environmental and social matters, public-health related factors, and other risks identified from time to time in the Company's public statements and reports filed with the Securities and Exchange Commission. Forward-looking statements speak only as of the date they are made, and the Company does not undertake to update these statements, except as required by law. Comparable sales and comparable sales excluding impacts from changes in gasoline prices and foreign exchange are intended as supplemental information and are not a substitute for net sales presented in accordance with U.S. GAAP.",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 1995,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_010"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:2e895f35effdfc616187afbd7d8a0a7b34bbfeebc8796412fec812a8c411634a"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_011",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "table",
+            "paragraph": 23
+          },
+          "text": "CONTACTS: Costco Wholesale Corporation Josh Dahmen, 425/313-8254 Andrew Yoon, 425/313-6305 Bryan Starnes, 425/427-7403 COST-Earn Press Release COSTCO WHOLESALE CORPORATION CONSOLIDATED STATEMENTS OF INCOME (dollars in millions, except per share data) (unaudited)\n16 Weeks Ended | 52 Weeks Ended\nAugust 30, 2026 | August 31, 2025 | August 30, 2026 | August 31, 2025\nREVENUE\nNet sales | $93,873 | $84,432 | $297,247 | $269,912\nMembership fees | 1,850 | 1,724 | 5,907 | 5,323\nTotal revenue | 95,723 | 86,156 | 303,154 | 275,235\nOPERATING EXPENSES\nMerchandise costs | 83,531 | 75,037 | 264,279 | 239,886\nSelling, general and administrative | 8,391 | 7,778 | 27,190 | 24,966\nOperating income | 3,801 | 3,341 | 11,685 | 10,383\nOTHER INCOME (EXPENSE)\nInterest expense | (45) | (46) | (145) | (154)\nInterest income and other, net | 253 | 215 | 711 | 589\nINCOME BEFORE INCOME TAXES | 4,009 | 3,510 | 12,251 | 10,818\nProvision for income taxes | 1,011 | 900 | 3,025 | 2,719\nNET INCOME | $2,998 | $2,610 | $9,226 | $8,099\nNET INCOME PER COMMON SHARE:\nBasic | $6.75 | $5.88 | $20.78 | $18.24\nDiluted | $6.75 | $5.87 | $20.76 | $18.21\nShares used in calculation (000's):\nBasic | 443,975 | 444,007 | 443,953 | 443,985\nDiluted | 444,364 | 444,706 | 444,427 | 444,803",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 425,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 313,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 8254,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 425,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 313,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 6305,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 425,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 427,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 7403,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 16,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 30,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 31,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2025,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 30,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 31,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2025,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 93873,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 84432,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 297247,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 269912,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 1850,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 1724,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 5907,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 5323,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 95723,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 86156,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 303154,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 275235,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 83531,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 75037,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 264279,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 239886,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 8391,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 7778,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 27190,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 24966,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 3801,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 3341,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 11685,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 10383,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 45,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 46,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 145,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 154,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 253,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 215,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 711,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 589,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 4009,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 3510,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 12251,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 10818,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 1011,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 900,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 3025,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2719,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2998,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 2610,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 9226,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 8099,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 6.75,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 5.88,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 20.78,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 18.24,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 6.75,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 5.87,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 20.76,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 18.21,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 0,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 443975,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 444007,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 443953,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 443985,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 444364,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 444706,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 444427,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            },
+            {
+              "label": "stated",
+              "value": 444803,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_011"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:dff5454d59394ca9f33efea1eaae62f15ffe3000a34a081eb425aadc7f1f1330"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_012",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "text",
+            "paragraph": 27
+          },
+          "text": "Press Release COSTCO WHOLESALE CORPORATION CONSOLIDATED BALANCE SHEETS\n(amounts in millions, except par value and share data) (unaudited)",
+          "numericValues": [],
+          "classification": "public",
+          "contentHash": "sha256:c58d31cd7ab5ecdce71f9b2312b2c5cbe15c919ad89b94200dbe2076a50d6309"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_013",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "table",
+            "paragraph": 29
+          },
+          "text": "Subject to Reclassification\nAugust 30, 2026 | August 31, 2025\nASSETS\nCURRENT ASSETS\nCash and cash equivalents | $20,207 | $14,161\nShort-term investments | 1,094 | 1,123\nReceivables, net | 3,959 | 3,203\nMerchandise inventories | 19,324 | 18,116\nOther current assets | 1,998 | 1,777\nTotal current assets | 46,582 | 38,380\nOTHER ASSETS\nProperty and equipment, net | 35,633 | 31,909\nOperating lease right-of-use assets | 2,697 | 2,725\nOther long-term assets | 4,133 | 4,085\nTOTAL ASSETS | $89,045 | $77,099\nLIABILITIES AND EQUITY\nCURRENT LIABILITIES\nAccounts payable | $22,591 | $19,783\nAccrued salaries and benefits | 5,641 | 5,205\nAccrued member rewards | 3,037 | 2,677\nDeferred membership fees | 3,006 | 2,854\nCurrent portion of long-term debt | 2,248 | 75\nOther current liabilities | 7,429 | 6,514\nTotal current liabilities | 43,952 | 37,108\nOTHER LIABILITIES\nLong-term debt, excluding current portion | 3,914 | 5,713\nLong-term operating lease liabilities | 2,414 | 2,460\nOther long-term liabilities | 2,962 | 2,654\nTOTAL LIABILITIES | 53,242 | 47,935\nCOMMITMENTS AND CONTINGENCIES\nEQUITY\nPreferred stock $0.005 par value; 100,000,000 shares authorized; no shares issued and outstanding | - | -\nCommon stock $0.005 par value; 900,000,000 shares authorized; 443,266,000 and 443,237,000 shares issued and outstanding | 2 | 2\nAdditional paid-in capital | 8,830 | 8,282\nAccumulated other comprehensive loss | (1,620) | (1,770)\nRetained earnings | 28,591 | 22,650\nTOTAL EQUITY | 35,803 | 29,164\nTOTAL LIABILITIES AND EQUITY | $89,045 | $77,099",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 30,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 31,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2025,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 20207,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 14161,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1094,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1123,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 3959,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 3203,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 19324,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 18116,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1998,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1777,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 46582,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 38380,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 35633,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 31909,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2697,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2725,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 4133,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 4085,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 89045,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 77099,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 22591,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 19783,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 5641,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 5205,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 3037,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2677,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 3006,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2854,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2248,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 75,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 7429,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 6514,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 43952,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 37108,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 3914,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 5713,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2414,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2460,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2962,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2654,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 53242,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 47935,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 0.005,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 100000000,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 0.005,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 900000000,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 443266000,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 443237000,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 2,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 8830,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 8282,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1620,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 1770,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 28591,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 22650,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 35803,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 29164,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 89045,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            },
+            {
+              "label": "stated",
+              "value": 77099,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_013"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:9ad44fe3f2f89246e2d7dd59df36a4d0c992d39878c25c1c73f2a0d886563ff7"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_014",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "table",
+            "paragraph": 35
+          },
+          "text": "Press Release COSTCO WHOLESALE CORPORATION CONDENSED CONSOLIDATED STATEMENTS OF CASH FLOWS (amounts in millions) (unaudited) Subject to Reclassification\n52 Weeks Ended\nAugust 30, 2026 | August 31, 2025\nCASH FLOWS FROM OPERATING ACTIVITIES\nNet income | $9,226 | $8,099\nAdjustments to reconcile net income to net cash provided by operating activities:\nDepreciation and amortization | 2,674 | 2,426\nNon-cash lease expense | 318 | 303\nStock-based compensation | 924 | 860\nOther non-cash operating activities, net | 355 | (117)\nChanges in working capital | 2,328 | 1,764\nNet cash provided by operating activities | 15,825 | 13,335\nCASH FLOWS FROM INVESTING ACTIVITIES\nAdditions to property and equipment | (6,435) | (5,498)\nPurchases of short-term investments | (788) | (1,028)\nMaturities of short-term investments | 811 | 1,141\nOther investing activities, net | 26 | 74\nNet cash used in investing activities | (6,386) | (5,311)\nCASH FLOWS FROM FINANCING ACTIVITIES\nRepayments of short-term borrowings | (577) | (862)\nProceeds from short-term borrowings | 553 | 816\nRepayments of long-term debt | (69) | (103)\nProceeds from issuance of long-term debt | 496 | -\nTax withholdings on stock-based awards | (361) | (393)\nRepurchases of common stock | (848) | (903)\nCash dividend payments | (2,458) | (2,183)\nFinancing lease payments and other financing activities, net | (91) | (147)\nNet cash used in financing activities | (3,355) | (3,775)\nEFFECT OF EXCHANGE RATE CHANGES ON CASH AND CASH EQUIVALENTS | (38) | 6\nNet change in cash and cash equivalents | 6,046 | 4,255",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 30,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2026,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 31,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2025,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 9226,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 8099,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2674,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2426,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 318,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 303,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 924,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 860,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 355,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 117,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2328,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 1764,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 15825,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 13335,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 6435,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 5498,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 788,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 1028,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 811,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 1141,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 26,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 74,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 6386,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 5311,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 577,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 862,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 553,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 816,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 69,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 103,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 496,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 361,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 393,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 848,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 903,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2458,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 2183,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 91,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 147,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 3355,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 3775,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 38,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 6,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 6046,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            },
+            {
+              "label": "stated",
+              "value": 4255,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_014"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:f28751458b5fe615efc210e944c84050c25d7bfaf313add0f0697c07f1c1f35a"
+        },
+        {
+          "excerptId": "source_sec_cost_000090983226000084_ex991_015",
+          "sourceId": "source_sec_cost_000090983226000084_ex991",
+          "locator": {
+            "section": "table",
+            "paragraph": 35
+          },
+          "text": "52 Weeks Ended\nCASH AND CASH EQUIVALENTS BEGINNING OF YEAR | 14,161 | 9,906\nCASH AND CASH EQUIVALENTS END OF YEAR | $20,207 | $14,161",
+          "numericValues": [
+            {
+              "label": "stated",
+              "value": 52,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_015"
+            },
+            {
+              "label": "stated",
+              "value": 14161,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_015"
+            },
+            {
+              "label": "stated",
+              "value": 9906,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_015"
+            },
+            {
+              "label": "stated",
+              "value": 20207,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_015"
+            },
+            {
+              "label": "stated",
+              "value": 14161,
+              "unit": "as_stated",
+              "basis": "text_extraction",
+              "sourceExcerptId": "source_sec_cost_000090983226000084_ex991_015"
+            }
+          ],
+          "classification": "public",
+          "contentHash": "sha256:a078cc6329d7757a20156bc14ea801d71438d42eb2f41fe97687539425cfdf93"
+        }
+      ]
+    }
+  ],
+  "usage": {
+    "inputTokens": 5454,
+    "outputTokens": 8674,
+    "cacheReadInputTokens": 0,
+    "cacheCreationInputTokens": 0
+  }
+}
