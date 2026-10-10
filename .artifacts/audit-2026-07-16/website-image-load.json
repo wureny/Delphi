@@ -1,0 +1,6 @@
+[
+  ["goto", "https://delphi-investment-demo.alix379.chatgpt.site/website"],
+  ["wait", "#product"],
+  ["js", "await Promise.race([Promise.all(Array.from(document.images).map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.addEventListener('load', resolve, {once:true}); img.addEventListener('error', resolve, {once:true}); }))), new Promise(resolve => setTimeout(resolve, 20000))]); JSON.stringify(Array.from(document.images).map(img => ({complete: img.complete, naturalWidth: img.naturalWidth})))"],
+  ["screenshot", "--viewport", "/Users/wurenyu/delphi/.artifacts/audit-2026-07-16/12-public-website-loaded.png"]
+]

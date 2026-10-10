@@ -1,0 +1,17 @@
+[
+  ["goto", "https://delphi-investment-demo.alix379.chatgpt.site/deltas/proposal_arct_enterprise_001"],
+  ["wait", "#proposal_arct_enterprise_001"],
+  ["click", "#proposal_arct_enterprise_001 button:has-text('Accept')"],
+  ["wait", "[role=dialog]"],
+  ["click", "[role=dialog] button:has-text('Approve and record')"],
+  ["click", "#proposal_arct_forecast_003 button:has-text('Edit')"],
+  ["fill", "input[placeholder=\"Why the team's judgment differs\"]", "Confirmed against the team model bridge."],
+  ["click", "[role=dialog] button:has-text('Approve edited version')"],
+  ["click", "#proposal_arct_midmarket_002 button:has-text('Accept')"],
+  ["click", "[role=dialog] button:has-text('Escalate to PM instead')"],
+  ["click", "#proposal_arct_question_004 button:has-text('Accept')"],
+  ["click", "[role=dialog] button:has-text('Approve and record')"],
+  ["click", "button:has-text('Apply approved changes')"],
+  ["click", "[role=dialog] button:has-text('Record state transition')"],
+  ["snapshot", "-i", "-c"]
+]
